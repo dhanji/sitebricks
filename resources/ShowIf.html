@@ -1,0 +1,62 @@
+<html>
+<!--
+
+Modified by Wideplay Interactive.
+
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+
+-->
+<head>
+
+    <link href="default.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <!-- start header -->
+    <div id="header">
+        <div id="logo">
+            <h1>warp::widgets</h1>
+            <h2>a ridiculously simple, restful web framework for guice</h2>
+        </div>
+        <div id="menu">
+            <ul>
+                <li class="active"><a href="http://www.wideplay.com">wideplay</a></li>
+                <li><a href="http://groups.google.com/group/warp-core">problems?</a></li>
+                <li><a href="http://warp-core.googlecode.com/svn/trunk">source</a></li>
+                <li><a href="http://www.wideplay.com/warp::widgets">doc</a></li>
+                <li><a href="http://code.google.com/p/google-guice">guice</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="page">
+        <!-- start content -->
+        <div id="content">
+            <div class="post">
+                <h1 class="title">examples</h1>
+                <div class="entry">
+
+                    The following span tag will only be shown if query parameter "show" is true.
+
+                    @ShowIf(show)
+                    <span>
+                        Message : ${message}
+                    </span>
+                    <br/><br/><br/>
+                    <p>
+                        <a href="showif?show=${!show}">toggle</a>
+                    </p>
+                </div>
+
+
+                <div class="meta">
+                    <p class="byline">warp-widgets. Wideplay Interactive Group.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

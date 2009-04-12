@@ -1,0 +1,337 @@
+package com.google.sitebricks.routing;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.inject.*;
+import com.google.inject.name.Named;
+import com.google.sitebricks.http.Select;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Bricks;
+import com.google.sitebricks.rendering.EmbedAs;
+import com.google.sitebricks.rendering.Strings;
+
+import net.jcip.annotations.ThreadSafe;
+import org.jetbrains.annotations.Nullable;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+/**
+ * contains active uri/widget mappings
+ *
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
+@Singleton
+@ThreadSafe
+class DefaultPageBook implements PageBook {
+  //multimaps TODO refactor to multimap?
+  private final Map<String, List<PageTuple>> pages = Maps.newHashMap();
+  private final List<PageTuple> universalMatchingPages = Lists.newArrayList();
+  private final Map<String, PageTuple> pagesByName = Maps.newHashMap();
+
+  private final Injector injector;
+
+  private final Object lock = new Object();
+
+  @Inject
+  public DefaultPageBook(Injector injector) {
+    this.injector = injector;
+  }
+
+  public PageTuple at(String uri, Class<?> clazz) {
+    synchronized (lock) {
+      final String key = firstPathElement(uri);
+
+      final PageTuple pageTuple =
+          new PageTuple(new PathMatcherChain(uri), clazz, injector);
+
+      //is universal? (i.e. first element is a variable)
+      if (isVariable(key))
+        universalMatchingPages.add(pageTuple);
+      else {
+        multiput(pages, key, pageTuple);
+      }
+
+      return pageTuple;
+    }
+  }
+
+  public Page embedAs(Class<?> clazz) {
+    String as = clazz.getAnnotation(EmbedAs.class).value();
+    Strings.nonEmpty(as,
+        "@EmbedAs() was empty. You must specify a valid widget name to embed as.");
+    return embedAs(clazz, as);
+  }
+
+  public Page embedAs(Class<?> clazz, String as) {
+    PageTuple pageTuple = new PageTuple(PathMatcherChain.ignoring(), clazz, injector);
+    pagesByName.put(as.toLowerCase(), pageTuple);
+
+    return pageTuple;
+  }
+
+  public Page nonCompilingGet(String uri) {
+    // The regular get is non compiling, in our case. So these methods are identical.
+    return get(uri);
+  }
+
+  private static void multiput(Map<String, List<PageTuple>> pages, String key,
+                               PageTuple page) {
+    List<PageTuple> list = pages.get(key);
+
+    if (null == list) {
+      list = new ArrayList<PageTuple>();
+      pages.put(key, list);
+    }
+
+    list.add(page);
+  }
+
+  private static boolean isVariable(String key) {
+    return key.length() > 0 && ':' == key.charAt(0);
+  }
+
+  String firstPathElement(String uri) {
+    String shortUri = uri.substring(1);
+
+    final int index = shortUri.indexOf("/");
+
+    return (index >= 0) ? shortUri.substring(0, index) : shortUri;
+  }
+
+  @Nullable
+  public Page get(String uri) {
+    final String key = firstPathElement(uri);
+
+    List<PageTuple> tuple = pages.get(key);
+
+    //first try static first piece
+    if (null != tuple) {
+
+      //first try static first piece
+      for (PageTuple pageTuple : tuple) {
+        if (pageTuple.matcher.matches(uri))
+          return pageTuple;
+      }
+    }
+
+    //now try dynamic first piece (how can we make this faster?)
+    for (PageTuple pageTuple : universalMatchingPages) {
+      if (pageTuple.matcher.matches(uri))
+        return pageTuple;
+    }
+
+    //nothing matched
+    return null;
+  }
+
+  public Page forName(String name) {
+    return pagesByName.get(name);
+  }
+
+
+  @Select("") //the default select (hacky!!)
+  public static class PageTuple implements Page {
+    private final PathMatcher matcher;
+    private final AtomicReference<Renderable> pageWidget = new AtomicReference<Renderable>();
+    private final Class<?> clazz;
+    private final Injector injector;
+
+    private final Map<String, MethodTuple> methods;
+
+    //dispatcher switch
+    private final Select select;
+
+    public PageTuple(PathMatcher matcher, Class<?> clazz, Injector injector) {
+      this.matcher = matcher;
+      this.clazz = clazz;
+      this.injector = injector;
+
+      this.select = reflectOn(clazz);
+        final Key<Map<String, Class<? extends Annotation>>> methodMapKey =
+                Key.get(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {}, Bricks.class);
+        this.methods = reflectAndCache(injector.getInstance(methodMapKey));
+    }
+
+    //the @Select request parameter-based event dispatcher
+    private Select reflectOn(Class<?> clazz) {
+      final Select select = clazz.getAnnotation(Select.class);
+      if (null != select)
+        return select;
+      else
+        return PageTuple.class.getAnnotation(Select.class);
+    }
+
+
+    /**
+     * Returns a map of HTTP-method name to @Annotation-marked methods
+     */
+    @SuppressWarnings({"JavaDoc"})
+    private Map<String, MethodTuple> reflectAndCache(Map<String, Class<? extends Annotation>> methodMap) {
+      final Map<String, MethodTuple> map = new HashMap<String, MethodTuple>();
+
+
+      for (Map.Entry<String, Class<? extends Annotation>> entry : methodMap.entrySet()) {
+
+          Class<? extends Annotation> get = entry.getValue();
+          // First search any available public methods and store them (including inherited ones)
+          for (Method method : clazz.getMethods()) {
+            if (method.isAnnotationPresent(get)) {
+              if (!method.isAccessible())
+                method.setAccessible(true); //ugh
+
+              //remember default value is empty string
+              map.put(entry.getKey(), new MethodTuple(method));
+            }
+          }
+
+          // Then searrch class's declared methods only (these take precedence)
+          for (Method method : clazz.getDeclaredMethods()) {
+            if (method.isAnnotationPresent(get)) {
+              if (!method.isAccessible())
+                method.setAccessible(true); //ugh
+
+              //remember default value is empty string
+              map.put(entry.getKey(), new MethodTuple(method));            }
+          }
+      }
+
+      return map;
+    }
+
+    public Renderable widget() {
+      return pageWidget.get();
+    }
+
+    public Object instantiate() {
+      return injector.getInstance(clazz);
+    }
+
+    public Object doMethod(String httpMethod, Object page, String pathInfo,
+                        Map<String, String[]> params) {
+      //nothing to fire
+      final MethodTuple methodTuple = methods.get(httpMethod);
+      if (Strings.empty(httpMethod) || null == methodTuple)
+        return null;
+
+      // Extract injectable pieces of the pathInfo.
+      final Map<String, String> map = matcher.findMatches(pathInfo);
+
+      //find method to dispatch to
+      final String[] events = params.get(select.value());
+
+      if (null != events)
+        for (String event : events) {
+
+          // TODO fix this so we have a better dispatch story.
+          //no event handler registered for this value (so fire to the default)
+//          if (null == methodTuple)
+//            methodTuple = get.get("");
+
+          //or fire event handler(s)
+//          Object redirect = methodTuple.call(page, map);
+
+          //redirects interrupt the event dispatch sequence
+//          if (null != redirect)
+//            return redirect;
+        }
+      else
+        //fire default handler
+        return methodTuple.call(page, map);
+
+      //no redirects, render normally
+      return null;
+    }
+
+    public Class<?> pageClass() {
+      return clazz;
+    }
+
+    public void apply(Renderable widget) {
+      this.pageWidget.set(widget);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof Page)) return false;
+
+      Page that = (Page) o;
+
+      return this.clazz.equals(that.pageClass());
+    }
+
+    @Override
+    public int hashCode() {
+      return clazz.hashCode();
+    }
+  }
+
+
+  private static class MethodTuple {
+    private final Method method;
+    private final List<String> args;
+
+    private MethodTuple(Method method) {
+      this.method = method;
+      this.args = reflect(method);
+    }
+
+    private List<String> reflect(Method method) {
+      final Annotation[][] annotationsGrid = method.getParameterAnnotations();
+      if (null == annotationsGrid)
+        return Collections.emptyList();
+
+      List<String> args = new ArrayList<String>();
+      for (Annotation[] annotations : annotationsGrid) {
+        boolean namedFound = false;
+        for (Annotation annotation : annotations) {
+          if (Named.class.isInstance(annotation)) {
+            Named named = (Named) annotation;
+
+            args.add(named.value());
+            namedFound = true;
+
+            break;
+          }
+        }
+
+        if (!namedFound)
+          throw new InvalidEventHandlerException(
+              "Encountered an argument not annotated with @Named in event handler method: " +
+                  method);
+      }
+
+      return Collections.unmodifiableList(args);
+    }
+
+    public Object call(Object page, Map<String, String> map) {
+      List<String> arguments = new ArrayList<String>();
+      for (String argName : args) {
+        arguments.add(map.get(argName));
+      }
+
+      return call(page, method, arguments.toArray());
+    }
+
+    private static Object call(Object page, final Method method,
+                               Object[] args) {
+      try {
+        return method.invoke(page, args);
+      } catch (IllegalAccessException e) {
+        throw new EventDispatchException(
+            "Could not access event method: " + method, e);
+      } catch (InvocationTargetException e) {
+        throw new EventDispatchException(
+            "Event method threw an exception: " + method, e);
+      }
+    }
+  }
+}
