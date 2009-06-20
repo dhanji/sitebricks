@@ -5,8 +5,10 @@ package com.google.sitebricks.example;
  */
 public class HelloWorld {
 
+  public static final String HELLO_MSG = "Hello from google-sitebricks!";
+
 //  @Visible
-  private String message = "Hello from google-sitebricks!";
+  private String message = HELLO_MSG;
 
   public String getMessage() {
     return message;

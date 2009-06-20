@@ -1,13 +1,12 @@
 package com.google.sitebricks.acceptance.page;
 
 import com.google.sitebricks.acceptance.util.AcceptanceTest;
+import com.google.sitebricks.example.HelloWorld;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.PageFactory;
 
 public class HelloWorldPage {
-    static final String HELLO_WORLD_MSG = String.format("Message : %s",
-        "Hello from warp-sitebricks!");
 
     private WebDriver driver;
 
@@ -17,7 +16,7 @@ public class HelloWorldPage {
 
     public boolean hasHelloWorldMessage() {
         //TODO ugh! stupid xpath doesn't work =(
-        return driver.getPageSource().contains(HELLO_WORLD_MSG);
+        return driver.getPageSource().contains(HelloWorld.HELLO_MSG);
     }
 
     public static HelloWorldPage open(WebDriver driver) {
