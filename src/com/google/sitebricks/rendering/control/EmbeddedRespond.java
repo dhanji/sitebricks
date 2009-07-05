@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
-*/
+ */
 class EmbeddedRespond implements Respond {
     private static final String BODY_BEGIN = "<body";
     private static final String BODY_END = "</body>";

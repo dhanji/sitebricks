@@ -28,7 +28,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/forms").show(Forms.class);
         at("/repeat").show(Repeat.class);
         at("/showif").show(ShowIf.class);
-//        at("/dynamic.js").show(DynamicJs.class);
+        at("/dynamic.js").show(DynamicJs.class);
 
         embed(HelloWorld.class).as("Hello");
       }

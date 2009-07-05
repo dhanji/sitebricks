@@ -142,15 +142,20 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
       log.finest(String.format("Compiling template for page %s", page));
 
       try {
-        final String template = loader.load(page);
+        final Template template = loader.load(page);
 
         Renderable widget;
 
         //is this an XML template or a flat-file template?
-        if (Parsing.treatAsXml(template))
-          widget = compilers.compileXml(page, template);
-        else
-          widget = compilers.compileFlat(page, template);
+        switch(template.getKind()) {
+          default:
+          case XML:
+            widget = compilers.compileXml(page, template.getText());
+            break;
+          case FLAT:
+            widget = compilers.compileFlat(page, template.getText());
+            break;
+        }
 
         //apply the compiled widget chain to the page (completing compile step)
         toCompile.apply(widget);

@@ -13,6 +13,9 @@ public class EdslTest {
 
   @Test
   public final void edsl() {
+
+    assert new Integer(11) == (new Byte((byte)11).intValue());
+    assert new Byte((byte)11).equals(new Integer(11)):"kk" ;
     Guice.createInjector(new SitebricksModule() {
 
       @Override

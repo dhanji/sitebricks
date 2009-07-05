@@ -5,7 +5,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.RequestScoped;
 import com.google.sitebricks.compiler.Compilers;
-import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.Production;
 import com.google.sitebricks.routing.SystemMetrics;
@@ -92,12 +91,16 @@ class DebugModePageBook implements PageBook {
 
 
     final Class<?> pageClass = page.pageClass();
-    final String template = templateLoader.get().load(pageClass);
+    final Template template = templateLoader.get().load(pageClass);
 
-    if (Parsing.treatAsXml(template))
-      page.apply(compilers.compileXml(pageClass, template));
-    else
-      page.apply(compilers.compileFlat(pageClass, template));
+    switch (template.getKind()) {
+      case XML:
+        page.apply(compilers.compileXml(pageClass, template.getText()));
+        break;
+      case FLAT:
+        page.apply(compilers.compileFlat(pageClass, template.getText()));
+        break;
+    }
   }
 
   @RequestScoped
