@@ -1,14 +1,14 @@
 package com.google.sitebricks.util;
 
 import com.google.inject.Guice;
-import com.google.sitebricks.compiler.EvaluatorCompiler;
-import com.google.sitebricks.compiler.ExpressionCompileException;
-import com.google.sitebricks.compiler.Parsing;
-import com.google.sitebricks.compiler.Token;
+import com.google.inject.Module;
+import com.google.sitebricks.compiler.*;
+import com.google.sitebricks.rendering.DynTypedMvelEvaluatorCompiler;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.List;
+import java.util.HashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,37 +17,38 @@ import java.util.List;
  * @author Dhanji R. Prasanna (dhanji at gmail com)
  */
 public class TextToolsTest {
-    private static final String TOKENS = "tokens";
+  private static final String TOKENS = "tokens";
 
-    @DataProvider(name = TOKENS)
-    public final Object[][] tokens() {
-        return new Object[][] {
-                { new String[] { "hello ", "expr", "${expr}" } },
-                { new String[] { "hello ", "expr", "${expr}", "as", "$asd", "$ {}" } },
-                { new String[] { "$$ { ", "{}", "${}" } },
-        };
-    }
 
-    @Test(dataProvider = TOKENS)
-    public final void testTokenize(String[] rawStream) throws ExpressionCompileException {
-        StringBuilder builder = new StringBuilder();
-        for (String chunk : rawStream)
-            builder.append(chunk);
+  @DataProvider(name = TOKENS)
+  public final Object[][] tokens() {
+    return new Object[][]{
+        {new String[]{"hello ", "expr", "${expr}"}},
+        {new String[]{"hello ", "expr", "${expr}", "as", "$asd", "$ {}"}},
+        {new String[]{"$$ { ", "{}", "${}"}},
+    };
+  }
 
-        List<Token> tokens = Parsing.tokenize(builder.toString(), Guice.createInjector()
-                .getInstance(EvaluatorCompiler.class));
+  @Test(dataProvider = TOKENS)
+  public final void testTokenize(String[] rawStream) throws ExpressionCompileException {
+    StringBuilder builder = new StringBuilder();
+    for (String chunk : rawStream)
+      builder.append(chunk);
 
-        assert tokens.size() == rawStream.length;
+    List<Token> tokens = Parsing.tokenize(builder.toString(),
+        new DynTypedMvelEvaluatorCompiler(new HashMap<String, Class<?>>()));
 
-        for (int i = 0; i < rawStream.length; i++) {
-            Token token = tokens.get(i);
+    assert tokens.size() == rawStream.length;
+
+    for (int i = 0; i < rawStream.length; i++) {
+      Token token = tokens.get(i);
 //            assert rawStream[i].equals(token.getToken());
 
-            if (rawStream[i].startsWith("${") && rawStream[i].endsWith("}"))
-                assert token.isExpression();
-            else
-                assert !token.isExpression();
-        }
+      if (rawStream[i].startsWith("${") && rawStream[i].endsWith("}"))
+        assert token.isExpression();
+      else
+        assert !token.isExpression();
     }
+  }
 
 }
