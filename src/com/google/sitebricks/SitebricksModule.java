@@ -32,6 +32,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     // Configure defaults via this contructor.
     public SitebricksModule() {
       // By default these are the method annotations we dispatch against.
+      // They can be overridden with custom annotation types.
       methods.put("get", Get.class);
       methods.put("post", Post.class);
       methods.put("put", Put.class);
@@ -75,7 +76,6 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
         .toInstance(methods);
 
     //initialize startup services and routing modules
-    bind(ContextInitializer.class).asEagerSingleton();
     install(PageBook.Routing.module());
 
     //development mode services
@@ -106,7 +106,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   }
 
   public void bindMethod(String method, Class<? extends Annotation> annotation) {
-    Strings.nonEmpty(method,  "The REST method must be a valid non-empty string");
+    Strings.nonEmpty(method, "The REST method must be a valid non-empty string");
     Preconditions.checkArgument(null != annotation);
 
     String methodNormal = method.toLowerCase();

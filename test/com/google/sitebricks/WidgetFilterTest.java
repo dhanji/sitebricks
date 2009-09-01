@@ -35,12 +35,8 @@ public class WidgetFilterTest {
 
         replay(filterConfig, bootstrapper);
 
-        new SitebricksFilter(createNiceMock(RoutingDispatcher.class), new Provider<ContextInitializer>() {
-            public ContextInitializer get() {
-                return new ContextInitializer(bootstrapper);
-            }
-        })
-                .init(filterConfig);
+        new SitebricksFilter(createNiceMock(RoutingDispatcher.class), bootstrapper)
+            .init(filterConfig);
 
 
         verify(filterConfig, bootstrapper);

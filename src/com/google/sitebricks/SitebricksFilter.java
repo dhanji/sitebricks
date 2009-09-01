@@ -1,7 +1,6 @@
 package com.google.sitebricks;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.sitebricks.routing.RoutingDispatcher;
 import net.jcip.annotations.Immutable;
@@ -17,16 +16,16 @@ import java.io.IOException;
 @Immutable @Singleton
 class SitebricksFilter implements Filter {
     private final RoutingDispatcher dispatcher;
-    private final Provider<ContextInitializer> initializer;
+    private final Bootstrapper bootstrapper;
 
-    @Inject
-    public SitebricksFilter(RoutingDispatcher dispatcher, Provider<ContextInitializer> initializer) {
+  @Inject
+    public SitebricksFilter(RoutingDispatcher dispatcher, Bootstrapper bootstrapper) {
         this.dispatcher = dispatcher;
-        this.initializer = initializer;
+        this.bootstrapper = bootstrapper;
     }
 
     public void init(FilterConfig filterConfig) throws ServletException {
-        initializer.get().init(filterConfig.getServletContext());
+        bootstrapper.start();
     }
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
