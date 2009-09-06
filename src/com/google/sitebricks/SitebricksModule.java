@@ -10,14 +10,13 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.servlet.ServletModule;
 import com.google.sitebricks.core.CaseWidget;
+import com.google.sitebricks.http.Delete;
+import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Post;
+import com.google.sitebricks.http.Put;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.RoutingDispatcher;
-import com.google.sitebricks.http.Get;
-import com.google.sitebricks.http.Put;
-import com.google.sitebricks.http.Post;
-import com.google.sitebricks.http.Delete;
-
 import org.mvel.MVEL;
 
 import java.lang.annotation.Annotation;
@@ -29,17 +28,17 @@ import java.util.Map;
  */
 public class SitebricksModule extends AbstractModule implements PageBinder {
 
-    // Configure defaults via this contructor.
-    public SitebricksModule() {
-      // By default these are the method annotations we dispatch against.
-      // They can be overridden with custom annotation types.
-      methods.put("get", Get.class);
-      methods.put("post", Post.class);
-      methods.put("put", Put.class);
-      methods.put("delete", Delete.class);
-    }
+  // Configure defaults via this contructor.
+  public SitebricksModule() {
+    // By default these are the method annotations we dispatch against.
+    // They can be overridden with custom annotation types.
+    methods.put("get", Get.class);
+    methods.put("post", Post.class);
+    methods.put("put", Put.class);
+    methods.put("delete", Delete.class);
+  }
 
-    @Override
+  @Override
   protected final void configure() {
 
     // Re-route all requests through sitebricks.
@@ -62,16 +61,19 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     //insert core widgets set
     packages.add(0, CaseWidget.class.getPackage());
 
-    bind(new TypeLiteral<List<Package>>() {})
+    bind(new TypeLiteral<List<Package>>() {
+    })
         .annotatedWith(Bricks.class)
         .toInstance(packages);
 
-    bind(new TypeLiteral<List<LinkingBinder>>() {})
+    bind(new TypeLiteral<List<LinkingBinder>>() {
+    })
         .annotatedWith(Bricks.class)
         .toInstance(bindings);
 
     // These are the HTTP methods that we listen for.
-    bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>(){})
+    bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
+    })
         .annotatedWith(Bricks.class)
         .toInstance(methods);
 
@@ -85,7 +87,8 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     }
   }
 
-  protected void configureSitebricks() {}
+  protected void configureSitebricks() {
+  }
 
   // Bindings.
   private final List<LinkingBinder> bindings = Lists.newArrayList();
@@ -114,7 +117,9 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   }
 
 
-  static enum BindingKind { EMBEDDED, PAGE, STATIC_RESOURCE }
+  static enum BindingKind {
+    EMBEDDED, PAGE, STATIC_RESOURCE
+  }
 
   class LinkingBinder implements ShowBinder, ScopedBindingBuilder, EmbedAsBinder {
     BindingKind bindingKind;
