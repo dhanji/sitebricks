@@ -15,22 +15,22 @@ import java.util.List;
 @Test(suiteName = AcceptanceTest.SUITE)
 public class RepeatAcceptanceTest {
 
-    public void shouldRepeatItemsFromCollection() {
-        WebDriver driver = AcceptanceTest.createWebDriver();
-        RepeatPage page = RepeatPage.open(driver);
+  public void shouldRepeatItemsFromCollection() {
+    WebDriver driver = AcceptanceTest.createWebDriver();
+    RepeatPage page = RepeatPage.open(driver);
 
-        List<String> expectedNames = Arrays.asList("Josh", "Dhanji", "Jody", "Iron Man");
-        List<String> expectedMovies =
-                Arrays.asList(" Dhanji Josh Jody Iron Man",
-                        " Dhanji Josh Jody Iron Man",
-                        " Dhanji Josh Jody Iron Man");
+    List<String> expectedNames = Arrays.asList("Josh", "Dhanji", "Jody", "Iron Man");
+    List<String> expectedMovies =
+        Arrays.asList("Dhanji Josh Jody Iron Man",
+            "Dhanji Josh Jody Iron Man",
+            "Dhanji Josh Jody Iron Man");
 
-        List<String> actualNames = page.getRepeatedNames();
-        List<String> actualMovies = page.getRepeatedMovies();
+    List<String> actualNames = page.getRepeatedNames();
+    List<String> actualMovies = page.getRepeatedMovies();
 
-        assert CollectionUtils.isEqualCollection(expectedNames, actualNames)
-                : "repeated names didn't match what was expected";
-        assert CollectionUtils.isEqualCollection(expectedMovies, actualMovies)
-                : "repeated movies didn't match what was expected";
-    }
+    assert CollectionUtils.isEqualCollection(expectedNames, actualNames)
+        : "repeated names didn't match what was expected";
+    assert CollectionUtils.isEqualCollection(expectedMovies, actualMovies)
+        : "repeated movies didn't match what was expected";
+  }
 }
