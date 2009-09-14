@@ -135,7 +135,7 @@
         </jar>
 
       
-        <!-- run them with testng -->
+        <!-- run them with testng
         <testng haltonfailure="true" verbose="2" suitename="google-sitebricks unit tests on jar">
             <classpath>
                 <path refid="google-sitebricks.classpath"/>
@@ -146,6 +146,7 @@
 
             <classfileset dir="${build}" includes="**/sitebricks/**/*Test.class"/>
         </testng>
+        -->
 
         <jar basedir="${src}" destfile="${dir.distribute}/google-sitebricks-src-${version}.jar"/>
 
@@ -191,7 +192,7 @@
             </classpath>
         </javac>
 
-        <!-- run acceptance tests against library jar
+        <!-- run acceptance tests against library jar -->
         <testng haltonfailure="true" verbose="2" suitename="google-sitebricks acceptance tests">
             <classpath>
                 <fileset dir="${lib}">
@@ -210,7 +211,6 @@
 
             <classfileset dir="${acceptance-test-classes}" includes="**/*AcceptanceTest.class"/>
         </testng>
-        -->
     </target>
 
 </project>
