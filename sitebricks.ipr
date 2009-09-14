@@ -396,6 +396,9 @@
     <option name="projectName" value="sitebricks" />
   </component>
   <component name="ProjectFileVersion" converted="true" />
+  <component name="ProjectKey">
+    <option name="state" value="https://google-sitebricks.googlecode.com/svn/trunk/sitebricks.ipr" />
+  </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Sitebricks.iml" filepath="$PROJECT_DIR$/Sitebricks.iml" />
