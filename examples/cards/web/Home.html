@@ -1,0 +1,30 @@
+<html>
+<head>
+  <title>
+    Cards
+  </title>
+  <link rel="stylesheet" href="cards.css"/>
+</head>
+<body>
+<div id="topbar">
+
+  @Card
+  <input id="newcard-button" type="button" value="New Card"/>
+
+
+  <div class="searchbox">
+    <input type="text" maxlength="50"/>
+    <input type="button" value="Search"/>
+  </div>
+</div>
+
+<div id="cardlist">
+  <h2>Card List</h2>
+
+  @Repeat(items=cards, var="card")
+  <div>${card.title}</div>
+
+</div>
+
+</body>
+</html>

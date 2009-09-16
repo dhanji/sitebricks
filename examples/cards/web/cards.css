@@ -1,0 +1,36 @@
+.body {
+  font-family: Arial, sans-serif;
+  font-size: 11pt;
+
+}
+
+#topbar {
+  padding: 0 0 2em 0;
+}
+
+.searchbox {
+  display: inline;
+}
+
+#cardlist {
+
+}
+
+#cardlist h2 {
+  font-family: Georgia, serif;
+  font-size: 11pt;
+  font-weight: bold;
+
+  color: gray;
+}
+
+#base-card {
+  display: none;
+}
+
+.card-template {
+  position: absolute;
+  width: 400px;
+  height: 250px;
+  border: 1px solid lightgray;
+}

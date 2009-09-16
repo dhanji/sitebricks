@@ -116,6 +116,11 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     methods.put(methodNormal, annotation);
   }
 
+  protected final void scan(Package pack) {
+    Preconditions.checkArgument(null != pack, "Package parameter to scan() cannot be null");
+    packages.add(pack);
+  }
+
 
   static enum BindingKind {
     EMBEDDED, PAGE, STATIC_RESOURCE

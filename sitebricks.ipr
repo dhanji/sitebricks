@@ -401,7 +401,8 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Sitebricks.iml" filepath="$PROJECT_DIR$/Sitebricks.iml" />
+      <module fileurl="file://$PROJECT_DIR$/examples/cards/cards.iml" filepath="$PROJECT_DIR$/examples/cards/cards.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sitebricks.iml" filepath="$PROJECT_DIR$/sitebricks.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.5" project-jdk-type="JavaSDK">
