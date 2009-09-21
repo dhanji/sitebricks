@@ -89,7 +89,7 @@
   <target name="jar" depends="clean,make"
           description="Assembles a distributable jar and zip (for direct use in webapps)">
     <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask"
-             classpath="${lib}/jarjar-1.0rc7.jar"/>
+             classpath="${lib}/jarjar-1.0.jar"/>
 
     <jarjar jarfile="${build}/jartmp.jar">
 
@@ -202,8 +202,7 @@
     <testng haltonfailure="true" verbose="2" suitename="google-sitebricks acceptance tests">
       <classpath>
         <fileset dir="${lib}">
-          <include name="guice-1.0.jar"/>
-          <include name="guice-servlet*.jar"/>
+          <include name="guice-*.jar"/>
         </fileset>
         <fileset dir="${lib}/webdriver">
           <include name="*.jar"/>
