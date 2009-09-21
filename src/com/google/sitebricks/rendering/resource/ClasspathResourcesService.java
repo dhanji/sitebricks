@@ -33,7 +33,7 @@ class ClasspathResourcesService implements ResourcesService {
         properties.load(
             ClasspathResourcesService.class.getResourceAsStream("mimetypes.properties"));
       } catch (IOException e) {
-        throw new ResourceLoadingException("Can't find mimes.properties", e);
+        throw new ResourceLoadingException("Can't find mimetypes.properties", e);
       }
 
       //noinspection unchecked
