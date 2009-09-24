@@ -76,6 +76,10 @@ class DebugModePageBook implements PageBook {
     return book.forInstance(instance);
   }
 
+  public Page forClass(Class<?> pageClass) {
+    return book.forClass(pageClass);
+  }
+
   private void reload(String identifier, Page page) {
 
     // Do nothing on the first pass since the page is already compiled.

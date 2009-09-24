@@ -56,6 +56,12 @@ public interface PageBook {
    */
   Page forInstance(Object instance);
 
+  /**
+   * Very similar to {@linkplain #forInstance(Object)}, except that it
+   * takes a class literal instead and does NOT do super crawling.
+   */
+  Page forClass(Class<?> pageClass);
+
   public static interface Page {
     Renderable widget();
 

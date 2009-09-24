@@ -5,11 +5,8 @@ import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Stage;
 import static com.google.inject.matcher.Matchers.annotatedWith;
-import static com.google.sitebricks.SitebricksModule.BindingKind.EMBEDDED;
-import static com.google.sitebricks.SitebricksModule.BindingKind.PAGE;
-import static com.google.sitebricks.SitebricksModule.BindingKind.STATIC_RESOURCE;
+import static com.google.sitebricks.SitebricksModule.BindingKind.*;
 import com.google.sitebricks.compiler.Compilers;
-import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.compiler.TemplateCompileException;
 import com.google.sitebricks.rendering.EmbedAs;
 import com.google.sitebricks.rendering.With;
@@ -20,6 +17,7 @@ import com.google.sitebricks.routing.SystemMetrics;
 
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -139,7 +137,9 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
     for (PageBook.Page toCompile : pagesToCompile) {
       Class<?> page = toCompile.pageClass();
 
-      log.finest(String.format("Compiling template for page %s", page));
+      if (log.isLoggable(Level.FINEST)) {
+        log.finest("Compiling template for page " + page.getName());
+      }
 
       try {
         final Template template = loader.load(page);
@@ -156,6 +156,8 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
             widget = compilers.compileFlat(page, template.getText());
             break;
         }
+
+        compilers.analyze(page);
 
         //apply the compiled widget chain to the page (completing compile step)
         toCompile.apply(widget);

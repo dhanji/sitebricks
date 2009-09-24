@@ -145,16 +145,27 @@ class DefaultPageBook implements PageBook {
     return pagesByName.get(name);
   }
 
+  @Nullable
   public Page forInstance(Object instance) {
     Class<?> aClass = instance.getClass();
     PageTuple targetType = classToPageMap.get(aClass);
 
-    if (null == targetType) {
-      // Do a super crawl to detect the target type if available.
-      // TODO...
-    }
+    // Do a super crawl to detect the target type.
+    while (null == targetType) {
+      Class<?> superClass = aClass.getSuperclass();
+      targetType = classToPageMap.get(superClass);
 
+      // Stop at the root =D
+      if (Object.class.equals(superClass)) {
+        return null;
+      }
+    }
+    
     return InstanceBoundPage.delegating(targetType, instance);
+  }
+
+  public Page forClass(Class<?> pageClass) {
+    return classToPageMap.get(pageClass);
   }
 
   public static class InstanceBoundPage implements Page {

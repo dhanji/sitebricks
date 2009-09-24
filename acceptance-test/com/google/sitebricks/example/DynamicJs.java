@@ -8,7 +8,8 @@ import com.google.sitebricks.Show;
  */
 @At("/dynamic.js") @Show("dynamic.js")
 public class DynamicJs {
-    public static final String A_MESSAGE = "Hi from warp-sitebricks! (this message was dynamically generated =)";
+    public static final String A_MESSAGE = "Hi from google-sitebricks! (this message"
+        + " was dynamically generated =)";
 
     public String getMessage() {
         return A_MESSAGE;

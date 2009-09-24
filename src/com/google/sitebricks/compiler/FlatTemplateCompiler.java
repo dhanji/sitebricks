@@ -20,7 +20,8 @@ class FlatTemplateCompiler {
     private final SystemMetrics metrics;
     private final WidgetRegistry registry;
 
-    public FlatTemplateCompiler(Class<?> page, MvelEvaluatorCompiler compiler, SystemMetrics metrics, WidgetRegistry registry) {
+    public FlatTemplateCompiler(Class<?> page, MvelEvaluatorCompiler compiler,
+                                SystemMetrics metrics, WidgetRegistry registry) {
         this.page = page;
         this.compiler = compiler;
         this.metrics = metrics;
