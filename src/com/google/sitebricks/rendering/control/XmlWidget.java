@@ -9,16 +9,10 @@ import com.google.sitebricks.compiler.ExpressionCompileException;
 import com.google.sitebricks.compiler.Token;
 import com.google.sitebricks.rendering.Attributes;
 import com.google.sitebricks.rendering.SelfRendering;
-
 import net.jcip.annotations.ThreadSafe;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p> Widget renders an XML-like tag </p>
@@ -33,7 +27,7 @@ class XmlWidget implements Renderable {
   private final String name;
   private final Map<String, List<Token>> attributes;
 
-  // HACK Extremely ouch!
+  // HACK Extremely ouch! Replace with Assisted inject.
   private static volatile Provider<HttpServletRequest> request;
 
   private static final Set<String> CONTEXTUAL_ATTRIBS;
@@ -128,7 +122,7 @@ class XmlWidget implements Renderable {
     if (isFirstToken && CONTEXTUAL_ATTRIBS.contains(attribute)) {
       //add context to path if needed
       if (raw.startsWith("/"))
-        raw = String.format("%s%s", request.get().getContextPath(), raw);
+        raw = request.get().getContextPath() + raw;
     }
 
     return raw;

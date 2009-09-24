@@ -1,8 +1,6 @@
 <html>
 <!--
 
-Modified by Wideplay Interactive.
-
 Design by Free CSS Templates
 http://www.freecsstemplates.org
 Released for free under a Creative Commons Attribution 2.5 License
@@ -14,17 +12,20 @@ Released for free under a Creative Commons Attribution 2.5 License
 
 <body>
 
-                    The following is a custom widget created from the <a href="hello">HelloWorld</a> example.
-                    Notice that the stylesheet is available in the enclosing page via use of the @Require widget (this page is not styled by default, whereas HelloWorld is).
-                    <br/><br/>
-                    We can even pass arguments to the embedded page (let's use "${arg}" instead of its <a href="hello">default message</a>).
-                    
-                    <br/><br/><br/><br/>
+    The following is a custom widget created from the <a href="hello">HelloWorld</a> example.
+    Notice that the stylesheet is available in the enclosing page via use of the @Require widget
+    (this page is not styled by default, whereas HelloWorld is).
+    <br/><br/>
 
-                    @Hello(message=arg)
-                    <span>
-                        This text is replaced by the embed.
-                    </span>
-    
+    We can even pass arguments to the embedded page (let's use "${arg}" instead of its
+    <a href="/hello">default message</a>).
+
+    <br/><br/><br/><br/>
+
+        @Hello(message=arg)
+        <span>
+            This text is replaced by the embed.
+        </span>
+
 </body>
 </html>

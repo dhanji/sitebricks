@@ -1,15 +1,12 @@
 <html>
 <!--
 
-
-
 Design by Free CSS Templates
 http://www.freecsstemplates.org
 Released for free under a Creative Commons Attribution 2.5 License
 
 -->
 <head>
-
     <link href="default.css" rel="stylesheet" type="text/css" />
 </head>
 
@@ -38,27 +35,9 @@ Released for free under a Creative Commons Attribution 2.5 License
                 <h1 class="title">examples</h1>
                 <div class="entry">
 
-                    The following expression is repeated over every item in the bound collection of names.
-
-                    <ul>
-                        @Repeat(items=names, var="name", pageVar="page")
-                        <li>${name}</li>
-                    </ul>
-
-                    <br/><br/><br/>
-                </div>
-
-
-                <div class="entry">
-
-                    Repeat inside a repeat:
-
-                    <ul>
-                        @Repeat(items=movies, var="movie")
-                        <li> @Repeat(items=movie.actors, var="actor")<span>${actor} </span> </li>
-                    </ul>
-
-                    <br/><br/><br/>
+                    The next page in the chain received the value you typed in from the previous
+                    page: <b>${persistedValue}</b>
+                    <br/><br/>
                 </div>
 
 

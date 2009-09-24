@@ -73,7 +73,8 @@ public class WidgetRoutingDispatcherTest {
             public Respond get() {
                 return respond;
             }
-        }, createNiceMock(ResourcesService.class)).dispatch(request);
+        }, createNiceMock(ResourcesService.class), null
+        ).dispatch(request);
 
 
         assert out == respond : "Did not respond correctly";
@@ -135,7 +136,8 @@ public class WidgetRoutingDispatcherTest {
             public Respond get() {
                 return respond;
             }
-        }, createNiceMock(ResourcesService.class)).dispatch(request);
+        }, createNiceMock(ResourcesService.class), null
+        ).dispatch(request);
 
 
         assert out == respond : "Did not respond correctly";
@@ -198,7 +200,8 @@ public class WidgetRoutingDispatcherTest {
             public Respond get() {
                 return respond;
             }
-        }, createNiceMock(ResourcesService.class)).dispatch(request);
+        }, createNiceMock(ResourcesService.class), null
+        ).dispatch(request);
 
 
         assert out == respond : "Did not respond correctly";
@@ -261,7 +264,8 @@ public class WidgetRoutingDispatcherTest {
             public Respond get() {
                 return respond;
             }
-        }, createNiceMock(ResourcesService.class)).dispatch(request);
+        }, createNiceMock(ResourcesService.class), null
+        ).dispatch(request);
 
 
         assert out == respond : "Did not respond correctly";
@@ -325,7 +329,8 @@ public class WidgetRoutingDispatcherTest {
             public Respond get() {
                 return respond;
             }
-        }, createNiceMock(ResourcesService.class)).dispatch(request);
+        }, createNiceMock(ResourcesService.class), null
+        ).dispatch(request);
 
 
         assert out == respond : "Did not respond correctly";
@@ -357,7 +362,9 @@ public class WidgetRoutingDispatcherTest {
 
         replay(request, pageBook, respond, binder);
 
-        Respond out = new WidgetRoutingDispatcher(pageBook, binder, respond, createNiceMock(ResourcesService.class)).dispatch(request);
+        Respond out = new WidgetRoutingDispatcher(pageBook, binder, respond, createNiceMock(ResourcesService.class),
+            null
+        ).dispatch(request);
 
 
         assert out == null : "Did not respond correctly";
@@ -391,7 +398,7 @@ public class WidgetRoutingDispatcherTest {
 
         replay(request, pageBook, respond, binder, resourcesService);
 
-        Respond out = new WidgetRoutingDispatcher(pageBook, binder, respond, resourcesService).dispatch(request);
+        Respond out = new WidgetRoutingDispatcher(pageBook, binder, respond, resourcesService, null).dispatch(request);
 
 
         assert out != null : "Did not respond correctly";

@@ -40,10 +40,21 @@ public interface PageBook {
   Page embedAs(Class<?> page, String as);
 
   /**
-   * Same as {@link #get} except guaranteed not to trigger a
+   * Same as {@linkplain #get} except guaranteed not to trigger a
    * cascading compile of page bricks.
    */
   Page nonCompilingGet(String uri);
+
+  /**
+   * Similar to {@linkplain #get} except that instead of returning
+   * a page for a URI, it returns the page matching the class of the
+   * provided instance, and uses the instance itself to deliver the
+   * page.
+   *
+   * @param instance An instance of some page registered by an {@literal @}{@code At}
+   * annotation or similar method in this sitebricks app.
+   */
+  Page forInstance(Object instance);
 
   public static interface Page {
     Renderable widget();
@@ -55,6 +66,8 @@ public interface PageBook {
     Class<?> pageClass();
 
     void apply(Renderable widget);
+
+    String getUri();
   }
 
   public static final class Routing extends AbstractModule {

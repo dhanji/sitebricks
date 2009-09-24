@@ -8,7 +8,6 @@ import com.google.sitebricks.compiler.Compilers;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.Production;
 import com.google.sitebricks.routing.SystemMetrics;
-
 import net.jcip.annotations.ThreadSafe;
 
 import java.util.HashSet;
@@ -73,6 +72,9 @@ class DebugModePageBook implements PageBook {
     return book.get(uri);
   }
 
+  public Page forInstance(Object instance) {
+    return book.forInstance(instance);
+  }
 
   private void reload(String identifier, Page page) {
 

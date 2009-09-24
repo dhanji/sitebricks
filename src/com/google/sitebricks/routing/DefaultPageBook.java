@@ -1,26 +1,24 @@
 package com.google.sitebricks.routing;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.inject.*;
 import com.google.inject.name.Named;
-import com.google.sitebricks.http.Select;
-import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Bricks;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.http.Select;
 import com.google.sitebricks.rendering.EmbedAs;
 import com.google.sitebricks.rendering.Strings;
-
+import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -28,17 +26,23 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
-@Singleton
-@ThreadSafe
+@ThreadSafe @Singleton
 class DefaultPageBook implements PageBook {
   //multimaps TODO refactor to multimap?
+
+  @GuardedBy("lock") // All three following fields
   private final Map<String, List<PageTuple>> pages = Maps.newHashMap();
   private final List<PageTuple> universalMatchingPages = Lists.newArrayList();
   private final Map<String, PageTuple> pagesByName = Maps.newHashMap();
 
-  private final Injector injector;
+  private final ConcurrentMap<Class<?>, PageTuple> classToPageMap =
+      new MapMaker()
+          .weakKeys()
+          .weakValues()
+          .makeMap();
 
   private final Object lock = new Object();
+  private final Injector injector;
 
   @Inject
   public DefaultPageBook(Injector injector) {
@@ -46,21 +50,23 @@ class DefaultPageBook implements PageBook {
   }
 
   public PageTuple at(String uri, Class<?> clazz) {
+    final String key = firstPathElement(uri);
+    final PageTuple pageTuple =
+        new PageTuple(uri, new PathMatcherChain(uri), clazz, injector);
+
     synchronized (lock) {
-      final String key = firstPathElement(uri);
-
-      final PageTuple pageTuple =
-          new PageTuple(new PathMatcherChain(uri), clazz, injector);
-
       //is universal? (i.e. first element is a variable)
       if (isVariable(key))
         universalMatchingPages.add(pageTuple);
       else {
         multiput(pages, key, pageTuple);
       }
-
-      return pageTuple;
     }
+
+    // Does not need to be inside lock, as it is concurrent.
+    classToPageMap.put(clazz, pageTuple);
+
+    return pageTuple;
   }
 
   public Page embedAs(Class<?> clazz) {
@@ -71,8 +77,11 @@ class DefaultPageBook implements PageBook {
   }
 
   public Page embedAs(Class<?> clazz, String as) {
-    PageTuple pageTuple = new PageTuple(PathMatcherChain.ignoring(), clazz, injector);
-    pagesByName.put(as.toLowerCase(), pageTuple);
+    PageTuple pageTuple = new PageTuple(null, PathMatcherChain.ignoring(), clazz, injector);
+
+    synchronized (lock) {
+      pagesByName.put(as.toLowerCase(), pageTuple);
+    }
 
     return pageTuple;
   }
@@ -136,9 +145,59 @@ class DefaultPageBook implements PageBook {
     return pagesByName.get(name);
   }
 
+  public Page forInstance(Object instance) {
+    Class<?> aClass = instance.getClass();
+    PageTuple targetType = classToPageMap.get(aClass);
+
+    if (null == targetType) {
+      // Do a super crawl to detect the target type if available.
+      // TODO...
+    }
+
+    return InstanceBoundPage.delegating(targetType, instance);
+  }
+
+  public static class InstanceBoundPage implements Page {
+    private final Page delegate;
+    private final Object instance;
+
+    private InstanceBoundPage(Page delegate, Object instance) {
+      this.delegate = delegate;
+      this.instance = instance;
+    }
+
+    public Renderable widget() {
+      return delegate.widget();
+    }
+
+    public Object instantiate() {
+      return instance;
+    }
+
+    public Object doMethod(String httpMethod, Object page, String pathInfo, Map<String, String[]> params) {
+      return delegate.doMethod(httpMethod, page, pathInfo, params);
+    }
+
+    public Class<?> pageClass() {
+      return delegate.pageClass();
+    }
+
+    public void apply(Renderable widget) {
+      delegate.apply(widget);
+    }
+
+    public String getUri() {
+      return delegate.getUri();
+    }
+
+    public static InstanceBoundPage delegating(Page delegate, Object instance) {
+      return new InstanceBoundPage(delegate, instance);
+    }
+  }
 
   @Select("") //the default select (hacky!!)
   public static class PageTuple implements Page {
+    private final String uri;
     private final PathMatcher matcher;
     private final AtomicReference<Renderable> pageWidget = new AtomicReference<Renderable>();
     private final Class<?> clazz;
@@ -146,10 +205,11 @@ class DefaultPageBook implements PageBook {
 
     private final Map<String, MethodTuple> methods;
 
-    //dispatcher switch
+    //dispatcher switch (select on request param by default)
     private final Select select;
 
-    public PageTuple(PathMatcher matcher, Class<?> clazz, Injector injector) {
+    public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, Injector injector) {
+      this.uri = uri;
       this.matcher = matcher;
       this.clazz = clazz;
       this.injector = injector;
@@ -256,6 +316,10 @@ class DefaultPageBook implements PageBook {
 
     public void apply(Renderable widget) {
       this.pageWidget.set(widget);
+    }
+
+    public String getUri() {
+      return uri;
     }
 
     @Override

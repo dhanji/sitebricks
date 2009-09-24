@@ -38,27 +38,18 @@ Released for free under a Creative Commons Attribution 2.5 License
                 <h1 class="title">examples</h1>
                 <div class="entry">
 
-                    The following expression is repeated over every item in the bound collection of names.
+                    The following demonstrates page chaining. The value you type in will be
+                    passed on to the next page on the server side, without leaking it to the
+                    client.
+                    <br/><br/>
+                    <form method="post">
+                        <input name="userValue" type="text" value="type something" />
 
-                    <ul>
-                        @Repeat(items=names, var="name", pageVar="page")
-                        <li>${name}</li>
-                    </ul>
-
-                    <br/><br/><br/>
-                </div>
-
-
-                <div class="entry">
-
-                    Repeat inside a repeat:
-
-                    <ul>
-                        @Repeat(items=movies, var="movie")
-                        <li> @Repeat(items=movie.actors, var="actor")<span>${actor} </span> </li>
-                    </ul>
+                        <input id="send" type="submit" value="send"/>
+                    </form>
 
                     <br/><br/><br/>
+
                 </div>
 
 

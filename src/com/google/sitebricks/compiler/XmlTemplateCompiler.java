@@ -7,18 +7,13 @@ import com.google.sitebricks.rendering.control.WidgetChain;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
-
 import net.jcip.annotations.NotThreadSafe;
 import org.dom4j.*;
 import org.dom4j.io.SAXReader;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.StringReader;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -80,12 +75,14 @@ class XmlTemplateCompiler {
 
             throw new TemplateParseException(e);
         }
-
-        if (!errors.isEmpty()) {
+      
+        if (!errors.isEmpty() || !warnings.isEmpty()) {
             // If there were any errors we must track them.
             metrics.logErrorsAndWarnings(page, errors, warnings);
 
-            throw new TemplateCompileException(page, template, errors, warnings);
+            // Only explode if there are errors.
+            if (!errors.isEmpty())
+                throw new TemplateCompileException(page, template, errors, warnings);
         }
 
         return widgetChain;
@@ -108,7 +105,7 @@ class XmlTemplateCompiler {
     private WidgetChain walk(Element element) {
 
         WidgetChain widgetChain = Chains.proceeding();
-        
+
         for (int i = 0, size = element.nodeCount(); i < size; i++) {
             Node node = element.node(i);
 
@@ -208,35 +205,35 @@ class XmlTemplateCompiler {
         return false;
     }
 
-  // Ensures that embed bound properties are writable
-  private void checkEmbedAgainst(EvaluatorCompiler compiler, Map<String, String> properties,
-                                 Class<?> embedClass, Element element) {
+    // Ensures that embed bound properties are writable
+    private void checkEmbedAgainst(EvaluatorCompiler compiler, Map<String, String> properties,
+                                   Class<?> embedClass, Element element) {
 
-    // TODO also type check them against expressions
-    for (String property : properties.keySet()) {
-      try {
-        if (!compiler.isWritable(property)) {
-          errors.add(
-              CompileError.in(Dom.asRawXml(element))
-                //TODO we need better line number detection if there is whitespace between the annotation and tag.
-                .near(Dom.lineNumberOf(element) - 1) // Really we want the line number of the annotation not the tag.
-                .causedBy(CompileErrors.PROPERTY_NOT_WRITEABLE,
-                    String.format("Property %s#%s was not writable. Did you forget to create "
-                        + "a setter or @Visible annotation?", embedClass.getSimpleName(), property))
-          );
-        }
-      } catch (ExpressionCompileException ece) {
-        errors.add(
-            CompileError.in(Dom.asRawXml(element))
-                .near(Dom.lineNumberOf(element))
-                .causedBy(CompileErrors.ERROR_COMPILING_PROPERTY)
-        );
-      }
+      // TODO also type check them against expressions
+      for (String property : properties.keySet()) {
+          try {
+              if (!compiler.isWritable(property)) {
+                  errors.add(
+                      CompileError.in(Dom.asRawXml(element))
+                        //TODO we need better line number detection if there is whitespace between the annotation and tag.
+                        .near(Dom.lineNumberOf(element) - 1) // Really we want the line number of the annotation not the tag.
+                        .causedBy(CompileErrors.PROPERTY_NOT_WRITEABLE,
+                            String.format("Property %s#%s was not writable. Did you forget to create "
+                                + "a setter or @Visible annotation?", embedClass.getSimpleName(), property))
+                  );
+              }
+          } catch (ExpressionCompileException ece) {
+              errors.add(
+                  CompileError.in(Dom.asRawXml(element))
+                      .near(Dom.lineNumberOf(element))
+                      .causedBy(CompileErrors.ERROR_COMPILING_PROPERTY)
+              );
+          }
+       }
     }
-  }
 
 
-  /**
+    /**
      * This method converts an XML element into a specific kind of widget.
      * Special cases are the XML widget, Header, @Require widget. Otherwise a standard
      * widget is created.
@@ -313,7 +310,7 @@ class XmlTemplateCompiler {
             }
 
 
-        
+
         // Recursively build widget from [Key, expression, child widgets].
         try {
             return registry.newWidget(widgetName, extract[1], childsChildren, lexicalScopes.peek());
@@ -456,7 +453,7 @@ class XmlTemplateCompiler {
             uriAttrib = element.attribute("href");
 
         if (null != uriAttrib) {
-            
+
             // Verify that such a uri exists in the page book,
             // only if it is contextual--ignore abs & relative URIs.
             final String uri = uriAttrib.getValue();

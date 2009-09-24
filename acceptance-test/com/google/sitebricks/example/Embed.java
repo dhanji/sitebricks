@@ -1,7 +1,6 @@
 package com.google.sitebricks.example;
 
 import com.google.sitebricks.At;
-import com.google.sitebricks.Visible;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -9,7 +8,6 @@ import com.google.sitebricks.Visible;
 @At("/embed")
 public class Embed {
 
-  @Visible
   private String arg = "Embedding in google-sitebricks is awesome!";
 
   public String getArg() {

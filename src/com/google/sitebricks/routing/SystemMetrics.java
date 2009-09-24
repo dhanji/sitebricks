@@ -10,7 +10,7 @@ import java.util.List;
  * 
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
-@ImplementedBy(DefaultSystemMetrics.class)
+@ImplementedBy(InMemorySystemMetrics.class)
 public interface SystemMetrics {
     /**
      * Records the last page render time for the given page (in millis).
