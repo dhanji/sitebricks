@@ -1,17 +1,18 @@
 package com.google.sitebricks.binding;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.sitebricks.Evaluator;
 import com.google.sitebricks.rendering.Strings;
-
 import net.jcip.annotations.Immutable;
 import org.mvel.PropertyAccessException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -39,33 +40,45 @@ class MvelRequestBinder implements RequestBinder {
     //bind iteratively (last incoming param-value per key, gets bound)
     for (Map.Entry<String, String[]> entry : map.entrySet()) {
       String key = entry.getKey();
-      String rawValue = entry.getValue()[entry.getValue().length - 1];   //choose last value
+
+      // If there are multiple entry, then this is a collection bind:
+      final String[] values = entry.getValue();
 
       validate(key);
 
-      //bind from collection?
       Object value;
-      if (rawValue.startsWith(COLLECTION_BIND_PREFIX)) {
-        final String[] binding = rawValue.substring(COLLECTION_BIND_PREFIX.length()).split("/");
-        if (binding.length != 2)
-          throw new InvalidBindingException(
-              "Collection sources must be bound in the form '[C/collection/hashcode'. "
-                  + "Was the request corrupt? Or did you try to bind something manually"
-                  + " with a key starting '[C/'? Was: " + rawValue);
 
-        final Collection<?> collection = cacheProvider.get().get(binding[0]);
+      if (values.length > 1) {
+        value = Lists.newArrayList(values);
+      } else {
+        // If there is only one value, bind as per normal
+        String rawValue = values[0];   //choose first (and only value)
 
-        value = search(collection, binding[1]);
-      } else
-        value = rawValue;
+        //bind from collection?
+        if (rawValue.startsWith(COLLECTION_BIND_PREFIX)) {
+          final String[] binding = rawValue.substring(COLLECTION_BIND_PREFIX.length()).split("/");
+          if (binding.length != 2)
+            throw new InvalidBindingException(
+                "Collection sources must be bound in the form '[C/collection/hashcode'. "
+                    + "Was the request corrupt? Or did you try to bind something manually"
+                    + " with a key starting '[C/'? Was: " + rawValue);
+
+          final Collection<?> collection = cacheProvider.get().get(binding[0]);
+
+          value = search(collection, binding[1]);
+        } else
+          value = rawValue;
+      }
 
       //apply the bound value to the page object property
       try {
         evaluator.write(key, o, value);
       } catch (PropertyAccessException e) {
         // Log missing property.
-        log.fine(String.format("A property [%s] could not be bound,"
-            + " but not necessarily an error.", key));
+        if (log.isLoggable(Level.FINE)) {
+          log.fine(String.format("A property [%s] could not be bound,"
+              + " but not necessarily an error.", key));
+        }
       }
     }
   }

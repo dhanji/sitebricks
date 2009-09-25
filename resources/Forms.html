@@ -43,6 +43,14 @@ Released for free under a Creative Commons Attribution 2.5 License
 
                         <input name="text" type="text" value="${text}" />
 
+                        <br/>
+                        <br/>
+                        <!-- Example of list binding -->
+                        Name some autobots:
+                        <input name="autobots" type="text" value="" /><br/>
+                        <input name="autobots" type="text" value="" /><br/>
+                        <input name="autobots" type="text" value="" /><br/>
+
                         <!--@Choose(from=autobots, bind=chosen)-->
                         <!--<select>$ {chosen}</select>-->
 
@@ -53,6 +61,9 @@ Released for free under a Creative Commons Attribution 2.5 License
                     Bound:
                     <p>
                         textfield: ${text}
+                    </p>
+                    <p>
+                        autobots: ${autobots}
                     </p>
                     <p>
                         <!--choose: $ {chosen}-->
