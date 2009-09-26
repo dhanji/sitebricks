@@ -12,14 +12,20 @@ import java.util.Date;
  */
 @Test(suiteName = AcceptanceTest.SUITE)
 public class FormsAcceptanceTest {
-    private static final String SOME_TEXT = "aoskdopaksdoaskd" + new Date();
+  private static final String SOME_TEXT = "aoskdopaksdoaskd" + new Date();
 
-    public void shouldRenderDynamicTextFromTextFieldBinding() {
-        WebDriver driver = AcceptanceTest.createWebDriver();
-        FormsPage page = FormsPage.open(driver);
+  public void shouldRenderDynamicTextFromTextFieldBinding() {
+    WebDriver driver = AcceptanceTest.createWebDriver();
+    FormsPage page = FormsPage.open(driver);
 
-        page.enterText(SOME_TEXT);
+    final String boundAutobots = "Optimus, Rodimus, UltraMagnus";
+    final String[] strings = boundAutobots.split(", ");
 
-        assert page.hasBoundText(SOME_TEXT) : "Did not generate dynamic text from form binding";
-    }
+    page.enterText(SOME_TEXT);
+    page.enterAutobots(strings[0], strings[1], strings[2]);
+    page.send();
+
+    assert page.hasBoundText(SOME_TEXT) : "Did not generate dynamic text from form binding";
+    assert page.hasBoundAutobots(boundAutobots) : "Did not generate text from list binding";
+  }
 }
