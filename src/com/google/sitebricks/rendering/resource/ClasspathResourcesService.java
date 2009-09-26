@@ -1,5 +1,6 @@
 package com.google.sitebricks.rendering.resource;
 
+import com.google.common.collect.MapMaker;
 import com.google.inject.Singleton;
 import com.google.sitebricks.Export;
 import com.google.sitebricks.Renderable;
@@ -12,7 +13,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -21,9 +21,11 @@ import java.util.concurrent.atomic.AtomicReference;
 @ThreadSafe
 @Singleton
 class ClasspathResourcesService implements ResourcesService {
-  private final Map<String, Resource> resources = new ConcurrentHashMap<String, Resource>();
+  private final Map<String, Resource> resources = new MapMaker().makeMap();
 
-  private static final AtomicReference<Map<String, String>> mimes = new AtomicReference<Map<String, String>>();
+  private static final AtomicReference<Map<String, String>> mimes =
+      new AtomicReference<Map<String, String>>();
+
   private static final String DEFAULT_MIME = "__defaultMimeType";
 
   public ClasspathResourcesService() {

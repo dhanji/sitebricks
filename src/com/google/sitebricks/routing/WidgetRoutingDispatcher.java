@@ -86,7 +86,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
       if (redirect instanceof String)
         respond.redirect((String) redirect);
       else {
-        // Handle page-injection driven redirection.
+        // Handle page-chaining driven redirection.
         PageBook.Page targetPage = book.forInstance(redirect);
 
         // should never be null coz it will be validated at compile time.

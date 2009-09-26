@@ -1,5 +1,6 @@
 package com.google.sitebricks.rendering.control;
 
+import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -10,11 +11,9 @@ import com.google.sitebricks.compiler.ExpressionCompileException;
 import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.compiler.RepeatToken;
 import com.google.sitebricks.routing.PageBook;
-
 import net.jcip.annotations.ThreadSafe;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -29,8 +28,7 @@ class DefaultWidgetRegistry implements WidgetRegistry {
   private final Evaluator evaluator;
   private final PageBook pageBook;
 
-  private final ConcurrentMap<String, WidgetWrapper> widgets =
-      new ConcurrentHashMap<String, WidgetWrapper>();
+  private final ConcurrentMap<String, WidgetWrapper> widgets = new MapMaker().makeMap();
 
   @Inject
   public DefaultWidgetRegistry(Evaluator evaluator, PageBook pageBook, Injector injector) {
@@ -61,8 +59,8 @@ class DefaultWidgetRegistry implements WidgetRegistry {
     if (null == wrapper) {
       throw new NoSuchWidgetException(
           "No widget found matching the name: @"
-          + widget + " ; Did you forget to bind your"
-          + " widget class using the embed().as() rule?");
+              + widget + " ; Did you forget to bind your"
+              + " widget class using the embed().as() rule?");
     }
 
     return wrapper.isSelfRendering();

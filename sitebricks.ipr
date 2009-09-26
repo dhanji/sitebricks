@@ -401,7 +401,6 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/bend/bend.iml" filepath="$PROJECT_DIR$/bend/bend.iml" />
       <module fileurl="file://$PROJECT_DIR$/examples/cards/cards.iml" filepath="$PROJECT_DIR$/examples/cards/cards.iml" />
       <module fileurl="file://$PROJECT_DIR$/sitebricks.iml" filepath="$PROJECT_DIR$/sitebricks.iml" />
     </modules>

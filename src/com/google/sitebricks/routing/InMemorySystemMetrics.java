@@ -18,11 +18,12 @@ import java.util.logging.Logger;
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
-@ThreadSafe @Singleton
+@ThreadSafe
+@Singleton
 class InMemorySystemMetrics implements SystemMetrics {
   private final ConcurrentMap<Class<?>, Metric> pages = new MapMaker().weakKeys().makeMap();
   private final AtomicBoolean active = new AtomicBoolean(false);
-  
+
   private final Logger log = Logger.getLogger(SystemMetrics.class.getName());
 
   public void logPageRenderTime(Class<?> page, long time) {
@@ -65,7 +66,7 @@ class InMemorySystemMetrics implements SystemMetrics {
       if (null == returned)
         metric = newMetric;
       else
-        metric = pages.get(page);
+        metric = returned;
     }
 
     return metric;
@@ -74,7 +75,7 @@ class InMemorySystemMetrics implements SystemMetrics {
   /**
    * Associates various metrics with a given page It is not guaranteed to represent any
    * particular request, rather metrics are collected over time.
-   * <p>
+   * <p/>
    * Except for the errors and warnings, which are always the last ones available (roughly!)
    */
   private static class Metric {
