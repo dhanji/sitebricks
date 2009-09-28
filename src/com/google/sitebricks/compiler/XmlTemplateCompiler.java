@@ -411,6 +411,10 @@ class XmlTemplateCompiler {
         if ("input".equals(element.getName()) || "textarea".equals(element.getName())) {
             Attribute name = element.attribute("name");
 
+            // Skip submits and buttons.
+            if (Dom.skippable(element.attribute("type")))
+                return;
+
             //TODO Skip empty?
             if (null == name) {
                 warnings.add(
@@ -421,10 +425,6 @@ class XmlTemplateCompiler {
 
                 return;
             }
-
-            // Skip submits and buttons.
-            if (Dom.skippable(element.attribute("type")))
-                return;
 
             // Compile expression path.
             final String expression = name.getValue();
