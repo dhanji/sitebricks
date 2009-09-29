@@ -160,7 +160,7 @@
     <copy todir="${staging}/WEB-INF/lib">
       <fileset dir="${dir.distribute}" includes="*.jar" excludes="google-sitebricks-src-*.jar"/>
       <fileset dir="${lib}">
-        <include name="google-servlet-*.jar"/>
+        <include name="google-collect-*.jar"/>
         <include name="guice-*.jar"/>
       </fileset>
     </copy>
