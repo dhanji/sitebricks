@@ -10,7 +10,7 @@
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks-lib</artifactId>
   <packaging>jar</packaging>
-  <version>1.0</version>
+  <version>0.8-SNAPSHOT</version>
   <name>sitebricks-lib</name>
   <url>http://maven.apache.org</url>
   <dependencies>
