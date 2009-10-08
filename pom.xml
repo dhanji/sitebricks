@@ -7,7 +7,7 @@
   <packaging>pom</packaging>
   <version>0.8-SNAPSHOT</version>
   <modules>
-    <module>sitebricks</module>                                 
+    <module>sitebricks</module>
     <module>sitebricks-web</module>
     <module>sitebricks-tutorial</module>
   </modules>
@@ -15,7 +15,7 @@
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
-      <groupId>org.testng</groupId>  
+      <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
       <version>5.8</version>
       <classifier>jdk15</classifier>
@@ -34,11 +34,17 @@
       </plugin>
     </plugins>
   </build>
-  <repositories>
+  <distributionManagement>
     <repository>
-      <id>google-maven-repository</id>
-      <name>Google Maven Repository</name>
-      <url>http://google-maven-repository.googlecode.com/svn/repository/</url>
+      <id>google-sitebricks-releases</id>
+      <name>Google Sitebricks Repository</name>
+      <url>http://oss.sonatype.org/content/repositories/google-releases/</url>
     </repository>
-  </repositories>
+    <snapshotRepository>
+      <id>google-sitebricks-snapshots</id>
+      <name>Google Sitebricks Snapshots Repository</name>
+      <url>http://oss.sonatype.org/content/repositories/google-snapshots/</url>
+      <uniqueVersion>false</uniqueVersion>
+    </snapshotRepository>
+  </distributionManagement>
 </project>

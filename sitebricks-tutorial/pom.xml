@@ -10,7 +10,7 @@
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks-tutorial</artifactId>
   <packaging>war</packaging>
-  <version>1.0</version>
+  <version>0.8-SNAPSHOT</version>
   <name>sitebricks-tutorial Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <build>

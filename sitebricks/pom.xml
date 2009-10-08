@@ -88,6 +88,6 @@
     </dependency>
   </dependencies>
   <build>
-    <finalName>google-sitebricks</finalName>
+    <finalName>sitebricks</finalName>
   </build>
 </project>

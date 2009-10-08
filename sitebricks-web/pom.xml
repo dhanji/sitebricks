@@ -10,15 +10,15 @@
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks-web</artifactId>
   <packaging>war</packaging>
-  <version>1.0</version>
+  <version>0.8-SNAPSHOT</version>
   <name>google-sitebricks-web Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
-      <dependency>
-        <groupId>com.google.sitebricks</groupId>
-        <artifactId>sitebricks</artifactId>
-        <version>0.8-SNAPSHOT</version>
-      </dependency>
+    <dependency>
+      <groupId>com.google.sitebricks</groupId>
+      <artifactId>sitebricks</artifactId>
+      <version>0.8-SNAPSHOT</version>
+    </dependency>
   </dependencies>
   <build>
     <finalName>sitebricks-web</finalName>
