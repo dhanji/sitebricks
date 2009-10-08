@@ -8,10 +8,10 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.google.sitebricks</groupId>
-  <artifactId>sitebricks-lib</artifactId>
+  <artifactId>sitebricks</artifactId>
   <packaging>jar</packaging>
   <version>0.8-SNAPSHOT</version>
-  <name>sitebricks-lib</name>
+  <name>sitebricks</name>
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>

@@ -7,7 +7,7 @@
   <packaging>pom</packaging>
   <version>0.8-SNAPSHOT</version>
   <modules>
-    <module>sitebricks-lib</module>
+    <module>sitebricks</module>                                 
     <module>sitebricks-web</module>
     <module>sitebricks-tutorial</module>
   </modules>
