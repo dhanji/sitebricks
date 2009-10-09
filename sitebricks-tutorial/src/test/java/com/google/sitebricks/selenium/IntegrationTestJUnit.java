@@ -1,11 +1,13 @@
 package com.google.sitebricks.selenium;
 
-import org.openqa.selenium.server.*;
-import java.util.regex.Pattern;
+import com.thoughtworks.selenium.SeleneseTestCase;
 
 public class IntegrationTestJUnit extends SeleneseTestCase {
-	public void setUp() throws Exception {
-		setUp("http://localhost:8080/", "*chrome");
+
+  @Override
+  public void setUp() throws Exception {
+		setUp(
+        "http://localhost:8080/", "*chrome");
 	}
 	public void testIntegrationTestJUnit() throws Exception {
 		verifyTrue(selenium.isTextPresent("Hello from Sitebricks!"));
