@@ -87,7 +87,48 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  
   <build>
+<!--
+
+  BD: You can un-comment this section to disable the currently failing unit tests, but still execute integration tests.
+  This section should be removed when the unit tests are working again.
+
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          &lt;!&ndash; Skip the normal tests. Run them in the integration-test phase &ndash;&gt;
+          <skip>true</skip>
+        </configuration>
+
+        <executions>
+          <execution>
+            <id>test</id>
+            <phase>test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </execution>
+          <execution>
+            <id>integration-test</id>
+            <phase>integration-test</phase>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
+    </plugins>
+-->
     <finalName>sitebricks</finalName>
   </build>
 </project>

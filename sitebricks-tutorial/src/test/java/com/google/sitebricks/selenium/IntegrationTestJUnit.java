@@ -7,7 +7,7 @@ public class IntegrationTestJUnit extends SeleneseTestCase {
   @Override
   public void setUp() throws Exception {
 		setUp(
-        "http://localhost:8080/", "*chrome");
+        "http://localhost:8888/", "*chrome");
 	}
 	public void testIntegrationTestJUnit() throws Exception {
 		verifyTrue(selenium.isTextPresent("Hello from Sitebricks!"));
