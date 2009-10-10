@@ -10,7 +10,7 @@ public class Jetty {
     private final Server server;
 
     public Jetty() {
-        this(new WebAppContext("resources", "/sitebricks"), 4040);
+        this(new WebAppContext("src/main/resources", "/sitebricks"), 4040);
     }
 
     public Jetty(WebAppContext webAppContext, int port) {
