@@ -5,7 +5,14 @@
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.8-SNAPSHOT</version>
+  <version>0.7</version>
+
+  <scm>
+    <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/trunk/</connection>
+    <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/trunk/</developerConnection>
+    <url>http://code.google.com/p/google-sitebricks/source/browse/</url>
+  </scm>
+
   <modules>
     <module>sitebricks</module>
     <module>acceptance-test</module>
@@ -33,13 +40,21 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.0-beta-7</version>
+        <configuration>
+          <tagBase>scm:svn:http://google-sitebricks.googlecode.com/svn/tags</tagBase>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <distributionManagement>
     <repository>
       <id>google-sitebricks-releases</id>
       <name>Google Sitebricks Repository</name>
-      <url>http://oss.sonatype.org/content/repositories/google-releases/</url>
+      <url>http://oss.sonatype.org/content/groups/google-with-staging/</url>
     </repository>
     <snapshotRepository>
       <id>google-sitebricks-snapshots</id>
@@ -48,4 +63,33 @@
       <uniqueVersion>false</uniqueVersion>
     </snapshotRepository>
   </distributionManagement>
+  <profiles>
+    <profile>
+      <id>release-sign-artifacts</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.0-alpha-4</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
