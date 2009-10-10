@@ -5,7 +5,7 @@
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.7</version>
+  <version>0.7-SNAPSHOT</version>
 
   <scm>
     <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/trunk/</connection>
