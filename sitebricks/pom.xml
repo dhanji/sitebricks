@@ -8,7 +8,7 @@
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks</artifactId>
   <packaging>jar</packaging>
-  <version>0.7</version>
+  <version>0.8-SNAPSHOT</version>
   <name>sitebricks</name>
   <url>http://maven.apache.org</url>
   <dependencies>
@@ -129,10 +129,4 @@
 -->
     <finalName>sitebricks</finalName>
   </build>
-
-  <scm>
-    <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/tags/sitebricks-0.7</connection>
-    <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/tags/sitebricks-0.7</developerConnection>
-    <url>scm:svn:https://google-sitebricks.googlecode.com/svn/tags/sitebricks-0.7</url>
-  </scm>
 </project>
