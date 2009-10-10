@@ -129,10 +129,4 @@
 -->
     <finalName>sitebricks</finalName>
   </build>
-
-  <scm>
-    <connection>scm:svn:scm:svn:http://google-sitebricks.googlecode.com/svn/tags/sitebricks-0.7</connection>
-    <developerConnection>scm:svn:scm:svn:http://google-sitebricks.googlecode.com/svn/tags/sitebricks-0.7</developerConnection>
-    <url>scm:svn:scm:svn:http://google-sitebricks.googlecode.com/svn/tags/sitebricks-0.7</url>
-  </scm>
 </project>
