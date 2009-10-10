@@ -94,7 +94,7 @@
   </build>
   <profiles>
     <profile>
-      <id>hudson</id>
+      <id>headless</id>
       <activation>
         <property>
           <name>env</name>
@@ -115,7 +115,7 @@
                 </goals>
                 <configuration>
                   <background>true</background>
-                  <browserSessionReuse>true</browserSessionReuse>
+                  <browserSessionReuse>false</browserSessionReuse>
                   <timeout>10000</timeout>
                 </configuration>
               </execution>

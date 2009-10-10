@@ -1,10 +1,10 @@
 package com.google.sitebricks.acceptance.page;
 
 import com.google.sitebricks.acceptance.util.AcceptanceTest;
+import org.openqa.selenium.How;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.How;
 import org.openqa.selenium.support.PageFactory;
 
 public class CasePage {
