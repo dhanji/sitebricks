@@ -5,7 +5,7 @@
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.7</version>
 
   <scm>
     <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/trunk/</connection>
@@ -54,7 +54,7 @@
     <repository>
       <id>google-sitebricks-releases</id>
       <name>Google Sitebricks Repository</name>
-      <url>http://oss.sonatype.org/content/groups/google-with-staging/</url>
+      <url>http://oss.sonatype.org/content/repositories/google-releases/</url>
     </repository>
     <snapshotRepository>
       <id>google-sitebricks-snapshots</id>
