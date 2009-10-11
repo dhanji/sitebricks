@@ -2,13 +2,13 @@
   <parent>
     <artifactId>sitebricks-parent</artifactId>
     <groupId>com.google.sitebricks</groupId>
-    <version>0.7</version>
+    <version>0.8-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks</artifactId>
   <packaging>jar</packaging>
-  <version>0.7</version>
+  <version>0.8-SNAPSHOT</version>
   <name>sitebricks</name>
   <url>http://maven.apache.org</url>
   <dependencies>
