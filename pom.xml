@@ -16,8 +16,8 @@
   <modules>
     <module>sitebricks</module>
     <module>acceptance-test</module>
-    <module>sitebricks-web</module>
-    <module>sitebricks-tutorial</module>
+    <!--<module>sitebricks-web</module>-->
+    <!--<module>sitebricks-tutorial</module>-->
   </modules>
   <name>sitebricks-parent</name>
   <url>http://maven.apache.org</url>
