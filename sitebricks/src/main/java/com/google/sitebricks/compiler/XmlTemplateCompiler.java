@@ -11,7 +11,11 @@ import net.jcip.annotations.NotThreadSafe;
 import org.dom4j.*;
 import org.dom4j.io.SAXReader;
 import org.jetbrains.annotations.NotNull;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 
@@ -62,6 +66,16 @@ class XmlTemplateCompiler {
             reader.setValidation(false);
             reader.setIncludeExternalDTDDeclarations(true);
 
+            reader.setEntityResolver(new EntityResolver() {
+                public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+                    if (systemId.contains(".dtd")) {
+                        return new InputSource(new StringReader(""));
+                    } else {
+                        return null;
+                    }
+                }
+            });
+
             widgetChain = walk(reader.read(new StringReader(template)));
         } catch (DocumentException e) {
             errors.add(
@@ -90,11 +104,27 @@ class XmlTemplateCompiler {
 
     private WidgetChain walk(Document document) {
         WidgetChain chain = Chains.proceeding();
+        handleDocType(document, chain);
         final WidgetChain docChain = walk(document.getRootElement());
 
         chain.addWidget(widgetize(null, document.getRootElement(), docChain));
 
         return chain;
+    }
+
+    private void handleDocType(Document document, WidgetChain chain) {
+        DocumentType docType = document.getDocType();
+        if (docType != null) {
+            String docTypeRawXml = document.getDocType().asXML();
+            try {
+                chain.addWidget(registry.textWidget(Dom.stripAnnotation(docTypeRawXml), lexicalScopes.peek()));
+            } catch (ExpressionCompileException e) {
+                errors.add(
+                    CompileError.in(docTypeRawXml)
+                        .causedBy(e)
+              );
+            }
+        }
     }
 
     /**
