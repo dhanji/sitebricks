@@ -46,6 +46,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
       @Override
       protected void configureServlets() {
+        filter("/*").through(HiddenMethodFilter.class);
         filter("/*").through(SitebricksFilter.class);
       }
 
