@@ -105,9 +105,14 @@ class Classes {
               //it's not inside a deeper dir
               if (name.endsWith(".class") && !entry.isDirectory()) {
                 String className = name.substring(packageName.length() + 1, name.length() - 6);
-
                 //include this class in our results
-                add(packageName, classes, className);
+
+                /* Issue #26 - package-info causes ISE during package scan. This ia a bit of a hack for just
+                 * package-info. TODO Determine better handling of unexpected classloader issues.
+                 */
+                if (!"package-info".equalsIgnoreCase(className)) {
+                  add(packageName, classes, className);
+                }
 //                  vResult.add();
               }
             }
