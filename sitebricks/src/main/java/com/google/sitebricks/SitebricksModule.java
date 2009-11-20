@@ -8,7 +8,6 @@ import com.google.inject.Scope;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.servlet.ServletModule;
 import com.google.sitebricks.core.CaseWidget;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
@@ -42,17 +41,9 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   protected final void configure() {
 
     // Re-route all requests through sitebricks.
-    install(new ServletModule() {
-
-      @Override
-      protected void configureServlets() {
-        filter("/*").through(HiddenMethodFilter.class);
-        filter("/*").through(SitebricksFilter.class);
-      }
-
-    });
-
-    // Call down to the implementation.
+    install(servletModule());
+    
+      // Call down to the implementation.
     configureSitebricks();
 
     //set up MVEL namespace (when jarjar-ed, it will use the repackaged namespace)
@@ -86,6 +77,19 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
       bind(PageBook.class).to(DebugModePageBook.class);
       bind(RoutingDispatcher.class).to(DebugModeRoutingDispatcher.class);
     }
+  }
+
+  /**
+   * Optionally supply {@link javax.servlet.Servlet} and/or {@link javax.servlet.Filter} implementations to
+   * Guice Servlet. See {@link com.google.sitebricks.SitebricksServletModule} for usage examples.
+   *
+   * @see com.google.sitebricks.SitebricksServletModule
+   *
+   * @return An instance of {@link com.google.sitebricks.SitebricksServletModule}. Implementing classes
+   * must return a non-null value.
+   */
+  protected SitebricksServletModule servletModule() {
+    return new SitebricksServletModule();
   }
 
   protected void configureSitebricks() {
