@@ -2,7 +2,6 @@ package com.google.sitebricks;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.sitebricks.compiler.Parsing;
 import net.jcip.annotations.Immutable;
 
 import javax.servlet.ServletContext;
@@ -16,6 +15,8 @@ import java.net.URL;
 class TemplateLoader {
   private final Provider<ServletContext> context;
 
+  private final String[] fileNameTemplates = new String[] { "%s.html", "%s.xhtml", "%s.xml" };
+
   @Inject
   public TemplateLoader(Provider<ServletContext> context) {
     this.context = context;
@@ -28,8 +29,9 @@ class TemplateLoader {
     //annotation not present, resolve by name
     if (null == show) {
       template = resolve(pageClass);
-    } else
+    } else {
       template = show.value();
+    }
 
     String text;
     try {
@@ -73,39 +75,30 @@ class TemplateLoader {
 
   private ResolvedTemplate resolve(Class<?> pageClass, ServletContext context) {
     //first resolve using url conversion
-    String templateName = String.format("%s.html", pageClass.getSimpleName());
-    InputStream resource = open(templateName, context);
+    for (String nameTemplate : fileNameTemplates) {
+      String templateName = String.format(nameTemplate, pageClass.getSimpleName());
+      InputStream resource = open(templateName, context);
 
-    if (null == resource) {
-      templateName = String.format("%s.xhtml", pageClass.getSimpleName());
-      resource = open(templateName, context);
-    } else
-      return new ResolvedTemplate(templateName, resource);
+      if (null != resource) {
+        return new ResolvedTemplate(templateName, resource);
+      }
 
-    if (null == resource) {
-      templateName = String.format("%s.xml", pageClass.getSimpleName());
-      resource = open(templateName, context);
+      resource = openWebInf(templateName, context);
+
+      if (null != resource) {
+        return new ResolvedTemplate(templateName, resource);
+      }
     }
 
+    //resolve again using servlet context if that fails
+    for (String nameTemplate : fileNameTemplates) {
+      String templateName = String.format(nameTemplate, pageClass.getSimpleName());
+      InputStream resource = context.getResourceAsStream(templateName);
 
-    //resolve again using servlet context if that fail
-    if (null == resource) {
-      templateName = String.format("%s.html", pageClass.getSimpleName());
-      resource = context.getResourceAsStream(templateName);
+      if (null != resource) {
+        return new ResolvedTemplate(templateName, resource);
+      }
     }
-
-    if (null == resource) {
-      templateName = String.format("%s.xhtml", pageClass.getSimpleName());
-      resource = context.getResourceAsStream(templateName);
-    }
-
-    if (null == resource) {
-      templateName = String.format("%s.xml", pageClass.getSimpleName());
-      resource = context.getResourceAsStream(String.format("%s.xml", pageClass.getSimpleName()));
-    }
-
-    if (null != resource)
-      return new ResolvedTemplate(templateName, resource);
 
     return null;
   }
@@ -127,26 +120,21 @@ class TemplateLoader {
       return null;
     }
   }
+  
+  private static InputStream openWebInf(String file, ServletContext context) {
+    return open("/WEB-INF/" + file, context);
+  }
 
   //resolves a location for this page class's template (assuming @Show is not present)
   private String resolve(Class<?> pageClass) {
-    String name = String.format("%s.html", pageClass.getSimpleName());
+    for (String nameTemplate : fileNameTemplates) {
+      String name = String.format(nameTemplate, pageClass.getSimpleName());
+      URL resource = pageClass.getResource(name);
 
-    URL resource = pageClass.getResource(name);
-
-    if (null == resource) {
-      name = String.format("%s.xhtml", pageClass.getSimpleName());
-      resource = pageClass.getResource(name);
-    } else
-      return name;
-
-    if (null == resource) {
-      name = String.format("%s.xml", pageClass.getSimpleName());
-      resource = pageClass.getResource(name);
+      if (null != resource) {
+        return name;
+      }
     }
-
-    if (null != resource)
-      return name;
 
     return null;
   }
