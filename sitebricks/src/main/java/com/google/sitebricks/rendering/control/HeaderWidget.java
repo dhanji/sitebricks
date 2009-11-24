@@ -29,6 +29,8 @@ class HeaderWidget implements Renderable {
   public void render(Object bound, Respond respond) {
     XmlWidget.writeOpenTag(bound, respond, "head", attribs);
 
+    respond.write('>');
+
     //render children (as necessary)
     widgetChain.render(bound, respond);
 
