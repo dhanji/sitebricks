@@ -248,12 +248,15 @@ public class XmlTemplateCompilerTest {
         widget.render(new TestBackingType("Dhanji", "content", 12), respond);
 
         final String value = respond.toString();
-        assert ("<html><head>" +
-                "      <script type='text/javascript' src='my.js'> </script>" +
-                "</head>" +
-                "<div class='content'>hello <a href='/people/12'>Dhanji</a></div></html>")
+      String expected = "<html> <head>" +
+          "      <script type='text/javascript' src='my.js'> </script>" +
+          "</head>" +
+          "<div class='content'>hello <a href='/people/12'>Dhanji</a></div></html>";
+      expected = expected.replaceAll("'", "\"");
 
-                .replaceAll("'", "\"")
+      assert expected
+
+
                 .equals(value) : "Did not write expected output, instead: " + value;
     }
 
