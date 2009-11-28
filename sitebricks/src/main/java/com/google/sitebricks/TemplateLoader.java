@@ -58,11 +58,14 @@ class TemplateLoader {
         }
 
         //if there's still no template, then error out
-        if (null == stream)
-          throw new MissingTemplateException(String.format("Could not find a suitable template for %s, did you remember to place " +
-              "an @Show? None of [%s.html, %s.xhtml or %s.xml] could be found in either " +
-              "package [%s] OR in the root of the resource dir.", pageClass.getName(), pageClass.getSimpleName(),
-              pageClass.getSimpleName(), pageClass.getSimpleName(), pageClass.getPackage().getName()));
+        if (null == stream) {
+          throw new MissingTemplateException(String.format("Could not find a suitable template for %s, " +
+              "did you remember to place an @Show? None of [" +
+              fileNameTemplates[0] + ", " + fileNameTemplates[1] + " or " + fileNameTemplates[2] +
+              " could be found in either package [%s], in the root of the resource dir OR in WEB-INF/.",
+              pageClass.getName(), pageClass.getSimpleName(), pageClass.getSimpleName(), pageClass.getSimpleName(),
+              pageClass.getPackage().getName()));
+        }
       }
 
       text = read(stream);
