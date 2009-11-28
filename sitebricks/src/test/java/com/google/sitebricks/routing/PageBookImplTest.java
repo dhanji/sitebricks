@@ -1,14 +1,19 @@
 package com.google.sitebricks.routing;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import com.google.sitebricks.*;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Select;
 import com.google.sitebricks.rendering.EmbedAs;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +28,14 @@ public class PageBookImplTest {
     private static final String REDIRECTED_GET = "/redirected_get";
     private static final String REDIRECTED_POST = "/redirected_post";
 
-    @Test
+  private Injector injector;
+
+  @BeforeTest
+  public final void pre() {
+    injector = Guice.createInjector(new SitebricksModule());
+  }
+
+  @Test
     public final void storeAndRetrievePageInstance() {
         final Respond respond = new MockRespond();
 
@@ -37,7 +49,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki", MyPage.class);
 
         PageBook.Page page = pageBook.get("/wiki");
@@ -59,7 +71,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki", MyPage.class);
 
         PageBook.Page page = pageBook.get("/wiki");
@@ -83,7 +95,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki", MyRedirectingPage.class);
 
         PageBook.Page page = pageBook.get("/wiki");
@@ -108,7 +120,7 @@ public class PageBookImplTest {
                     }
                 };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki", MyRedirectingPage.class);
 
         PageBook.Page page = pageBook.get("/wiki");
@@ -138,7 +150,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki", MyEventSupportingPage.class);
 
         PageBook.Page page = pageBook.get("/wiki");
@@ -169,7 +181,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki", MyEventSupportingPage.class);
 
         PageBook.Page page = pageBook.get("/wiki");
@@ -200,7 +212,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki", MyEventSupportingPage.class);
 
         PageBook.Page page = pageBook.get("/wiki");
@@ -231,7 +243,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki", MyEventSupportingPage.class);
 
         PageBook.Page page = pageBook.get("/wiki");
@@ -262,7 +274,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki", MyEventSupportingPage.class);
 
         PageBook.Page page = pageBook.get("/wiki");
@@ -296,7 +308,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki", MyEventSupportingPage.class);
 
         PageBook.Page page = pageBook.get("/wiki");
@@ -325,7 +337,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki/:title", MyPageWithTemplate.class);
 
         PageBook.Page page = pageBook.get("/wiki/IMAX");
@@ -350,7 +362,7 @@ public class PageBookImplTest {
                     }
                 };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki/:title/cat/:id", MyPageWithTemplate.class);
 
         PageBook.Page page = pageBook.get("/wiki/IMAX_P/cat/12");
@@ -375,7 +387,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki/:title/cat/:id", MyBrokenPageWithTemplate.class);
 
         PageBook.Page page = pageBook.get("/wiki/IMAX_P/cat/12");
@@ -397,7 +409,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at("/wiki", MyPage.class);
 
         PageBook.Page page = pageBook.get("/wiki");
@@ -434,7 +446,7 @@ public class PageBookImplTest {
             }
         };
 
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at(template, MyPage.class);
 
         PageBook.Page page = pageBook.get(toMatch);
@@ -459,7 +471,7 @@ public class PageBookImplTest {
 
     @Test(dataProvider = NOT_URIS_AND_TEMPLATES)
     public final void notMatchPageByUriTemplate(final String template, final String toMatch) {
-        final PageBook pageBook = new DefaultPageBook(null);
+        final PageBook pageBook = new DefaultPageBook(injector);
         pageBook.at(template, MyPage.class);
 
         //cant find
@@ -572,7 +584,7 @@ public class PageBookImplTest {
 
     @Test(dataProvider = FIRST_PATH_ELEMENTS)
     public final void firstPathElement(final String uri, final String answer) {
-        final String fPath = new DefaultPageBook(null)
+        final String fPath = new DefaultPageBook(injector)
                 .firstPathElement(uri);
 
         assert answer.equals(fPath) : "wrong path: " + fPath;

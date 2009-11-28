@@ -1,9 +1,11 @@
 package com.google.sitebricks.routing;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
-import com.google.common.collect.Maps;
-import com.google.inject.*;
+import com.google.common.collect.*;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
@@ -218,8 +220,11 @@ class DefaultPageBook implements PageBook {
 
     //dispatcher switch (select on request param by default)
     private final Select select;
+    private Map<String, Class<? extends Annotation>> httpMethods;
+
 
     public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, Injector injector) {
+
       this.uri = uri;
       this.matcher = matcher;
       this.clazz = clazz;
@@ -228,7 +233,9 @@ class DefaultPageBook implements PageBook {
       this.select = reflectOn(clazz);
         final Key<Map<String, Class<? extends Annotation>>> methodMapKey =
                 Key.get(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {}, Bricks.class);
-        this.methods = reflectAndCache(injector.getInstance(methodMapKey));
+
+      this.httpMethods = injector.getInstance(methodMapKey);
+      this.methods = reflectAndCache(httpMethods);
     }
 
     //the @Select request parameter-based event dispatcher
@@ -259,7 +266,9 @@ class DefaultPageBook implements PageBook {
                 method.setAccessible(true); //ugh
 
               //remember default value is empty string
-              map.put(entry.getKey(), new MethodTuple(method));
+              String value = getValue(get, method);
+              String key = (Strings.empty(value)) ? entry.getKey() : entry.getKey() + value;
+              map.put(key, new MethodTuple(method));
             }
           }
 
@@ -270,11 +279,24 @@ class DefaultPageBook implements PageBook {
                 method.setAccessible(true); //ugh
 
               //remember default value is empty string
-              map.put(entry.getKey(), new MethodTuple(method));            }
+              String value = getValue(get, method);
+              String key = (Strings.empty(value)) ? entry.getKey() : entry.getKey() + value;
+              map.put(key, new MethodTuple(method));
+            }
           }
       }
 
       return map;
+    }
+
+    private String getValue(Class<? extends Annotation> get, Method method) {
+      Annotation annotation = method.getAnnotation(get);
+      try {
+        Method m = annotation.getClass().getMethod("value");
+        return (String) m.invoke(annotation);
+      } catch (Throwable t) {
+        return null;
+      }
     }
 
     public Renderable widget() {
@@ -286,39 +308,56 @@ class DefaultPageBook implements PageBook {
     }
 
     public Object doMethod(String httpMethod, Object page, String pathInfo,
-                        Map<String, String[]> params) {
+                           Map<String, String[]> params) {
+
       //nothing to fire
-      final MethodTuple methodTuple = methods.get(httpMethod);
-      if (Strings.empty(httpMethod) || null == methodTuple)
+      if (Strings.empty(httpMethod)) {
         return null;
+      }
 
       // Extract injectable pieces of the pathInfo.
       final Map<String, String> map = matcher.findMatches(pathInfo);
 
-      //find method to dispatch to
+      //find method(s) to dispatch to
       final String[] events = params.get(select.value());
-
-      if (null != events)
+      if (null != events) {
+        boolean matched = false;
         for (String event : events) {
+          String key = httpMethod + event;
+          MethodTuple tuple = methods.get(key);
+          Object redirect = null;
+          if (null != tuple) {
+            matched = true;
+            redirect = tuple.call(page, map);
+          }
 
-          // TODO fix this so we have a better dispatch story.
-          //no event handler registered for this value (so fire to the default)
-//          if (null == methodTuple)
-//            methodTuple = get.get("");
-
-          //or fire event handler(s)
-//          Object redirect = methodTuple.call(page, map);
-
-          //redirects interrupt the event dispatch sequence
-//          if (null != redirect)
-//            return redirect;
+          //redirects interrupt the event dispatch sequence. Note this might cause inconsistent behaviour depending on
+          // the order of processing for events.
+          if (null != redirect) {
+            return redirect;
+          }
         }
-      else
-        //fire default handler
-        return methodTuple.call(page, map);
+
+        // no matched events. Fire default handler
+        if (!matched) {
+          return callMethodTuple(httpMethod, page, map);
+        }
+      } else {
+        // Fire default handler (no events defined)
+        return callMethodTuple(httpMethod, page, map);
+      }
 
       //no redirects, render normally
       return null;
+    }
+
+    private Object callMethodTuple(String httpMethod, Object page, Map<String, String> map) {
+      MethodTuple tuple = methods.get(httpMethod);
+      if (null != tuple) {
+        return tuple.call(page, map);
+      }
+      return null;
+
     }
 
     public Class<?> pageClass() {

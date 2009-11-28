@@ -55,19 +55,19 @@
       <version>6.1.9</version>
     </dependency>
     <dependency>
-      <groupId>org.openqa.selenium.webdriver</groupId>
+      <groupId>org.seleniumhq.webdriver</groupId>
       <artifactId>webdriver-common</artifactId>
-      <version>0.6.964</version>
+      <version>0.9.7376</version>
     </dependency>
     <dependency>
-      <groupId>org.openqa.selenium.webdriver</groupId>
+      <groupId>org.seleniumhq.webdriver</groupId>
       <artifactId>webdriver-htmlunit</artifactId>
-      <version>0.6.964</version>
+      <version>0.9.7376</version>
     </dependency>
     <dependency>
       <groupId>org.seleniumhq.webdriver</groupId>
       <artifactId>webdriver-common</artifactId>
-      <version>0.9.7089</version>
+      <version>0.9.7376</version>
     </dependency>
     <dependency>
       <groupId>commons-collections</groupId>

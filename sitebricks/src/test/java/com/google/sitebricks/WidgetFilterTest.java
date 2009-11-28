@@ -30,16 +30,13 @@ public class WidgetFilterTest {
 
         bootstrapper.start();
 
-        expect(filterConfig.getServletContext())
-                .andReturn(createMock(ServletContext.class));
-
-        replay(filterConfig, bootstrapper);
+        replay(bootstrapper);
 
         new SitebricksFilter(createNiceMock(RoutingDispatcher.class), bootstrapper)
             .init(filterConfig);
 
 
-        verify(filterConfig, bootstrapper);
+        verify(bootstrapper);
     }
 
     @Test

@@ -9,7 +9,6 @@ import org.testng.annotations.Test;
 /**
  * @author Peter Knego
  */
-@Test(suiteName = AcceptanceTest.SUITE)
 public class HiddenFieldMethodPage {
 
   private WebDriver driver;
