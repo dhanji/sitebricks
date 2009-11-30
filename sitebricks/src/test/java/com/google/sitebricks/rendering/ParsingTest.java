@@ -38,18 +38,4 @@ public class ParsingTest {
     public final void isXmlTemplateOrNot(final String template, boolean is) {
         assert is == Parsing.treatAsXml(template);
     }
-
-
-    @Test
-    public final void isXmlTemplateFileOrNot() throws IOException {
-        String flat = readFile("testFlatFile.js");
-        String xml = readFile("testXmlFile.js");
-
-        assert !Parsing.treatAsXml(flat);
-        assert Parsing.treatAsXml(xml);
     }
-
-    private static String readFile(final String s) throws IOException {
-        return FileUtils.readFileToString(new File(ParsingTest.class.getResource(s).getFile()), null);
-    }
-}

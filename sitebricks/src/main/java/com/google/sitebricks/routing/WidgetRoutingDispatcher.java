@@ -21,16 +21,35 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
   private final RequestBinder binder;
   private final Provider<Respond> respondProvider;
   private final ResourcesService resourcesService;
-  private final Provider<FlashCache> flashCache;
+  private final Provider<FlashCache> flashCacheProvider;
 
   @Inject
   public WidgetRoutingDispatcher(PageBook book, RequestBinder binder, Provider<Respond> respondProvider,
-                                 ResourcesService resourcesService, Provider<FlashCache> flashCache) {
+                                 ResourcesService resourcesService, Provider<FlashCache> flashCacheProvider) {
+      if (null == book) {
+          throw new IllegalArgumentException("null as book is not allowed.");
+      }
     this.book = book;
+
+      if (null == binder) {
+          throw new IllegalArgumentException("null as binder is not allowed.");
+      }
     this.binder = binder;
+
+      if (null == respondProvider) {
+          throw new IllegalArgumentException("null as respondProvider is not allowed.");
+      }
     this.respondProvider = respondProvider;
+
+      if (null == resourcesService) {
+          throw new IllegalArgumentException("null as resourcesService is not allowed.");
+      }
     this.resourcesService = resourcesService;
-    this.flashCache = flashCache;
+
+      if (null == flashCacheProvider) {
+          throw new IllegalArgumentException("null as flashCacheProvider is not allowed.");
+  }
+      this.flashCacheProvider = flashCacheProvider;
   }
 
   public Respond dispatch(HttpServletRequest request) {
@@ -49,7 +68,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     // remove the page and process it in one go. It is
     // also worth coordinating this with conversation request
     // queueing.
-    PageBook.Page page = flashCache.get().remove(uri);
+    PageBook.Page page = flashCacheProvider.get().remove(uri);
 
     // If there is no link, obtain page via Guice as normal.
     if (null == page)
@@ -90,7 +109,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
         PageBook.Page targetPage = book.forInstance(redirect);
 
         // should never be null coz it will be validated at compile time.
-        flashCache.get().put(targetPage.getUri(), targetPage);
+        flashCacheProvider.get().put(targetPage.getUri(), targetPage);
 
         // Send to the canonical address of the page. This is also
         // verified at compile, not be a variablized matcher.

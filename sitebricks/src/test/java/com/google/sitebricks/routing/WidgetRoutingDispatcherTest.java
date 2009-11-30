@@ -3,6 +3,7 @@ package com.google.sitebricks.routing;
 import com.google.inject.Provider;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
+import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.rendering.resource.ResourcesService;
 import static org.easymock.EasyMock.*;
@@ -11,6 +12,7 @@ import org.testng.annotations.Test;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import org.testng.annotations.BeforeMethod;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -19,6 +21,21 @@ public class WidgetRoutingDispatcherTest {
     private static final String REDIRECTED_POST = "/redirect_post";
     private static final String REDIRECTED_GET = "/redirect_get";
     private static final String A_STATIC_RESOURCE_URI = "/not_thing";
+
+    private Provider<FlashCache> flashCacheProvider;
+    private FlashCache flashCache;
+
+    @BeforeMethod
+    @SuppressWarnings("unchecked")
+    public final void initFlashCacheProvider(){
+        flashCacheProvider = createMock(Provider.class);
+        flashCache = createMock(FlashCache.class);
+
+        expect(flashCacheProvider.get())
+                .andReturn(flashCache).anyTimes();
+
+        replay(flashCacheProvider);
+    }
 
     @Test
     public final void dispatchRequestAndRespondOnGet() {
@@ -73,7 +90,7 @@ public class WidgetRoutingDispatcherTest {
             public Respond get() {
                 return respond;
             }
-        }, createNiceMock(ResourcesService.class), null
+        }, createNiceMock(ResourcesService.class), flashCacheProvider
         ).dispatch(request);
 
 
@@ -136,7 +153,7 @@ public class WidgetRoutingDispatcherTest {
             public Respond get() {
                 return respond;
             }
-        }, createNiceMock(ResourcesService.class), null
+        }, createNiceMock(ResourcesService.class), flashCacheProvider
         ).dispatch(request);
 
 
@@ -185,7 +202,7 @@ public class WidgetRoutingDispatcherTest {
                 .andReturn("POST");
 
         //noinspection unchecked
-        expect(page.doMethod("post", eq(pageOb), eq("/thing"), isA(Map.class)))
+        expect(page.doMethod(matches("post"), eq(pageOb), eq("/thing"), isA(Map.class)))
                 .andReturn(null);
 //        expectLastCall().once();
 
@@ -200,7 +217,7 @@ public class WidgetRoutingDispatcherTest {
             public Respond get() {
                 return respond;
             }
-        }, createNiceMock(ResourcesService.class), null
+        }, createNiceMock(ResourcesService.class), flashCacheProvider
         ).dispatch(request);
 
 
@@ -250,7 +267,7 @@ public class WidgetRoutingDispatcherTest {
         respond.redirect(REDIRECTED_POST);
 
         //noinspection unchecked
-        expect(page.doMethod("post", eq(pageOb), eq("/thing"), isA(Map.class)))
+        expect(page.doMethod(matches("post"), eq(pageOb), eq("/thing"), isA(Map.class)))
                 .andReturn(REDIRECTED_POST);
 
 
@@ -264,7 +281,7 @@ public class WidgetRoutingDispatcherTest {
             public Respond get() {
                 return respond;
             }
-        }, createNiceMock(ResourcesService.class), null
+        }, createNiceMock(ResourcesService.class), flashCacheProvider
         ).dispatch(request);
 
 
@@ -315,7 +332,7 @@ public class WidgetRoutingDispatcherTest {
         respond.redirect(REDIRECTED_GET);
 
         //noinspection unchecked
-        expect(page.doMethod("get", eq(pageOb), eq("/thing"), isA(Map.class)))
+        expect(page.doMethod(matches("get"), eq(pageOb), eq("/thing"), isA(Map.class)))
                 .andReturn(REDIRECTED_GET);
 
 
@@ -329,7 +346,7 @@ public class WidgetRoutingDispatcherTest {
             public Respond get() {
                 return respond;
             }
-        }, createNiceMock(ResourcesService.class), null
+        }, createNiceMock(ResourcesService.class), flashCacheProvider
         ).dispatch(request);
 
 
@@ -340,14 +357,13 @@ public class WidgetRoutingDispatcherTest {
     }
 
     @Test
-    public final void dispatchNothingBecuaseOfNoUriMatch() {
+    public final void dispatchNothingBecauseOfNoUriMatch() {
         final HttpServletRequest request = createMock(HttpServletRequest.class);
         PageBook pageBook = createMock(PageBook.class);
         RequestBinder binder = createMock(RequestBinder.class);
 
         @SuppressWarnings("unchecked")
         Provider<Respond> respond = createMock(Provider.class);
-
 
         expect(request.getRequestURI())
                 .andReturn(A_STATIC_RESOURCE_URI)
@@ -363,7 +379,7 @@ public class WidgetRoutingDispatcherTest {
         replay(request, pageBook, respond, binder);
 
         Respond out = new WidgetRoutingDispatcher(pageBook, binder, respond, createNiceMock(ResourcesService.class),
-            null
+            flashCacheProvider
         ).dispatch(request);
 
 
@@ -398,7 +414,7 @@ public class WidgetRoutingDispatcherTest {
 
         replay(request, pageBook, respond, binder, resourcesService);
 
-        Respond out = new WidgetRoutingDispatcher(pageBook, binder, respond, resourcesService, null).dispatch(request);
+        Respond out = new WidgetRoutingDispatcher(pageBook, binder, respond, resourcesService, flashCacheProvider).dispatch(request);
 
 
         assert out != null : "Did not respond correctly";

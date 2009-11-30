@@ -25,9 +25,9 @@ public class TextToolsTest {
   @DataProvider(name = TOKENS)
   public final Object[][] tokens() {
     return new Object[][]{
-        {new String[]{"hello ", "expr", "${expr}"}},
-        {new String[]{"hello ", "expr", "${expr}", "as", "$asd", "$ {}"}},
-        {new String[]{"$$ { ", "{}", "${}"}},
+        {new String[]{"hello expr", "${expr}"}},
+        {new String[]{"hello expr", "${expr}", "as $asd  $ {}"}},
+        {new String[]{"$$ { {}", "${}"}},
     };
   }
 
