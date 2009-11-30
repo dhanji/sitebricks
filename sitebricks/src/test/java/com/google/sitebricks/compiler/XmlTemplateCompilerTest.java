@@ -1,10 +1,16 @@
 package com.google.sitebricks.compiler;
 
+import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
 import com.google.sitebricks.*;
+import com.google.sitebricks.http.Delete;
+import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Post;
+import com.google.sitebricks.http.Put;
 import com.google.sitebricks.rendering.EmbedAs;
 import com.google.sitebricks.rendering.control.Chains;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
@@ -18,6 +24,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Annotation;
+import java.util.Map;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -27,12 +35,22 @@ public class XmlTemplateCompilerTest {
   private Injector injector;
   private PageBook pageBook;
   private SystemMetrics metrics;
+  private final Map<String, Class<? extends Annotation>> methods = Maps.newHashMap();
 
   @BeforeMethod
   public void pre() {
+    methods.put("get", Get.class);
+    methods.put("post", Post.class);
+    methods.put("put", Put.class);
+    methods.put("delete", Delete.class);
+
     injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
+        })
+            .annotatedWith(Bricks.class)
+            .toInstance(methods);
       }
     });
 
@@ -100,7 +118,7 @@ public class XmlTemplateCompilerTest {
         {"true"},
         {"java.lang.Boolean.TRUE"},
         {"java.lang.Boolean.valueOf('true')"},
-        {"true ? true : true"},
+//        {"true ? true : true"},   @TODO (BD): Disabled until I actually investigate if this is a valid test.
         {"'x' == 'x'"},
         {"\"x\" == \"x\""},
         {"'hello' instanceof java.io.Serializable"},
@@ -223,6 +241,10 @@ public class XmlTemplateCompilerTest {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
+        })
+            .annotatedWith(Bricks.class)
+            .toInstance(methods);
       }
     });
 
@@ -323,6 +345,10 @@ public class XmlTemplateCompilerTest {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
+        })
+            .annotatedWith(Bricks.class)
+            .toInstance(methods);
       }
     });
     final PageBook book = injector      //hacky, where are you super-packages!
@@ -359,6 +385,10 @@ public class XmlTemplateCompilerTest {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
+        })
+            .annotatedWith(Bricks.class)
+            .toInstance(methods);
       }
     });
     final PageBook book = injector      //hacky, where are you super-packages!
