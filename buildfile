@@ -8,7 +8,7 @@ TESTNG = 'org.testng:testng:jar:jdk15:5.8'
 EASYMOCK = 'org.easymock:easymock:jar:2.4'
 
 # Compile deps
-MVEL = transitive('org.mvel:mvel2:jar:2.0.9')
+MVEL = transitive('org.mvel:mvel2:jar:2.0.14')
 GUICE_SERVLET = 'com.google.inject.extensions:guice-servlet:jar:2.0'
 GOOGLE_COLLECTIONS = transitive('com.google.collections:google-collections:jar:1.0-rc2')
 JCIP = transitive('net.jcip:jcip-annotations:jar:1.0')
