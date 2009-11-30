@@ -50,6 +50,9 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     System.setProperty("mvel.namespace",
         MVEL.class.getPackage().getName().replace('.', '/') + "/");
 
+    // Help us work on Google appengine
+    System.setProperty("mvel2.disable.jit", "true");
+
     //insert core widgets set
     packages.add(0, CaseWidget.class.getPackage());
 
