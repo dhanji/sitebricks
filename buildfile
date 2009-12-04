@@ -2,6 +2,11 @@ require 'buildr'
 
 VERSION_NUMBER = '0.8'
 
+repositories.remote << 'http://www.ibiblio.org/maven2'
+repositories.remote << 'http://nexus.openqa.org/content/repositories/releases'
+repositories.remote << 'http://repository.codehaus.org'
+
+
 # Test deps
 JUNIT = 'junit:junit:jar:3.8.1'
 TESTNG = 'org.testng:testng:jar:jdk15:5.8'
@@ -26,22 +31,16 @@ JETTY  = group('jetty', 'jetty-util',
                :under=>'org.mortbay.jetty', :version=>'6.1.21')
 JETTY_API = 'org.mortbay.jetty:servlet-api-2.5:jar:6.1.9'
 SELENIUM_WEBDRIVER = transitive(group('webdriver-common', 'webdriver-htmlunit', 'webdriver-support',
-                                      :under=>'org.openqa.selenium.webdriver', :version=>'0.6.964'))
-SELENIUM_WEBDRIVER_COMMON = transitive('org.seleniumhq.webdriver:webdriver-common:jar:0.9.7089')
+                                      :under=>'org.seleniumhq.webdriver', :version=>'0.9.7376'))
 COMMONS_COLLECTIONS = transitive('commons-collections:commons-collections:jar:20040616')
 
 # Dependency shortcuts
 COMPILE_DEPS = [MVEL, GUICE, GUICE_SERVLET, GOOGLE_COLLECTIONS, JCIP, INTELLIJ_ANNO, COMMONS_HTTPC,
                 COMMONS_IO, DOM4J, JAXEN, SERVLET_API]
 TEST_DEPS = [EASYMOCK, JUNIT, TESTNG]
-ACCEPTANCE_TEST_DEPS = [JETTY, JETTY_API, SELENIUM_WEBDRIVER, COMMONS_COLLECTIONS]
+ACCEPTANCE_TEST_DEPS = [JETTY, JETTY_API, TESTNG, SELENIUM_WEBDRIVER, COMMONS_COLLECTIONS]
 
-repositories.remote << 'http://www.ibiblio.org/maven2/'
-repositories.remote << 'http://nexus.openqa.org/content/repositories/releases'
-
-desc 'Sitebricks'
 define 'sitebricks-parent' do
-
   project.version = VERSION_NUMBER
   project.group = 'com.google.sitebricks'
   compile.options.target = '1.5'
@@ -64,10 +63,7 @@ define 'sitebricks-parent' do
   desc 'Acceptance tests'
   define 'acceptance-test' do
     compile.with ACCEPTANCE_TEST_DEPS, COMPILE_DEPS, projects('sitebricks')
-
     test.with ACCEPTANCE_TEST_DEPS
     test.using :testng
-
   end
-
 end

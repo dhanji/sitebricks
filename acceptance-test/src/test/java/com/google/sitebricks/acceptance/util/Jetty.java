@@ -7,32 +7,39 @@ import org.mortbay.jetty.webapp.WebAppContext;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 public class Jetty {
-    private final Server server;
+  private static final String APP_NAME = "/sitebricks";
+  private static final int PORT = 4040;
 
-    public Jetty() {
-        this(new WebAppContext("src/main/resources", "/sitebricks"), 4040);
-    }
+  private final Server server;
 
-    public Jetty(WebAppContext webAppContext, int port) {
-        server = new Server(port);
-        server.addHandler(webAppContext);
-    }
+  public Jetty() {
+    this(new WebAppContext("src/main/resources", APP_NAME), PORT);
+  }
 
-    public void start() throws Exception {
-        server.start();
-    }
+  public Jetty(String path) {
+    this(new WebAppContext(path, APP_NAME), PORT);
+  }
 
-    public void join() throws Exception {
-        server.join();
-    }
+  public Jetty(WebAppContext webAppContext, int port) {
+    server = new Server(port);
+    server.addHandler(webAppContext);
+  }
 
-    public void stop() throws Exception {
-        server.stop();
-    }
+  public void start() throws Exception {
+    server.start();
+  }
 
-    public static void main(String... args) throws Exception {
-        Jetty jetty = new Jetty();
-        jetty.start();
-        jetty.join();
-    }
+  public void join() throws Exception {
+    server.join();
+  }
+
+  public void stop() throws Exception {
+    server.stop();
+  }
+
+  public static void main(String... args) throws Exception {
+    Jetty jetty = new Jetty();
+    jetty.start();
+    jetty.join();
+  }
 }

@@ -85,9 +85,9 @@
       <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>org.openqa.selenium.webdriver</groupId>
+      <groupId>org.seleniumhq.webdriver</groupId>
       <artifactId>webdriver-support</artifactId>
-      <version>0.5.609</version>
+      <version>0.9.7376</version>
     </dependency>
   </dependencies>
 </project>
