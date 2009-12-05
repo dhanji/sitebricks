@@ -1,6 +1,6 @@
 require 'buildr'
 
-VERSION_NUMBER = '0.8'
+VERSION_NUMBER = '0.8-SNAPSHOT'
 
 repositories.remote << 'http://www.ibiblio.org/maven2'
 repositories.remote << 'http://nexus.openqa.org/content/repositories/releases'
