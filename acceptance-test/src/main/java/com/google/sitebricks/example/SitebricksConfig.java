@@ -18,6 +18,8 @@ public class SitebricksConfig extends GuiceServletContextListener {
       @Override
       protected void configureSitebricks() {
 //        scan(SitebricksConfig.class.getPackage());
+        // TODO(dhanji): find a way to run the suite again with this module installed.
+//        install(new GaeModule());
 
         //TODO explicit bindings should override scanned ones.
         at("/").show(Start.class);
