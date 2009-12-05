@@ -4,6 +4,7 @@ import com.google.common.collect.MapMaker;
 import com.google.sitebricks.compiler.Parsing;
 import net.jcip.annotations.ThreadSafe;
 import org.jetbrains.annotations.Nullable;
+import org.mvel2.CompileException;
 import org.mvel2.MVEL;
 import org.mvel2.PropertyAccessException;
 
@@ -49,6 +50,10 @@ public class MvelEvaluator implements Evaluator {
       throw new IllegalArgumentException(
           String.format("Evaluation of property expression [%s] resulted in a NullPointerException",
               expr), npe);
+    } catch (CompileException e) {
+      throw new IllegalArgumentException(
+          String.format("Compile of property expression [%s] resulted in an error",
+              expr), e);    
     }
   }
 
