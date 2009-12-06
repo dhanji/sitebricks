@@ -6,11 +6,10 @@ import org.testng.annotations.Test;
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
-public class WebClientEdslTest {
+public class WebClientEdslIntegrationTest {
 
     @Test
     public final void edslForBinding() {
-
         Web resource = Guice.createInjector().getInstance(Web.class);
 
         WebClient<String> webClient = resource.clientOf("http://google.com")
@@ -21,5 +20,6 @@ public class WebClientEdslTest {
 
         final String responseAsString = response.toString();
 
+        assert responseAsString.contains("Google");
     }
 }

@@ -3,9 +3,7 @@ package com.google.sitebricks;
 import com.google.inject.Guice;
 import com.google.inject.Scopes;
 import com.google.inject.servlet.RequestScoped;
-
 import org.testng.annotations.Test;
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
@@ -15,8 +13,6 @@ public class EdslTest {
   @Test
   public final void edsl() {
 
-    //assert new Integer(11) == (new Byte((byte)11).intValue());
-    //assertEquals(new Integer(11),new Byte((byte)11));
     Guice.createInjector(new SitebricksModule() {
 
       @Override

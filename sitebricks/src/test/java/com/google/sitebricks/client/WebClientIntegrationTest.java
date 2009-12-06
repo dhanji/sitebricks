@@ -2,17 +2,11 @@ package com.google.sitebricks.client;
 
 import com.google.inject.Guice;
 import org.testng.annotations.Test;
-import org.mvel2.util.ParseTools;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.util.List;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
-public class WebClientTest {
+public class WebClientIntegrationTest {
 
   @Test
   public final void simpleJsonGetFromTwitter() {
@@ -24,8 +18,6 @@ public class WebClientTest {
 
     final WebResponse response = webClient.get();
 
-    System.out.println(response.toString());
-//    System.out.println(response.to(List.class).using(Json.class));
-
+    assert response.toString().contains("statuses");
   }
 }

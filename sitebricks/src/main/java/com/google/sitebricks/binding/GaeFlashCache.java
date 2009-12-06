@@ -5,7 +5,6 @@ import com.google.inject.Provider;
 import net.jcip.annotations.ThreadSafe;
 
 import javax.servlet.http.HttpSession;
-import java.io.Serializable;
 
 /**
  * Used to store binding (or forwarding) information between successive requests. This
@@ -16,7 +15,7 @@ import java.io.Serializable;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 @ThreadSafe
-public final class GaeFlashCache implements FlashCache, Serializable {
+public final class GaeFlashCache implements FlashCache {
   private final Provider<HttpSession> session;
 
   @Inject

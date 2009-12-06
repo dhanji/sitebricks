@@ -2,14 +2,17 @@ package com.google.sitebricks.example;
 
 
 import com.google.sitebricks.At;
-import com.google.sitebricks.http.*;
+import com.google.sitebricks.http.Delete;
+import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Post;
+import com.google.sitebricks.http.Put;
+import com.google.sitebricks.http.Select;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-@At("/select")
-@Select("event")
+@At("/select") @Select("event")
 public class SelectRouting {
 
   private List<String> data = new ArrayList<String>();

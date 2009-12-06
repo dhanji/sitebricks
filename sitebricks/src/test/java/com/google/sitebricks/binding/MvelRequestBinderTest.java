@@ -3,12 +3,16 @@ package com.google.sitebricks.binding;
 import com.google.inject.Guice;
 import com.google.inject.Provider;
 import com.google.sitebricks.Evaluator;
-import static org.easymock.EasyMock.*;
 import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.HashMap;
+
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -150,6 +154,7 @@ public class MvelRequestBinderTest {
 
   }
 
+  @SuppressWarnings({"UnusedDeclaration"})  
   public static class AnObject {
     private String name;
     private int age;
