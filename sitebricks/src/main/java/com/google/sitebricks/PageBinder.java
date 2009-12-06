@@ -13,6 +13,12 @@ public interface PageBinder {
   EmbedAsBinder embed(Class<?> clazz);
 
   void bindMethod(String method, Class<? extends Annotation> annotation);
+  
+  NegotiateWithBinder negotiate(String header);
+
+  static interface NegotiateWithBinder {
+    void with(Class<? extends Annotation> ann);
+  }
 
   static interface ShowBinder {
     ScopedBindingBuilder show(Class<?> clazz);

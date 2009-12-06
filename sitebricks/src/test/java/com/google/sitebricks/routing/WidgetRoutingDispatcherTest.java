@@ -6,13 +6,21 @@ import com.google.sitebricks.Respond;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.rendering.resource.ResourcesService;
-import static org.easymock.EasyMock.*;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
-import java.util.Map;
-import org.testng.annotations.BeforeMethod;
+
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.matches;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -58,7 +66,8 @@ public class WidgetRoutingDispatcherTest {
                 .anyTimes();
 
         expect(request.getParameterMap())
-                .andReturn(new HashMap());
+                .andReturn(new HashMap())
+                .anyTimes();
 
         expect(pageBook.get("/thing"))
                 .andReturn(page);
@@ -75,9 +84,8 @@ public class WidgetRoutingDispatcherTest {
         expect(request.getMethod())
                 .andReturn("GET");
 
-        expect(page.doMethod("get", pageOb, "/thing", new HashMap<String, String[]>()))
+        expect(page.doMethod("get", pageOb, "/thing", request))
                 .andReturn(null);
-//        expectLastCall().once();
 
 
         widget.render(pageOb, respond);
@@ -136,12 +144,11 @@ public class WidgetRoutingDispatcherTest {
 
         final HashMap<String, String[]> parameterMap = new HashMap<String, String[]>();
         expect(request.getParameterMap())
-                .andReturn(parameterMap);
+                .andReturn(parameterMap)
+                .anyTimes();
 
-        expect(page.doMethod("get", pageOb, "/thing", parameterMap))
+        expect(page.doMethod("get", pageOb, "/thing", request))
                 .andReturn(null);
-//        expectLastCall().once();
-
 
         widget.render(pageOb, respond);
         expectLastCall().once();
@@ -184,7 +191,8 @@ public class WidgetRoutingDispatcherTest {
                 .anyTimes();
 
         expect(request.getParameterMap())
-                .andReturn(new HashMap());
+                .andReturn(new HashMap())
+                .anyTimes();
 
         expect(pageBook.get("/thing"))
                 .andReturn(page);
@@ -202,7 +210,7 @@ public class WidgetRoutingDispatcherTest {
                 .andReturn("POST");
 
         //noinspection unchecked
-        expect(page.doMethod(matches("post"), eq(pageOb), eq("/thing"), isA(Map.class)))
+        expect(page.doMethod(matches("post"), eq(pageOb), eq("/thing"), isA(HttpServletRequest.class)))
                 .andReturn(null);
 //        expectLastCall().once();
 
@@ -247,7 +255,8 @@ public class WidgetRoutingDispatcherTest {
                 .anyTimes();
 
         expect(request.getParameterMap())
-                .andReturn(new HashMap());
+                .andReturn(new HashMap())
+                .anyTimes();
 
         expect(pageBook.get("/thing"))
                 .andReturn(page);
@@ -267,7 +276,7 @@ public class WidgetRoutingDispatcherTest {
         respond.redirect(REDIRECTED_POST);
 
         //noinspection unchecked
-        expect(page.doMethod(matches("post"), eq(pageOb), eq("/thing"), isA(Map.class)))
+        expect(page.doMethod(matches("post"), eq(pageOb), eq("/thing"), isA(HttpServletRequest.class)))
                 .andReturn(REDIRECTED_POST);
 
 
@@ -312,7 +321,8 @@ public class WidgetRoutingDispatcherTest {
                 .anyTimes();
 
         expect(request.getParameterMap())
-                .andReturn(new HashMap());
+                .andReturn(new HashMap())
+                .anyTimes();
 
         expect(pageBook.get("/thing"))
                 .andReturn(page);
@@ -332,7 +342,7 @@ public class WidgetRoutingDispatcherTest {
         respond.redirect(REDIRECTED_GET);
 
         //noinspection unchecked
-        expect(page.doMethod(matches("get"), eq(pageOb), eq("/thing"), isA(Map.class)))
+        expect(page.doMethod(matches("get"), eq(pageOb), eq("/thing"), isA(HttpServletRequest.class)))
                 .andReturn(REDIRECTED_GET);
 
 

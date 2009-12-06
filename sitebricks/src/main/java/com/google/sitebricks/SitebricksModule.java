@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scope;
-import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.sitebricks.core.CaseWidget;
@@ -13,10 +12,9 @@ import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
+import com.google.sitebricks.http.negotiate.Accept;
+import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
-import com.google.sitebricks.routing.PageBook;
-import com.google.sitebricks.routing.RoutingDispatcher;
-import org.mvel2.MVEL;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -42,13 +40,13 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
     // Re-route all requests through sitebricks.
     install(servletModule());
-    
-      // Call down to the implementation.
-    configureSitebricks();
+    install(new SitebricksInternalModule());
 
-    //set up MVEL namespace (when jarjar-ed, it will use the repackaged namespace)
-    System.setProperty("mvel.namespace",
-        MVEL.class.getPackage().getName().replace('.', '/') + "/");
+    // negotiations stuff (make sure we clean this up).
+    negotiate("Accept").with(Accept.class);
+    
+    // Call down to the implementation.
+    configureSitebricks();
 
     //insert core widgets set
     packages.add(0, CaseWidget.class.getPackage());
@@ -69,14 +67,11 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
         .annotatedWith(Bricks.class)
         .toInstance(methods);
 
-    //initialize startup services and routing modules
-    install(PageBook.Routing.module());
-
-    //development mode services
-    if (Stage.DEVELOPMENT.equals(binder().currentStage())) {
-      bind(PageBook.class).to(DebugModePageBook.class);
-      bind(RoutingDispatcher.class).to(DebugModeRoutingDispatcher.class);
-    }
+    // These are Content negotiation annotations.
+    bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
+    })
+        .annotatedWith(Negotiation.class)
+        .toInstance(negotiations);
   }
 
   /**
@@ -100,6 +95,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   private final List<Package> packages = Lists.newArrayList();
 
   private final Map<String, Class<? extends Annotation>> methods = Maps.newHashMap();
+  private final Map<String, Class<? extends Annotation>> negotiations = Maps.newHashMap();
 
   public final ShowBinder at(String uri) {
     LinkingBinder binding = new LinkingBinder(uri);
@@ -107,18 +103,28 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     return binding;
   }
 
-  public EmbedAsBinder embed(Class<?> clazz) {
+  public final EmbedAsBinder embed(Class<?> clazz) {
     LinkingBinder binding = new LinkingBinder(clazz);
     bindings.add(binding);
     return binding;
   }
 
-  public void bindMethod(String method, Class<? extends Annotation> annotation) {
+  public final void bindMethod(String method, Class<? extends Annotation> annotation) {
     Strings.nonEmpty(method, "The REST method must be a valid non-empty string");
     Preconditions.checkArgument(null != annotation);
 
     String methodNormal = method.toLowerCase();
     methods.put(methodNormal, annotation);
+  }
+
+  public NegotiateWithBinder negotiate(final String header) {
+    Preconditions.checkArgument(!Strings.empty(header), "invalid request header string for negotiation.");
+    return new NegotiateWithBinder() {
+      public void with(Class<? extends Annotation> ann) {
+        Preconditions.checkArgument(null != ann);
+        negotiations.put(header, ann);
+      }
+    };
   }
 
   protected final void scan(Package pack) {
@@ -128,7 +134,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
 
   static enum BindingKind {
-    EMBEDDED, PAGE, STATIC_RESOURCE
+    EMBEDDED, PAGE, SERVICE, STATIC_RESOURCE
   }
 
   class LinkingBinder implements ShowBinder, ScopedBindingBuilder, EmbedAsBinder {

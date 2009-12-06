@@ -1,10 +1,12 @@
 package com.google.sitebricks.routing;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
-import com.google.sitebricks.*;
+import com.google.sitebricks.At;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Respond;
+import com.google.sitebricks.SitebricksModule;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Select;
@@ -17,6 +19,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -77,7 +83,7 @@ public class PageBookImplTest {
         PageBook.Page page = pageBook.get("/wiki");
         page.apply(mock);
         final MyPage bound = new MyPage();
-        page.doMethod("get", bound, "/wiki", new HashMap<String, String[]>());
+        page.doMethod("get", bound, "/wiki", fakeRequestWithParams(new HashMap<String, String[]>()));
 
         assert page.widget().equals(mock);
         assert bound.getted : "@Get method was not fired, on doGet()";
@@ -101,7 +107,7 @@ public class PageBookImplTest {
         PageBook.Page page = pageBook.get("/wiki");
         page.apply(mock);
         final MyRedirectingPage bound = new MyRedirectingPage();
-        Object redirect = page.doMethod("get", bound, "/wiki", new HashMap<String, String[]>());
+        Object redirect = page.doMethod("get", bound, "/wiki", fakeRequestWithParams(new HashMap<String, String[]>()));
 
         assert REDIRECTED_GET.equals(redirect);
         assert page.widget().equals(mock);
@@ -126,7 +132,7 @@ public class PageBookImplTest {
         PageBook.Page page = pageBook.get("/wiki");
         page.apply(mock);
         final MyRedirectingPage bound = new MyRedirectingPage();
-        Object redirect = page.doMethod("post", bound, "/wiki", new HashMap<String, String[]>());
+        Object redirect = page.doMethod("post", bound, "/wiki", fakeRequestWithParams(new HashMap<String, String[]>()));
 
         assert REDIRECTED_POST.equals(redirect);
         assert page.widget().equals(mock);
@@ -156,7 +162,7 @@ public class PageBookImplTest {
         PageBook.Page page = pageBook.get("/wiki");
         page.apply(mock);
         final MyEventSupportingPage bound = new MyEventSupportingPage();
-        page.doMethod("get", bound, "/wiki", params);
+        page.doMethod("get", bound, "/wiki", fakeRequestWithParams(params));
 
         assert page.widget().equals(mock);
         assert bound.getted1 : "@Get @On method was not fired, on doGet() for [event=1]";
@@ -187,7 +193,7 @@ public class PageBookImplTest {
         PageBook.Page page = pageBook.get("/wiki");
         page.apply(mock);
         final MyEventSupportingPage bound = new MyEventSupportingPage();
-        page.doMethod("post", bound, "/wiki", params);
+        page.doMethod("post", bound, "/wiki", fakeRequestWithParams(params));
 
         assert page.widget().equals(mock);
         assert bound.posted1 : "@Post @On method was not fired, on doPost() for [event=1]";
@@ -218,7 +224,7 @@ public class PageBookImplTest {
         PageBook.Page page = pageBook.get("/wiki");
         page.apply(mock);
         final MyEventSupportingPage bound = new MyEventSupportingPage();
-        page.doMethod("get", bound, "/wiki", params);
+        page.doMethod("get", bound, "/wiki", fakeRequestWithParams(params));
 
         assert page.widget().equals(mock);
         assert !bound.getted1 : "@Get @On method was fired, on doGet() for [event=1]";
@@ -249,7 +255,7 @@ public class PageBookImplTest {
         PageBook.Page page = pageBook.get("/wiki");
         page.apply(mock);
         final MyEventSupportingPage bound = new MyEventSupportingPage();
-        page.doMethod("post", bound, "/wiki", params);
+        page.doMethod("post", bound, "/wiki", fakeRequestWithParams(params));
 
         assert page.widget().equals(mock);
         assert !bound.posted1 : "@Post @On method was fired, on doGet() for [event=1]";
@@ -280,7 +286,7 @@ public class PageBookImplTest {
         PageBook.Page page = pageBook.get("/wiki");
         page.apply(mock);
         final MyEventSupportingPage bound = new MyEventSupportingPage();
-        page.doMethod("get", bound, "/wiki", params);
+        page.doMethod("get", bound, "/wiki", fakeRequestWithParams(params));
 
         assert page.widget().equals(mock);
         assert !bound.getted1 : "@Get @On method was fired, on doGet() for [event=1]";
@@ -314,7 +320,7 @@ public class PageBookImplTest {
         PageBook.Page page = pageBook.get("/wiki");
         page.apply(mock);
         final MyEventSupportingPage bound = new MyEventSupportingPage();
-        page.doMethod("post", bound, "/wiki", params);
+        page.doMethod("post", bound, "/wiki", fakeRequestWithParams(params));
 
         assert page.widget().equals(mock);
         assert !bound.getted2 : "@Get @On method was fired, on doPost() for [event=2]";
@@ -343,7 +349,7 @@ public class PageBookImplTest {
         PageBook.Page page = pageBook.get("/wiki/IMAX");
         page.apply(mock);
         final MyPageWithTemplate bound = new MyPageWithTemplate();
-        page.doMethod("get", bound, "/wiki/IMAX", new HashMap<String, String[]>());
+        page.doMethod("get", bound, "/wiki/IMAX", fakeRequestWithParams(new HashMap<String, String[]>()));
 
         assert page.widget().equals(mock);
         assert "IMAX".equals(bound.title) : "@Get method was not fired, on doGet() with the right arg, instead: " + bound.title;
@@ -368,7 +374,7 @@ public class PageBookImplTest {
         PageBook.Page page = pageBook.get("/wiki/IMAX_P/cat/12");
         page.apply(mock);
         final MyPageWithTemplate bound = new MyPageWithTemplate();
-        page.doMethod("post", bound, "/wiki/IMAX_P/cat/12", new HashMap<String, String[]>());
+        page.doMethod("post", bound, "/wiki/IMAX_P/cat/12", fakeRequestWithParams(new HashMap<String, String[]>()));
 
         assert page.widget().equals(mock);
         assert "IMAX_P".equals(bound.post) && "12".equals(bound.id)
@@ -392,7 +398,7 @@ public class PageBookImplTest {
 
         PageBook.Page page = pageBook.get("/wiki/IMAX_P/cat/12");
         final MyBrokenPageWithTemplate bound = new MyBrokenPageWithTemplate();
-        page.doMethod("post", bound, "/wiki/IMAX_P/cat/12", new HashMap<String, String[]>());
+        page.doMethod("post", bound, "/wiki/IMAX_P/cat/12", fakeRequestWithParams(new HashMap<String, String[]>()));
 
         assert page.widget().equals(mock);
     }
@@ -415,7 +421,7 @@ public class PageBookImplTest {
         PageBook.Page page = pageBook.get("/wiki");
         final MyPage bound = new MyPage();
         page.apply(mock);
-        page.doMethod("post", bound, "/wiki", new HashMap<String, String[]>());
+        page.doMethod("post", bound, "/wiki", fakeRequestWithParams(new HashMap<String, String[]>()));
 
         assert page.widget().equals(mock);
         assert bound.posted : "@Post method was not fired, on doPost()";
@@ -457,7 +463,7 @@ public class PageBookImplTest {
 
         assert mock.equals(page.widget());
     }
-
+  
     @DataProvider(name = NOT_URIS_AND_TEMPLATES)
     public Object[][] getNotUriTemplatesAndMatches() {
         return new Object[][]{
@@ -478,8 +484,17 @@ public class PageBookImplTest {
         assert null == pageBook.get(toMatch);
 
     }
+  
+    public static HttpServletRequest fakeRequestWithParams(Map<String, String[]> map) {
+      HttpServletRequest request = createMock(HttpServletRequest.class);
+      
+      expect(request.getParameterMap()).andReturn(map);
+      replay(request);
+      
+      return request;
+    }
 
-    @At("/oas")
+  @At("/oas")
     @Select("event")
     public static class MyEventSupportingPage {
         private boolean getted1;

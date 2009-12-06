@@ -34,6 +34,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
 
         at("/hiddenfieldmethod").show(HiddenFieldMethod.class);
         at("/select").show(SelectRouting.class);
+        at("/conneg").show(ContentNegotiation.class);
 
         at("/pagechain").show(PageChain.class);
         at("/nextpage").show(NextPage.class);

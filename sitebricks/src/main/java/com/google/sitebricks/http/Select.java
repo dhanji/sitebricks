@@ -5,31 +5,30 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * This annotation is used to select request handlers based on
- * specified request headers. It can be used to perform HTTP
- * content negotiation. If a client sends in a request for an
- * image via uri, "/city/atlantis" and accepts JPEG type, then
- * you may instruct sitebricks to choose a request handler as
- * follows:
+ * request parameters. For example, in a single resource URL, you
+ * may wish to call different handlers for POST based on the request
+ * parameter "action" (action=update, action=delete, etc.). These
+ * maybe modeled as form parameters or as part of the query string.
+ *
  * <pre>
- *   {@literal @}At("/city/atlantis")
+ *   {@literal @}At("/city/atlantis") {@literal @} Select("action")
  *   public class PictureWebService {
  *
- *     {@literal @}Select("Accept") @Get("image/jpeg")
- *     public Response getJpeg() {
- *       //return JPEG image...
+ *     {@literal @}Post("update")
+ *     public void update() {
+ *       // edit resource in place
  *     }
  *
- *     {@literal @}Select("Accept") @Get("image/png")
- *     public Response getPng() {
- *       //return PNG image instead...
+ *     {@literal @}Post("delete")
+ *     public void delete() {
+ *       // remove the item...
  *     }
  *   }
- *
+ * </pre>
  *
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 @Retention(RetentionPolicy.RUNTIME)
-//@Target(ElementType.METHOD)
 public @interface Select {
-    String value();
+  String value();
 }

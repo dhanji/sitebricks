@@ -6,7 +6,7 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.sitebricks.Renderable;
 
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -67,7 +67,7 @@ public interface PageBook {
 
     Object instantiate();
 
-    Object doMethod(String httpMethod, Object page, String pathInfo, Map<String, String[]> params);
+    Object doMethod(String httpMethod, Object page, String pathInfo, HttpServletRequest request);
 
     Class<?> pageClass();
 

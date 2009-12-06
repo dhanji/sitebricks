@@ -125,7 +125,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     final String method = request.getMethod();
     final String pathInfo = getPathInfo(request);
 
-    return page.doMethod(method.toLowerCase(), instance, pathInfo, request.getParameterMap());
+    return page.doMethod(method.toLowerCase(), instance, pathInfo, request);
   }
 
   private static String contextualize(HttpServletRequest request, String targetUri) {

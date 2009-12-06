@@ -1,6 +1,10 @@
 package com.google.sitebricks.routing;
 
-import com.google.common.collect.*;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -10,16 +14,23 @@ import com.google.inject.name.Named;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.http.Select;
+import com.google.sitebricks.http.negotiate.ContentNegotiator;
+import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.EmbedAs;
 import com.google.sitebricks.rendering.Strings;
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -187,8 +198,8 @@ class DefaultPageBook implements PageBook {
       return instance;
     }
 
-    public Object doMethod(String httpMethod, Object page, String pathInfo, Map<String, String[]> params) {
-      return delegate.doMethod(httpMethod, page, pathInfo, params);
+    public Object doMethod(String httpMethod, Object page, String pathInfo, HttpServletRequest request) {
+      return delegate.doMethod(httpMethod, page, pathInfo, request);
     }
 
     public Class<?> pageClass() {
@@ -216,10 +227,12 @@ class DefaultPageBook implements PageBook {
     private final Class<?> clazz;
     private final Injector injector;
 
-    private final Map<String, MethodTuple> methods;
+    private final Multimap<String, MethodTuple> methods;
 
     //dispatcher switch (select on request param by default)
     private final Select select;
+
+    // A map of http methods -> annotation types (e.g. "POST" -> @Post)
     private Map<String, Class<? extends Annotation>> httpMethods;
 
 
@@ -230,16 +243,17 @@ class DefaultPageBook implements PageBook {
       this.clazz = clazz;
       this.injector = injector;
 
-      this.select = reflectOn(clazz);
-        final Key<Map<String, Class<? extends Annotation>>> methodMapKey =
-                Key.get(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {}, Bricks.class);
+      this.select = discoverSelect(clazz);
+
+      Key<Map<String, Class<? extends Annotation>>> methodMapKey =
+              Key.get(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {}, Bricks.class);
 
       this.httpMethods = injector.getInstance(methodMapKey);
       this.methods = reflectAndCache(httpMethods);
     }
 
     //the @Select request parameter-based event dispatcher
-    private Select reflectOn(Class<?> clazz) {
+    private Select discoverSelect(Class<?> clazz) {
       final Select select = clazz.getAnnotation(Select.class);
       if (null != select)
         return select;
@@ -247,14 +261,12 @@ class DefaultPageBook implements PageBook {
         return PageTuple.class.getAnnotation(Select.class);
     }
 
-
     /**
      * Returns a map of HTTP-method name to @Annotation-marked methods
      */
     @SuppressWarnings({"JavaDoc"})
-    private Map<String, MethodTuple> reflectAndCache(Map<String, Class<? extends Annotation>> methodMap) {
-      final Map<String, MethodTuple> map = new HashMap<String, MethodTuple>();
-
+    private Multimap<String, MethodTuple> reflectAndCache(Map<String, Class<? extends Annotation>> methodMap) {
+      Multimap<String, MethodTuple> map = HashMultimap.create();
 
       for (Map.Entry<String, Class<? extends Annotation>> entry : methodMap.entrySet()) {
 
@@ -268,11 +280,11 @@ class DefaultPageBook implements PageBook {
               //remember default value is empty string
               String value = getValue(get, method);
               String key = (Strings.empty(value)) ? entry.getKey() : entry.getKey() + value;
-              map.put(key, new MethodTuple(method));
+              map.put(key, new MethodTuple(method, injector));
             }
           }
 
-          // Then searrch class's declared methods only (these take precedence)
+          // Then search class's declared methods only (these take precedence)
           for (Method method : clazz.getDeclaredMethods()) {
             if (method.isAnnotationPresent(get)) {
               if (!method.isAccessible())
@@ -281,7 +293,7 @@ class DefaultPageBook implements PageBook {
               //remember default value is empty string
               String value = getValue(get, method);
               String key = (Strings.empty(value)) ? entry.getKey() : entry.getKey() + value;
-              map.put(key, new MethodTuple(method));
+              map.put(key, new MethodTuple(method, injector));
             }
           }
       }
@@ -290,13 +302,7 @@ class DefaultPageBook implements PageBook {
     }
 
     private String getValue(Class<? extends Annotation> get, Method method) {
-      Annotation annotation = method.getAnnotation(get);
-      try {
-        Method m = annotation.getClass().getMethod("value");
-        return (String) m.invoke(annotation);
-      } catch (Throwable t) {
-        return null;
-      }
+      return readAnnotationValue(method.getAnnotation(get));
     }
 
     public Renderable widget() {
@@ -308,27 +314,37 @@ class DefaultPageBook implements PageBook {
     }
 
     public Object doMethod(String httpMethod, Object page, String pathInfo,
-                           Map<String, String[]> params) {
+                           HttpServletRequest request) {
 
       //nothing to fire
       if (Strings.empty(httpMethod)) {
         return null;
       }
 
+      @SuppressWarnings("unchecked")  // Guaranteed by javax.servlet
+      Map<String, String[]> params = (Map<String, String[]>)request.getParameterMap();
+
       // Extract injectable pieces of the pathInfo.
       final Map<String, String> map = matcher.findMatches(pathInfo);
 
-      //find method(s) to dispatch to
+      //find method(s) to dispatch
+      //  to
       final String[] events = params.get(select.value());
       if (null != events) {
         boolean matched = false;
         for (String event : events) {
           String key = httpMethod + event;
-          MethodTuple tuple = methods.get(key);
+          Collection<MethodTuple> tuples = methods.get(key);
           Object redirect = null;
-          if (null != tuple) {
-            matched = true;
-            redirect = tuple.call(page, map);
+          
+          if (null != tuples) {
+            for (MethodTuple methodTuple : tuples) {
+              if (methodTuple.shouldCall(request)) {
+                matched = true;
+                redirect = methodTuple.call(page, map);
+                break;
+              }
+            }
           }
 
           //redirects interrupt the event dispatch sequence. Note this might cause inconsistent behaviour depending on
@@ -340,23 +356,33 @@ class DefaultPageBook implements PageBook {
 
         // no matched events. Fire default handler
         if (!matched) {
-          return callMethodTuple(httpMethod, page, map);
+          return callMethodTuple(httpMethod, page, map, request);
         }
+
       } else {
         // Fire default handler (no events defined)
-        return callMethodTuple(httpMethod, page, map);
+        return callMethodTuple(httpMethod, page, map, request);
       }
 
       //no redirects, render normally
       return null;
     }
 
-    private Object callMethodTuple(String httpMethod, Object page, Map<String, String> map) {
-      MethodTuple tuple = methods.get(httpMethod);
+    private Object callMethodTuple(String httpMethod, Object page, Map<String, String> pathMap,
+                                   HttpServletRequest request) {
+
+      // There may be more than one default handler
+      Collection<MethodTuple> tuple = methods.get(httpMethod);
+      Object redirect = null;
       if (null != tuple) {
-        return tuple.call(page, map);
+        for (MethodTuple methodTuple : tuple) {
+          if (methodTuple.shouldCall(request)) {
+            redirect = methodTuple.call(page, pathMap);
+            break;
+          }
+        }
       }
-      return null;
+      return redirect;
 
     }
 
@@ -392,10 +418,14 @@ class DefaultPageBook implements PageBook {
   private static class MethodTuple {
     private final Method method;
     private final List<String> args;
+    private final Map<String, String> negotiates;
+    private final ContentNegotiator negotiator;
 
-    private MethodTuple(Method method) {
+    private MethodTuple(Method method, Injector injector) {
       this.method = method;
       this.args = reflect(method);
+      this.negotiates = discoverNegotiates(method, injector);
+      this.negotiator = injector.getInstance(ContentNegotiator.class);
     }
 
     private List<String> reflect(Method method) {
@@ -426,6 +456,14 @@ class DefaultPageBook implements PageBook {
       return Collections.unmodifiableList(args);
     }
 
+    /**
+     * @return true if this method tuple can be validly called against this request.
+     * Used to select for content negotiation.
+     */
+    public boolean shouldCall(HttpServletRequest request) {
+      return negotiator.shouldCall(negotiates, request);
+    }
+
     public Object call(Object page, Map<String, String> map) {
       List<String> arguments = new ArrayList<String>();
       for (String argName : args) {
@@ -433,6 +471,24 @@ class DefaultPageBook implements PageBook {
       }
 
       return call(page, method, arguments.toArray());
+    }
+
+      //the @Accept request header-based event dispatcher
+    private Map<String, String> discoverNegotiates(Method method, Injector injector) {
+      // This ugly gunk gets us the map of headers to negotiation annotations
+      Map<String, Class<? extends Annotation>> negotiationsMap = injector.getInstance(
+          Key.get(new TypeLiteral<Map<String, Class<? extends Annotation>>>(){ }, Negotiation.class));
+
+      Map<String, String> negotiations = Maps.newHashMap();
+      // Gather all the negotiation annotations in this class.
+      for (Map.Entry<String, Class<? extends Annotation>> headerAnn : negotiationsMap.entrySet()) {
+        Annotation annotation = method.getAnnotation(headerAnn.getValue());
+        if (annotation != null) {
+          negotiations.put(headerAnn.getKey(), readAnnotationValue(annotation));
+        }
+      }
+
+      return negotiations;
     }
 
     private static Object call(Object page, final Method method,
@@ -448,4 +504,27 @@ class DefaultPageBook implements PageBook {
       }
     }
   }
+
+  /**
+   * A simple utility method that reads the String value attribute of any annotation
+   * instance.
+   */
+  static String readAnnotationValue(Annotation annotation) {
+       try {
+         Method m = annotation.getClass().getMethod("value");
+
+         return (String) m.invoke(annotation);
+
+       } catch (NoSuchMethodException e) {
+         throw new IllegalStateException("Encountered a configured Negotiation annotation that " +
+             "has no value parameter. This should never happen. " + annotation, e);
+       } catch (InvocationTargetException e) {
+         throw new IllegalStateException("Encountered a configured Negotiation annotation that " +
+             "could not be read." + annotation, e);
+       } catch (IllegalAccessException e) {
+         throw new IllegalStateException("Encountered a configured Negotiation annotation that " +
+             "could not be read." + annotation, e);
+       }
+     }
+
 }
