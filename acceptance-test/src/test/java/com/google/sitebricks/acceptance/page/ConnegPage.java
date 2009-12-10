@@ -2,8 +2,8 @@ package com.google.sitebricks.acceptance.page;
 
 import com.google.inject.Guice;
 import com.google.sitebricks.acceptance.util.AcceptanceTest;
-import com.google.sitebricks.client.Json;
 import com.google.sitebricks.client.Web;
+import com.google.sitebricks.client.transport.Text;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 
@@ -36,7 +36,7 @@ public class ConnegPage {
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/conneg", headers)
         .transports(String.class)
-        .over(Json.class)
+        .over(Text.class)
         .get()
         .toString();
 

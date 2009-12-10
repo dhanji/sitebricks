@@ -1,6 +1,7 @@
 package com.google.sitebricks.client;
 
 import com.google.inject.Guice;
+import com.google.sitebricks.client.transport.Text;
 import org.testng.annotations.Test;
 
 /**
@@ -14,7 +15,7 @@ public class WebClientEdslIntegrationTest {
 
         WebClient<String> webClient = resource.clientOf("http://google.com")
                 .transports(String.class)
-                .over(Json.class);
+                .over(Text.class);
 
         final WebResponse response = webClient.get();
 
