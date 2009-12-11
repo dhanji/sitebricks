@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ * @Expensive
  */
 public class WebClientIntegrationTest {
 

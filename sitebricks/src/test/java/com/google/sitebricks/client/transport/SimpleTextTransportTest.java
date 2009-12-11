@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Unit test for the various transports supported out of the box.
  */
-public class TransportTest {
+public class SimpleTextTransportTest {
   private static final String TEXT_DATA = "text";
 
   @DataProvider(name = TEXT_DATA)
@@ -28,9 +28,9 @@ public class TransportTest {
   @Test(dataProvider = TEXT_DATA)
   public final void textTransport(String data) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    new Text().out(out, String.class, data);
+    new SimpleTextTransport().out(out, String.class, data);
 
-    String in = new Text().in(new ByteArrayInputStream(out.toByteArray()), String.class);
+    String in = new SimpleTextTransport().in(new ByteArrayInputStream(out.toByteArray()), String.class);
 
     assert data.equals(in) : "Text transport was not balanced";
   }

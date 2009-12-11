@@ -9,18 +9,18 @@ import org.testng.annotations.Test;
  */
 public class WebClientEdslIntegrationTest {
 
-    @Test
-    public final void edslForBinding() {
-        Web resource = Guice.createInjector().getInstance(Web.class);
+  @Test
+  public final void edslForBinding() {
+    Web resource = Guice.createInjector().getInstance(Web.class);
 
-        WebClient<String> webClient = resource.clientOf("http://google.com")
-                .transports(String.class)
-                .over(Text.class);
+    WebClient<String> webClient = resource.clientOf("http://google.com")
+        .transports(String.class)
+        .over(Text.class);
 
-        final WebResponse response = webClient.get();
+    final WebResponse response = webClient.get();
 
-        final String responseAsString = response.toString();
+    final String responseAsString = response.toString();
 
-        assert responseAsString.contains("Google");
-    }
+    assert responseAsString.contains("Google");
+  }
 }

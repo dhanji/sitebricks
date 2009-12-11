@@ -7,7 +7,7 @@
   <artifactId>acceptance-test</artifactId>
   <version>0.8-SNAPSHOT</version>
   <name>acceptance-test</name>
-  <url>http://maven.apache.org</url>
+  <url>http://code.google.com/p/google-sitebricks/</url>
 
   <repositories>
     <repository>

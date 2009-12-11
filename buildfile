@@ -25,6 +25,7 @@ DOM4J = transitive('dom4j:dom4j:jar:1.6.1')
 JAXEN = transitive('jaxen:jaxen:jar:1.1.1')
 SAXPATH = transitive('saxpath:saxpath:jar:1.0-FCS')
 SERVLET_API = transitive('javax.servlet:servlet-api:jar:2.5')
+XSTREAM = transitive('xstream:xstream:jar:1.2.2')
 
 # Acceptance test deps
 JETTY  = group('jetty', 'jetty-util',
@@ -36,7 +37,7 @@ COMMONS_COLLECTIONS = transitive('commons-collections:commons-collections:jar:20
 
 # Dependency shortcuts
 COMPILE_DEPS = [MVEL, GUICE, GUICE_SERVLET, GOOGLE_COLLECTIONS, JCIP, INTELLIJ_ANNO, COMMONS_HTTPC,
-                COMMONS_IO, DOM4J, JAXEN, SERVLET_API]
+                COMMONS_IO, DOM4J, JAXEN, SERVLET_API, XSTREAM]
 TEST_DEPS = [EASYMOCK, JUNIT, TESTNG]
 ACCEPTANCE_TEST_DEPS = [JETTY, JETTY_API, TESTNG, SELENIUM_WEBDRIVER, COMMONS_COLLECTIONS]
 
