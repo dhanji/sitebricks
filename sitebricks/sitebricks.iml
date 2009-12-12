@@ -37,9 +37,10 @@
     <orderEntry type="library" exported="" name="Maven: javax.servlet:servlet-api:2.5" level="project" />
     <orderEntry type="library" exported="" name="Maven: com.thoughtworks.xstream:xstream:1.2.2" level="project" />
     <orderEntry type="library" exported="" name="Maven: xpp3:xpp3_min:1.1.3.4.O" level="project" />
-    <orderEntry type="library" exported="" name="Maven: jackson:jackson-asl:0.9.3" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.easymock:easymock:2.4" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:jdk15:5.8" level="project" />
+    <orderEntry type="library" exported="" name="Maven: org.codehaus.jackson:jackson-core-asl:1.3.2" level="project" />
+    <orderEntry type="library" exported="" name="Maven: org.codehaus.jackson:jackson-mapper-asl:1.3.2" level="project" />
   </component>
 </module>
 

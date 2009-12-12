@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.Date;
 
 /**
- * Unit test for the various transports supported out of the box.
+ * Unit test for the xml transport supported out of the box.
  */
 public class XmlTransportTest {
   private static final String ROBOTS = "robots";
