@@ -62,6 +62,11 @@ public interface PageBook {
    */
   Page forClass(Class<?> pageClass);
 
+  /**
+   * Same as {@linkplain #at} but registers a headless web service instead.
+   */
+  Page serviceAt(String uri, Class<?> pageClass);
+
   public static interface Page {
     Renderable widget();
 

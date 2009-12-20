@@ -25,6 +25,48 @@ public class RestfuWebServiceAcceptanceTest {
         .over(Json.class)
         .get();
 
+    assertBookResponse(response);
+  }
+
+  public void shouldRedirect() {
+    WebResponse response = Guice.createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/service")
+        .transports(String.class)
+        .over(Text.class)
+        .post("");
+
+    assertRedirectResponse(response);
+  }
+
+  public void shouldTransportJsonWithoutTemplateNoAnnotations() {
+    WebResponse response = Guice.createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/no_annotations/service")
+        .transports(String.class)
+        .over(Json.class)
+        .get();
+
+    assertBookResponse(response);
+  }
+
+  public void shouldRedirectNoAnnotations() {
+    WebResponse response = Guice.createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/no_annotations/service")
+        .transports(String.class)
+        .over(Text.class)
+        .post("");
+
+    assertRedirectResponse(response);
+  }
+
+  private static void assertRedirectResponse(WebResponse response) {
+    assert HttpServletResponse.SC_MOVED_TEMPORARILY == response.status();
+    assert response.getHeaders().get("Location").endsWith("/other");
+  }
+
+  private static void assertBookResponse(WebResponse response) {
     assert HttpServletResponse.SC_OK == response.status();
 
     // Make sure the headers were set.
@@ -36,17 +78,5 @@ public class RestfuWebServiceAcceptanceTest {
     assert RestfulWebService.CHINA_MIEVILLE.equals(book.getAuthor());
     assert RestfulWebService.PERDIDO_STREET_STATION.equals(book.getName());
     assert RestfulWebService.PAGE_COUNT == book.getPageCount();
-  }
-
-  public void shouldRedirect() {
-    WebResponse response = Guice.createInjector()
-        .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/service")
-        .transports(String.class)
-        .over(Text.class)
-        .post("");
-
-    assert HttpServletResponse.SC_MOVED_TEMPORARILY == response.status();
-    assert response.getHeaders().get("Location").endsWith("/other");
   }
 }

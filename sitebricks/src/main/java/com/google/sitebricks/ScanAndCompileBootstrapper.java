@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import static com.google.inject.matcher.Matchers.annotatedWith;
 import static com.google.sitebricks.SitebricksModule.BindingKind.EMBEDDED;
 import static com.google.sitebricks.SitebricksModule.BindingKind.PAGE;
+import static com.google.sitebricks.SitebricksModule.BindingKind.SERVICE;
 import static com.google.sitebricks.SitebricksModule.BindingKind.STATIC_RESOURCE;
 
 /**
@@ -104,6 +105,8 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
       } else if (STATIC_RESOURCE == binding.bindingKind) {
         //localize the resource to the SitebricksModule's package.
         resourcesService.add(SitebricksModule.class, binding.getResource());
+      } else if (SERVICE == binding.bindingKind) {
+        pagesToCompile.add(pageBook.serviceAt(binding.uri, binding.pageClass));
       }
     }
   }

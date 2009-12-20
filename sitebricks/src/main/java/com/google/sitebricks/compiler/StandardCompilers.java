@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
@@ -68,6 +69,14 @@ class StandardCompilers implements Compilers {
             // do further analysis on this sucka
             if (page.getUri().contains(":"))
               ; // throw an error coz we cant redir to dynamic URLs
+
+
+            // If this is headless, it MUST return an instance of reply.
+            if (page.isHeadless()) {
+              if (!Reply.class.isAssignableFrom(method.getReturnType())) {
+                // throw error
+              }
+            }
           }
         }
       }

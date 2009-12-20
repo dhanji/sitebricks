@@ -80,6 +80,10 @@ class DebugModePageBook implements PageBook {
     return book.forClass(pageClass);
   }
 
+  public Page serviceAt(String uri, Class<?> pageClass) {
+    return book.serviceAt(uri, pageClass);
+  }
+
   private void reload(String identifier, Page page) {
 
     // Do nothing on the first pass since the page is already compiled.

@@ -8,6 +8,7 @@ import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.sitebricks.core.CaseWidget;
+import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
@@ -118,7 +119,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   }
 
   public NegotiateWithBinder negotiate(final String header) {
-    Preconditions.checkArgument(!Strings.empty(header), "invalid request header string for negotiation.");
+    Strings.nonEmpty(header, "invalid request header string for negotiation.");
     return new NegotiateWithBinder() {
       public void with(Class<? extends Annotation> ann) {
         Preconditions.checkArgument(null != ann);
@@ -177,13 +178,19 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     }
 
     public ScopedBindingBuilder show(Class<?> clazz) {
+      Preconditions.checkArgument(!clazz.isAnnotationPresent(Service.class),
+          "Cannot show() a headless web service. Did you mean to call serve() instead?");
       this.pageClass = clazz;
+      this.bindingKind = BindingKind.PAGE;
 
       return this;
     }
 
     public ScopedBindingBuilder serve(Class<?> clazz) {
+      Preconditions.checkArgument(!clazz.isAnnotationPresent(Show.class),
+          "Cannot serve() a template page. Did you mean to call show() instead?");
       this.pageClass = clazz;
+      this.bindingKind = BindingKind.SERVICE;
 
       return this;
     }

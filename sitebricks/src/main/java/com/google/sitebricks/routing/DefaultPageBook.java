@@ -64,11 +64,18 @@ class DefaultPageBook implements PageBook {
     this.injector = injector;
   }
 
+  public Page serviceAt(String uri, Class<?> pageClass) {
+    return at(uri, pageClass, true); 
+  }
+
   public PageTuple at(String uri, Class<?> clazz) {
+    return at(uri, clazz, clazz.isAnnotationPresent(Service.class));
+  }
+
+  private PageTuple at(String uri, Class<?> clazz, boolean headless) {
     final String key = firstPathElement(uri);
     final PageTuple pageTuple =
-        new PageTuple(uri, new PathMatcherChain(uri), clazz, injector,
-            clazz.isAnnotationPresent(Service.class));
+        new PageTuple(uri, new PathMatcherChain(uri), clazz, injector, headless);
 
     synchronized (lock) {
       //is universal? (i.e. first element is a variable)
@@ -180,7 +187,7 @@ class DefaultPageBook implements PageBook {
         return null;
       }
     }
-    
+
     return InstanceBoundPage.delegating(targetType, instance);
   }
 
