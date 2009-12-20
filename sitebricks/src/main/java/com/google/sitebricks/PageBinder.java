@@ -22,6 +22,7 @@ public interface PageBinder {
 
   static interface ShowBinder {
     ScopedBindingBuilder show(Class<?> clazz);
+    ScopedBindingBuilder serve(Class<?> clazz);
     void export(String glob);
   }
 

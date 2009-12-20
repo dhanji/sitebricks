@@ -182,6 +182,12 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
       return this;
     }
 
+    public ScopedBindingBuilder serve(Class<?> clazz) {
+      this.pageClass = clazz;
+
+      return this;
+    }
+
     public void export(String glob) {
       resource = glob;
       this.bindingKind = BindingKind.STATIC_RESOURCE;
