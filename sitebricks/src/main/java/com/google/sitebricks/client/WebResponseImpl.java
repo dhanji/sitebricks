@@ -5,9 +5,8 @@ import net.jcip.annotations.NotThreadSafe;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpMethodBase;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -79,7 +78,7 @@ class WebResponseImpl implements WebResponse {
     };
   }
 
-  public int getStatusCode() {
+  public int status() {
     return method.getStatusCode();
   }
 

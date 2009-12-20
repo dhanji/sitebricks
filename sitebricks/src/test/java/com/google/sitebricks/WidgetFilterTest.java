@@ -1,19 +1,23 @@
 package com.google.sitebricks;
 
-import com.google.inject.Provider;
 import com.google.sitebricks.routing.RoutingDispatcher;
-import static org.easymock.EasyMock.*;
 import org.testng.annotations.Test;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
+
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -62,7 +66,7 @@ public class WidgetFilterTest {
             }
         };
 
-        expect(dispatcher.dispatch(request))
+        expect(dispatcher.dispatch(request, response))
                 .andReturn(respond);
 
         //nothing set?
@@ -106,7 +110,7 @@ public class WidgetFilterTest {
         FilterChain filterChain = createMock(FilterChain.class);
 
         //meaning no dispatch could be performed...
-        expect(dispatcher.dispatch(request))
+        expect(dispatcher.dispatch(request, response))
                 .andReturn(null);
 
         filterChain.doFilter(request, response);
@@ -130,7 +134,7 @@ public class WidgetFilterTest {
         Respond respond = createMock(Respond.class);
 
         //meaning no dispatch could be performed...
-        expect(dispatcher.dispatch(request))
+        expect(dispatcher.dispatch(request, response))
                 .andReturn(respond);
 
         expect(respond.getRedirect())

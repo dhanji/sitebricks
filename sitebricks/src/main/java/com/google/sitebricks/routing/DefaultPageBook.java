@@ -10,9 +10,11 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.Preconditions;
 import com.google.inject.name.Named;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Select;
 import com.google.sitebricks.http.negotiate.ContentNegotiator;
 import com.google.sitebricks.http.negotiate.Negotiation;
@@ -65,7 +67,8 @@ class DefaultPageBook implements PageBook {
   public PageTuple at(String uri, Class<?> clazz) {
     final String key = firstPathElement(uri);
     final PageTuple pageTuple =
-        new PageTuple(uri, new PathMatcherChain(uri), clazz, injector);
+        new PageTuple(uri, new PathMatcherChain(uri), clazz, injector,
+            clazz.isAnnotationPresent(Service.class));
 
     synchronized (lock) {
       //is universal? (i.e. first element is a variable)
@@ -83,6 +86,8 @@ class DefaultPageBook implements PageBook {
   }
 
   public Page embedAs(Class<?> clazz) {
+    Preconditions.checkArgument(null == clazz.getAnnotation(Service.class),
+        "You cannot embed headless web services!");
     String as = clazz.getAnnotation(EmbedAs.class).value();
     Strings.nonEmpty(as,
         "@EmbedAs() was empty. You must specify a valid widget name to embed as.");
@@ -90,7 +95,9 @@ class DefaultPageBook implements PageBook {
   }
 
   public Page embedAs(Class<?> clazz, String as) {
-    PageTuple pageTuple = new PageTuple(null, PathMatcherChain.ignoring(), clazz, injector);
+    Preconditions.checkArgument(null == clazz.getAnnotation(Service.class),
+        "You cannot embed headless web services!");
+    PageTuple pageTuple = new PageTuple(null, PathMatcherChain.ignoring(), clazz, injector, false);
 
     synchronized (lock) {
       pagesByName.put(as.toLowerCase(), pageTuple);
@@ -214,6 +221,10 @@ class DefaultPageBook implements PageBook {
       return delegate.getUri();
     }
 
+    public boolean isHeadless() {
+      return delegate.isHeadless();
+    }
+
     public static InstanceBoundPage delegating(Page delegate, Object instance) {
       return new InstanceBoundPage(delegate, instance);
     }
@@ -225,6 +236,7 @@ class DefaultPageBook implements PageBook {
     private final PathMatcher matcher;
     private final AtomicReference<Renderable> pageWidget = new AtomicReference<Renderable>();
     private final Class<?> clazz;
+    private final boolean headless;
     private final Injector injector;
 
     private final Multimap<String, MethodTuple> methods;
@@ -236,12 +248,13 @@ class DefaultPageBook implements PageBook {
     private Map<String, Class<? extends Annotation>> httpMethods;
 
 
-    public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, Injector injector) {
+    public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, Injector injector, boolean headless) {
 
       this.uri = uri;
       this.matcher = matcher;
       this.clazz = clazz;
       this.injector = injector;
+      this.headless = headless;
 
       this.select = discoverSelect(clazz);
 
@@ -311,6 +324,10 @@ class DefaultPageBook implements PageBook {
 
     public Object instantiate() {
       return injector.getInstance(clazz);
+    }
+
+    public boolean isHeadless() {
+      return headless;
     }
 
     public Object doMethod(String httpMethod, Object page, String pathInfo,

@@ -45,6 +45,8 @@ class StandardCompilers implements Compilers {
         .compile(template);
   }
 
+
+  // TODO(dhanji): Feedback errors as return rather than throwing.
   public void analyze(Class<?> page) {
     // May move this into a separate class if it starts getting too big.
     analyzeMethods(page.getDeclaredMethods());

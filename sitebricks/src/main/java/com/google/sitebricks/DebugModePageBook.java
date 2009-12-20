@@ -83,8 +83,8 @@ class DebugModePageBook implements PageBook {
   private void reload(String identifier, Page page) {
 
     // Do nothing on the first pass since the page is already compiled.
-    // Also skips static resources.
-    if (null == page || !metrics.isActive())
+    // Also skips static resources and headless web services.
+    if (null == page || !metrics.isActive() || page.isHeadless())
       return;
 
     // Ensure we reload only once per request, per identifier.

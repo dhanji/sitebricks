@@ -12,6 +12,8 @@ import net.jcip.annotations.ThreadSafe;
 import org.mvel2.PropertyAccessException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -43,7 +45,8 @@ class DebugModeRoutingDispatcher implements RoutingDispatcher {
   }
 
 
-  public Respond dispatch(HttpServletRequest request) {
+  public Respond dispatch(HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
     long start = System.currentTimeMillis();
 
     // Attempt to discover page class.
@@ -57,7 +60,7 @@ class DebugModeRoutingDispatcher implements RoutingDispatcher {
       pageClass = page.pageClass();
 
     try {
-      return dispatcher.dispatch(request);
+      return dispatcher.dispatch(request, response);
 
 
     } catch (TemplateCompileException tce) {

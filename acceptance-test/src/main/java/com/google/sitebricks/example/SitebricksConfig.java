@@ -36,6 +36,8 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/select").show(SelectRouting.class);
         at("/conneg").show(ContentNegotiation.class);
 
+        at("/service").show(RestfulWebService.class);
+
         at("/pagechain").show(PageChain.class);
         at("/nextpage").show(NextPage.class);
 

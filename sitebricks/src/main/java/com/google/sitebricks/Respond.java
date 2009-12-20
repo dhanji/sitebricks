@@ -7,7 +7,9 @@ import com.google.inject.ImplementedBy;
  */
 @ImplementedBy(StringBuilderRespond.class)
 public interface Respond {
-    void write(String text);
+  Respond HEADLESS = new StringBuilderRespond();
+
+  void write(String text);
 
     HtmlTagBuilder withHtml();
 

@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Stage;
-import static com.google.inject.matcher.Matchers.annotatedWith;
-import static com.google.sitebricks.SitebricksModule.BindingKind.*;
 import com.google.sitebricks.compiler.Compilers;
 import com.google.sitebricks.compiler.TemplateCompileException;
 import com.google.sitebricks.rendering.EmbedAs;
@@ -19,6 +17,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.google.inject.matcher.Matchers.annotatedWith;
+import static com.google.sitebricks.SitebricksModule.BindingKind.EMBEDDED;
+import static com.google.sitebricks.SitebricksModule.BindingKind.PAGE;
+import static com.google.sitebricks.SitebricksModule.BindingKind.STATIC_RESOURCE;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -137,6 +140,13 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
     for (PageBook.Page toCompile : pagesToCompile) {
       Class<?> page = toCompile.pageClass();
 
+      // Headless web services need to be analyzed but not page-compiled.
+      if (toCompile.isHeadless()) {
+        // TODO(dhanji): Feedback errors as return rather than throwing.
+        compilers.analyze(page);
+        continue;
+      }
+
       if (log.isLoggable(Level.FINEST)) {
         log.finest("Compiling template for page " + page.getName());
       }
@@ -167,8 +177,9 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
     }
 
     //log failures if any (we don't abort the app startup)
-    if (!failures.isEmpty())
+    if (!failures.isEmpty()) {
       logFailures(failures);
+    }
   }
 
   private PageBook.Page embed(String embedAs, Class<?> page) {

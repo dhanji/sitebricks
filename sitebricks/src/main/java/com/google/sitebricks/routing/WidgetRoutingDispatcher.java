@@ -6,10 +6,13 @@ import com.google.inject.Singleton;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.RequestBinder;
+import com.google.sitebricks.headless.HeadlessRenderer;
 import com.google.sitebricks.rendering.resource.ResourcesService;
 import net.jcip.annotations.Immutable;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -22,10 +25,14 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
   private final Provider<Respond> respondProvider;
   private final ResourcesService resourcesService;
   private final Provider<FlashCache> flashCacheProvider;
+  private final HeadlessRenderer headlessRenderer;
 
   @Inject
   public WidgetRoutingDispatcher(PageBook book, RequestBinder binder, Provider<Respond> respondProvider,
-                                 ResourcesService resourcesService, Provider<FlashCache> flashCacheProvider) {
+                                 ResourcesService resourcesService, Provider<FlashCache> flashCacheProvider,
+                                 HeadlessRenderer headlessRenderer) {
+    this.headlessRenderer = headlessRenderer;
+    // TODO(dhanji): get rid of these null checks, Guice ensures them for us anyway.
       if (null == book) {
           throw new IllegalArgumentException("null as book is not allowed.");
       }
@@ -52,7 +59,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
       this.flashCacheProvider = flashCacheProvider;
   }
 
-  public Respond dispatch(HttpServletRequest request) {
+  public Respond dispatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
     String uri = getPathInfo(request);
 
     //first try dispatching as a static resource service
@@ -78,13 +85,29 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     if (null == page)
       return null;
 
-    respond = respondProvider.get();
     final Object instance = page.instantiate();
+    if (page.isHeadless()) {
+      respond = Respond.HEADLESS;
 
-    //fire events and render reponders
-    bindAndRespond(request, page, respond, instance);
+      bindAndReply(request, response, page, instance);
+    } else {
+      respond = respondProvider.get();
+
+      //fire events and render reponders
+      bindAndRespond(request, page, respond, instance);
+    }
 
     return respond;
+  }
+
+  private void bindAndReply(HttpServletRequest request, HttpServletResponse response,
+                            PageBook.Page page, Object instance) throws IOException {
+    // bind request (sets request params, etc).
+    binder.bind(request, instance);
+
+    // call the appropriate handler.
+    headlessRenderer.render(response, fireEvent(request, page, instance));
+
   }
 
   private String getPathInfo(HttpServletRequest request) {

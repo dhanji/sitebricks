@@ -74,6 +74,8 @@ public interface PageBook {
     void apply(Renderable widget);
 
     String getUri();
+
+    boolean isHeadless();
   }
 
   public static final class Routing extends AbstractModule {

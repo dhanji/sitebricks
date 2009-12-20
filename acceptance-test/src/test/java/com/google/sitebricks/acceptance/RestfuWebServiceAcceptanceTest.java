@@ -1,0 +1,52 @@
+package com.google.sitebricks.acceptance;
+
+import com.google.inject.Guice;
+import com.google.sitebricks.acceptance.util.AcceptanceTest;
+import com.google.sitebricks.client.Web;
+import com.google.sitebricks.client.WebResponse;
+import com.google.sitebricks.client.transport.Json;
+import com.google.sitebricks.client.transport.Text;
+import com.google.sitebricks.example.RestfulWebService;
+import org.testng.annotations.Test;
+
+import javax.servlet.http.HttpServletResponse;
+
+/**
+ * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ */
+@Test(suiteName = AcceptanceTest.SUITE)
+public class RestfuWebServiceAcceptanceTest {
+
+  public void shouldTransportJsonWithoutTemplate() {
+    WebResponse response = Guice.createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/service")
+        .transports(String.class)
+        .over(Json.class)
+        .get();
+
+    assert HttpServletResponse.SC_OK == response.status();
+
+    // Make sure the headers were set.
+    assert response.getHeaders().containsKey("hi");
+    assert "there".equals(response.getHeaders().get("hi"));
+
+    // assert stuff about the content itself.
+    RestfulWebService.Book book = response.to(RestfulWebService.Book.class).using(Json.class);
+    assert RestfulWebService.CHINA_MIEVILLE.equals(book.getAuthor());
+    assert RestfulWebService.PERDIDO_STREET_STATION.equals(book.getName());
+    assert RestfulWebService.PAGE_COUNT == book.getPageCount();
+  }
+
+  public void shouldRedirect() {
+    WebResponse response = Guice.createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/service")
+        .transports(String.class)
+        .over(Text.class)
+        .post("");
+
+    assert HttpServletResponse.SC_MOVED_TEMPORARILY == response.status();
+    assert response.getHeaders().get("Location").endsWith("/other");
+  }
+}
