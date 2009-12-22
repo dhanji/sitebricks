@@ -120,6 +120,8 @@ class ReplyMaker<E> extends Reply<E> {
     // By default we use the content type of the transport.
     if (null == contentType) {
       response.setContentType(transport.contentType());
+    } else {
+      response.setContentType(contentType);
     }
 
 

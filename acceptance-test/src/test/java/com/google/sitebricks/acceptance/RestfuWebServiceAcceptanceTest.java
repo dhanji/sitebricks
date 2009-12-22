@@ -72,6 +72,7 @@ public class RestfuWebServiceAcceptanceTest {
     // Make sure the headers were set.
     assert response.getHeaders().containsKey("hi");
     assert "there".equals(response.getHeaders().get("hi"));
+    assert response.getHeaders().containsKey("Content-Type");
 
     // assert stuff about the content itself.
     RestfulWebService.Book book = response.to(RestfulWebService.Book.class).using(Json.class);
