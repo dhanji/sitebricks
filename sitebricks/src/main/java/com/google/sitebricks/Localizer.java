@@ -129,8 +129,8 @@ class Localizer {
         Parsing.tokenize(message.message(), compiler);
         tokens = Parsing.tokenize(template, compiler);
       } catch (ExpressionCompileException e) {
-        check(false, "Compile error in i18n message template: \n" + e.getError() + "\n\n...in: ",
-            iface, method);
+        check(false, "Compile error in i18n message template: \n  " + e.getError().getError() +
+            " in expression " + e.getError().getExpression() +"\n\n  ...in: ", iface, method);
       }
 
       // OK now actually go through and build a map between method names and values.

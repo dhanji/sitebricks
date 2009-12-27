@@ -10,7 +10,13 @@ Released for free under a Creative Commons Attribution 2.5 License
 -->
 <head>
 
-    <link href="/default.css" rel="stylesheet" type="text/css" />
+    @Require
+    <link href="default.css" rel="stylesheet" type="text/css" />
+
+    @Require
+    <script type="text/javascript"></script>
+
+    <!-- some stuff you should never see if this widget is embedded -->
 </head>
 
 <body>
@@ -38,21 +44,16 @@ Released for free under a Creative Commons Attribution 2.5 License
                 <h1 class="title">examples</h1>
                 <div class="entry">
 
-                    <ul>
-                        <li><a class="comments" href="/hello">Hello World</a> </li>
-                        <li><a class="comments" href="/showif?show=true">@ShowIf brick</a> (How to hide stuff) </li>
-                        <li><a class="comments" href="/repeat">Repeat brick</a> (How to iterate collections) </li>
-                        <li><a class="comments" href="/forms">Form bricks</a> (textfield, chooser, etc.) </li>
-                        <li><a class="comments" href="/embed">Embedding pages in each other</a> (Authoring a new brick) </li>
-                        <li><a class="comments" href="/case">Case brick</a> (Like java's switch) </li>
-                        <li><a class="comments" href="/dynamic.js">Dynamic Javascript</a> (non-XML templates) </li>
+                    Browser Locale: ${locale}
+                    <br/>
 
-                        <li><a class="comments" href="/i18n">Internationalization</a> (locales via Accept-Language header) </li>
+                    <form>
+                        Enter name: <input type="text" name="name" value="Friend"/> 
+                        <input type="submit" value="send"/> 
+                    </form>
+                    <br/>
 
-                        <li><a class="comments" href="/pagechain">Page Chaining</a> (passing state across pages using
-                            post + redirect) </li>
-
-                    </ul>
+                    Localized message: <span id="localizedMessage">${message}</span>
                 </div>
 
 

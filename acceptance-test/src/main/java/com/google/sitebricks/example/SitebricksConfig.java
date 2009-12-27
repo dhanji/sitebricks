@@ -3,8 +3,11 @@ package com.google.sitebricks.example;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
+import com.google.inject.internal.ImmutableMap;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.sitebricks.SitebricksModule;
+
+import java.util.Locale;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -42,9 +45,15 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/pagechain").show(PageChain.class);
         at("/nextpage").show(NextPage.class);
 
-        embed(HelloWorld.class).as("Hello");
-      }
+        at("/i18n").show(I18n.class);
 
+        embed(HelloWorld.class).as("Hello");
+
+        // Localize using the default translation set (i.e. from the @Message annotations)
+        localize(I18n.MyMessages.class).usingDefault();
+        localize(I18n.MyMessages.class).using(Locale.CANADA_FRENCH,
+            ImmutableMap.of(I18n.HELLO, I18n.HELLO_IN_FRENCH));
+      }
     });
   }
 }

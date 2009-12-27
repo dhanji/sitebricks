@@ -5,7 +5,13 @@ import com.google.inject.Provider;
 import net.jcip.annotations.Immutable;
 
 import javax.servlet.ServletContext;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 
 /**
@@ -61,9 +67,9 @@ class TemplateLoader {
         if (null == stream) {
           throw new MissingTemplateException(String.format("Could not find a suitable template for %s, " +
               "did you remember to place an @Show? None of [" +
-              fileNameTemplates[0] + ", " + fileNameTemplates[1] + " or " + fileNameTemplates[2] +
-              " could be found in either package [%s], in the root of the resource dir OR in WEB-INF/.",
-              pageClass.getName(), pageClass.getSimpleName(), pageClass.getSimpleName(), pageClass.getSimpleName(),
+              fileNameTemplates[0] +
+              "] could be found in either package [%s], in the root of the resource dir OR in WEB-INF/.",
+              pageClass.getName(), template,
               pageClass.getPackage().getName()));
         }
       }
