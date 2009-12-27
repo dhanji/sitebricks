@@ -3,7 +3,11 @@ package com.google.sitebricks.compiler;
 
 import com.google.sitebricks.rendering.Strings;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -134,8 +138,7 @@ public class Parsing {
     if (token.length() > 0)
       tokens.add(CompiledToken.text(token.toString()));
 
-    //freeze the token list
-    return Collections.unmodifiableList(tokens);
+    return tokens;
   }
 
   public static String stripExpression(String expr) {
@@ -164,7 +167,20 @@ public class Parsing {
    */
   public static boolean treatAsXml(String template) {
     return 0 > indexOfMeta(template);
+  }
 
+  /**
+   * Converts the given token stream into a rendered output evaluating each expression
+   * against the provided context object which may be a regular Java POJO with getters
+   * and setters or a map of string/value pairs.
+   */
+  public static String render(List<Token> tokens, Map<String, Object> arguments) {
+    StringBuilder builder = new StringBuilder();
+    for (Token token : tokens) {
+        builder.append(token.render(arguments));
+    }
+
+    return builder.toString();
   }
 
   public static int indexOfMeta(String template) {

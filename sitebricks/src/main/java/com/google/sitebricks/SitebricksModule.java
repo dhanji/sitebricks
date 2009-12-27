@@ -3,6 +3,7 @@ package com.google.sitebricks;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
@@ -19,7 +20,11 @@ import com.google.sitebricks.rendering.Strings;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -73,6 +78,8 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     })
         .annotatedWith(Negotiation.class)
         .toInstance(negotiations);
+
+    Localizer.localizeAll(binder(), localizations);
   }
 
   /**
@@ -97,6 +104,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
   private final Map<String, Class<? extends Annotation>> methods = Maps.newHashMap();
   private final Map<String, Class<? extends Annotation>> negotiations = Maps.newHashMap();
+  private final Set<Localizer.Localization> localizations = Sets.newHashSet();
 
   public final ShowBinder at(String uri) {
     LinkingBinder binding = new LinkingBinder(uri);
@@ -124,6 +132,35 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
       public void with(Class<? extends Annotation> ann) {
         Preconditions.checkArgument(null != ann);
         negotiations.put(header, ann);
+      }
+    };
+  }
+
+  public LocalizationBinder localize(final Class<?> iface) {
+    Preconditions.checkArgument(iface.isInterface(), "Localization accepts an interface type only");
+    return new LocalizationBinder() {
+      public void using(Locale locale, Map<String, String> messages) {
+        localizations.add( new Localizer.Localization(iface, locale, messages));
+      }
+
+      public void using(Locale locale, Properties properties) {
+        Preconditions.checkArgument(null != properties, "Must provide a non-null resource bundle");
+        @SuppressWarnings("unchecked") // A Properties object is always of type string/string
+        Map<String, String> messages = (Map) properties;
+        localizations.add(new Localizer.Localization(iface, locale, messages));
+      }
+
+      public void using(Locale locale, ResourceBundle bundle) {
+        Preconditions.checkArgument(null != bundle, "Must provide a non-null resource bundle");
+        Map<String, String> messages = Maps.newHashMap();
+        for (String key : bundle.keySet()) {
+          messages.put(key, bundle.getString(key));
+        }
+        localizations.add(new Localizer.Localization(iface, locale, messages));
+      }
+
+      public void usingDefault() {
+        localizations.add(Localizer.defaultLocalizationFor(iface));
       }
     };
   }
