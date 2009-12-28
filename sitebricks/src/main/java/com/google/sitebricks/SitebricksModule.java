@@ -19,6 +19,7 @@ import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
 
 import java.lang.annotation.Annotation;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
     // negotiations stuff (make sure we clean this up).
     negotiate("Accept").with(Accept.class);
-    
+
     // Call down to the implementation.
     configureSitebricks();
 
@@ -153,10 +154,15 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
       public void using(Locale locale, ResourceBundle bundle) {
         Preconditions.checkArgument(null != bundle, "Must provide a non-null resource bundle");
         Map<String, String> messages = Maps.newHashMap();
-        for (String key : bundle.keySet()) {
-          messages.put(key, bundle.getString(key));
+
+        if (null != bundle) {
+          Enumeration<String> keys = bundle.getKeys();
+          while (keys.hasMoreElements()) {
+            String key = bundle.getKeys().nextElement();
+            messages.put(key, bundle.getString(key));
+          }
+          localizations.add(new Localizer.Localization(iface, locale, messages));
         }
-        localizations.add(new Localizer.Localization(iface, locale, messages));
       }
 
       public void usingDefault() {
