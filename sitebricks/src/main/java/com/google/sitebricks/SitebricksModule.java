@@ -155,14 +155,12 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
         Preconditions.checkArgument(null != bundle, "Must provide a non-null resource bundle");
         Map<String, String> messages = Maps.newHashMap();
 
-        if (null != bundle) {
-          Enumeration<String> keys = bundle.getKeys();
-          while (keys.hasMoreElements()) {
-            String key = bundle.getKeys().nextElement();
-            messages.put(key, bundle.getString(key));
-          }
-          localizations.add(new Localizer.Localization(iface, locale, messages));
+        Enumeration<String> keys = bundle.getKeys();
+        while (keys.hasMoreElements()) {
+          String key = bundle.getKeys().nextElement();
+          messages.put(key, bundle.getString(key));
         }
+        localizations.add(new Localizer.Localization(iface, locale, messages));
       }
 
       public void usingDefault() {
