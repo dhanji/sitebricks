@@ -157,7 +157,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
         Enumeration<String> keys = bundle.getKeys();
         while (keys.hasMoreElements()) {
-          String key = bundle.getKeys().nextElement();
+          String key = keys.nextElement();
           messages.put(key, bundle.getString(key));
         }
         localizations.add(new Localizer.Localization(iface, locale, messages));
