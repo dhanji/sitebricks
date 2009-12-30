@@ -127,7 +127,12 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
 
       if (redirect instanceof String)
         respond.redirect((String) redirect);
-      else {
+      else if (redirect instanceof Class) {
+        PageBook.Page targetPage = book.forClass((Class<?>) redirect);
+
+        // should never be null coz it is validated on compile.
+        respond.redirect(contextualize(request, targetPage.getUri()));
+      } else {
         // Handle page-chaining driven redirection.
         PageBook.Page targetPage = book.forInstance(redirect);
 

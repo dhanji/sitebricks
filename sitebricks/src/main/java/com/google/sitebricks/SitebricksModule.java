@@ -138,7 +138,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   }
 
   public LocalizationBinder localize(final Class<?> iface) {
-    Preconditions.checkArgument(iface.isInterface(), "Localization accepts an interface type only");
+    Preconditions.checkArgument(iface.isInterface(), "localize() accepts an interface type only");
     return new LocalizationBinder() {
       public void using(Locale locale, Map<String, String> messages) {
         localizations.add( new Localizer.Localization(iface, locale, messages));
