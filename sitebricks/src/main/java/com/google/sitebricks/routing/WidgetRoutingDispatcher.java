@@ -75,6 +75,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     // remove the page and process it in one go. It is
     // also worth coordinating this with conversation request
     // queueing.
+    // TODO(dhanji): Change flashcache to use temporary cookies instead.
     PageBook.Page page = flashCacheProvider.get().remove(uri);
 
     // If there is no link, obtain page via Guice as normal.
