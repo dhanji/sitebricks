@@ -11,6 +11,10 @@ import java.util.Map;
  * Reply to a (headless) web request.
  */
 public abstract class Reply<E> {
+  // Asks sitebricks to continue down the servlet processing chain
+  public static final Reply<?> NO_REPLY = Reply.saying();
+
+  public static final String NO_REPLY_ATTR = "sb_no_reply";
 
   public abstract Reply<E> seeOther(String uri);
 

@@ -2,15 +2,11 @@ package com.google.sitebricks;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.routing.RoutingDispatcher;
 import net.jcip.annotations.Immutable;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -44,8 +40,9 @@ class SitebricksFilter implements Filter {
     //dispatch
     final Respond respond = dispatcher.dispatch(request, response);
 
-    //was there any matching page? (if it was a headless response, we don't need to do anything.
-    if (null != respond) {
+    //was there any matching page? (if it was a headless response, we don't need to do anything).
+    // Also we do not do anything if the page elected to do nothing.
+    if (null != respond && null == request.getAttribute(Reply.NO_REPLY_ATTR)) {
 
       // Only use the string rendering pipeline if this is not a headless request.
       if (Respond.HEADLESS != respond) {

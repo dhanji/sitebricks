@@ -7,6 +7,7 @@ import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.client.transport.Text;
 import com.google.sitebricks.rendering.Strings;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
@@ -107,6 +108,12 @@ class ReplyMaker<E> extends Reply<E> {
 
   @Override
   void populate(Injector injector, HttpServletResponse response) throws IOException {
+    // If we should not bother with the chain
+    if (Reply.NO_REPLY == this) {
+      injector.getInstance(HttpServletRequest.class).setAttribute(Reply.NO_REPLY_ATTR, Boolean.TRUE);
+      return;
+    }
+
     // This is where we take all the builder values and encode them in the response.
     Transport transport = injector.getInstance(this.transport);
 
@@ -117,11 +124,14 @@ class ReplyMaker<E> extends Reply<E> {
       }
     }
 
-    // By default we use the content type of the transport.
-    if (null == contentType) {
-      response.setContentType(transport.contentType());
-    } else {
-      response.setContentType(contentType);
+    // If the content type was already set, do nothing.
+    if (response.getContentType() == null) {
+      // By default we use the content type of the transport.
+      if (null == contentType) {
+        response.setContentType(transport.contentType());
+      } else {
+        response.setContentType(contentType);
+      }
     }
 
 

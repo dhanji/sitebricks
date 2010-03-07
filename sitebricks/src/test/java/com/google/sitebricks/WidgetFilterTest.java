@@ -12,12 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createNiceMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.easymock.EasyMock.*;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -46,7 +41,7 @@ public class WidgetFilterTest {
     @Test
     public final void doFilter() throws IOException, ServletException {
         RoutingDispatcher dispatcher = createMock(RoutingDispatcher.class);
-        HttpServletRequest request = createMock(HttpServletRequest.class);
+        HttpServletRequest request = createNiceMock(HttpServletRequest.class);
         HttpServletResponse response = createMock(HttpServletResponse.class);
         FilterChain filterChain = createMock(FilterChain.class);
         Respond respond = new StringBuilderRespond() {
@@ -127,7 +122,7 @@ public class WidgetFilterTest {
     @Test
     public final void doFilterRedirects() throws IOException, ServletException {
         RoutingDispatcher dispatcher = createMock(RoutingDispatcher.class);
-        HttpServletRequest request = createMock(HttpServletRequest.class);
+        HttpServletRequest request = createNiceMock(HttpServletRequest.class);
         HttpServletResponse response = createMock(HttpServletResponse.class);
         FilterChain filterChain = createMock(FilterChain.class);
 

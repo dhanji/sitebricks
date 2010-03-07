@@ -14,10 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.easymock.EasyMock.*;
 
 /**
  * A unit test for the reply builder/response populate pipeline.
@@ -49,7 +46,7 @@ public class HeadlessReplyTest {
   public void textReply() throws IOException {
     Injector injector = Guice.createInjector();
     HeadlessRenderer renderer = injector.getInstance(HeadlessRenderer.class);
-    HttpServletResponse response = createMock(HttpServletResponse.class);
+    HttpServletResponse response = createNiceMock(HttpServletResponse.class);
     ServletOutputStream outputStream = fakeServletOutputStream();
 
 
@@ -73,7 +70,7 @@ public class HeadlessReplyTest {
   public void jsonReply() throws IOException {
     Injector injector = Guice.createInjector();
     HeadlessRenderer renderer = injector.getInstance(HeadlessRenderer.class);
-    HttpServletResponse response = createMock(HttpServletResponse.class);
+    HttpServletResponse response = createNiceMock(HttpServletResponse.class);
     ServletOutputStream outputStream = fakeServletOutputStream();
 
 
@@ -108,7 +105,7 @@ public class HeadlessReplyTest {
   public void xmlReplyWithHeaders() throws IOException {
     Injector injector = Guice.createInjector();
     HeadlessRenderer renderer = injector.getInstance(HeadlessRenderer.class);
-    HttpServletResponse response = createMock(HttpServletResponse.class);
+    HttpServletResponse response = createNiceMock(HttpServletResponse.class);
     ServletOutputStream outputStream = fakeServletOutputStream();
 
 
