@@ -9,16 +9,21 @@ import java.util.Map;
  */
 @ImplementedBy(CommonsWeb.class)
 public interface Web {
+  enum Auth {
+    BASIC, DIGEST
+  }
 
-    public FormatBuilder clientOf(String url);
+  FormatBuilder clientOf(String url);
 
-    public FormatBuilder clientOf(String url, Map<String, String> headers);
+  FormatBuilder clientOf(String url, Map<String, String> headers);
 
-    public static interface FormatBuilder {
-        <T> ReadAsBuilder<T> transports(Class<T> clazz);
-    }
+  static interface FormatBuilder {
+    <T> ReadAsBuilder<T> transports(Class<T> clazz);
 
-    public static interface ReadAsBuilder<T> {
-        WebClient<T> over(Class<? extends Transport> clazz);
-    }
+    FormatBuilder auth(Auth auth, String username, String password);
+  }
+
+  static interface ReadAsBuilder<T> {
+    WebClient<T> over(Class<? extends Transport> clazz);
+  }
 }

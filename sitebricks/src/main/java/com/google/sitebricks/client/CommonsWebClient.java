@@ -6,16 +6,21 @@ import com.google.inject.Key;
 import net.jcip.annotations.ThreadSafe;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
-@ThreadSafe //@Concurrent
+@ThreadSafe
+    //@Concurrent
 class CommonsWebClient<T> implements WebClient<T> {
   private final Injector injector;
   private final String url;
@@ -24,7 +29,12 @@ class CommonsWebClient<T> implements WebClient<T> {
   private final Key<? extends Transport> transport;
   private final HttpClient httpClient;
 
-  public CommonsWebClient(Injector injector, String url, Map<String, String> headers,
+  private final Web.Auth authType;
+  private final String username;
+  private final String password;
+
+  public CommonsWebClient(Injector injector, Web.Auth authType, String username,
+                          String password, String url, Map<String, String> headers,
                           Class<T> transporting,
                           Key<? extends Transport> transport) {
 
@@ -33,10 +43,31 @@ class CommonsWebClient<T> implements WebClient<T> {
     this.url = url;
     this.headers = (null == headers) ? null : ImmutableMap.copyOf(headers);
 
+
+    this.authType = authType;
+    this.username = username;
+    this.password = password;
     this.transporting = transporting;
     this.transport = transport;
 
     this.httpClient = new HttpClient();
+
+    // configure auth
+    if (null != authType) {
+      URI uri = toUri(url);
+      httpClient.getState().setCredentials(
+          new AuthScope(null, uri.getPort(), null),
+          new UsernamePasswordCredentials(username, password)
+      );
+    }
+  }
+
+  private static URI toUri(String url) {
+    try {
+      return new URI(url);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private WebResponse simpleRequest(HttpMethodBase methodBase) {
@@ -46,6 +77,8 @@ class CommonsWebClient<T> implements WebClient<T> {
       for (Map.Entry<String, String> header : headers.entrySet())
         methodBase.addRequestHeader(header.getKey(), header.getValue());
 
+    methodBase.setDoAuthentication(authType != null);
+    
     try {
       httpClient.executeMethod(methodBase);
 
@@ -63,6 +96,8 @@ class CommonsWebClient<T> implements WebClient<T> {
     if (null != headers)
       for (Map.Entry<String, String> header : headers.entrySet())
         methodBase.addRequestHeader(header.getKey(), header.getValue());
+
+    methodBase.setDoAuthentication(authType != null);
 
     //fire method
     try {
