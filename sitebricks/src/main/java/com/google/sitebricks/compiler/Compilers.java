@@ -8,6 +8,8 @@ import com.google.sitebricks.Renderable;
  */
 @ImplementedBy(StandardCompilers.class)
 public interface Compilers {
+  Renderable compileHtml(Class<?> page, String template);
+
   Renderable compileXml(Class<?> page, String template);
 
   Renderable compileFlat(Class<?> page, String template);

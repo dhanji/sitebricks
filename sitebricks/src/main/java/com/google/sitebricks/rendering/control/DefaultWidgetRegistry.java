@@ -142,6 +142,11 @@ class DefaultWidgetRegistry implements WidgetRegistry {
     return new TextWidget(template, compiler);
   }
 
+  public Renderable rawTextWidget(String template, EvaluatorCompiler compiler)
+      throws ExpressionCompileException {
+    return new RawTextWidget(template, compiler);
+  }
+
   public void addEmbed(String embedAs) {
     add(embedAs, EmbedWidget.class);
   }

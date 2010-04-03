@@ -269,7 +269,7 @@ class XmlTemplateCompiler {
      * widget is created.
      */
     @SuppressWarnings({"JavaDoc"}) @NotNull
-    private Renderable widgetize(Node preceeding, Element element, WidgetChain childsChildren) {
+    private Renderable widgetize(Node preceding, Element element, WidgetChain childsChildren) {
 
         // Header widget is a special case, where we match by the name of the tag =(
         if ("head".equals(element.getName())) {
@@ -286,7 +286,7 @@ class XmlTemplateCompiler {
         }
 
         //read annotation if available
-        String annotation = Dom.readAnnotation(preceeding);
+        String annotation = Dom.readAnnotation(preceding);
 
         //if there is no annotation, treat as a raw xml-widget (i.e. tag)
         if (null == annotation)

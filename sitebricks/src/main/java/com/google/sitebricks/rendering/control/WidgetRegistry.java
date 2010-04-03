@@ -31,6 +31,9 @@ public interface WidgetRegistry {
   Renderable textWidget(String template, EvaluatorCompiler compiler)
       throws ExpressionCompileException;
 
+  Renderable rawTextWidget(String template, EvaluatorCompiler compiler)
+      throws ExpressionCompileException;
+
   void addEmbed(String embedAs);
 
   void addArgument(String callWith);

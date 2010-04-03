@@ -104,6 +104,9 @@ class DebugModePageBook implements PageBook {
     final Template template = templateLoader.get().load(pageClass);
 
     switch (template.getKind()) {
+      case HTML:
+        page.apply(compilers.compileHtml(pageClass, template.getText()));
+        break;
       case XML:
         page.apply(compilers.compileXml(pageClass, template.getText()));
         break;

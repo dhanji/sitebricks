@@ -40,6 +40,12 @@ class StandardCompilers implements Compilers {
         .compile(template);
   }
 
+  public Renderable compileHtml(Class<?> page, String template) {
+    return new HtmlTemplateCompiler(page, new MvelEvaluatorCompiler(page), registry, pageBook,
+        metrics)
+        .compile(template);
+  }
+
 
   public Renderable compileFlat(Class<?> page, String template) {
     return new FlatTemplateCompiler(page, new MvelEvaluatorCompiler(page), metrics, registry)

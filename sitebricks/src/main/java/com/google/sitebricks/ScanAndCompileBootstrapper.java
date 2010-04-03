@@ -159,9 +159,12 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
 
         Renderable widget;
 
-        //is this an XML template or a flat-file template?
+        //is this an HTML, XML, or a flat-file template?
         switch(template.getKind()) {
           default:
+          case HTML:
+            widget = compilers.compileHtml(page, template.getText());
+            break;
           case XML:
             widget = compilers.compileXml(page, template.getText());
             break;

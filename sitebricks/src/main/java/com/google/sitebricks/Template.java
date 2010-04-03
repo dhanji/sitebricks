@@ -21,15 +21,20 @@ class Template {
   }
 
   public static enum Kind {
-    XML, FLAT,;
+    HTML, XML, FLAT,;
 
     /**
-     * Returns whether or not the given filename for a template should be
-     * treated as xml or not. 
+     * Returns whether a given template should be treated as html, xml or flat
+     * (currently by looking at file extension)
      */
     public static Kind kindOf(String template) {
-      return (template.endsWith(".xml") || template.endsWith(".html")
-          || template.endsWith(".xhtml")) ? XML : FLAT;
+      if (template.endsWith(".html") || template.endsWith(".xhtml"))
+        return HTML;
+      else if (template.endsWith(".xml"))
+        return XML;
+      else
+        return FLAT;
     }
+    
   }
 }
