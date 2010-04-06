@@ -1,5 +1,7 @@
 package com.google.sitebricks.compiler;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.sitebricks.rendering.Strings;
 import org.apache.commons.lang.Validate;
 import org.jsoup.nodes.*;
 import org.jsoup.parser.Tag;
@@ -8,8 +10,6 @@ import org.jsoup.parser.TokenQueue;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import com.google.common.collect.ImmutableSet;
 
 /**
   Parses HTML into a List<{@link org.jsoup.nodes.Node}>
@@ -131,7 +131,7 @@ public class HtmlParser  {
         String tagName = tq.consumeWord();
         tq.chompTo(">");
 
-        if (!tagName.isEmpty()) {
+        if (!Strings.empty(tagName)) {
             Tag tag = Tag.valueOf(tagName);
             popStackToClose(tag);
         }
@@ -141,7 +141,7 @@ public class HtmlParser  {
         tq.consume("<");
         String tagName = tq.consumeWord();
 
-        if (tagName.isEmpty()) { // doesn't look like a start tag after all; put < back on stack and handle as text
+        if (!Strings.empty(tagName)) { // doesn't look like a start tag after all; put < back on stack and handle as text
             tq.addFirst("&lt;");
             parseTextNode();
             return;
@@ -190,7 +190,7 @@ public class HtmlParser  {
         // <base href>: update the base uri
         if (child.tagName().equals("base")) {
             String href = child.absUrl("href");
-            if (!href.isEmpty()) { // ignore <base target> etc
+            if (!Strings.empty(href)) { // ignore <base target> etc
                 baseUri = href;
                 // TODO - consider updating baseUri for relevant elements in the stack, eg rebase(stack, uri)
                 // doc.get().setBaseUri(href); // set on the doc so doc.createElement(Tag) will get updated base
@@ -222,7 +222,7 @@ public class HtmlParser  {
             }
             whitespace();
         }
-        if (!key.isEmpty())
+        if (!Strings.empty(key))
             return Attribute.createFromEncoded(key, value);
         else {
             tq.consume(); // unknown char, keep popping so not get stuck
@@ -401,7 +401,7 @@ public class HtmlParser  {
         if (!child.isBlock() && parent.isData())
             return false;
 
-        if (closingOptional.contains(parent.getName()) && parent.equals(child.getName()))
+        if (closingOptional.contains(parent.getName()) && parent.getName().equals(child.getName()))
            return false;
 
         if (parent.isEmpty() || parent.isData())
