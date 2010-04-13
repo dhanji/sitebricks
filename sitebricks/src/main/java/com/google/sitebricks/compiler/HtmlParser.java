@@ -141,7 +141,7 @@ public class HtmlParser  {
         tq.consume("<");
         String tagName = tq.consumeWord();
 
-        if (!Strings.empty(tagName)) { // doesn't look like a start tag after all; put < back on stack and handle as text
+        if (Strings.empty(tagName)) { // doesn't look like a start tag after all; put < back on stack and handle as text
             tq.addFirst("&lt;");
             parseTextNode();
             return;
