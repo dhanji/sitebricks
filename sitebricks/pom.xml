@@ -127,7 +127,7 @@
       <!-- jsoup HTML library @ http://jsoup.org/ -->
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
-      <version>0.3.1</version>
+      <version>1.2.3</version>
     </dependency>
   </dependencies>
 
@@ -179,6 +179,14 @@
         <finalName>sitebricks</finalName>
         
         <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <source>1.6</source>
+              <target>1.6</target>
+            </configuration>
+          </plugin>          
           <plugin>
             <inherited>true</inherited>
             <groupId>org.apache.maven.plugins</groupId>

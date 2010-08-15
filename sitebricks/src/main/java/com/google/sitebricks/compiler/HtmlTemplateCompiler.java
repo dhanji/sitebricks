@@ -10,27 +10,13 @@ import com.google.sitebricks.routing.SystemMetrics;
 import net.jcip.annotations.NotThreadSafe;
 import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
-
-import org.jsoup.Jsoup;
-
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.Attribute;
-import org.jsoup.nodes.Attributes;
-import org.jsoup.nodes.Comment;
-import org.jsoup.nodes.DataNode;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.TextNode;
-import org.jsoup.nodes.XmlDeclaration;
-
-
-import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
-import static com.google.sitebricks.compiler.HtmlParser.LINE_NUMBER_ATTRIBUTE;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_KEY;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_CONTENT;
-
+import org.jsoup.nodes.*;
 
 import java.util.*;
+
+import static com.google.sitebricks.compiler.AnnotationNode.*;
+import static com.google.sitebricks.compiler.HtmlParser.LINE_NUMBER_ATTRIBUTE;
+import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
 
 /**
  * @author Shawn based on XMLTemplateCompiler by Dhanji R. Prasanna (dhanji@gmail.com)
@@ -563,7 +549,7 @@ class HtmlTemplateCompiler {
 
     // outerHtml from jsoup.Node, Element with suppressed _attribs
 
-    private static String cleanHtml(Node node) {
+    private static String cleanHtml(final Node node) {
         if (node instanceof Element) {
             Element element = ((Element) node);
             StringBuilder accum = new StringBuilder();
@@ -571,7 +557,10 @@ class HtmlTemplateCompiler {
             for (Attribute attribute: element.attributes()) {
                 if (!(attribute.getKey().startsWith("_"))) {
                     accum.append(" ");
-                    accum.append(attribute.html());
+                    accum.append(attribute.getKey());
+                    accum.append("=\"");
+                    accum.append(attribute.getValue());
+                    accum.append('"');
                 }
             }
 
@@ -588,10 +577,21 @@ class HtmlTemplateCompiler {
         } else if (node instanceof TextNode) {
             return ((TextNode) node).getWholeText();
         } else if (node instanceof XmlDeclaration) {
-            return ((XmlDeclaration)node).outerHtml();
+
+          // HACK
+          if (node.childNodes().isEmpty()) {
+            return "";
+          }
+            return node.outerHtml();
+        } else if (node instanceof Comment) {
+          // HACK: elide comments for now.
+          return "";
+        } else if (node instanceof DataNode && node.childNodes().isEmpty()) {
+          // Data nodes that have no content, example:
+          // <script src=..></script>
+          return "";
         } else {
             return node.outerHtml();
         }
-
     }
 }

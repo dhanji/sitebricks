@@ -21,6 +21,7 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 
 import static org.easymock.EasyMock.*;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -262,8 +263,9 @@ public class HtmlTemplateCompilerTest {
             .compile("<html> <head>" +
                 "   @Require <script type='text/javascript' src='my.js'> </script>" +
                 "   @Require <script type='text/javascript' src='my.js'> </script>" +
-                "</head>" +
-                "<div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></html>");
+                "</head><body>" +
+                "<div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div>" +
+                "</body></html>");
 
     assert null != widget : " null ";
 
@@ -273,13 +275,12 @@ public class HtmlTemplateCompilerTest {
 
     final String value = respond.toString();
     String expected = "<html> <head>" +
-        "      <script type='text/javascript' src='my.js'> </script>" +
-        "</head>" +
-        "<div class='content'>hello <a href='/people/12'>Dhanji</a></div></html>";
+        "      <script type='text/javascript' src='my.js'></script>" +
+        "</head><body>" +
+        "<div class='content'>hello <a href='/people/12'>Dhanji</a></div></body></html>";
     expected = expected.replaceAll("'", "\"");
 
-    assert expected
-        .equals(value) : "Did not write expected output, instead: " + value;
+    assertEquals(value, expected);
   }
 
 
@@ -312,7 +313,7 @@ public class HtmlTemplateCompilerTest {
 
     Renderable widget =
         new HtmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, pageBook, metrics)
-            .compile("<!doctype html><html><div class='${clazz}'>hello @ShowIf(false)<a href='/hi/${id}'>hideme</a></div></html>");
+            .compile("<!doctype html><html><body><div class='${clazz}'>hello @ShowIf(false)<a href='/hi/${id}'>hideme</a></div></body></html>");
 
     assert null != widget : " null ";
 
