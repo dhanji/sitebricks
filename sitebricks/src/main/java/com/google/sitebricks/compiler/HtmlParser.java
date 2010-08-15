@@ -7,6 +7,7 @@ import org.jsoup.nodes.*;
 import org.jsoup.parser.Tag;
 import org.jsoup.parser.TokenQueue;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -98,6 +99,15 @@ public class HtmlParser {
         parseTextNode();
       }
     }
+
+    // Pop off body as it is already inside html.
+    Iterator<Node> iterator = stack.iterator();
+    while (iterator.hasNext()) {
+      if (iterator.next().nodeName().equals(bodyTag.getName())) {
+        iterator.remove();
+      }
+    }
+
     return stack;
   }
 
@@ -268,8 +278,9 @@ public class HtmlParser {
     if (parent != null)
       parent.appendChild(child);
 
-    if (!isEmptyElement && !child.tag().isData())
+    if (!isEmptyElement && !child.tag().isData()) {
       stack.addLast(child);
+    }
 
     return parent;
   }
