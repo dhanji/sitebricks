@@ -6,7 +6,6 @@ import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.routing.PageBook;
-
 import net.jcip.annotations.Immutable;
 
 import java.util.Collections;
@@ -40,10 +39,10 @@ class EmbedWidget implements Renderable {
 
 
   public void render(Object bound, Respond respond) {
-    final PageBook.Page page = pageBook.forName(targetPage);
+    PageBook.Page page = pageBook.forName(targetPage);
 
     //create an instance of the embedded page
-    final Object pageObject = page.instantiate();
+    Object pageObject = page.instantiate();
 
     //bind parameters to it as necessary
     for (Map.Entry<String, String> entry : bindExpressions.entrySet()) {
@@ -51,12 +50,14 @@ class EmbedWidget implements Renderable {
     }
 
     //chain to embedded page (widget), with arguments
-    final EmbeddedRespond embed = factory.get(arguments);
+    EmbeddedRespond embed = factory.get(arguments);
     page.widget().render(pageObject, embed);
 
     //extract and write embedded response to enclosing page's respond
     respond.writeToHead(embed.toHeadString()); //TODO only write @Require tags
     respond.write(embed.toString());
+
+    embed.clear();
   }
 
   public <T extends Renderable> Set<T> collect(Class<T> clazz) {

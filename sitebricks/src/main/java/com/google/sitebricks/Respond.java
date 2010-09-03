@@ -11,33 +11,35 @@ public interface Respond {
 
   void write(String text);
 
-    HtmlTagBuilder withHtml();
+  HtmlTagBuilder withHtml();
 
-    void write(char c);
+  void write(char c);
 
-    void chew();
+  void chew();
 
-    String toString();
+  String toString();
 
-    void writeToHead(String text);
+  void writeToHead(String text);
 
-    void require(String requireString);
+  void require(String requireString);
 
-    void redirect(String to);
+  void redirect(String to);
 
-    String getContentType();
+  String getContentType();
 
-    String getRedirect();
+  String getRedirect();
 
-    Renderable include(String argument);
+  Renderable include(String argument);
 
-    String getHead();
+  String getHead();
 
-    public static interface HtmlTagBuilder {
-        void textField(String value, String s);
+  void clear();
 
-        void headerPlaceholder();
+  public static interface HtmlTagBuilder {
+    void textField(String value, String s);
 
-        void textArea(String expression, String s);
-    }
+    void headerPlaceholder();
+
+    void textArea(String expression, String s);
+  }
 }

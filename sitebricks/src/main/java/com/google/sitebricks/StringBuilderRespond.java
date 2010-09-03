@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 @NotThreadSafe
-class StringBuilderRespond implements Respond {
+public class StringBuilderRespond implements Respond {
 
   private static final String TEXT_TAG_TEMPLATE = "sitebricks.template.textfield";
   private static final String TEXTAREA_TAG_TEMPLATE = "sitebricks.template.textarea";
@@ -90,6 +90,15 @@ class StringBuilderRespond implements Respond {
 
   public String getContentType() {
     return TEXT_HTML;
+  }
+
+  public void clear() {
+    if (null != out) {
+      out.delete(0, out.length());
+    }
+    if (null != head) {
+      head.delete(0, head.length());
+    }
   }
 
   @Override

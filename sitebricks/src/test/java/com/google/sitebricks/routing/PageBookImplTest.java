@@ -20,9 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.*;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -648,6 +646,10 @@ public class PageBookImplTest {
         public String getHead() {
             return null;
         }
+
+      @Override
+      public void clear() {
+      }
     }
 
     @At("/wiki")

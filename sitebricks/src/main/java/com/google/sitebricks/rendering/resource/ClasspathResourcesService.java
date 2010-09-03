@@ -171,5 +171,9 @@ class ClasspathResourcesService implements ResourcesService {
     public String getHead() {
       return null;
     }
+
+    @Override
+    public void clear() {
+    }
   }
 }

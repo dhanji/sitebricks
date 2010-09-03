@@ -14,96 +14,100 @@ import java.util.Set;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
-*/
+ */
 class WidgetWrapper {
-    private final Class<? extends Renderable> clazz;
-    private final Constructor<? extends Renderable> constructor;
-    private final String key;
-    private final boolean selfRendering;
-    private final WidgetKind kind;
+  private final Class<? extends Renderable> clazz;
+  private final Constructor<? extends Renderable> constructor;
+  private final String key;
+  private final boolean selfRendering;
+  private final WidgetKind kind;
 
-    private WidgetWrapper(Class<? extends Renderable> clazz, Constructor<? extends Renderable> constructor,
-                          WidgetKind kind, String key) {
-        this.kind = kind;
-        this.clazz = clazz;
-        this.constructor = constructor;
-        this.key = key;
+  private WidgetWrapper(Class<? extends Renderable> clazz,
+      Constructor<? extends Renderable> constructor, WidgetKind kind, String key) {
+    this.kind = kind;
+    this.clazz = clazz;
+    this.constructor = constructor;
+    this.key = key;
 
-        selfRendering = clazz.isAnnotationPresent(SelfRendering.class);
+    selfRendering = clazz.isAnnotationPresent(SelfRendering.class);
+  }
+
+  public Renderable newWidget(WidgetChain widgetChain, String expression, Evaluator evaluator,
+                              PageBook pageBook) {
+    try {
+      return WidgetKind.NORMAL.equals(kind) ?
+          constructor.newInstance(widgetChain, expression, evaluator) :
+          constructor.newInstance(toArguments(widgetChain), expression, evaluator, pageBook, key);
+
+    } catch (IllegalAccessException e) {
+      throw new IllegalStateException("Malformed Widget (this should never happen): " + clazz);
+    } catch (InvocationTargetException e) {
+      throw new IllegalStateException("Could not construct an instance of " + clazz, e);
+    } catch (InstantiationException e) {
+      throw new IllegalStateException("Could not construct an instance of : " + clazz, e);
+    }
+  }
+
+  private static Map<String, ArgumentWidget> toArguments(WidgetChain widgetChain) {
+    Set<ArgumentWidget> arguments = widgetChain.collect(ArgumentWidget.class);
+    Map<String, ArgumentWidget> map = new HashMap<String, ArgumentWidget>();
+
+    for (ArgumentWidget argument : arguments) {
+      map.put(argument.getName(), argument);
     }
 
-    public Renderable newWidget(WidgetChain widgetChain, String expression, Evaluator evaluator, PageBook pageBook) {
-        try {
+    return map;
+  }
 
+  public static WidgetWrapper forWidget(String key, Class<? extends Renderable> widgetClass) {
+    WidgetKind kind = EmbedWidget.class.isAssignableFrom(widgetClass)
+        ? WidgetKind.EMBED
+        : WidgetKind.NORMAL;
+    Constructor<? extends Renderable> constructor;
 
-        return WidgetKind.NORMAL.equals(kind) ?
-                constructor
-                    .newInstance(widgetChain, expression, evaluator) :
-                constructor
-                    .newInstance(toArguments(widgetChain), expression, evaluator, pageBook, key);
+    try {
+      switch (kind) {
+        case EMBED:
+          constructor = widgetClass.getConstructor(Map.class, String.class, Evaluator.class,
+              PageBook.class, String.class);
+          break;
 
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException("Malformed Widget (this should never happen): " + clazz);
-        } catch (InvocationTargetException e) {
-            throw new IllegalStateException("Could not construct an instance of " + clazz, e);
-        } catch (InstantiationException e) {
-            throw new IllegalStateException("Could not construct an instance of : " + clazz, e);
-        }
+        case NORMAL:
+        default:
+          constructor = widgetClass.getConstructor(WidgetChain.class, String.class,
+              Evaluator.class);
+      }
+    } catch (NoSuchMethodException e) {
+      throw new IllegalStateException("Malformed Widget (this should never happen): "
+          + widgetClass);
     }
 
-    private static Map<String, ArgumentWidget> toArguments(WidgetChain widgetChain) {
-        Set<ArgumentWidget> arguments = widgetChain.collect(ArgumentWidget.class);
 
-        Map<String, ArgumentWidget> map = new HashMap<String, ArgumentWidget>();
+    // Ugh...
+    if (!constructor.isAccessible())
+      constructor.setAccessible(true);
 
-        for (ArgumentWidget argument : arguments) {
-            map.put(argument.getName(), argument);
-        }
+    return new WidgetWrapper(widgetClass, constructor, kind, key);
+  }
 
-        return map;
-    }
+  /**
+   * Returns true if this widget will render an outer, containing tag,
+   * discarding the annotated tag.
+   */
+  public boolean isSelfRendering() {
+    return selfRendering;
+  }
 
-    public static WidgetWrapper forWidget(String key, Class<? extends Renderable> widgetClass) {
-        WidgetKind kind = EmbedWidget.class.isAssignableFrom(widgetClass) ? WidgetKind.EMBED : WidgetKind.NORMAL;
-        Constructor<? extends Renderable> constructor;
+  @Override
+  public String toString() {
+    return new ToStringBuilder(WidgetWrapper.class)
+        .add("key", key)
+        .add("class", clazz)
+        .add("kind", kind)
+        .toString();
+  }
 
-        try {
-            switch (kind) {
-                case EMBED:
-                    constructor = widgetClass
-                            .getConstructor(Map.class, String.class, Evaluator.class, PageBook.class, String.class);
-                    break;
-
-                case NORMAL:
-                default:
-                    constructor = widgetClass
-                            .getConstructor(WidgetChain.class, String.class, Evaluator.class);
-            }
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException("Malformed Widget (this should never happen): " + widgetClass);
-        }
-
-
-        //ugh...
-        if (!constructor.isAccessible())
-            constructor.setAccessible(true);
-
-        return new WidgetWrapper(widgetClass, constructor, kind, key);
-    }
-
-    public boolean isSelfRendering() {
-        return selfRendering;
-    }
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(WidgetWrapper.class)
-                .add("key", key)
-                .add("class", clazz)
-                .add("kind", kind)
-                .toString();
-    }
-
-    @SuppressWarnings({"InnerClassTooDeeplyNested"})
-    private static enum WidgetKind { NORMAL, EMBED }
+  private static enum WidgetKind {
+    NORMAL, EMBED
+  }
 }

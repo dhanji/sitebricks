@@ -166,7 +166,9 @@ class HtmlTemplateCompiler {
         if (node.attr(ANNOTATION).length()>1) {
 
             // Setup a new lexical scope (symbol table changes on each scope encountered).
-            if (REPEAT_WIDGET.equalsIgnoreCase(node.attr(ANNOTATION_KEY)) || CHOOSE_WIDGET.equalsIgnoreCase(node.attr(ANNOTATION_KEY))) {
+            if (REPEAT_WIDGET.equalsIgnoreCase(node.attr(ANNOTATION_KEY))
+                || CHOOSE_WIDGET.equalsIgnoreCase(node.attr(ANNOTATION_KEY))) {
+
                 String[] keyAndContent = {node.attr(ANNOTATION_KEY), node.attr(ANNOTATION_CONTENT)};
                 lexicalScopes.push(new MvelEvaluatorCompiler(parseRepeatScope(keyAndContent, node)));
                 return true;
@@ -177,7 +179,8 @@ class HtmlTemplateCompiler {
             if (null != embed) {
                 final Class<?> embedClass = embed.pageClass();
                 MvelEvaluatorCompiler compiler = new MvelEvaluatorCompiler(embedClass);
-                checkEmbedAgainst(compiler, Parsing.toBindMap(node.attr(ANNOTATION_CONTENT)), embedClass, (Element) node);
+                checkEmbedAgainst(compiler, Parsing.toBindMap(node.attr(ANNOTATION_CONTENT)),
+                    embedClass, node);
 
               lexicalScopes.push(compiler);
               return true;
@@ -481,7 +484,10 @@ class HtmlTemplateCompiler {
       if (null == kind)
           return false;
 
-      return ( "submit".equals(kind) || "button".equals(kind) || "reset".equals(kind) || "file".equals(kind) );
+      return ("submit".equals(kind)
+          || "button".equals(kind)
+          || "reset".equals(kind)
+          || "file".equals(kind));
   }
 
 
