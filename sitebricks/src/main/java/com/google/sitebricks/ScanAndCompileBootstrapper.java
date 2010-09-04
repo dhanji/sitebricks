@@ -19,10 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.google.inject.matcher.Matchers.annotatedWith;
-import static com.google.sitebricks.SitebricksModule.BindingKind.EMBEDDED;
-import static com.google.sitebricks.SitebricksModule.BindingKind.PAGE;
-import static com.google.sitebricks.SitebricksModule.BindingKind.SERVICE;
-import static com.google.sitebricks.SitebricksModule.BindingKind.STATIC_RESOURCE;
+import static com.google.sitebricks.SitebricksModule.BindingKind.*;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -96,6 +93,10 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
     for (SitebricksModule.LinkingBinder binding : bindings) {
 
       if (EMBEDDED == binding.bindingKind) {
+        if (null == binding.embedAs) {
+          // Throw an error.
+          throw new IllegalStateException("embed() missing .as() clause: " + binding.pageClass);
+        }
         registry.addEmbed(binding.embedAs);
         pagesToCompile.add(pageBook.embedAs(binding.pageClass, binding.embedAs));
 
