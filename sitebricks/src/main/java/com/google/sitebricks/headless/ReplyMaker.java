@@ -1,8 +1,8 @@
 package com.google.sitebricks.headless;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.inject.Injector;
-import com.google.inject.internal.Preconditions;
 import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.client.transport.Text;
 import com.google.sitebricks.rendering.Strings;

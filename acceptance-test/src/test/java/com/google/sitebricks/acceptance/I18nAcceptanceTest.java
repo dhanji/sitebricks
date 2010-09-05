@@ -1,6 +1,6 @@
 package com.google.sitebricks.acceptance;
 
-import com.google.inject.internal.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 import com.google.sitebricks.acceptance.page.I18nPage;
 import com.google.sitebricks.acceptance.util.AcceptanceTest;
 import org.testng.annotations.Test;

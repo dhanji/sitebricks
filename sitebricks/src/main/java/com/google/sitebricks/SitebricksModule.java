@@ -19,13 +19,7 @@ import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
 
 import java.lang.annotation.Annotation;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -139,6 +133,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
   public LocalizationBinder localize(final Class<?> iface) {
     Preconditions.checkArgument(iface.isInterface(), "localize() accepts an interface type only");
+    localizations.add(Localizer.defaultLocalizationFor(iface));
     return new LocalizationBinder() {
       public void using(Locale locale, Map<String, String> messages) {
         localizations.add( new Localizer.Localization(iface, locale, messages));

@@ -1,16 +1,8 @@
 package com.google.sitebricks.routing;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Singleton;
-import com.google.inject.TypeLiteral;
-import com.google.inject.internal.Preconditions;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.*;
+import com.google.inject.*;
 import com.google.inject.name.Named;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
@@ -28,11 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 

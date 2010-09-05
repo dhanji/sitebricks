@@ -1,8 +1,8 @@
 package com.google.sitebricks.headless;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.internal.ImmutableMap;
 import com.google.sitebricks.client.transport.Json;
 import com.google.sitebricks.client.transport.Text;
 import com.google.sitebricks.client.transport.Xml;

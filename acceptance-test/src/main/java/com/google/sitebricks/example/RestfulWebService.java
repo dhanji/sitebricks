@@ -1,6 +1,6 @@
 package com.google.sitebricks.example;
 
-import com.google.inject.internal.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 import com.google.sitebricks.At;
 import com.google.sitebricks.client.transport.Json;
 import com.google.sitebricks.headless.Reply;
