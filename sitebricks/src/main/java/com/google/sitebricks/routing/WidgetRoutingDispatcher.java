@@ -32,31 +32,11 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
                                  ResourcesService resourcesService, Provider<FlashCache> flashCacheProvider,
                                  HeadlessRenderer headlessRenderer) {
     this.headlessRenderer = headlessRenderer;
-    // TODO(dhanji): get rid of these null checks, Guice ensures them for us anyway.
-      if (null == book) {
-          throw new IllegalArgumentException("null as book is not allowed.");
-      }
     this.book = book;
-
-      if (null == binder) {
-          throw new IllegalArgumentException("null as binder is not allowed.");
-      }
     this.binder = binder;
-
-      if (null == respondProvider) {
-          throw new IllegalArgumentException("null as respondProvider is not allowed.");
-      }
     this.respondProvider = respondProvider;
-
-      if (null == resourcesService) {
-          throw new IllegalArgumentException("null as resourcesService is not allowed.");
-      }
     this.resourcesService = resourcesService;
-
-      if (null == flashCacheProvider) {
-          throw new IllegalArgumentException("null as flashCacheProvider is not allowed.");
-  }
-      this.flashCacheProvider = flashCacheProvider;
+    this.flashCacheProvider = flashCacheProvider;
   }
 
   public Respond dispatch(HttpServletRequest request, HttpServletResponse response) throws IOException {

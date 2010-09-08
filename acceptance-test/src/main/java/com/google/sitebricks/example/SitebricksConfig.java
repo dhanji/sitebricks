@@ -47,6 +47,9 @@ public class SitebricksConfig extends GuiceServletContextListener {
 
         at("/i18n").show(I18n.class);
 
+        // MVEL template.
+        at("/template/mvel").show(MvelTemplateExample.class);
+
         embed(HelloWorld.class).as("Hello");
 
         // Localize using the default translation set (i.e. from the @Message annotations)

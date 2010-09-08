@@ -15,6 +15,13 @@ public interface Compilers {
   Renderable compileFlat(Class<?> page, String template);
 
   /**
+   * Creates a Renderable that can process MVEL templates.
+   * These are not to be confused with Sitebricks templates
+   * that *use* MVEL. Rather, this is MVEL's template technology.
+   */
+  Renderable compileMvel(Class<?> page, String template);
+
+  /**
    * Performs static analysis of the given page class to
    * determine some types of errors.
    */

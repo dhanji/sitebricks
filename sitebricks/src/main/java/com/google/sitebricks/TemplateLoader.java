@@ -5,13 +5,7 @@ import com.google.inject.Provider;
 import net.jcip.annotations.Immutable;
 
 import javax.servlet.ServletContext;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 
 /**
@@ -69,7 +63,7 @@ class TemplateLoader {
               "did you remember to place an @Show? None of [" +
               fileNameTemplates[0] +
               "] could be found in either package [%s], in the root of the resource dir OR in WEB-INF/.",
-              pageClass.getName(), template,
+              pageClass.getName(), pageClass.getSimpleName(),
               pageClass.getPackage().getName()));
         }
       }

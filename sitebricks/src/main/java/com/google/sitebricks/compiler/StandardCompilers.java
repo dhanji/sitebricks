@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
@@ -46,10 +47,13 @@ class StandardCompilers implements Compilers {
         .compile(template);
   }
 
-
   public Renderable compileFlat(Class<?> page, String template) {
     return new FlatTemplateCompiler(page, new MvelEvaluatorCompiler(page), metrics, registry)
         .compile(template);
+  }
+
+  public Renderable compileMvel(Class<?> page, String template) {
+    return new MvelTemplateCompiler(page).compile(template);
   }
 
 

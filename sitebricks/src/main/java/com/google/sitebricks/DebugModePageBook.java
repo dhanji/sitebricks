@@ -103,6 +103,7 @@ class DebugModePageBook implements PageBook {
     final Class<?> pageClass = page.pageClass();
     final Template template = templateLoader.get().load(pageClass);
 
+    // TODO(dhanji): Merge this with the duplicated code in ScanAndCompileBootstrapper
     switch (template.getKind()) {
       case HTML:
         page.apply(compilers.compileHtml(pageClass, template.getText()));
@@ -112,6 +113,9 @@ class DebugModePageBook implements PageBook {
         break;
       case FLAT:
         page.apply(compilers.compileFlat(pageClass, template.getText()));
+        break;
+      case MVEL:
+        page.apply(compilers.compileMvel(pageClass, template.getText()));
         break;
     }
   }

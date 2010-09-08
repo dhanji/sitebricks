@@ -94,7 +94,7 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
 
       if (EMBEDDED == binding.bindingKind) {
         if (null == binding.embedAs) {
-          // Throw an error.
+          // This can happen if embed() is not followed by an .as(..)
           throw new IllegalStateException("embed() missing .as() clause: " + binding.pageClass);
         }
         registry.addEmbed(binding.embedAs);
@@ -171,6 +171,9 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
             break;
           case FLAT:
             widget = compilers.compileFlat(page, template.getText());
+            break;
+          case MVEL:
+            widget = compilers.compileMvel(page, template.getText());
             break;
         }
 
