@@ -49,7 +49,6 @@ public abstract class CompileError {
     }
 
     public CompileError causedBy(ExpressionCompileException e) {
-      System.out.println(e.getError());
       return new CompileErrorImpl(fragment, line, e.getError());
     }
 

@@ -34,6 +34,8 @@ public interface WidgetRegistry {
   Renderable rawTextWidget(String template, EvaluatorCompiler compiler)
       throws ExpressionCompileException;
 
+  Renderable xmlDirectiveWidget(String wholeDeclaration, EvaluatorCompiler evaluatorCompiler) throws ExpressionCompileException;
+
   void addEmbed(String embedAs);
 
   void addArgument(String callWith);

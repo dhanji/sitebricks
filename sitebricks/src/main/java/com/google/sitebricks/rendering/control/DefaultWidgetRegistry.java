@@ -147,6 +147,12 @@ class DefaultWidgetRegistry implements WidgetRegistry {
     return new RawTextWidget(template, compiler);
   }
 
+  @Override
+  public Renderable xmlDirectiveWidget(String wholeDeclaration, EvaluatorCompiler evaluatorCompiler)
+      throws ExpressionCompileException {
+    return new XmlDirectiveWidget(wholeDeclaration, evaluatorCompiler);
+  }
+
   public void addEmbed(String embedAs) {
     add(embedAs, EmbedWidget.class);
   }

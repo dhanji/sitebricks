@@ -124,7 +124,9 @@ class HtmlTemplateCompiler {
                 }
             } else if (n instanceof XmlDeclaration) {
                 try {
-                    widgetChain.addWidget(registry.rawTextWidget(cleanHtml(n), lexicalScopes.peek()));
+                    widgetChain.addWidget(registry
+                        .xmlDirectiveWidget(((XmlDeclaration)n).getWholeDeclaration(),
+                        lexicalScopes.peek()));
                 } catch (ExpressionCompileException e) {
                     errors.add(
                             CompileError.in(node.outerHtml())
@@ -199,7 +201,8 @@ class HtmlTemplateCompiler {
     private <N extends Node> Renderable widgetize(N node, WidgetChain childsChildren) {
         if (node instanceof XmlDeclaration) {
             try {
-                return registry.rawTextWidget(cleanHtml(node), lexicalScopes.peek());
+              XmlDeclaration decl = (XmlDeclaration)node;
+              return registry.xmlDirectiveWidget(decl.getWholeDeclaration(), lexicalScopes.peek());
             } catch (ExpressionCompileException e) {
                 errors.add(
                         CompileError.in(node.outerHtml())
@@ -533,7 +536,7 @@ class HtmlTemplateCompiler {
 
     public Integer siblingIndex(Node node) {
         if (null != node.parent())
-        Validate.notNull(node);
+          Validate.notNull(node);
         return indexInList(node, findSiblings(node));
     }
 

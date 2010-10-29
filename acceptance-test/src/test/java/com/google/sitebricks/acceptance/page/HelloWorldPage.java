@@ -8,19 +8,24 @@ import org.openqa.selenium.support.PageFactory;
 
 public class HelloWorldPage {
 
-    private WebDriver driver;
+  private WebDriver driver;
 
-    public HelloWorldPage(WebDriver driver) {
-        this.driver = driver;
-    }
+  public HelloWorldPage(WebDriver driver) {
+    this.driver = driver;
+  }
 
-    public boolean hasHelloWorldMessage() {
-        //TODO ugh! stupid xpath doesn't work =(
-        return driver.getPageSource().contains(HelloWorld.HELLO_MSG);
-    }
+  public boolean hasHelloWorldMessage() {
+    //TODO ugh! stupid xpath doesn't work =(
+    return driver.getPageSource().contains(HelloWorld.HELLO_MSG);
+  }
 
-    public static HelloWorldPage open(WebDriver driver) {
-        driver.get(AcceptanceTest.BASE_URL + "/hello");
-        return PageFactory.initElements(driver, HelloWorldPage.class);
-    }
+  public boolean hasCorrectDoctype() {
+    return driver.getPageSource().startsWith("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\n" +
+        "    \"http://www.w3.org/TR/html4/loose.dtd\">");
+  }
+
+  public static HelloWorldPage open(WebDriver driver) {
+    driver.get(AcceptanceTest.BASE_URL + "/hello");
+    return PageFactory.initElements(driver, HelloWorldPage.class);
+  }
 }
