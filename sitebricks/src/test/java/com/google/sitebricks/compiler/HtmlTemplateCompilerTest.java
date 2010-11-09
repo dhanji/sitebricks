@@ -323,7 +323,7 @@ public class HtmlTemplateCompilerTest {
     widget.render(new TestBackingType("Dhanji", "content", 12), mockRespond);
 
     final String s = mockRespond.toString();
-    assertEquals(s, "<html><body><div class=\"content\">hello </div></body></html>");
+    assertEquals(s, "<!doctype html><html><body><div class=\"content\">hello </div></body></html>");
   }
 
   @EmbedAs(MyEmbeddedPage.MY_FAVE_ANNOTATION)
