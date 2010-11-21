@@ -26,7 +26,7 @@ public class StringBuilderRespond implements Respond {
 
   private static final String TEXT_HTML = "text/html";
 
-  StringBuilderRespond() {
+  public StringBuilderRespond() {
     if (null == templates.get()) {
       final Properties properties = new Properties();
       try {
