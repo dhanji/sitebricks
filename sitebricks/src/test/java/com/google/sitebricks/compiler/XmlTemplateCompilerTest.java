@@ -328,7 +328,7 @@ public class XmlTemplateCompilerTest {
 
   @EmbedAs(MyEmbeddedPage.MY_FAVE_ANNOTATION)
   public static class MyEmbeddedPage {
-    private static final String MY_FAVE_ANNOTATION = "MyFave";
+    protected static final String MY_FAVE_ANNOTATION = "MyFave";
     private boolean should = true;
 
     public boolean isShould() {

@@ -21,9 +21,12 @@ public interface Compilers {
    */
   Renderable compileMvel(Class<?> page, String template);
 
+  Renderable compileFreemarker( Class<?> page, String text );
+
   /**
    * Performs static analysis of the given page class to
    * determine some types of errors.
    */
   void analyze(Class<?> page);
+
 }

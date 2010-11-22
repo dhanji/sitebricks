@@ -117,6 +117,9 @@ class DebugModePageBook implements PageBook {
       case MVEL:
         page.apply(compilers.compileMvel(pageClass, template.getText()));
         break;
+      case FREEMARKER:
+        page.apply(compilers.compileFreemarker(pageClass, template.getText())); 
+        break;        
     }
   }
 

@@ -15,7 +15,7 @@ import java.net.URL;
 class TemplateLoader {
   private final Provider<ServletContext> context;
 
-  private final String[] fileNameTemplates = new String[] { "%s.html", "%s.xhtml", "%s.xml" };
+  private final String[] fileNameTemplates = new String[] { "%s.html", "%s.xhtml", "%s.xml", "%s.txt", "%s.fml" };
 
   @Inject
   public TemplateLoader(Provider<ServletContext> context) {

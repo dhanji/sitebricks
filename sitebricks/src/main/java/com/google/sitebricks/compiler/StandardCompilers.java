@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
+import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
@@ -56,6 +57,9 @@ class StandardCompilers implements Compilers {
     return new MvelTemplateCompiler(page).compile(template);
   }
 
+  public Renderable compileFreemarker( Class<?> page, String template ) {
+      return new FreemarkerTemplateCompiler(page).compile(template);
+  }
 
   // TODO(dhanji): Feedback errors as return rather than throwing.
   public void analyze(Class<?> page) {
