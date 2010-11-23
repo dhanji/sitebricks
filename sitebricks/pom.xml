@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.sonatype.oss</groupId>
     <artifactId>oss-parent</artifactId>
     <version>5</version>
-  </parent>     
+  </parent>
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks</artifactId>
   <packaging>jar</packaging>
@@ -18,7 +18,7 @@
     <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/trunk</developerConnection>
     <url>http://code.google.com/p/google-sitebricks/source/browse</url>
   </scm>
-  
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -129,7 +129,7 @@
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
       <version>2.3.10</version>
-    </dependency>    
+    </dependency>
   </dependencies>
 
   <build>
@@ -144,4 +144,19 @@
       </plugin>
     </plugins>
   </build>
+ 
+  <!-- This should be removed when the googlecode repositories are migrated to the standard Nexus OSS repository infrastructure -->
+  <distributionManagement>
+    <snapshotRepository>
+      <id>googlecode-snapshots</id>
+      <name>Sonatype OSS Nexus Snapshots</name>
+      <url>http://oss.sonatype.org/content/repositories/googlecode-snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>googlecode-with-staging</id>
+      <name>Nexus OSS Release Repository</name>
+      <url>http://oss.sonatype.org/content/groups/googlecode-with-staging</url>
+    </repository>
+  </distributionManagement>
+  
 </project>
