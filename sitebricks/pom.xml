@@ -147,14 +147,14 @@
   <!-- This should be removed when the googlecode repositories are migrated to the standard Nexus OSS repository infrastructure -->
   <distributionManagement>
     <snapshotRepository>
-      <id>googlecode-snapshots</id>
+      <id>google-snapshots</id>
       <name>Sonatype OSS Nexus Snapshots</name>
-      <url>http://oss.sonatype.org/content/repositories/googlecode-snapshots</url>
+      <url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
     </snapshotRepository>
     <repository>
-      <id>googlecode-with-staging</id>
-      <name>Nexus OSS Release Repository</name>
-      <url>http://oss.sonatype.org/content/groups/googlecode-with-staging</url>
+      <id>google-with-staging</id>
+      <name>Nexus OSS Staging Repository</name>
+      <url> https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
   
