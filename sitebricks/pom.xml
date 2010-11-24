@@ -8,14 +8,14 @@
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks</artifactId>
   <packaging>jar</packaging>
-  <version>0.8.0</version>
+  <version>0.8.1-SNAPSHOT</version>
   <name>sitebricks</name>
   <url>http://code.google.com/p/google-sitebricks/</url>
 
   <scm>
-    <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/tags/sitebricks-0.8.0</connection>
-    <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/tags/sitebricks-0.8.0</developerConnection>
-    <url>http://code.google.com/p/google-sitebricks/source/browse/tags/sitebricks-0.8.0</url>
+    <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/trunk</connection>
+    <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/trunk</developerConnection>
+    <url>http://code.google.com/p/google-sitebricks/source/browse</url>
   </scm>
 
   <dependencies>
