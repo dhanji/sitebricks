@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
-@ImplementedBy(HttpSessionFlashCache.class)
+@ImplementedBy(NoFlashCache.class)
 public interface FlashCache {
   @Nullable
   <T> T get(String key);

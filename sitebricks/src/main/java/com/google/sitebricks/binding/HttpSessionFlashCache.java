@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 @ThreadSafe @SessionScoped
-class HttpSessionFlashCache implements FlashCache, Serializable {
+public class HttpSessionFlashCache implements FlashCache, Serializable {
   private final ConcurrentMap<String, Object> cache = new MapMaker().makeMap();
 
   @SuppressWarnings("unchecked")

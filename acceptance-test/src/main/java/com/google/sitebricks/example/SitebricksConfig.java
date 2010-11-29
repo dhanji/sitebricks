@@ -3,9 +3,12 @@ package com.google.sitebricks.example;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.sitebricks.SitebricksModule;
+import com.google.sitebricks.binding.FlashCache;
+import com.google.sitebricks.binding.HttpSessionFlashCache;
 
 import java.util.Locale;
 
@@ -23,6 +26,8 @@ public class SitebricksConfig extends GuiceServletContextListener {
 //        scan(SitebricksConfig.class.getPackage());
         // TODO(dhanji): find a way to run the suite again with this module installed.
 //        install(new GaeModule());
+
+        bind(FlashCache.class).to(HttpSessionFlashCache.class).in(Singleton.class);
 
         //TODO explicit bindings should override scanned ones.
         at("/").show(Start.class);
