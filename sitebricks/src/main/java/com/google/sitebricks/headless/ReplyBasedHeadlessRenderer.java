@@ -25,6 +25,9 @@ class ReplyBasedHeadlessRenderer implements HeadlessRenderer {
     assert o instanceof Reply;
 
     Reply<?> reply = (Reply<?>)o;
+    if (null == reply) {
+      throw new RuntimeException("Sitebricks received a null reply from the resource.");
+    }
     reply.populate(injector, response);
   }
 }

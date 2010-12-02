@@ -84,7 +84,7 @@ class DebugModeRoutingDispatcher implements RoutingDispatcher {
     } catch (PropertyAccessException pae) {
       final Respond respond = respondProvider.get();
 
-      final Throwable cause = pae.getCause();
+      Throwable cause = pae.getCause();
 
       respond.write("<h3>");
       respond.write("Exception during page render");
@@ -96,18 +96,22 @@ class DebugModeRoutingDispatcher implements RoutingDispatcher {
       // Analyze cause and construct a detailed error report.
       if (cause instanceof InvocationTargetException) {
         InvocationTargetException ite = (InvocationTargetException) cause;
-
-        // Create ourselves a printwriter to buffer error output into.
-        final StringWriter writer = new StringWriter();
-        ite.getCause().printStackTrace(new PrintWriter(writer));
-
-        respond.write("<h3>");
-        respond.write("Exception during page render");
-        respond.write("</h3>");
-        respond.write("<pre>");
-        respond.write(writer.toString());
-        respond.write("</pre>");
+        cause = ite.getCause();
       }
+
+      if (cause == null)
+        cause = pae;
+
+      // Create ourselves a printwriter to buffer error output into.
+      final StringWriter writer = new StringWriter();
+      cause.printStackTrace(new PrintWriter(writer));
+
+      respond.write("<h3>");
+      respond.write("Exception during page render");
+      respond.write("</h3>");
+      respond.write("<pre>");
+      respond.write(writer.toString());
+      respond.write("</pre>");
 
       return respond;
     } finally {
