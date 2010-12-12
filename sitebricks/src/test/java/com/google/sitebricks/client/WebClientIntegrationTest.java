@@ -2,7 +2,6 @@ package com.google.sitebricks.client;
 
 import com.google.inject.Guice;
 import com.google.sitebricks.client.transport.Text;
-import org.testng.annotations.Test;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -10,7 +9,7 @@ import org.testng.annotations.Test;
  */
 public class WebClientIntegrationTest {
 
-  @Test
+//  @Test Disabled as you need to be online for this to work
   public final void simpleJsonGetFromTwitter() {
     Web web = Guice.createInjector().getInstance(Web.class);
 

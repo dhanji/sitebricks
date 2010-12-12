@@ -1,15 +1,14 @@
 package com.google.sitebricks.example;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import com.google.inject.Stage;
+import com.google.inject.*;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.sitebricks.SitebricksModule;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.HttpSessionFlashCache;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
 
 /**
@@ -55,6 +54,8 @@ public class SitebricksConfig extends GuiceServletContextListener {
         // MVEL template.
         at("/template/mvel").show(MvelTemplateExample.class);
 
+        bind(Start.class).annotatedWith(Test.class).to(Start.class);
+
         embed(HelloWorld.class).as("Hello");
 
         // Localize using the default translation set (i.e. from the @Message annotations)
@@ -63,5 +64,10 @@ public class SitebricksConfig extends GuiceServletContextListener {
             ImmutableMap.of(I18n.HELLO, I18n.HELLO_IN_FRENCH));
       }
     });
+  }
+
+  @BindingAnnotation
+  @Retention(RetentionPolicy.RUNTIME)
+  public static @interface Test {
   }
 }

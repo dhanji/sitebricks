@@ -1,12 +1,16 @@
 package com.google.sitebricks.example;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Injector;
 import com.google.sitebricks.At;
 import com.google.sitebricks.client.transport.Json;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
@@ -18,12 +22,17 @@ public class RestfulWebService {
   public static final int PAGE_COUNT = 789;
 
   @Get
-  public Reply<Book> books() {
+  public Reply<Book> books(Injector injector, HttpServletRequest request,
+                       @SitebricksConfig.Test Start start) {
+    Preconditions.checkNotNull(injector, "method argument injection failed");
+    Preconditions.checkNotNull(request, "method argument injection failed");
+    Preconditions.checkNotNull(start, "method argument injection failed");
+
     Book perdido = new Book();
     perdido.setAuthor(CHINA_MIEVILLE);
     perdido.setName(PERDIDO_STREET_STATION);
     perdido.setPageCount(PAGE_COUNT);
-    
+
     return Reply.with(perdido)
                 .headers(ImmutableMap.<String, String>of("hi", "there"))
                 .type("application/json")

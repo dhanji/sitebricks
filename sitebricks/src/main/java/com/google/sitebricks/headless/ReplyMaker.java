@@ -107,6 +107,11 @@ class ReplyMaker<E> extends Reply<E> {
   }
 
   @Override
+  public void ok() {
+    status = HttpServletResponse.SC_OK;
+  }
+
+  @Override
   void populate(Injector injector, HttpServletResponse response) throws IOException {
     // If we should not bother with the chain
     if (Reply.NO_REPLY == this) {

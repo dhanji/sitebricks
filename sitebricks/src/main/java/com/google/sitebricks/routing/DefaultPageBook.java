@@ -429,24 +429,29 @@ class DefaultPageBook implements PageBook {
 
   private static class MethodTuple {
     private final Method method;
-    private final List<String> args;
+    private final Injector injector;
+    private final List<Object> args;
     private final Map<String, String> negotiates;
     private final ContentNegotiator negotiator;
 
     private MethodTuple(Method method, Injector injector) {
       this.method = method;
+      this.injector = injector;
       this.args = reflect(method);
       this.negotiates = discoverNegotiates(method, injector);
       this.negotiator = injector.getInstance(ContentNegotiator.class);
     }
 
-    private List<String> reflect(Method method) {
+    private List<Object> reflect(Method method) {
       final Annotation[][] annotationsGrid = method.getParameterAnnotations();
       if (null == annotationsGrid)
         return Collections.emptyList();
 
-      List<String> args = new ArrayList<String>();
-      for (Annotation[] annotations : annotationsGrid) {
+      List<Object> args = new ArrayList<Object>();
+      for (int i = 0; i < annotationsGrid.length; i++) {
+        Annotation[] annotations = annotationsGrid[i];
+
+        Annotation bindingAnnotation = null;
         boolean namedFound = false;
         for (Annotation annotation : annotations) {
           if (Named.class.isInstance(annotation)) {
@@ -456,13 +461,26 @@ class DefaultPageBook implements PageBook {
             namedFound = true;
 
             break;
+          } else if (annotation.annotationType().isAnnotationPresent(BindingAnnotation.class)) {
+            bindingAnnotation = annotation;
           }
         }
 
-        if (!namedFound)
-          throw new InvalidEventHandlerException(
-              "Encountered an argument not annotated with @Named in event handler method: " +
-                  method);
+        if (!namedFound) {
+          // Could be an arbitrary injection request.
+          Class<?> argType = method.getParameterTypes()[i];
+          Key<?> key = (null != bindingAnnotation)
+              ? Key.get(argType, bindingAnnotation)
+              : Key.get(argType);
+
+          args.add(key);
+
+          if (null == injector.getBindings().get(key))
+            throw new InvalidEventHandlerException(
+                "Encountered an argument not annotated with @Named and not a valid injection key"
+                + " in event handler method: " + method + " " + key);
+        }
+
       }
 
       return Collections.unmodifiableList(args);
@@ -477,9 +495,13 @@ class DefaultPageBook implements PageBook {
     }
 
     public Object call(Object page, Map<String, String> map) {
-      List<String> arguments = new ArrayList<String>();
-      for (String argName : args) {
-        arguments.add(map.get(argName));
+      List<Object> arguments = new ArrayList<Object>();
+      for (Object arg : args) {
+        if (arg instanceof String)
+          //noinspection SuspiciousMethodCalls
+          arguments.add(map.get(arg));
+        else
+          arguments.add(injector.getInstance((Key<?>) arg));
       }
 
       return call(page, method, arguments.toArray());

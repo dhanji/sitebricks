@@ -6,11 +6,12 @@ import com.google.sitebricks.Show;
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
-@At("/") @Show("index.html")
+@At("/")
+@Show("index.html")
 public class Start {
-    private String message = "Hello from warp-sitebricks!";
+  private String message = "Hello from google-sitebricks!";
 
-    public String getMessage() {
-        return message;
-    }
+  public String getMessage() {
+    return message;
+  }
 }

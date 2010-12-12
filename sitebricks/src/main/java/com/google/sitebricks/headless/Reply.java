@@ -37,6 +37,8 @@ public abstract class Reply<E> {
   public abstract Reply<E> noContent();
 
   public abstract Reply<E> error();
+  
+  public abstract void ok();
 
   abstract void populate(Injector injector, HttpServletResponse response) throws IOException;
 
