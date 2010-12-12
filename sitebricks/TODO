@@ -1,0 +1,17 @@
+TODO
+----
+
+- RPC batching
+- Cometd support (hanging get/websocket)
+- Fix up template error reporting
+- add patch for script from Jared
+- Make it possible to weaken the binding target error checking
+- Make it possible to turn off generic checking (or fix it)
+x Inject anything into method
+- Create Request<T> abstraction for @Services
+
+More generifiable stuff:
+- timing module
+- Monitoring module (statusz, varz etc.)
+- General RPC system?
+- Async HTTP client

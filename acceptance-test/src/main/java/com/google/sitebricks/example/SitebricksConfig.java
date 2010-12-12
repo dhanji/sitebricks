@@ -1,7 +1,11 @@
 package com.google.sitebricks.example;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.*;
+import com.google.inject.BindingAnnotation;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.sitebricks.SitebricksModule;
 import com.google.sitebricks.binding.FlashCache;

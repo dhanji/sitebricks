@@ -3,13 +3,21 @@ package com.google.sitebricks.compiler;
 import com.google.common.collect.ImmutableSet;
 import com.google.sitebricks.rendering.Strings;
 import org.apache.commons.lang.Validate;
-import org.jsoup.nodes.*;
+import org.jsoup.nodes.Attribute;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Comment;
+import org.jsoup.nodes.DataNode;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.nodes.XmlDeclaration;
 import org.jsoup.parser.Tag;
 import org.jsoup.parser.TokenQueue;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -24,7 +32,6 @@ public class HtmlParser {
   private static final ImmutableSet<String> headTags = ImmutableSet
       .of("base", "script", "noscript", "link", "meta", "title", "style", "object");
 
-
   private static final String SQ = "'";
   private static final String DQ = "\"";
 
@@ -38,7 +45,8 @@ public class HtmlParser {
   // private final LinkedList<Node> soup = new LinkedList<Node>();
   private final LinkedList<Node> stack = new LinkedList<Node>();
 
-
+  static final Pattern EMBEDDED_ANNOTATION_REGEX = Pattern.compile("(@\\w\\w*(\\([\\w,=\"'()?:><!\\[\\];{}. ]*\\))?)");
+  
   // TODO - LineCountingTokenQueue
   static final Pattern LINE_SEPARATOR = Pattern.compile("(\\r\\n|\\n|\\r|\\u0085|\\u2028|\\u2029)");
   static final String LINE_NUMBER_ATTRIBUTE = "_linecount";
@@ -183,19 +191,9 @@ public class HtmlParser {
     if (tag.isData()) {
       String data = tq.chompTo("</" + tagName);
       tq.chompTo(">");
-
-      Node dataNode;
-      // want to show as text, but not contain inside tags (so not a data tag?)
-      if (tag.equals(titleTag) || tag.equals(textareaTag))
-        dataNode = TextNode.createFromEncoded(data, baseUri);
-      else // data not encoded but raw (for " in script)
-        dataNode = new DataNode(data, baseUri);
-
-      if (pendingAnnotation != null)
-        pendingAnnotation.apply(dataNode);
-
-      lines(dataNode, data);
-      child.appendChild(dataNode);
+      
+      // enable annotations on data areas
+      parseAnnotatableText (data, child);
     }
 
     // <base href>: update the base uri
@@ -240,7 +238,118 @@ public class HtmlParser {
       return null;
     }
   }
+  
 
+  /**
+   * Pulls a text segment apart by annotations within it and creates multiple Text Nodes
+   * applying the annotation to each text segment as approriate.
+   * 
+   * @param text the text to be processed for annotations
+   * @param parent
+   */
+  private void parseAnnotatableText(String text, Element parent) {
+	  AnnotationNode annotation = null;
+	  Matcher matcher = EMBEDDED_ANNOTATION_REGEX.matcher(text);
+
+	  int previousEnd = 0;
+	  while (matcher.find()){
+		  int start = matcher.start();
+
+		  // build a new text node for what is between last index and current annotation
+		  if (start > previousEnd)	{
+			  String segment = text.substring(previousEnd, start);
+			  // ignore empty white space
+			  if (segment.trim().length() > 0){
+				  addTextNodeToParent (segment, parent, annotation);
+				  annotation = null;
+			  }
+		  }
+
+		  // parse the annotation
+		  String annotationText = matcher.group().trim();
+		  if (null != annotationText) {
+		      annotation = new AnnotationNode(annotationText);
+		      lines(annotation, annotationText);
+		  }
+		  previousEnd = matcher.end();
+	  }
+	  
+	  // handle leftover text if we parsed some segment
+	  if (previousEnd > 0 && previousEnd < text.length()){
+		  String segment = text.substring(previousEnd);
+		  if (segment.trim().length() > 0){
+			  addTextNodeToParent (segment, parent, annotation);
+			  annotation = null;
+		  }
+	  }
+	  
+	  // store the remaining annotation for use by whatever is parsed next
+	  if (annotation != null)
+		  add(annotation);
+	  
+	  // handle no annotations being found
+	  if (previousEnd == 0){
+		  Node dataNode;
+		  if (parent.tagName().equals(titleTag) || parent.tagName().equals(textareaTag))
+	        dataNode = TextNode.createFromEncoded(text, baseUri);
+	      else // data not encoded but raw (for " in script)
+	        dataNode = new DataNode(text, baseUri);
+	      lines(dataNode, text);
+	      
+	      if (pendingAnnotation != null)
+	          pendingAnnotation.apply(dataNode);
+	      
+		  // put the text node on the parent
+		  parent.appendChild(dataNode);
+	  }
+  }
+
+  /** 
+   * Break the text up by the first line delimiter.  We only want annotations applied to the first line of a block of text
+   * and not to a whole segment.
+   * 
+   * @param text the text to turn into nodes
+   * @param parent the parent node
+   * @param annotation the current annotation to be applied to the first line of text
+   */
+  private void addTextNodeToParent (String text, Element parent, AnnotationNode annotation)	{
+	  String [] lines = new String[] {text};
+	  
+	  if (annotation != null)
+		  lines = splitInTwo(text);
+	  
+	  for (int i = 0; i < lines.length; i++){
+		  TextNode textNode = TextNode.createFromEncoded(lines[i], baseUri);
+		  lines(textNode, lines[i]);
+		  
+		  // apply the annotation and reset it to null
+		  if (annotation != null && i == 0)
+			  annotation.apply(textNode);
+		  
+		  // put the text node on the parent
+		  parent.appendChild(textNode);
+	  }
+  }
+  
+  /**
+   * Break a text segment apart into two at the first line delimiter which has non-whitespace characters before it.
+   * 
+   * @param text text to split in two
+   * @return
+   */
+  private String[] splitInTwo(String text)	{
+	  Matcher matcher = LINE_SEPARATOR.matcher(text);
+	  while (matcher.find()){
+		  int start = matcher.start();
+		  if (start > 0 && start < text.length())	{
+			  String segment = text.substring(0, start);
+			  if (segment.trim().length() > 0)
+				  return new String[] {text.substring(0, start), text.substring(start)};
+		  }
+	  }
+	  return new String[] {text};
+  }
+  
   private void parseTextNode() {
     String text = tq.consumeTo("<");
     String annotationText = AnnotationParser.readAnnotation(text);

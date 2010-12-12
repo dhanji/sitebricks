@@ -1,22 +1,39 @@
 package com.google.sitebricks.compiler;
 
+import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION;
+import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_CONTENT;
+import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_KEY;
+import static com.google.sitebricks.compiler.HtmlParser.LINE_NUMBER_ATTRIBUTE;
+import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
+import net.jcip.annotations.NotThreadSafe;
+
+import org.apache.commons.lang.Validate;
+import org.jetbrains.annotations.NotNull;
+import org.jsoup.nodes.Attribute;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Comment;
+import org.jsoup.nodes.DataNode;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.nodes.XmlDeclaration;
+
 import com.google.common.collect.Lists;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.rendering.control.Chains;
 import com.google.sitebricks.rendering.control.WidgetChain;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
-import net.jcip.annotations.NotThreadSafe;
-import org.apache.commons.lang.Validate;
-import org.jetbrains.annotations.NotNull;
-import org.jsoup.nodes.*;
-
-import java.util.*;
-
-import static com.google.sitebricks.compiler.AnnotationNode.*;
-import static com.google.sitebricks.compiler.HtmlParser.LINE_NUMBER_ATTRIBUTE;
-import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
 
 /**
  * @author Shawn based on XMLTemplateCompiler by Dhanji R. Prasanna (dhanji@gmail.com)
@@ -84,7 +101,7 @@ class HtmlTemplateCompiler {
     /**
      * Walks the DOM recursively, and converts elements into corresponding sitebricks widgets.
      */
-    @SuppressWarnings({"JavaDoc"}) @NotNull
+    @NotNull
     private <N extends Node> WidgetChain walk(N node) {
 
         WidgetChain widgetChain = Chains.proceeding();
@@ -110,7 +127,43 @@ class HtmlTemplateCompiler {
                     lexicalDescend(child, shouldPopScope);
                 }
 
-            } else if ((n instanceof TextNode) || (n instanceof Comment) || (n instanceof DataNode)) {
+            } else if (n instanceof TextNode) {
+            	TextNode child = (TextNode)n;
+            	Renderable textWidget = null;
+            	
+                //setup a lexical scope if we're going into a repeat widget (by reading the previous node)
+                final boolean shouldPopScope = lexicalClimb(child);
+
+                // construct the text widget
+                try {
+                	textWidget = registry.textWidget(cleanHtml(n), lexicalScopes.peek());
+                	
+                	// if there are no annotations, add the text widget to the chain
+                	if (!child.hasAttr(ANNOTATION_KEY))	{
+                		widgetChain.addWidget(textWidget);
+                	}
+                	else	{
+                		// construct a new widget chain for this text node 
+                		WidgetChain childsChildren = Chains.proceeding().addWidget(textWidget);
+                		
+                		// make a new widget for the annotation, making the text chain the child
+                		String widgetName = child.attr(ANNOTATION_KEY).toLowerCase();
+                		Renderable annotationWidget = registry.newWidget(widgetName, child.attr(ANNOTATION_CONTENT), childsChildren, lexicalScopes.peek());
+                		widgetChain.addWidget(annotationWidget);
+                	}
+                	
+                } catch (ExpressionCompileException e) {
+                    errors.add(
+                            CompileError.in(node.outerHtml())
+                            .near(line(node))
+                            .causedBy(e)
+                    );
+                }
+
+                if (shouldPopScope)
+                	lexicalScopes.pop();
+            	
+            } else if ((n instanceof Comment) || (n instanceof DataNode)) {
                 //process as raw text widget
                 try {
                     widgetChain.addWidget(registry.textWidget(cleanHtml(n), lexicalScopes.peek()));
@@ -596,9 +649,15 @@ class HtmlTemplateCompiler {
           // HACK: elide comments for now.
           return "";
         } else if (node instanceof DataNode && node.childNodes().isEmpty()) {
-          // Data nodes that have no content, example:
-          // <script src=..></script>
-          return "";
+        	// No child nodes are defined but we have to handle content if such exists, example
+            // <script language="JavaScript">var a =  { name: "${user.name}"}</script>  
+
+            String content = node.attr("data");
+            if (Strings.empty(content)) {
+                return "";
+            }
+
+            return content;
         } else {
             return node.outerHtml();
         }
