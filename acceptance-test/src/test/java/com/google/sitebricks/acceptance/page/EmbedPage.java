@@ -1,7 +1,6 @@
 package com.google.sitebricks.acceptance.page;
 
 import com.google.sitebricks.acceptance.util.AcceptanceTest;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.PageFactory;
 
@@ -16,7 +15,9 @@ public class EmbedPage {
   }
 
   public boolean hasCssLink() {
-    return null != driver.findElement(By.xpath("//head/link[@href='default.css']"));
+
+    // UGH, but webdriver is sucking it up with xpath soo....
+    return driver.getPageSource().contains("<link href=\"default.css\"");
   }
 
 
