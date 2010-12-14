@@ -37,16 +37,13 @@ public class FreemarkerTemplateCompiler {
       public void render(Object bound, Respond respond) {
         assert page.isInstance(bound);
         Writer writer = new StringWriter();
-        try
-        {
+        try {
             template.process(bound, writer);
         }
-        catch (TemplateException e)
-        {
-            throw new RuntimeException( e );
+        catch (TemplateException e) {
+            throw new RuntimeException(e);
         }
-        catch (IOException e)
-        {
+        catch (IOException e) {
             throw new RuntimeException(e);
         }          
         respond.write(writer.toString());
@@ -61,22 +58,21 @@ public class FreemarkerTemplateCompiler {
   
   private Template getTemplate(Class<?> page, String content)
   {
-      Configuration configuration = new Configuration();
-      configuration.setTemplateExceptionHandler( new SitebricksTemplateExceptionHandler() );
+    Configuration configuration = new Configuration();
+    configuration.setTemplateExceptionHandler( new SitebricksTemplateExceptionHandler() );
       
-      try {
-        return new Template(page.getName(), new StringReader(content), configuration);
+    try {
+      return new Template(page.getName(), new StringReader(content), configuration);
     }
-    catch ( IOException e )
-    {
-        throw new RuntimeException( e );
+    catch ( IOException e ) {
+      throw new RuntimeException( e );
     }          
   }
   
   class SitebricksTemplateExceptionHandler implements TemplateExceptionHandler {
-      public void handleTemplateException(TemplateException te, Environment env, Writer out) 
-          throws TemplateException 
-      {        
-      }
+    public void handleTemplateException(TemplateException te, Environment env, Writer out) 
+      throws TemplateException {        
+      // We intentionally do nothing here
+    }
   }
 }
