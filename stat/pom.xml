@@ -1,0 +1,83 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>5</version>
+  </parent>
+  <groupId>com.google.sitebricks</groupId>
+  <artifactId>stat</artifactId>
+  <packaging>jar</packaging>
+  <version>0.8.3-SNAPSHOT</version>
+  <name>guice-stat</name>
+  <url>http://code.google.com/p/google-sitebricks/</url>
+  <description>Statistics module for Guice applications (does not require sitebricks)</description>
+
+  <scm>
+    <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/trunk/sitebricks</connection>
+    <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/trunk/sitebricks</developerConnection>
+    <url>http://code.google.com/p/google-sitebricks/source/browse</url>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-servlet</artifactId>
+      <version>2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.collections</groupId>
+      <artifactId>google-collections</artifactId>
+      <version>1.0-rc2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>2.0</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+ 
+  <!-- This should be removed when the googlecode repositories are migrated to the standard Nexus OSS repository infrastructure -->
+  <distributionManagement>
+    <snapshotRepository>
+      <id>google-snapshots</id>
+      <name>Sonatype OSS Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>google-with-staging</id>
+      <name>Nexus OSS Staging Repository</name>
+      <url> https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
+  
+</project>

@@ -1,12 +1,9 @@
 package com.google.sitebricks.example;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.BindingAnnotation;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import com.google.inject.Stage;
+import com.google.inject.*;
 import com.google.inject.servlet.GuiceServletContextListener;
+import com.google.inject.stat.StatModule;
 import com.google.sitebricks.SitebricksModule;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.HttpSessionFlashCache;
@@ -66,6 +63,8 @@ public class SitebricksConfig extends GuiceServletContextListener {
         localize(I18n.MyMessages.class).usingDefault();
         localize(I18n.MyMessages.class).using(Locale.CANADA_FRENCH,
             ImmutableMap.of(I18n.HELLO, I18n.HELLO_IN_FRENCH));
+        
+        install(new StatModule("/stats"));
       }
     });
   }

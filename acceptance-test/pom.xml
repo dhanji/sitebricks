@@ -81,6 +81,11 @@
       <version>0.8.3-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>com.google.sitebricks</groupId>
+      <artifactId>stat</artifactId>
+      <version>0.8.3-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>org.seleniumhq.webdriver</groupId>
       <artifactId>webdriver-support</artifactId>
       <version>0.9.7376</version>
