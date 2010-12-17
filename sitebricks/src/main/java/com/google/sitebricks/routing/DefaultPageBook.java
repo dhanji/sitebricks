@@ -531,10 +531,16 @@ class DefaultPageBook implements PageBook {
         return method.invoke(page, args);
       } catch (IllegalAccessException e) {
         throw new EventDispatchException(
-            "Could not access event method: " + method, e);
+            "Could not access event method (appears to be a security problem): " + method, e);
       } catch (InvocationTargetException e) {
-        throw new EventDispatchException(
-            "Event method threw an exception: " + method, e);
+        Throwable cause = e.getCause();
+        StackTraceElement[] stackTrace = cause.getStackTrace();
+        throw new EventDispatchException(String.format(
+            "Exception [%s - \"%s\"] thrown by event method [%s]\n\nat %s\n"
+            + "(See below for entire trace.)\n",
+            cause.getClass().getSimpleName(),
+            cause.getMessage(), method,
+            stackTrace[0]), e);
       }
     }
   }
