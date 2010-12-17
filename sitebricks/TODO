@@ -12,6 +12,6 @@ x Inject anything into method
 
 More generifiable stuff:
 - timing module
-- Monitoring module (statusz, varz etc.)
+x Monitoring module (statusz, varz etc.)
 - General RPC system?
 - Async HTTP client

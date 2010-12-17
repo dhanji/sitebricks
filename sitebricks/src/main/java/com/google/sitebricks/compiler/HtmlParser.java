@@ -3,14 +3,7 @@ package com.google.sitebricks.compiler;
 import com.google.common.collect.ImmutableSet;
 import com.google.sitebricks.rendering.Strings;
 import org.apache.commons.lang.Validate;
-import org.jsoup.nodes.Attribute;
-import org.jsoup.nodes.Attributes;
-import org.jsoup.nodes.Comment;
-import org.jsoup.nodes.DataNode;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
-import org.jsoup.nodes.XmlDeclaration;
+import org.jsoup.nodes.*;
 import org.jsoup.parser.Tag;
 import org.jsoup.parser.TokenQueue;
 
@@ -147,7 +140,7 @@ public class HtmlParser {
 
   private void parseEndTag() {
     tq.consume("</");
-    String tagName = tq.consumeWord();
+    String tagName = tq.consumeTagName();
     tq.chompTo(">");
 
     if (!Strings.empty(tagName)) {
@@ -158,7 +151,7 @@ public class HtmlParser {
 
   private void parseStartTag() {
     tq.consume("<");
-    String tagName = tq.consumeWord();
+    String tagName = tq.consumeTagName();
 
     if (Strings.empty(tagName)) { // doesn't look like a start tag after all; put < back on stack and handle as text
       tq.addFirst("&lt;");
