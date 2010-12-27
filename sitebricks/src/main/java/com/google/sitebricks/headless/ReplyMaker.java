@@ -3,13 +3,16 @@ package com.google.sitebricks.headless;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.client.transport.Text;
 import com.google.sitebricks.rendering.Strings;
+import org.apache.commons.io.IOUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -25,7 +28,7 @@ class ReplyMaker<E> extends Reply<E> {
   private String redirectUri;
   private Map<String, String> headers = Maps.newHashMap();
 
-  private Class<? extends Transport> transport = Text.class;
+  private Key<? extends Transport> transport = Key.get(Text.class);
   private E entity;
 
   public ReplyMaker(E entity) {
@@ -74,9 +77,16 @@ class ReplyMaker<E> extends Reply<E> {
   }
 
   @Override
-  public Reply<E> as(Class<? extends Transport> transport) {
+  public Reply<E> as(Key<? extends Transport> transport) {
     Preconditions.checkArgument(null != transport, "Transport class cannot be null!");
     this.transport = transport;
+    return this;
+  }
+
+  @Override
+  public Reply<E> as(Class<? extends Transport> transport) {
+    Preconditions.checkArgument(null != transport, "Transport class cannot be null!");
+    this.transport = Key.get(transport);
     return this;
   }
 
@@ -157,8 +167,18 @@ class ReplyMaker<E> extends Reply<E> {
     // Write out data.
     response.setStatus(status);
     if (null != entity) {
-      // TODO(dhanji): This feels wrong to me. We need a better way to obtain the entity type.
-      transport.out(response.getOutputStream(), (Class<E>) entity.getClass(), entity);
+      if (entity instanceof InputStream) {
+        // Stream the response rather than marshalling it through a transport.
+        InputStream inputStream = (InputStream) entity;
+        try {
+          IOUtils.copy(inputStream, response.getOutputStream());
+        } finally {
+          inputStream.close();
+        }
+      } else {
+        // TODO(dhanji): This feels wrong to me. We need a better way to obtain the entity type.
+        transport.out(response.getOutputStream(), (Class<E>) entity.getClass(), entity);
+      }
     }
   }
 }

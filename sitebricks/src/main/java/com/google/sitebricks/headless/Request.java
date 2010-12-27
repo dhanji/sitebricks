@@ -3,6 +3,9 @@ package com.google.sitebricks.headless;
 import com.google.common.collect.Multimap;
 import com.google.sitebricks.client.Transport;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * Sitebricks abstraction of a request. May be a standard HTTP request, a tunneled
  * Sitebricks RPC-over-HTTP, or another abstraction entirely.
@@ -10,10 +13,37 @@ import com.google.sitebricks.client.Transport;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public interface Request {
+
+  /**
+   * Reads the raw request data into an object of the given type. Must
+   * be followed by a transport clause for correct unmarshalling. Example:
+   * <pre>
+   *   Person p = request.read(Person.class).as(Json.class);
+   * </pre>
+   *
+   * @param type The target type to unmarshall the raw request data into.
+   * @return an instance containing the deserialized raw data.
+   */
   <E> RequestRead<E> read(Class<E> type);
 
+  /**
+   * Reads the request data directly into the given output stream. Useful
+   * for streaming uploads to a file or passthrough socket.
+   *
+   * @param out Any valid, open outputstream. Not closed after writing.
+   *
+   * @throws IOException If an error occurs during the streaming.
+   */
+  void readTo(OutputStream out) throws IOException;
+
+  /**
+   * Returns request headers as a multimap (to account for repeated headers).
+   */
   Multimap<String, String> headers();
 
+  /**
+   * Returns request parameters as a multimap (to account for repeated values).
+   */
   Multimap<String, String> params();
 
   public static interface RequestRead<E> {

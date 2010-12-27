@@ -11,10 +11,12 @@ import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.RoutingDispatcher;
+import org.apache.commons.io.IOUtils;
 import org.mvel2.MVEL;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -104,6 +106,11 @@ class SitebricksInternalModule extends AbstractModule {
             return memo;
           }
         };
+      }
+
+      @Override
+      public void readTo(OutputStream out) throws IOException {
+        IOUtils.copy(servletRequest.getInputStream(), out);
       }
 
       @Override
