@@ -1,6 +1,7 @@
 package com.google.sitebricks.rendering.control;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.sitebricks.Evaluator;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
@@ -8,6 +9,7 @@ import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.routing.PageBook;
 import net.jcip.annotations.Immutable;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +26,7 @@ class EmbedWidget implements Renderable {
   private final String targetPage;
 
   private EmbeddedRespondFactory factory;
+  private Provider<HttpServletRequest> request;
 
   public EmbedWidget(Map<String, ArgumentWidget> arguments, String expression,
                      Evaluator evaluator, PageBook pageBook, String targetPage) {
@@ -51,6 +54,9 @@ class EmbedWidget implements Renderable {
 
     //chain to embedded page (widget), with arguments
     EmbeddedRespond embed = factory.get(arguments);
+
+    HttpServletRequest req = request.get();
+    page.doMethod(req.getMethod(), pageObject, "", req);
     page.widget().render(pageObject, embed);
 
     //extract and write embedded response to enclosing page's respond
@@ -64,9 +70,9 @@ class EmbedWidget implements Renderable {
     return Collections.emptySet();
   }
 
-  //TODO improve to constructor injected
   @Inject
-  public void setFactory(EmbeddedRespondFactory factory) {
+  public void init(EmbeddedRespondFactory factory, Provider<HttpServletRequest> request) {
     this.factory = factory;
+    this.request = request;
   }
 }

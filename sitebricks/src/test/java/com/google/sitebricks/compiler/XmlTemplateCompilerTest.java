@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.sitebricks.*;
 import com.google.sitebricks.http.Delete;
@@ -16,9 +15,6 @@ import com.google.sitebricks.rendering.control.Chains;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
-
-import static org.easymock.EasyMock.*;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -26,6 +22,9 @@ import org.testng.annotations.Test;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.util.Map;
+
+import static com.google.sitebricks.compiler.HtmlTemplateCompilerTest.mockRequestProviderForContext;
+import static org.easymock.EasyMock.createNiceMock;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -456,19 +455,5 @@ public class XmlTemplateCompilerTest {
 //        assert "<xml><div class=\"content\">hello showme</div></xml>"
 //                .equals(s) : "Did not write expected output, instead: " + s;
 //    }
-
-  static Provider<HttpServletRequest> mockRequestProviderForContext() {
-    return new Provider<HttpServletRequest>() {
-      public HttpServletRequest get() {
-        final HttpServletRequest request = createMock(HttpServletRequest.class);
-        expect(request.getContextPath())
-            .andReturn("")
-            .anyTimes();
-        replay(request);
-
-        return request;
-      }
-    };
-  }
 
 }

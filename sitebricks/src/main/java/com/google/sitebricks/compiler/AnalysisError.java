@@ -43,7 +43,6 @@ public abstract class AnalysisError {
     }
 
     public AnalysisError causedBy(ExpressionCompileException e) {
-      System.out.println(e.getError());
       return new AnalysisErrorImpl(fragment, line, e.getError());
     }
 

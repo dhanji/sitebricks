@@ -1,5 +1,6 @@
 package com.google.sitebricks.compiler;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.inject.*;
 import com.google.sitebricks.*;
@@ -457,12 +458,18 @@ public class HtmlTemplateCompilerTest {
 //                .equals(s) : "Did not write expected output, instead: " + s;
 //    }
 
-  static Provider<HttpServletRequest> mockRequestProviderForContext() {
+  public static Provider<HttpServletRequest> mockRequestProviderForContext() {
     return new Provider<HttpServletRequest>() {
       public HttpServletRequest get() {
         final HttpServletRequest request = createMock(HttpServletRequest.class);
         expect(request.getContextPath())
             .andReturn("")
+            .anyTimes();
+        expect(request.getMethod())
+            .andReturn("POST")
+            .anyTimes();
+        expect(request.getParameterMap())
+            .andReturn(ImmutableMap.of())
             .anyTimes();
         replay(request);
 
