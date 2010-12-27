@@ -107,8 +107,15 @@ class ReplyMaker<E> extends Reply<E> {
   }
 
   @Override
-  public void ok() {
+  public Reply<E> status(int code) {
+    status = code;
+    return this;
+  }
+
+  @Override
+  public Reply<E> ok() {
     status = HttpServletResponse.SC_OK;
+    return this;
   }
 
   @Override

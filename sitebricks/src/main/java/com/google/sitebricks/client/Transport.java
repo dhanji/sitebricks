@@ -30,8 +30,10 @@ public interface Transport {
    * @param out An open outputstream to write to. This stream will NOT be closed.
    * @param type The type of the data being serialized to the stream.
    * @param data An object representing the data to be written out.
+
+   * @throws IOException Thrown if there is an error writing to this stream.
    */
-  <T> void out(OutputStream out, Class<T> type, T data);
+  <T> void out(OutputStream out, Class<T> type, T data) throws IOException;
 
   /**
    * Returns the HTTP content type marshalled by this transport. For example, the

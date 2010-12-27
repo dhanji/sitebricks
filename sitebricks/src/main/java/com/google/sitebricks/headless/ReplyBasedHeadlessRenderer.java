@@ -21,13 +21,14 @@ class ReplyBasedHeadlessRenderer implements HeadlessRenderer {
   }
 
   public void render(HttpServletResponse response, Object o) throws IOException {
-    // Guaranteed by Sitebrick's page validator.
-    assert o instanceof Reply;
-
-    Reply<?> reply = (Reply<?>)o;
-    if (null == reply) {
+    if (null == o) {
       throw new RuntimeException("Sitebricks received a null reply from the resource.");
     }
+
+    // Guaranteed by Sitebrick's page validator.
+    assert o instanceof Reply : o.getClass();
+    Reply<?> reply = (Reply<?>)o;
+
     reply.populate(injector, response);
   }
 }

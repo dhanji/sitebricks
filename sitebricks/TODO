@@ -1,12 +1,13 @@
 TODO
 ----
 
+- Fix all error checking
+- Make it possible to weaken the binding target error checking
+- Make it possible to turn off generic checking (or fix it)
 - RPC batching
 - Cometd support (hanging get/websocket)
 - Fix up template error reporting
-- add patch for script from Jared
-- Make it possible to weaken the binding target error checking
-- Make it possible to turn off generic checking (or fix it)
+x add patch for script from Jared
 x Inject anything into method
 - Create Request<T> abstraction for @Services
 

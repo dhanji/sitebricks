@@ -29,4 +29,15 @@ public class Strings {
   public static boolean empty(String string) {
     return null == string || "".equals(string.trim());
   }
+
+  public static String join(String[] strings, char sep) {
+    StringBuilder builder = new StringBuilder();
+    for (String string : strings) {
+      builder.append(string);
+      builder.append(sep);
+    }
+    builder.deleteCharAt(builder.length() - 1);
+
+    return builder.toString();
+  }
 }
