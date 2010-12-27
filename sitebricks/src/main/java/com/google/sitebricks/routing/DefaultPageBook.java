@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
 import com.google.inject.*;
 import com.google.inject.name.Named;
+import com.google.sitebricks.At;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.headless.Service;
@@ -53,6 +54,29 @@ class DefaultPageBook implements PageBook {
   }
 
   public Page serviceAt(String uri, Class<?> pageClass) {
+    // Handle subpaths, registering each as a separate instance of the page
+    // tuple.
+    for (Method method : pageClass.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(At.class)) {
+
+        // This is a subpath expression.
+        At at = method.getAnnotation(At.class);
+        String subpath = at.value();
+
+        // Validate subpath
+        if (!subpath.startsWith("/") || subpath.isEmpty() || subpath.length() == 1) {
+          throw new IllegalArgumentException(String.format(
+              "Subpath At(\"%s\") on %s.%s() must begin with a \"/\" and must not be empty",
+              subpath, pageClass.getName(), method.getName()));
+        }
+
+        subpath = uri + subpath;
+
+        // Register as headless web service.
+        at(subpath, pageClass, true);
+      }
+    }
+
     return at(uri, pageClass, true); 
   }
 
@@ -243,8 +267,8 @@ class DefaultPageBook implements PageBook {
     private Map<String, Class<? extends Annotation>> httpMethods;
 
 
-    public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, Injector injector, boolean headless) {
-
+    public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, Injector injector,
+                     boolean headless) {
       this.uri = uri;
       this.matcher = matcher;
       this.clazz = clazz;
@@ -257,7 +281,7 @@ class DefaultPageBook implements PageBook {
               Key.get(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {}, Bricks.class);
 
       this.httpMethods = injector.getInstance(methodMapKey);
-      this.methods = reflectAndCache(httpMethods);
+      this.methods = reflectAndCache(uri, httpMethods);
     }
 
     //the @Select request parameter-based event dispatcher
@@ -273,7 +297,21 @@ class DefaultPageBook implements PageBook {
      * Returns a map of HTTP-method name to @Annotation-marked methods
      */
     @SuppressWarnings({"JavaDoc"})
-    private Multimap<String, MethodTuple> reflectAndCache(Map<String, Class<? extends Annotation>> methodMap) {
+    private Multimap<String, MethodTuple> reflectAndCache(String uri,
+        Map<String, Class<? extends Annotation>> methodMap) {
+      String tail = "";
+      if (clazz.isAnnotationPresent(At.class)) {
+        int length = clazz.getAnnotation(At.class).value().length();
+
+        // It's possible that the uri being registered is shorter than the
+        // class length, this can happen in the case of using the .at() module
+        // directive to override @At() URI path mapping. In this case we treat
+        // this call as a top-level path registration with no tail. Any
+        // encountered subpath @At methods will be ignored for this URI.
+        if (length <= uri.length())
+          tail = uri.substring(length);
+      }
+
       Multimap<String, MethodTuple> map = HashMultimap.create();
 
       for (Map.Entry<String, Class<? extends Annotation>> entry : methodMap.entrySet()) {
@@ -284,6 +322,21 @@ class DefaultPageBook implements PageBook {
             if (method.isAnnotationPresent(get)) {
               if (!method.isAccessible())
                 method.setAccessible(true); //ugh
+
+              // Be defensive about subpaths.
+              if (method.isAnnotationPresent(At.class)) {
+                // Skip any at-annotated methods for a top-level path registration.
+                if (tail.isEmpty()) {
+                  continue;
+                }
+
+                // Skip any at-annotated methods that do not exactly match the path.
+                if (!tail.equals(method.getAnnotation(At.class).value())) {
+                  continue;
+                }
+              }
+
+              // Otherwise register this method for firing...
 
               //remember default value is empty string
               String value = getValue(get, method);
@@ -297,6 +350,21 @@ class DefaultPageBook implements PageBook {
             if (method.isAnnotationPresent(get)) {
               if (!method.isAccessible())
                 method.setAccessible(true); //ugh
+
+              // Be defensive about subpaths.
+              if (method.isAnnotationPresent(At.class)) {
+                // Skip any at-annotated methods for a top-level path registration.
+                if (tail.isEmpty()) {
+                  continue;
+                }
+
+                // Skip any at-annotated methods that do not exactly match the path.
+                if (!tail.equals(method.getAnnotation(At.class).value())) {
+                  continue;
+                }
+              }
+
+              // Otherwise register this method for firing...
 
               //remember default value is empty string
               String value = getValue(get, method);
