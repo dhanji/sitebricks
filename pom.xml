@@ -15,7 +15,7 @@
   <modules>
     <module>sitebricks</module>
     <module>acceptance-test</module>
-    <module>stats</module>
+    <module>stat</module>
   </modules>
   
   <scm>
