@@ -12,12 +12,21 @@ import com.google.sitebricks.http.Put;
 
 /**
  * Demonstrates CRUD operations in a restful webservice.
+ * 
+ * // ------------------------------
+ * // Method   URL        Action
+ * // ------------------------------
+ * // POST     /user     CREATE
+ * // GET      /user     READ (collection)
+ * // GET      /user/1   READ (individual)
+ * // PUT      /user/1   UPDATE
+ * // DELETE   /user/1   DELETE
  *
  * @author Jason van Zyl
  */
 @At("/json/:type") @Service
 public class RestfulWebServiceWithCRUD {
-	public static final String TYPE = "person";
+	public static final String TYPE = "user";
   public static final String BASE_SERVICE_PATH = "/json/" + TYPE;
   public static final String CREATE = "CREATE";
   public static final String READ_COLLECTION = "READ_COLLECTION";
