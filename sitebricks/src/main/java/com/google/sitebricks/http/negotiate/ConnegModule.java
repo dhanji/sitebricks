@@ -3,7 +3,6 @@ package com.google.sitebricks.http.negotiate;
 import com.google.sitebricks.SitebricksModule;
 
 /**
- *
  * Bindings for content negotiation defaults.
  */
 public class ConnegModule extends SitebricksModule {
