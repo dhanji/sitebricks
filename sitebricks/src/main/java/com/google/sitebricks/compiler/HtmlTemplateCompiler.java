@@ -1,20 +1,14 @@
 package com.google.sitebricks.compiler;
 
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_CONTENT;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_KEY;
-import static com.google.sitebricks.compiler.HtmlParser.LINE_NUMBER_ATTRIBUTE;
-import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
+import com.google.common.collect.Lists;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.rendering.Strings;
+import com.google.sitebricks.rendering.control.Chains;
+import com.google.sitebricks.rendering.control.WidgetChain;
+import com.google.sitebricks.rendering.control.WidgetRegistry;
+import com.google.sitebricks.routing.PageBook;
+import com.google.sitebricks.routing.SystemMetrics;
 import net.jcip.annotations.NotThreadSafe;
-
 import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Attribute;
@@ -26,14 +20,18 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.nodes.XmlDeclaration;
 
-import com.google.common.collect.Lists;
-import com.google.sitebricks.Renderable;
-import com.google.sitebricks.rendering.Strings;
-import com.google.sitebricks.rendering.control.Chains;
-import com.google.sitebricks.rendering.control.WidgetChain;
-import com.google.sitebricks.rendering.control.WidgetRegistry;
-import com.google.sitebricks.routing.PageBook;
-import com.google.sitebricks.routing.SystemMetrics;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
+import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION;
+import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_CONTENT;
+import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_KEY;
+import static com.google.sitebricks.compiler.HtmlParser.LINE_NUMBER_ATTRIBUTE;
+import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
 
 /**
  * @author Shawn based on XMLTemplateCompiler by Dhanji R. Prasanna (dhanji@gmail.com)
@@ -389,6 +387,8 @@ class HtmlTemplateCompiler {
 
             context.put(repeat.var(), typeParameter);
             context.put(repeat.pageVar(), page);
+            context.put("index", int.class);
+            context.put("isLast", boolean.class);
 
         } catch (ExpressionCompileException e) {
                 errors.add(

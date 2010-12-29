@@ -399,6 +399,8 @@ class XmlTemplateCompiler {
 
             context.put(repeat.var(), typeParameter);
             context.put(repeat.pageVar(), page);
+            context.put("index", int.class);
+            context.put("isLast", boolean.class);
 
         } catch (ExpressionCompileException e) {
                 errors.add(

@@ -42,7 +42,7 @@ Released for free under a Creative Commons Attribution 2.5 License
 
                     <ul>
                         @Repeat(items=names, var="name", pageVar="page")
-                        <li>${name}</li>
+                        <li>${index}: ${name} (last? ${isLast})</li>
                     </ul>
 
                     <br/><br/><br/>

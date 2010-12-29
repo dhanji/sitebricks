@@ -23,7 +23,7 @@ class RepeatWidget implements Renderable {
     private final String var;
     private final String pageVar;
     private final Evaluator evaluator;
-    
+
     private static final String DEFAULT_PAGEVAR = "__page";
     private static final String DEFAULT_VAR = "__this";
 
@@ -60,11 +60,14 @@ class RepeatWidget implements Renderable {
         Map<String, Object> context = new HashMap<String, Object>();
 
         //set up context variables
+        int i = 0;
         for (Object thing : things) {
 
             //decorate with some context
             context.put(var, thing);
             context.put(pageVar, bound);
+            context.put("index", i++);
+            context.put("isLast", i == things.size());
             widgetChain.render(context, respond);
         }
 

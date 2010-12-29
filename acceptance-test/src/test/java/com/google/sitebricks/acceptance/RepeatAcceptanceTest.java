@@ -19,7 +19,11 @@ public class RepeatAcceptanceTest {
     WebDriver driver = AcceptanceTest.createWebDriver();
     RepeatPage page = RepeatPage.open(driver);
 
-    List<String> expectedNames = Arrays.asList("Josh", "Dhanji", "Jody", "Iron Man");
+    List<String> expectedNames = Arrays.asList(
+        "0: Dhanji (last? false)",
+        "1: Josh (last? false)",
+        "2: Jody (last? false)",
+        "3: Iron Man (last? true)");
     List<String> expectedMovies =
         Arrays.asList("Dhanji Josh Jody Iron Man",
             "Dhanji Josh Jody Iron Man",

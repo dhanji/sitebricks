@@ -27,7 +27,7 @@ public class RepeatPage {
   public List<String> getRepeatedNames() {
     List<String> items = new ArrayList<String>();
     for (WebElement li : namesEntry.findElements(By.tagName("li"))) {
-      items.add(li.getText());
+      items.add(li.getText().trim());
     }
 
     return items;

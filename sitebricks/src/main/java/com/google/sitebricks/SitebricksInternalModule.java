@@ -122,6 +122,11 @@ class SitebricksInternalModule extends AbstractModule {
       public Multimap<String, String> params() {
         return params;
       }
+
+      @Override
+      public String param(String name) {
+        return servletRequest.getParameter(name);
+      }
     };
   }
 }

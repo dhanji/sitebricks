@@ -46,6 +46,14 @@ public interface Request {
    */
   Multimap<String, String> params();
 
+  /**
+   * Returns the only value of a request parameter or null if the parameter
+   * was not present.
+   * <p>
+   * Behaves exactly like {@link javax.servlet.http.HttpServletRequest#getParameter(String)}.
+   */
+  String param(String name);
+
   public static interface RequestRead<E> {
     E as(Class<? extends Transport> transport);
   }
