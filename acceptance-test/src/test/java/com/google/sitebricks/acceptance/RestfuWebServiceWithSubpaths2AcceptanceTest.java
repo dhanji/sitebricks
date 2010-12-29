@@ -38,6 +38,30 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
     assert RestfulWebServiceWithSubpaths2.PATH_1.equals(response.toString()) : response.toString();
   }
 
+  public void shouldServiceSameFirstLevelStaticPathWithPutMethod() {
+    WebResponse response = Guice.createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/subpath1")
+        .transports(String.class)
+        .over(Json.class)
+        .put("");
+
+    assert RestfulWebServiceWithSubpaths2.PATH_1_PUT.equals(response.toString())
+        : response.toString();
+  }
+
+  public void shouldServiceSameFirstLevelStaticPathWithDeleteMethod() {
+    WebResponse response = Guice.createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/subpath1")
+        .transports(String.class)
+        .over(Json.class)
+        .delete();
+
+    assert RestfulWebServiceWithSubpaths2.PATH_1_DELETE.equals(response.toString())
+        : response.toString();
+  }
+
   public void shouldServiceTwoLevelDynamicPath() {
     WebResponse response = Guice.createInjector()
         .getInstance(Web.class)
@@ -48,4 +72,81 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
 
     assert "junk_more_junk".equals(response.toString()) : response.toString();
   }
+
+  public void shouldServiceTwoLevelDynamicPathWithDeleteMethod() {
+    WebResponse response = Guice.createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk")
+        .transports(String.class)
+        .over(Json.class)
+        .delete();
+
+    assert "delete:junk_more_junk".equals(response.toString()) : response.toString();
+  }
+
+  public void shouldServiceThreeLevelDynamicPathWithDeleteMethod() {
+    WebResponse response = Guice.createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk")
+        .transports(String.class)
+        .over(Json.class)
+        .delete();
+
+    assert "delete:junk_more_junk_most_junk".equals(response.toString()) : response.toString();
+  }
+
+  public void shouldServiceThreeLevelDynamicPathWithPutMethod() {
+    WebResponse response = Guice.createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk")
+        .transports(String.class)
+        .over(Json.class)
+        .put("");
+
+    assert "put:junk_more_junk_most_junk".equals(response.toString()) : response.toString();
+  }
+
+  public void shouldServiceThreeLevelDynamicPathWithPostMethod() {
+    WebResponse response = Guice.createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk")
+        .transports(String.class)
+        .over(Json.class)
+        .post("");
+
+    assert "post:junk_more_junk_most_junk".equals(response.toString()) : response.toString();
+  }
+
+  public void shouldServiceThreeLevelDynamicPathWithGetMethod() {
+    WebResponse response = Guice.createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk")
+        .transports(String.class)
+        .over(Json.class)
+        .get();
+
+    assert "get:junk_more_junk_most_junk".equals(response.toString()) : response.toString();
+  }
+//
+//  public void shouldService4LevelMixedPathWithGetMethod() {
+//    WebResponse response = Guice.createInjector()
+//        .getInstance(Web.class)
+//        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk/4l")
+//        .transports(String.class)
+//        .over(Json.class)
+//        .get();
+//
+//    assert "4l:get:junk_more_junk_most_junk".equals(response.toString()) : response.toString();
+//  }
+//
+//  public void shouldService4LevelMixedPathWithPostMethod() {
+//    WebResponse response = Guice.createInjector()
+//        .getInstance(Web.class)
+//        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk/4l")
+//        .transports(String.class)
+//        .over(Json.class)
+//        .post("");
+//
+//    assert "4l:post:junk_more_junk_most_junk".equals(response.toString()) : response.toString();
+//  }
 }
