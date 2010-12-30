@@ -431,7 +431,7 @@ class DefaultPageBook implements PageBook {
       }
 
       @SuppressWarnings("unchecked")  // Guaranteed by javax.servlet
-      Map<String, String[]> params = (Map<String, String[]>)request.getParameterMap();
+      Map<String, String[]> params = (Map<String, String[]>) request.getParameterMap();
 
       // Extract injectable pieces of the pathInfo.
       final Map<String, String> map = matcher.findMatches(pathInfo);
