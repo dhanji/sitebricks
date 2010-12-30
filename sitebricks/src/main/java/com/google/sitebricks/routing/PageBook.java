@@ -7,6 +7,9 @@ import com.google.inject.Stage;
 import com.google.sitebricks.Renderable;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -67,7 +70,10 @@ public interface PageBook {
    */
   Page serviceAt(String uri, Class<?> pageClass);
 
-  public static interface Page {
+  Collection<List<Page>> getPageMap();
+
+
+  public static interface Page extends Comparable<Page> {
     Renderable widget();
 
     Object instantiate();
@@ -81,6 +87,8 @@ public interface PageBook {
     String getUri();
 
     boolean isHeadless();
+
+    Set<String> getMethod();
   }
 
   public static final class Routing extends AbstractModule {

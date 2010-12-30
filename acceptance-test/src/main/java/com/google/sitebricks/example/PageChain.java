@@ -1,5 +1,6 @@
 package com.google.sitebricks.example;
 
+import com.google.sitebricks.At;
 import com.google.sitebricks.http.Post;
 
 /**
@@ -8,6 +9,7 @@ import com.google.sitebricks.http.Post;
  *
  * @author dhanji@google.com (Dhanji R. Prasanna)
  */
+@At("/pagechain")
 public class PageChain {
   private String userValue;
 

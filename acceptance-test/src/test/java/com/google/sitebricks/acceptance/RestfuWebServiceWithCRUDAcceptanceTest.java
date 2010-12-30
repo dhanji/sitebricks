@@ -1,19 +1,18 @@
 package com.google.sitebricks.acceptance;
 
+import com.google.inject.Guice;
+import com.google.sitebricks.acceptance.util.AcceptanceTest;
+import com.google.sitebricks.client.Web;
+import com.google.sitebricks.client.WebResponse;
+import com.google.sitebricks.client.transport.Json;
+import org.testng.annotations.Test;
+
 import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.BASE_SERVICE_PATH;
 import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.CREATE;
 import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.DELETE;
 import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.READ_COLLECTION;
 import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.READ_INDIVIDUAL;
 import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.UPDATE;
-
-import org.testng.annotations.Test;
-
-import com.google.inject.Guice;
-import com.google.sitebricks.acceptance.util.AcceptanceTest;
-import com.google.sitebricks.client.Web;
-import com.google.sitebricks.client.WebResponse;
-import com.google.sitebricks.client.transport.Json;
 
 /**
  * @author Jason van Zyl
@@ -57,7 +56,7 @@ public class RestfuWebServiceWithCRUDAcceptanceTest {
         .over(Json.class)
         .get();
 
-    assert READ_INDIVIDUAL.equals(response.toString());
+    assert READ_INDIVIDUAL.equals(response.toString()) : response.toString();
   }  
   
   public void update() {

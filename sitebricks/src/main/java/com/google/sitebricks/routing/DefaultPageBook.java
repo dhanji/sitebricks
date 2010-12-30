@@ -53,6 +53,11 @@ class DefaultPageBook implements PageBook {
     this.injector = injector;
   }
 
+  @Override
+  public Collection<List<Page>> getPageMap() {
+    return (Collection) pages.values();
+  }
+
   public Page serviceAt(String uri, Class<?> pageClass) {
     // Handle subpaths, registering each as a separate instance of the page
     // tuple.
@@ -116,7 +121,7 @@ class DefaultPageBook implements PageBook {
   public Page embedAs(Class<?> clazz, String as) {
     Preconditions.checkArgument(null == clazz.getAnnotation(Service.class),
         "You cannot embed headless web services!");
-    PageTuple pageTuple = new PageTuple(null, PathMatcherChain.ignoring(), clazz, injector, false);
+    PageTuple pageTuple = new PageTuple("", PathMatcherChain.ignoring(), clazz, injector, false);
 
     synchronized (lock) {
       pagesByName.put(as.toLowerCase(), pageTuple);
@@ -244,6 +249,14 @@ class DefaultPageBook implements PageBook {
       return delegate.isHeadless();
     }
 
+    public Set<String> getMethod() {
+      return delegate.getMethod();
+    }
+
+    public int compareTo(Page page) {
+      return delegate.compareTo(page);
+    }
+
     public static InstanceBoundPage delegating(Page delegate, Object instance) {
       return new InstanceBoundPage(delegate, instance);
     }
@@ -334,6 +347,10 @@ class DefaultPageBook implements PageBook {
                 if (!tail.equals(method.getAnnotation(At.class).value())) {
                   continue;
                 }
+              } else if (!tail.isEmpty()) {
+                // If this is the top-level method we're scanning, but their is a tail, i.e.
+                // this is not intended to be served by the top-level method, then skip.
+                continue;
               }
 
               // Otherwise register this method for firing...
@@ -362,6 +379,10 @@ class DefaultPageBook implements PageBook {
                 if (!tail.equals(method.getAnnotation(At.class).value())) {
                   continue;
                 }
+              } else if (!tail.isEmpty()) {
+                // If this is the top-level method we're scanning, but their is a tail, i.e.
+                // this is not intended to be served by the top-level method, then skip.
+                continue;
               }
 
               // Otherwise register this method for firing...
@@ -391,6 +412,14 @@ class DefaultPageBook implements PageBook {
 
     public boolean isHeadless() {
       return headless;
+    }
+
+    public Set<String> getMethod() {
+      return methods.keySet();
+    }
+
+    public int compareTo(Page page) {
+      return uri.compareTo(page.getUri());
     }
 
     public Object doMethod(String httpMethod, Object page, String pathInfo,

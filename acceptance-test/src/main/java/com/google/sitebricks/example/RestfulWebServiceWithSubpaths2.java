@@ -81,18 +81,18 @@ public class RestfulWebServiceWithSubpaths2 {
   }
 
 // BUG EXISTS WHEN 4-Level MIXED PATHS ARE INTRODUCED:
-//
-//  @At("/:l2/:l3/l4") @Get
-//  public Reply<String> l4Get(@Named("dynamic") String dynamic,
-//                            @Named("l2") String second,
-//                            @Named("l3") String third) {
-//    return Reply.with("4l:get:" + dynamic + "_" + second + "_" + third);
-//  }
 
-//  @At("/:l2/:l3/l4") @Post
-//  public Reply<String> l4Post(@Named("dynamic") String dynamic,
-//                            @Named("l2") String second,
-//                            @Named("l3") String third) {
-//    return Reply.with("4l:post:" + dynamic + "_" + second + "_" + third);
-//  }
+  @At("/:l2/:l3/l4") @Get
+  public Reply<String> l4Get(@Named("dynamic") String dynamic,
+                            @Named("l2") String second,
+                            @Named("l3") String third) {
+    return Reply.with("4l:get:" + dynamic + "_" + second + "_" + third);
+  }
+
+  @At("/:l2/:l3/l4") @Post
+  public Reply<String> l4Post(@Named("dynamic") String dynamic,
+                            @Named("l2") String second,
+                            @Named("l3") String third) {
+    return Reply.with("4l:post:" + dynamic + "_" + second + "_" + third);
+  }
 }

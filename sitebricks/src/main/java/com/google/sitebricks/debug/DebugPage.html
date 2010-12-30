@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Sitebricks Debug Console</title>
+  <style type="text/css">
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 1.0em;
+    }
+
+    .pages {
+      font-family: "Anonymous Pro", "Courier New", monospace;
+      font-size: 1.0em;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Web Pages</h2>
+  @Repeat(items=pages, var="page")
+  <div class="pages">
+    ${page.uri} : ${page.pageClass().getName()} ${page.method.empty ? "" : page.method}
+  </div>
+
+  <h2>Web Services</h2>
+  @Repeat(items=resources, var="page")
+  <div class="pages">
+    ${page.uri} : ${page.pageClass().getName()} ${page.method.empty ? "" : page.method}
+  </div>
+
+</body>
+</html>

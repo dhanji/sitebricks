@@ -1,6 +1,7 @@
 package com.google.sitebricks.example;
 
 
+import com.google.sitebricks.At;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
 
@@ -8,7 +9,7 @@ import com.google.sitebricks.http.Put;
 /**
  * @author Peter Knego
  */
-
+@At("/hiddenfieldmethod")
 public class HiddenFieldMethod {
   private String text = "initial textfield value";
 

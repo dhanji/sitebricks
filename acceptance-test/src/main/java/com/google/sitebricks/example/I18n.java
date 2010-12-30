@@ -2,6 +2,7 @@ package com.google.sitebricks.example;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.google.sitebricks.At;
 import com.google.sitebricks.i18n.Message;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +11,7 @@ import java.util.Locale;
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
+@At("/i18n")
 public class I18n {
   // These would typically be provided by a translated set resource bundle (external).
   public static final String HELLO = "hello";

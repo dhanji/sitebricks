@@ -62,7 +62,7 @@ public class RestfuWebServiceAcceptanceTest {
   }
 
   private static void assertRedirectResponse(WebResponse response) {
-    assert HttpServletResponse.SC_MOVED_TEMPORARILY == response.status();
+    assert HttpServletResponse.SC_MOVED_TEMPORARILY == response.status() : response.toString();
     assert response.getHeaders().get("Location").endsWith("/other");
   }
 

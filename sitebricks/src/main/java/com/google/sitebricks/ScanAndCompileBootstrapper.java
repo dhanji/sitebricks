@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Stage;
 import com.google.sitebricks.compiler.Compilers;
 import com.google.sitebricks.compiler.TemplateCompileException;
+import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.rendering.EmbedAs;
 import com.google.sitebricks.rendering.With;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
@@ -19,7 +20,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.google.inject.matcher.Matchers.annotatedWith;
-import static com.google.sitebricks.SitebricksModule.BindingKind.*;
+import static com.google.sitebricks.SitebricksModule.BindingKind.EMBEDDED;
+import static com.google.sitebricks.SitebricksModule.BindingKind.PAGE;
+import static com.google.sitebricks.SitebricksModule.BindingKind.SERVICE;
+import static com.google.sitebricks.SitebricksModule.BindingKind.STATIC_RESOURCE;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -130,8 +134,15 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
       }
 
       At at = page.getAnnotation(At.class);
-      if (null != at)
-        pagesToCompile.add(pageBook.at(at.value(), page));
+      if (null != at) {
+        if (page.isAnnotationPresent(Service.class)) {
+          pagesToCompile.add(pageBook.serviceAt(at.value(), page));
+        } else if (page.isAnnotationPresent(Export.class)) {
+          //localize the resource to the SitebricksModule's package.
+          resourcesService.add(SitebricksModule.class, page.getAnnotation(Export.class));
+        } else
+          pagesToCompile.add(pageBook.at(at.value(), page));
+      }
     }
 
     return pagesToCompile;

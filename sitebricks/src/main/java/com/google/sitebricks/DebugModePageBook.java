@@ -10,7 +10,9 @@ import com.google.sitebricks.routing.Production;
 import com.google.sitebricks.routing.SystemMetrics;
 import net.jcip.annotations.ThreadSafe;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -82,6 +84,10 @@ class DebugModePageBook implements PageBook {
 
   public Page serviceAt(String uri, Class<?> pageClass) {
     return book.serviceAt(uri, pageClass);
+  }
+
+  public Collection<List<Page>> getPageMap() {
+    return book.getPageMap();
   }
 
   private void reload(String identifier, Page page) {

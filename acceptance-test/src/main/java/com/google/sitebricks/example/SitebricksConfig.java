@@ -7,6 +7,7 @@ import com.google.inject.stat.StatModule;
 import com.google.sitebricks.SitebricksModule;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.HttpSessionFlashCache;
+import com.google.sitebricks.debug.DebugPage;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -23,12 +24,30 @@ public class SitebricksConfig extends GuiceServletContextListener {
 
       @Override
       protected void configureSitebricks() {
-//        scan(SitebricksConfig.class.getPackage());
+
         // TODO(dhanji): find a way to run the suite again with this module installed.
 //        install(new GaeModule());
 
         bind(FlashCache.class).to(HttpSessionFlashCache.class).in(Singleton.class);
 
+        // TODO We should run the test suite once with this turned off and with scan() on.
+//        scan(SitebricksConfig.class.getPackage());
+        bindExplicitly();
+
+        at("/no_annotations/service").serve(RestfulWebServiceNoAnnotations.class);
+        at("/debug").show(DebugPage.class);
+
+        bind(Start.class).annotatedWith(Test.class).to(Start.class);
+
+        // Localize using the default translation set (i.e. from the @Message annotations)
+        localize(I18n.MyMessages.class).usingDefault();
+        localize(I18n.MyMessages.class).using(Locale.CANADA_FRENCH,
+            ImmutableMap.of(I18n.HELLO, I18n.HELLO_IN_FRENCH));
+        
+        install(new StatModule("/stats"));
+      }
+
+      private void bindExplicitly() {
         //TODO explicit bindings should override scanned ones.
         at("/").show(Start.class);
         at("/hello").show(HelloWorld.class);
@@ -45,7 +64,6 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/conneg").show(ContentNegotiation.class);
 
         at("/service").serve(RestfulWebService.class);
-        at("/no_annotations/service").serve(RestfulWebServiceNoAnnotations.class);
         at("/postable").serve(PostableRestfulWebService.class);
         at("/superpath").serve(RestfulWebServiceWithSubpaths.class);
         at("/superpath2/:dynamic").serve(RestfulWebServiceWithSubpaths2.class);
@@ -59,16 +77,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         // MVEL template.
         at("/template/mvel").show(MvelTemplateExample.class);
 
-        bind(Start.class).annotatedWith(Test.class).to(Start.class);
-
         embed(HelloWorld.class).as("Hello");
-
-        // Localize using the default translation set (i.e. from the @Message annotations)
-        localize(I18n.MyMessages.class).usingDefault();
-        localize(I18n.MyMessages.class).using(Locale.CANADA_FRENCH,
-            ImmutableMap.of(I18n.HELLO, I18n.HELLO_IN_FRENCH));
-        
-        install(new StatModule("/stats"));
       }
     });
   }

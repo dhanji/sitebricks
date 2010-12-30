@@ -1,5 +1,8 @@
 package com.google.sitebricks;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
@@ -13,7 +16,8 @@ import java.lang.annotation.Target;
  *
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
-@Target({})
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 public @interface Export {
   String at();
 
