@@ -321,7 +321,7 @@ class DefaultPageBook implements PageBook {
         // directive to override @At() URI path mapping. In this case we treat
         // this call as a top-level path registration with no tail. Any
         // encountered subpath @At methods will be ignored for this URI.
-        if (length <= uri.length())
+        if (uri != null && length <= uri.length())
           tail = uri.substring(length);
       }
 
