@@ -13,7 +13,7 @@ import java.lang.reflect.Field;
 class StatAnnotatedTypeListener implements TypeListener {
   private final Stats stats;
 
-  public StatAnnotatedTypeListener(Stats stats) {
+  StatAnnotatedTypeListener(Stats stats) {
     this.stats = stats;
   }
 
@@ -26,7 +26,8 @@ class StatAnnotatedTypeListener implements TypeListener {
         encounter.register(new InjectionListener<I>() {
           @Override
           public void afterInjection(I injectee) {
-            stats.register(new StatDescriptor(injectee, stat.value(), field));
+            stats.register(new StatDescriptor(
+                injectee, stat.value(), stat.description(), field));
           }
         });
       }

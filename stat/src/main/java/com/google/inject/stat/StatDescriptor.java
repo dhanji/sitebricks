@@ -5,41 +5,33 @@ import java.lang.reflect.Field;
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class StatDescriptor {
-  private final Object instance;
-  private final String stat;
+public final class StatDescriptor {
+  private final Object target;
+  private final String name;
+  private final String description;
   private final Field field;
 
-  StatDescriptor(Object instance, String stat, Field field) {
-    this.instance = instance;
-    this.stat = stat;
+  public StatDescriptor(
+      Object target, String name, String description, Field field) {
+    this.target = target;
+    this.name = name;
+    this.description = description;
     this.field = field;
-
-    if (!field.isAccessible()) {
-      field.setAccessible(true);
-    }
   }
 
-  public String getStat() {
-    return stat;
+  public String getName() {
+    return name;
   }
 
-  public Object getInstance() {
-    return instance;
+  public String getDescription() {
+    return description;
+  }
+
+  public Object getTarget() {
+    return target;
   }
 
   public Field getField() {
     return field;
-  }
-
-  public String read() {
-    Object value = null;
-    try {
-      value = field.get(instance);
-    } catch (IllegalAccessException e) {
-      return "unable to read: " + e.getMessage();
-    }
-
-    return value.toString();
   }
 }
