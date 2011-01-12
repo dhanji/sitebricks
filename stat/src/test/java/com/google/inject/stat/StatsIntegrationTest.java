@@ -44,6 +44,8 @@ public class StatsIntegrationTest {
     StatDescriptor statDescriptor = entry.getKey();
     assertEquals(DummyService.NUMBER_OF_CALLS, statDescriptor.getName());
     Object value = entry.getValue();
-    assertEquals("3", String.valueOf(value));
+    // This assertion also checks that the value is the true underlying value
+    // of the stat, and not only a string representation.
+    assertEquals(3, value);
   }
 }
