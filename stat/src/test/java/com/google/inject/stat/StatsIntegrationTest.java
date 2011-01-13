@@ -1,13 +1,11 @@
 package com.google.inject.stat;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.*;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.stat.testservices.DummyService;
-
 
 import org.junit.Test;
 
