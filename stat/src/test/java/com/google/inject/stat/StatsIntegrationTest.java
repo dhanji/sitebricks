@@ -1,15 +1,18 @@
 package com.google.inject.stat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.stat.testservices.DummyService;
 
+
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -46,6 +49,7 @@ public class StatsIntegrationTest {
     Object value = entry.getValue();
     // This assertion also checks that the value is the true underlying value
     // of the stat, and not only a string representation.
-    assertEquals(3, value);
+    AtomicInteger atomicIntegerValue = (AtomicInteger) value;
+    assertEquals(3, atomicIntegerValue.get());
   }
 }
