@@ -32,13 +32,13 @@ public abstract class StatsPublisher {
    * Returns a string indicating the content type. The string should be a
    * suitable value for setting the content type of a servlet request.
    */
-  abstract String getContentType();
+  protected abstract String getContentType();
 
   /**
    * Publishes the given {@code snapshot} to the given {@link PrintWriter},
    * where the values of the snapshot are the values of the stats by which
    * each is keyed.
    */
-  abstract void publish(
+  protected abstract void publish(
       ImmutableMap<StatDescriptor, Object> snapshot, PrintWriter writer);
 }

@@ -29,11 +29,11 @@ import java.util.Map;
  */
 class HtmlStatsPublisher extends StatsPublisher {
 
-  @Override String getContentType() {
+  @Override protected String getContentType() {
     return "text/html";
   }
 
-  @Override void publish(
+  @Override protected void publish(
       ImmutableMap<StatDescriptor, Object> snapshot, PrintWriter writer) {
     writer.println("<html><head><style>");
     writer.println("body { font-family: monospace; }");

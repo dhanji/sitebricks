@@ -32,11 +32,11 @@ import java.util.Map.Entry;
  */
 class JsonStatsPublisher extends StatsPublisher {
 
-  @Override String getContentType() {
+  @Override protected String getContentType() {
     return "application/json";
   }
 
-  @Override void publish(
+  @Override protected void publish(
       ImmutableMap<StatDescriptor, Object> snapshot, PrintWriter writer) {
     Gson gson = new Gson();
     Map<String, Object> valuesByName = Maps.newLinkedHashMap();

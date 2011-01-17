@@ -1,6 +1,6 @@
 package com.google.inject.stat;
 
-import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -9,14 +9,14 @@ public final class StatDescriptor {
   private final Object target;
   private final String name;
   private final String description;
-  private final Field field;
+  private final Member member;
 
   public StatDescriptor(
-      Object target, String name, String description, Field field) {
+      Object target, String name, String description, Member member) {
     this.target = target;
     this.name = name;
     this.description = description;
-    this.field = field;
+    this.member = member;
   }
 
   public String getName() {
@@ -31,7 +31,7 @@ public final class StatDescriptor {
     return target;
   }
 
-  public Field getField() {
-    return field;
+  public Member getMember() {
+    return member;
   }
 }

@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.METHOD})
 public @interface Stat {
   /**
    * The name of the stat to track.

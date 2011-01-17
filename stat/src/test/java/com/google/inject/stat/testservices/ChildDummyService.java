@@ -15,28 +15,31 @@
  *
  */
 
-package com.google.inject.stat;
+package com.google.inject.stat.testservices;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.inject.stat.Stat;
 
-import java.io.PrintWriter;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * This implementation of {@link StatsPublisher} publishes snapshots as text.
+ * This subclass of {@link DummyService} exists to illustrate how stats are
+ * published (or not published) within a class hierarchy.
  *
  * @author ffaber@gmail.com (Fred Faber)
  */
-class TextStatsPublisher extends StatsPublisher {
+public class ChildDummyService extends DummyService {
 
-  @Override protected String getContentType() {
-    return "text/plain";
+  public static final String NUMBER_OF_CHILD_CALLS = "number-of-child-calls";
+
+  @Stat(NUMBER_OF_CHILD_CALLS)
+  private final AtomicInteger childCalls = new AtomicInteger();
+
+  @Override public void call() {
+    super.call();
+    childCalls.incrementAndGet();
   }
 
-  @Override protected void publish(
-      ImmutableMap<StatDescriptor, Object> snapshot, PrintWriter writer) {
-    for (Map.Entry<StatDescriptor, Object> entry : snapshot.entrySet()) {
-      writer.println(entry.getKey().getName() + " " + entry.getValue());
-    }
+  public AtomicInteger getChildCalls() {
+    return childCalls;
   }
 }

@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import com.google.inject.stat.Stat;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This is a simple dummy class that is used in tests to ensure that a private
@@ -36,11 +37,29 @@ public class DummyService {
   @Stat(NUMBER_OF_CALLS)
   private final AtomicInteger calls = new AtomicInteger();
 
+  public static final String CALL_LATENCY_NS = "call-latency-ns";
+
+  private final AtomicLong callLatencyNs = new AtomicLong(0L);
+
+  /**
+   * Increments {@link #calls} by one.  Also increments {@link #callLatencyNs}
+   * by the amount of time required to do so..
+   */
   public void call() {
-    calls.incrementAndGet();
+    Long startTime = System.nanoTime();
+    try {
+      calls.incrementAndGet();
+    } finally {
+      callLatencyNs.addAndGet(System.nanoTime() - startTime);
+    }
   }
 
   public AtomicInteger getCalls() {
     return calls;
+  }
+
+  @Stat(CALL_LATENCY_NS)
+  public Long getCallLatencyMs() {
+    return callLatencyNs.get();
   }
 }
