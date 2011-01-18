@@ -31,7 +31,6 @@ public class ChildDummyService extends DummyService {
 
   public static final String NUMBER_OF_CHILD_CALLS = "number-of-child-calls";
 
-  @Stat(NUMBER_OF_CHILD_CALLS)
   private final AtomicInteger childCalls = new AtomicInteger();
 
   @Override public void call() {
@@ -39,6 +38,7 @@ public class ChildDummyService extends DummyService {
     childCalls.incrementAndGet();
   }
 
+  @Stat(NUMBER_OF_CHILD_CALLS)
   public AtomicInteger getChildCalls() {
     return childCalls;
   }
