@@ -3,7 +3,7 @@ package com.google.sitebricks;
 import net.jcip.annotations.NotThreadSafe;
 
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -45,7 +45,7 @@ public class StringBuilderRespond implements Respond {
   private final StringBuilder head = new StringBuilder();
 
   //TODO use SortedSet for clustering certain tag types together.
-  private final Set<String> requires = new HashSet<String>();
+  private final Set<String> requires = new LinkedHashSet<String>();
   private String redirect;
 
   public String getHead() {
@@ -109,8 +109,8 @@ public class StringBuilderRespond implements Respond {
     }
 
     //write header to placeholder...
-    int index = out.indexOf(
-        HEADER_PLACEHOLDER);        //TODO optimize by scanning upto <body> only (if no head)
+    //TODO optimize by scanning upto <body> only (if no head)
+    int index = out.indexOf(HEADER_PLACEHOLDER);
 
     String output = out.toString();
 
@@ -121,7 +121,7 @@ public class StringBuilderRespond implements Respond {
     return output;
   }
 
-  //do NOT make this a static inner class!  TODO: absorb into enclosing class (Saves on memory allocation)
+  //do NOT make this a static inner class!
   private class HtmlBuilder implements HtmlTagBuilder {
 
     public void textField(String bind, String value) {

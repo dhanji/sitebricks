@@ -84,7 +84,7 @@ public class Parsing {
 
   //tokenizes text into raw text chunks interspersed with expression chunks
   public static List<Token> tokenize(String warpRawText, EvaluatorCompiler compiler) throws ExpressionCompileException {
-    List<Token> tokens = new ArrayList<Token>();
+    ArrayList<Token> tokens = new ArrayList<Token>();
 
     //simple state machine to iterate the text and break it up into chunks
     char[] characters = warpRawText.toCharArray();
@@ -133,6 +133,9 @@ public class Parsing {
     //add last token read if it has any content (is always text)
     if (token.length() > 0)
       tokens.add(CompiledToken.text(token.toString()));
+
+    // Pack list capacity to size (saves memory).
+    tokens.trimToSize();
 
     return tokens;
   }
