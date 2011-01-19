@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 
 /**
@@ -16,15 +17,45 @@ class Stats {
   private final Map<String, StatDescriptor> stats = new MapMaker().makeMap();
 
   void register(StatDescriptor statDescriptor) {
-    StatDescriptor first = stats.get(statDescriptor.getName());
-    if (null != first) {
+    StatDescriptor existingDescriptor = stats.get(statDescriptor.getName());
+
+    if (existingDescriptor != null &&
+        !isAnAllowedDuplicate(statDescriptor, existingDescriptor)) {
       throw new IllegalArgumentException(String.format(
-          "You have two stats using the same name [%s] in different types, this is not allowed. \n"
-          + "First encounter: %s\nSecond encounter: %s", statDescriptor.getName(), first.getName(),
+          "You have two stats using the same name [%s] in different types, "
+              + "this is not allowed. \n"
+              + "First encounter:  %s\nSecond encounter: %s",
+          statDescriptor.getName(),
+          existingDescriptor.getMember().getDeclaringClass(),
           statDescriptor.getMember().getDeclaringClass()));
     }
 
     stats.put(statDescriptor.getName(), statDescriptor);
+  }
+
+  /**
+   * This method returns true if the {@code newDescriptor} is an <em>allowed
+   * duplicate</em> of the given {@code existingDescriptor}.  The only reason
+   * this might be true is if both represent a descriptor on a registered
+   * static member on the same class.
+   */
+  boolean isAnAllowedDuplicate(
+      StatDescriptor newDescriptor, StatDescriptor existingDescriptor) {
+    Member newMember = newDescriptor.getMember();
+    Member existingMember = existingDescriptor.getMember();
+    // If they're unequal, then they're clearly not representative of the same
+    // member.
+    if (!newMember.equals(existingMember)) {
+      return false;
+    }
+
+    // If this is not a static member, then we return false as not to allow
+    // published instance members to clobber each other.
+    if ((existingMember.getModifiers() & Modifier.STATIC) == 0) {
+      return false;
+    }
+
+    return true;
   }
 
   ImmutableMap<StatDescriptor, Object> snapshot() {

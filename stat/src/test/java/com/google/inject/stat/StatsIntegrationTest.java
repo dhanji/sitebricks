@@ -8,6 +8,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.stat.testservices.ChildDummyService;
 import com.google.inject.stat.testservices.DummyService;
+import com.google.inject.stat.testservices.StaticDummyService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -82,6 +83,24 @@ public class StatsIntegrationTest {
     Object numberOfChildCallsValue = snapshot.get(numberOfChildCallsDescriptor);
     AtomicInteger numberOfChildCalls = (AtomicInteger) numberOfChildCallsValue;
     assertEquals(service.getChildCalls().intValue(), numberOfChildCalls.get());
+  }
+
+  @Test public void testPublishingStatsAsStaticMember() {
+    StaticDummyService service1 = injector.getInstance(StaticDummyService.class);
+    StaticDummyService service2 = injector.getInstance(StaticDummyService.class);
+
+    service1.call();
+    service2.call();
+
+    Stats stats = injector.getInstance(Stats.class);
+    ImmutableMap<StatDescriptor, Object> snapshot = stats.snapshot();
+    assertEquals(1, snapshot.size());
+    StatDescriptor staticCallsDescriptor =
+        getByName(StaticDummyService.STATIC_CALLS, snapshot);
+    Object numberOfStaticCallsValue = snapshot.get(staticCallsDescriptor);
+    AtomicInteger numberOfStaticCalls = (AtomicInteger) numberOfStaticCallsValue;
+    assertEquals(
+        StaticDummyService.getNumberOfStaticCalls(), numberOfStaticCalls.get());
   }
 
   StatDescriptor getByName(
