@@ -17,7 +17,6 @@
 
 package com.google.inject.stat.testservices;
 
-import com.google.inject.Singleton;
 import com.google.inject.stat.Stat;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,7 +29,6 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-@Singleton
 public class DummyService {
   public static final String NUMBER_OF_CALLS = "number-of-calls";
 

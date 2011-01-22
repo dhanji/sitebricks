@@ -13,6 +13,7 @@ import com.google.inject.stat.testservices.StaticDummyService;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -101,6 +102,24 @@ public class StatsIntegrationTest {
     AtomicInteger numberOfStaticCalls = (AtomicInteger) numberOfStaticCallsValue;
     assertEquals(
         StaticDummyService.getNumberOfStaticCalls(), numberOfStaticCalls.get());
+  }
+
+  @Test public final void testPublishingDuplicatedStat() {
+    DummyService service1 = injector.getInstance(DummyService.class);
+    DummyService service2 = injector.getInstance(DummyService.class);
+
+    service1.call();
+    service2.call();
+
+    Stats stats = injector.getInstance(Stats.class);
+    ImmutableMap<StatDescriptor, Object> snapshot = stats.snapshot();
+
+    assertEquals(snapshot.toString(), 2, snapshot.size());
+    for (Entry<StatDescriptor, Object> entry : snapshot.entrySet()) {
+      assertEquals(
+          "Unexpected value for " + entry.getKey(),
+          Stats.DUPLICATED_STAT_VALUE, entry.getValue());
+    }
   }
 
   StatDescriptor getByName(

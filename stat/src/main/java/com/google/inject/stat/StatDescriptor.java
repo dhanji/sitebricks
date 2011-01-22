@@ -1,5 +1,7 @@
 package com.google.inject.stat;
 
+import com.google.common.base.Objects;
+
 import java.lang.reflect.Member;
 
 /**
@@ -33,5 +35,36 @@ public final class StatDescriptor {
 
   public Member getMember() {
     return member;
+  }
+
+  @Override public String toString() {
+    return Objects.toStringHelper(this)
+        .add("name", name)
+        .add("description", description)
+        .add("target", target)
+        .add("member", member)
+        .toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof StatDescriptor)) {
+      return false;
+    }
+
+    StatDescriptor that = (StatDescriptor) o;
+    return Objects.equal(this.name, that.name)
+        && Objects.equal(this.description, that.description)
+        && Objects.equal(this.member, that.member)
+        && Objects.equal(this.target, that.target)
+        && Objects.equal(this.member, that.member);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(name, description, member, target);
   }
 }

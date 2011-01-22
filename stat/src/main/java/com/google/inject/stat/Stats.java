@@ -8,29 +8,45 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Logger;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class Stats {
-  private final Map<String, StatDescriptor> stats = new MapMaker().makeMap();
+  private final ConcurrentMap<String, StatDescriptor> stats =
+      new MapMaker().makeMap();
+
+  private static final Logger logger =
+      Logger.getLogger(Stats.class.getCanonicalName());
+
+  /** This is the value used for duplicate stats. */
+  static final String DUPLICATED_STAT_VALUE = "duplicated value";
 
   void register(StatDescriptor statDescriptor) {
-    StatDescriptor existingDescriptor = stats.get(statDescriptor.getName());
+    String statName = statDescriptor.getName();
+    StatDescriptor existingDescriptor =
+        stats.putIfAbsent(statName, statDescriptor);
 
     if (existingDescriptor != null &&
         !isAnAllowedDuplicate(statDescriptor, existingDescriptor)) {
-      throw new IllegalArgumentException(String.format(
-          "You have two stats using the same name [%s] in different types, "
+      logger.warning(String.format(
+          "You have two non-static stats using the same name [%s], "
               + "this is not allowed. \n"
               + "First encounter:  %s\nSecond encounter: %s",
-          statDescriptor.getName(),
-          existingDescriptor.getMember().getDeclaringClass(),
-          statDescriptor.getMember().getDeclaringClass()));
-    }
+          statName,
+          existingDescriptor.getTarget(),
+          statDescriptor.getTarget()));
 
-    stats.put(statDescriptor.getName(), statDescriptor);
+      StaticStatContainer staticStatContainer =
+          new StaticStatContainer(DUPLICATED_STAT_VALUE);
+      StatDescriptor syntheticDescriptor = new StatDescriptor(
+          staticStatContainer, statName, "", StaticStatContainer.getMember());
+      stats.put(statName, syntheticDescriptor);
+    } else {
+      stats.put(statName, statDescriptor);
+    }
   }
 
   /**
@@ -99,5 +115,22 @@ class Stats {
 
     throw new IllegalArgumentException(
         "Unexpected member type on descriptor: " + statDescriptor);
+  }
+
+  /** This class is useful to publish a stat that has a static string value. */
+  static final class StaticStatContainer {
+    final String staticValue;
+
+    StaticStatContainer(String staticValue) {
+      this.staticValue = staticValue;
+    }
+
+    static Member getMember() {
+      try {
+        return StaticStatContainer.class.getDeclaredField("staticValue");
+      } catch (NoSuchFieldException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 }
