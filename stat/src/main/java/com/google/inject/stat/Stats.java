@@ -39,10 +39,11 @@ class Stats {
           existingDescriptor.getTarget(),
           statDescriptor.getTarget()));
 
-      StaticStatContainer staticStatContainer =
-          new StaticStatContainer(DUPLICATED_STAT_VALUE);
-      StatDescriptor syntheticDescriptor = new StatDescriptor(
-          staticStatContainer, statName, "", StaticStatContainer.getMember());
+      ConstantStatContainer constantStatContainer =
+          new ConstantStatContainer(DUPLICATED_STAT_VALUE);
+      StatDescriptor syntheticDescriptor = StatDescriptor.of(
+          constantStatContainer, statName, "",
+          ConstantStatContainer.getMember());
       stats.put(statName, syntheticDescriptor);
     } else {
       stats.put(statName, statDescriptor);
@@ -117,17 +118,17 @@ class Stats {
         "Unexpected member type on descriptor: " + statDescriptor);
   }
 
-  /** This class is useful to publish a stat that has a static string value. */
-  static final class StaticStatContainer {
+  /** This class is useful to publish a stat that has a constant string value. */
+  static final class ConstantStatContainer {
     final String staticValue;
 
-    StaticStatContainer(String staticValue) {
+    ConstantStatContainer(String staticValue) {
       this.staticValue = staticValue;
     }
 
     static Member getMember() {
       try {
-        return StaticStatContainer.class.getDeclaredField("staticValue");
+        return ConstantStatContainer.class.getDeclaredField("staticValue");
       } catch (NoSuchFieldException e) {
         throw new RuntimeException(e);
       }

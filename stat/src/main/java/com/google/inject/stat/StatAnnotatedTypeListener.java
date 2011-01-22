@@ -61,7 +61,7 @@ class StatAnnotatedTypeListener implements TypeListener {
       encounter.register(new InjectionListener<I>() {
         @Override
         public void afterInjection(I injectee) {
-          stats.register(new StatDescriptor(
+          stats.register(StatDescriptor.of(
               injectee, stat.value(), stat.description(), member));
         }
       });

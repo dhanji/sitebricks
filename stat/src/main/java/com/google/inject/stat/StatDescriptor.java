@@ -13,12 +13,17 @@ public final class StatDescriptor {
   private final String description;
   private final Member member;
 
-  public StatDescriptor(
+  private StatDescriptor(
       Object target, String name, String description, Member member) {
     this.target = target;
     this.name = name;
     this.description = description;
     this.member = member;
+  }
+
+  public static StatDescriptor of(
+      Object target, String name, String description, Member member) {
+    return new StatDescriptor(target, name, description, member);
   }
 
   public String getName() {
