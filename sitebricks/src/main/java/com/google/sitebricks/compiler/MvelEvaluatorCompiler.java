@@ -145,6 +145,7 @@ public class MvelEvaluatorCompiler implements EvaluatorCompiler {
   private ParserContext singleBackingTypeParserContext() throws ExpressionCompileException {
     ParserContext context = new ParserContext();
     context.setStrongTyping(true);
+    context.addInput("this", backingType);
 
     PropertyDescriptor[] propertyDescriptors;
     try {

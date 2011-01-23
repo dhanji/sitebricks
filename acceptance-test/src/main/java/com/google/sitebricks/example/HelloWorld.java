@@ -19,4 +19,9 @@ public class HelloWorld {
   public void setMessage(String message) {
     this.message = message;
   }
+
+  // Some deterministic mangled representation of the input.
+  public String mangle(String s) {
+    return "" + s.hashCode();
+  }
 }

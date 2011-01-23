@@ -24,6 +24,10 @@ public class HelloWorldPage {
         "    \"http://www.w3.org/TR/html4/loose.dtd\">");
   }
 
+  public boolean hasMangledString() {
+    return driver.getPageSource().contains(new HelloWorld().mangle(HelloWorld.HELLO_MSG));
+  }
+
   public static HelloWorldPage open(WebDriver driver) {
     driver.get(AcceptanceTest.BASE_URL + "/hello");
     return PageFactory.initElements(driver, HelloWorldPage.class);

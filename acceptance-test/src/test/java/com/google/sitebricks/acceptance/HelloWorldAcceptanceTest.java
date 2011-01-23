@@ -17,5 +17,6 @@ public class HelloWorldAcceptanceTest {
 
         assert page.hasHelloWorldMessage() : "Did not generate dynamic text from el expression";
         assert page.hasCorrectDoctype() : "Did not contain the expected doctype declaration at the start of the HTML file";
+        assert page.hasMangledString() : "Did not contain method-generated string";
     }
 }
