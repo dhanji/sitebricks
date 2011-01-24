@@ -49,7 +49,7 @@ public final class StatDescriptor {
     return Objects.toStringHelper(this)
         .add("name", name)
         .add("description", description)
-        .add("statClosure", statReader)
+        .add("statReader", statReader)
         .add("statExposerClass", statExposerClass)
         .toString();
   }
