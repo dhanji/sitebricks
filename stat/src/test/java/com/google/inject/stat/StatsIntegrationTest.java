@@ -8,11 +8,13 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.stat.testservices.ChildDummyService;
 import com.google.inject.stat.testservices.DummyService;
+import com.google.inject.stat.testservices.StatExposerTestingService;
 import com.google.inject.stat.testservices.StaticDummyService;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,6 +32,7 @@ public class StatsIntegrationTest {
 
         bind(DummyService.class);
         bind(ChildDummyService.class);
+        bind(StatExposerTestingService.class);
       }
     });
   }
@@ -49,19 +52,17 @@ public class StatsIntegrationTest {
     // Here we check the value of the field, NUMBER_OF_CALLS
     StatDescriptor numberOfCallsDescriptor =
         getByName(DummyService.NUMBER_OF_CALLS, snapshot);
-    Object numberOfCallsValue = snapshot.get(numberOfCallsDescriptor);
 
-    // This assertion also checks that the value is the true underlying value
-    // of the stat, and not only a string representation.
-    AtomicInteger numberOfCalls = (AtomicInteger) numberOfCallsValue;
-    assertEquals(service.getCalls().intValue(), numberOfCalls.get());
+    // We expect a string representation of the value within the snapshot.
+    String numberOfCallsValue = (String) snapshot.get(numberOfCallsDescriptor);
+    assertEquals(String.valueOf(service.getCalls()), numberOfCallsValue);
 
     // Here we check the value of the method, CALL_LATENCY_NS
     StatDescriptor callLatencyNsDescriptor =
         getByName(DummyService.CALL_LATENCY_NS, snapshot);
-    Object callLatencyNsValue = snapshot.get(callLatencyNsDescriptor);
-    Long callLatencyNs = (Long) callLatencyNsValue;
-    assertEquals(service.getCallLatencyMs(), callLatencyNs);
+    String callLatencyNsValue = (String) snapshot.get(callLatencyNsDescriptor);
+    assertEquals(
+        String.valueOf(service.getCallLatencyMs()), callLatencyNsValue);
   }
 
   /**
@@ -81,9 +82,10 @@ public class StatsIntegrationTest {
     assertEquals(1, snapshot.size());
     StatDescriptor numberOfChildCallsDescriptor =
         getByName(ChildDummyService.NUMBER_OF_CHILD_CALLS, snapshot);
-    Object numberOfChildCallsValue = snapshot.get(numberOfChildCallsDescriptor);
-    AtomicInteger numberOfChildCalls = (AtomicInteger) numberOfChildCallsValue;
-    assertEquals(service.getChildCalls().intValue(), numberOfChildCalls.get());
+    String numberOfChildCallsValue =
+        (String) snapshot.get(numberOfChildCallsDescriptor);
+    assertEquals(
+        String.valueOf(service.getChildCalls()), numberOfChildCallsValue);
   }
 
   @Test public void testPublishingStatsAsStaticMember() {
@@ -98,10 +100,11 @@ public class StatsIntegrationTest {
     assertEquals(1, snapshot.size());
     StatDescriptor staticCallsDescriptor =
         getByName(StaticDummyService.STATIC_CALLS, snapshot);
-    Object numberOfStaticCallsValue = snapshot.get(staticCallsDescriptor);
-    AtomicInteger numberOfStaticCalls = (AtomicInteger) numberOfStaticCallsValue;
+    String numberOfStaticCallsValue =
+        (String) snapshot.get(staticCallsDescriptor);
     assertEquals(
-        StaticDummyService.getNumberOfStaticCalls(), numberOfStaticCalls.get());
+        String.valueOf(StaticDummyService.getNumberOfStaticCalls()),
+        numberOfStaticCallsValue);
   }
 
   @Test public final void testPublishingDuplicatedStat() {
@@ -120,6 +123,90 @@ public class StatsIntegrationTest {
           "Unexpected value for " + entry.getKey(),
           Stats.DUPLICATED_STAT_VALUE, entry.getValue());
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Test public final void testPublishingUsingDifferentExposers() {
+    StatExposerTestingService service =
+        injector.getInstance(StatExposerTestingService.class);
+
+    service.call();
+    service.call();
+
+    Stats stats = injector.getInstance(Stats.class);
+    ImmutableMap<StatDescriptor, Object> snapshot = stats.snapshot();
+    assertEquals(
+        "Snapshot has unexpected size: " + snapshot, 8, snapshot.size());
+
+    AtomicInteger atomicIntegerCallCount = service.getCallCount();
+    String stringCallCount = String.valueOf(atomicIntegerCallCount);
+    
+    StatDescriptor callsDefaultExposerDescriptor = getByName(
+        StatExposerTestingService.CALLS_WITH_DEFAULT_EXPOSER, snapshot);
+    String callsDefaultExposerValue = 
+        (String) snapshot.get(callsDefaultExposerDescriptor);
+    assertEquals(stringCallCount, callsDefaultExposerValue);
+
+    StatDescriptor callsIdentityExposerDescriptor = getByName(
+        StatExposerTestingService.CALLS_WITH_IDENTITY_EXPOSER, snapshot);
+    AtomicInteger callsIdentityExposerValue = 
+        (AtomicInteger) snapshot.get(callsIdentityExposerDescriptor);
+    assertEquals(atomicIntegerCallCount.get(), callsIdentityExposerValue.get());
+    
+    StatDescriptor callsInferenceExposerDescriptor = getByName(
+        StatExposerTestingService.CALLS_WITH_INFERENCE_EXPOSER, snapshot);
+    String callsInferenceExposerValue = 
+        (String) snapshot.get(callsInferenceExposerDescriptor);
+    assertEquals(stringCallCount, callsInferenceExposerValue);
+
+    StatDescriptor callsToStringExposerDescriptor = getByName(
+        StatExposerTestingService.CALLS_WITH_TO_STRING_EXPOSER, snapshot);
+    String callsToStringExposerValue = 
+        (String) snapshot.get(callsToStringExposerDescriptor);
+    assertEquals(stringCallCount, callsToStringExposerValue);
+
+    List<Integer> callsList = service.getCallsList();
+    String callsListAsString = String.valueOf(callsList);
+
+    StatDescriptor listDefaultExposerDescriptor = getByName(
+        StatExposerTestingService.LIST_WITH_DEFAULT_EXPOSER, snapshot);
+    List<Integer> listDefaultExposerValue =
+        (List<Integer>) snapshot.get(listDefaultExposerDescriptor);
+    assertEquals(callsList, listDefaultExposerValue);
+
+    StatDescriptor listIdentityExposerDescriptor = getByName(
+        StatExposerTestingService.LIST_WITH_IDENTITY_EXPOSER, snapshot);
+    List<Integer> listIdentityExposerValue =
+        (List<Integer>) snapshot.get(listIdentityExposerDescriptor);
+    assertEquals(callsList, listIdentityExposerValue);
+    
+    StatDescriptor listInferenceExposerDescriptor = getByName(
+        StatExposerTestingService.LIST_WITH_INFERENCE_EXPOSER, snapshot);
+    List<Integer> listInferenceExposerValue =
+        (List<Integer>) snapshot.get(listInferenceExposerDescriptor);
+    assertEquals(callsList, listInferenceExposerValue);
+
+    StatDescriptor listToStringExposerDescriptor = getByName(
+        StatExposerTestingService.LIST_WITH_TO_STRING_EXPOSER, snapshot);
+    String listToStringExposerValue =
+        (String) snapshot.get(listToStringExposerDescriptor);
+    assertEquals(callsListAsString, listToStringExposerValue);
+  }
+
+  @Test public final void testPublishingStandaloneStat() {
+    StatRegistrar statRegistrar = injector.getInstance(StatRegistrar.class);
+
+    AtomicInteger statValue = new AtomicInteger(0);
+    statRegistrar.registerSingleStat("single-stat", "", statValue);
+
+    Stats stats = injector.getInstance(Stats.class);
+    ImmutableMap<StatDescriptor, Object> snapshot = stats.snapshot();
+
+    StatDescriptor numberOfChildCallsDescriptor =
+        getByName("single-stat", snapshot);
+    String snapshottedValue =
+        (String) snapshot.get(numberOfChildCallsDescriptor);
+    assertEquals(String.valueOf(statValue.intValue()), snapshottedValue);
   }
 
   StatDescriptor getByName(

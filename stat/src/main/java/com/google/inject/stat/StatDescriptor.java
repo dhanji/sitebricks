@@ -2,28 +2,31 @@ package com.google.inject.stat;
 
 import com.google.common.base.Objects;
 
-import java.lang.reflect.Member;
-
 /**
+ * A {@link StatDescriptor} encapsulates the information required to publish
+ * a stat.
+ *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public final class StatDescriptor {
-  private final Object target;
   private final String name;
   private final String description;
-  private final Member member;
+  private final StatReader statReader;
+  private final Class<? extends StatExposer> statExposerClass;
 
   private StatDescriptor(
-      Object target, String name, String description, Member member) {
-    this.target = target;
+      String name, String description, StatReader statReader,
+      Class<? extends StatExposer> statExposerClass) {
     this.name = name;
     this.description = description;
-    this.member = member;
+    this.statReader = statReader;
+    this.statExposerClass = statExposerClass;
   }
 
-  public static StatDescriptor of(
-      Object target, String name, String description, Member member) {
-    return new StatDescriptor(target, name, description, member);
+  static StatDescriptor of(
+      String name, String description, StatReader statReader,
+      Class<? extends StatExposer> statExposerClass) {
+    return new StatDescriptor(name, description, statReader, statExposerClass);
   }
 
   public String getName() {
@@ -34,20 +37,20 @@ public final class StatDescriptor {
     return description;
   }
 
-  public Object getTarget() {
-    return target;
+  public StatReader getStatReader() {
+    return statReader;
   }
 
-  public Member getMember() {
-    return member;
+  public Class<? extends StatExposer> getStatExposerClass() {
+    return statExposerClass;
   }
 
   @Override public String toString() {
     return Objects.toStringHelper(this)
         .add("name", name)
         .add("description", description)
-        .add("target", target)
-        .add("member", member)
+        .add("statClosure", statReader)
+        .add("statExposerClass", statExposerClass)
         .toString();
   }
 
@@ -63,13 +66,12 @@ public final class StatDescriptor {
     StatDescriptor that = (StatDescriptor) o;
     return Objects.equal(this.name, that.name)
         && Objects.equal(this.description, that.description)
-        && Objects.equal(this.member, that.member)
-        && Objects.equal(this.target, that.target)
-        && Objects.equal(this.member, that.member);
+        && Objects.equal(this.statReader, that.statReader)
+        && Objects.equal(this.statExposerClass, that.statExposerClass);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(name, description, member, target);
+    return Objects.hashCode(name, description, statReader, statExposerClass);
   }
 }

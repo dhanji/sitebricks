@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.inject.stat.StatsServlet.DEFAULT_FORMAT;
 
+import com.google.inject.Singleton;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.servlet.ServletModule;
@@ -91,10 +92,18 @@ public class StatModule extends ServletModule {
 
   @Override
   protected void configureServlets() {
+    // Manual bootstrapping is needed to instantiated a well-formed listener.
     Stats stats = new Stats();
-
-    bindListener(Matchers.any(), new StatAnnotatedTypeListener(stats));
     bind(Stats.class).toInstance(stats);
+    requestInjection(stats);
+
+    StatRegistrar statRegistrar = new StatRegistrar(stats);
+    bind(StatRegistrar.class).toInstance(statRegistrar);
+
+    StatAnnotatedTypeListener listener =
+        new StatAnnotatedTypeListener(statRegistrar);
+
+    bindListener(Matchers.any(), listener);
 
     serve(uriPath).with(StatsServlet.class);
 

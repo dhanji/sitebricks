@@ -45,9 +45,9 @@ public class StatsPublishersTest {
     stringWriter = new StringWriter(1024);
     printWriter = new PrintWriter(stringWriter);
     snapshot = ImmutableMap.<StatDescriptor, Object>builder()
-        .put(StatDescriptor.of(null, "int-stat", "", null), 3)
-        .put(StatDescriptor.of(null, "float-stat", "", null), 4.3d)
-        .put(StatDescriptor.of(null, "list-stat", "", null),
+        .put(StatDescriptor.of("int-stat", "", null, null), 3)
+        .put(StatDescriptor.of("float-stat", "", null, null), 4.3d)
+        .put(StatDescriptor.of("list-stat", "", null, null),
             ImmutableList.of("a", "b", "c"))
         .build();
   }

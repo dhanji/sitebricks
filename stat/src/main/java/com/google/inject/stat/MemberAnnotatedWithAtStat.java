@@ -27,11 +27,11 @@ import java.lang.reflect.Member;
  *
  * @author ffaber@gmail.com (Fred Faber)
  */
-class StatAnnotatedMember {
+final class MemberAnnotatedWithAtStat {
   final Stat stat;
   final Member member;
 
-  StatAnnotatedMember(Stat stat, Member member) {
+  MemberAnnotatedWithAtStat(Stat stat, Member member) {
     this.stat = stat;
     this.member = member;
   }
@@ -46,11 +46,12 @@ class StatAnnotatedMember {
   }
 
   @Override public boolean equals(Object other) {
-    if (!(other instanceof StatAnnotatedMember)) {
+    if (!(other instanceof MemberAnnotatedWithAtStat)) {
       return false;
     }
 
-    StatAnnotatedMember otherAnnotatedMember = (StatAnnotatedMember) other;
+    MemberAnnotatedWithAtStat otherAnnotatedMember =
+        (MemberAnnotatedWithAtStat) other;
     return Objects.equal(this.member, otherAnnotatedMember.member)
         && Objects.equal(this.stat, otherAnnotatedMember.stat);
   }
