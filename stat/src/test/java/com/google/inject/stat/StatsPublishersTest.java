@@ -53,7 +53,7 @@ public class StatsPublishersTest {
   }
 
   @Test public void testHtmlPublisher() {
-    HtmlStatsPublisher publisher = new HtmlStatsPublisher();
+    com.google.inject.stat.StatsPublishers.HtmlStatsPublisher publisher = new com.google.inject.stat.StatsPublishers.HtmlStatsPublisher();
     String expectedOutput = new StringBuilder()
         .append("<html><head><style>\n")
         .append("body { font-family: monospace; }\n")
@@ -67,7 +67,7 @@ public class StatsPublishersTest {
   }
 
   @Test public void testJsonPublisher() {
-    JsonStatsPublisher publisher = new JsonStatsPublisher();
+    com.google.inject.stat.StatsPublishers.JsonStatsPublisher publisher = new com.google.inject.stat.StatsPublishers.JsonStatsPublisher();
     String expectedOutput = new StringBuilder()
         .append("{")
         .append("\"int-stat\":3")
@@ -81,7 +81,7 @@ public class StatsPublishersTest {
   }
 
   @Test public void testTextPublisher() {
-    TextStatsPublisher publisher = new TextStatsPublisher();
+    com.google.inject.stat.StatsPublishers.TextStatsPublisher publisher = new com.google.inject.stat.StatsPublishers.TextStatsPublisher();
     String expectedOutput = new StringBuilder()
         .append("int-stat 3\n")
         .append("float-stat 4.3\n")

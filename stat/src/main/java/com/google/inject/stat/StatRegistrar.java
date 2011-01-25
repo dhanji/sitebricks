@@ -58,11 +58,11 @@ public final class StatRegistrar {
   }
 
   public void registerSingleStat(String name, String description, Object stat) {
-    registerStat(
+    registerSingleStat(
         name, description, StatReaders.forObject(stat), DEFAULT_EXPOSER_CLASS);
   }
 
-  public void registerStat(
+  public void registerSingleStat(
       String name, String description, StatReader statReader,
       Class<? extends StatExposer> statExposerClass) {
     stats.register(

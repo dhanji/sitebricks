@@ -4,15 +4,18 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.inject.stat.StatsServlet.DEFAULT_FORMAT;
 
-import com.google.inject.Singleton;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.servlet.ServletModule;
+import com.google.inject.stat.StatsPublishers.HtmlStatsPublisher;
+import com.google.inject.stat.StatsPublishers.JsonStatsPublisher;
+import com.google.inject.stat.StatsPublishers.TextStatsPublisher;
 
 /**
  * This module enables publishing values annotated with {@link Stat} to a given
  * servlet path.
  * <p>
+ * <h3>Example of Use</h3>
  * As an example, consider the following class:
  * <pre><code>
  * class QueryServlet extends HttpServlet {
@@ -34,7 +37,7 @@ import com.google.inject.servlet.ServletModule;
  * }
  * </pre></code>
  * <p>
- * This class exports a stat called {@code search-hits}.  To configure the
+ * This class registers a stat called {@code search-hits}.  To configure the
  * server to publish this stat, install a {@link StatModule}, such as:
  * <pre><code>
  * public class YourServerModule extends AbstractModule {
@@ -47,6 +50,81 @@ import com.google.inject.servlet.ServletModule;
  * <p>
  * Then, to query the server for its stats, hit the url that was registered
  * with the module (which was {@code /stats}, in the example above).
+ *
+ * <h3>Registering Stats</h3>
+ * The simplest way of registering a stat is to use the <code>@Stat</code>
+ * annotation.  Members of a class annotated by <code>@Stat</code> are
+ * registered automatically when an instance of the class is created by Guice.
+ * The value of the member is read when a snapshot of the stats is requested,
+ * most likely by the {@link StatsServlet} upon a request to {@code /stats}.
+ * <p>
+ * At times it is convenient to "manually" register a stat.  To do this,
+ * inject an instance of {@link StatRegistrar} and use it to register a stat.
+ * For example:
+ * <pre><code>
+ * class RegistersLocalVariableAsStat {
+ *
+ *   private final StatRegistrar statRegistrar;
+ *
+ *   {@literal @}Inject RegistersLocalVariableAsStat(
+ *       StatRegistrar statRegistrar) {
+ *     this.statRegistrar = statRegistrar;
+ *    }
+ *
+ *   void initialize() {
+ *     long start = System.currentTimeMillis();
+ *     doInitialization();
+ *     statRegistrar.registerSingleStat(
+ *       "init-time-in-ms",
+ *       "Initialization time of a class",
+ *       System.currentTimeMillis() - start);
+ *   }
+ * }
+ * </code></pre>
+ * There are other convenience methods on {@link StatRegistrar} to facilitate
+ * registering annotated static members on classes and registering all
+ * annotated members on instances as well.
+ *
+ * <h3>Exposing Stats</h3>
+ * It's important to consider, if only to be careful, how to prevent a mutable
+ * reference of a stat from leaking into the stat publishing logic.  For
+ * instance, if you were to publish a deeply mutable reference to a
+ * <code>List</code>, then a stat publisher could inadvertently (or purposely)
+ * mutate it.
+ * <p>
+ * It is the role of a {@link StatExposer} to guard against such leaks:  An
+ * exposer is given the raw value of a stat, and should return a safe view of
+ * it.  This view is then passed to the {@link StatsPublishers publishers}.
+ * <p>
+ * By default, a {@link StatExposers.InferenceExposer} is used to guard stats
+ * registered via {@link Stat <code>@Stat</code>}.  This implementation should
+ * handle the majority of common use cases.  If, however, you want to use a
+ * different {@link StatExposer} for your stat, then you may do so by
+ * specifying its class within the {@link Stat <code>@Stat</code>} annotation.
+ * For example:
+ * <pre><code>
+ * class ServiceStat implements Cloneable {
+ *   int calls;
+ *   AtomicLong&lt;Long&gt; latencyInMs;
+ *
+ *  {@literal @}Override protected Object clone() {
+ *     return new ServiceStat(calls, latencyInMs);
+ *   }
+ * }
+ *
+ * class ServiceStatExposer implements StatExposer&lt;ServiceStat&gt; {
+ *  {@literal @}Override Object expose(ServiceStat serviceStat) {
+ *     return serviceStat.clone();
+ *   }
+ * }
+ *
+ * class Service {
+ *  {@literal @}Stat(value = "service-stat", exposer = ServiceStatExposer.class)
+ *   private final ServiceStat serviceStat;
+ *
+ *   ...
+ * }
+ * </pre></code>
  *
  * <h3>Published Formats</h3>
  * By default, published stats are available in several formats:

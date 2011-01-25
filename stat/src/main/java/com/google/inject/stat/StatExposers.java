@@ -36,10 +36,9 @@ public final class StatExposers {
    * how it should expose the value as an equivalent.  As a default case, it
    * returns the string value of the stat.
    */
-  public final static class InferenceExposer
-      implements StatExposer {
+  public final static class InferenceExposer implements StatExposer<Object> {
     @SuppressWarnings("unchecked")
-    @Override public <T> Object expose(T target) {
+    @Override public Object expose(Object target) {
       if (target instanceof List) {
         return Collections.unmodifiableList((List) target);
       }
@@ -54,15 +53,15 @@ public final class StatExposers {
   }
 
   /** This exposer returns the string value of a stat as its exposed form. */
-  public final static class ToStringExposer implements StatExposer {
-    @Override public <T> Object expose(T target) {
+  public final static class ToStringExposer implements StatExposer<Object> {
+    @Override public Object expose(Object target) {
       return String.valueOf(target);
     }
   }
 
   /** This exposer returns the raw stat it is passed as its exposed form. */
   public final static class IdentityExposer implements StatExposer {
-    @Override public <T> Object expose(T target) {
+    @Override public Object expose(Object target) {
       return target;
     }
   }

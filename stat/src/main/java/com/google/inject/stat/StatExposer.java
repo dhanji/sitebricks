@@ -26,11 +26,11 @@ package com.google.inject.stat;
  *
  * @author ffaber@gmail.com (Fred Faber)
  */
-public interface StatExposer {
+public interface StatExposer<T> {
 
   /** Accepts the raw value of a stat, optionally transforms it, and returns
    * an exposed value of the stat.  This exposed value is what is passed to
    * the stat publishing logic.
    */
-  <T> Object expose(T target);
+  Object expose(T target);
 }

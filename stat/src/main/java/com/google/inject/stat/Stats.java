@@ -78,6 +78,7 @@ final class Stats {
       // And here we are careful to expose only the reference we should
       StatExposer statExposer =
           getStatExposer(statDescriptor.getStatExposerClass());
+      @SuppressWarnings("unchecked") // We know we don't guarantee a <T> here.
       Object exposedValue = statExposer.expose(statValue);
       builder.put(statDescriptor, exposedValue);
     }
