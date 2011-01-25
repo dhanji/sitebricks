@@ -21,6 +21,9 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.stat.StatsPublishers.HtmlStatsPublisher;
+import com.google.inject.stat.StatsPublishers.JsonStatsPublisher;
+import com.google.inject.stat.StatsPublishers.TextStatsPublisher;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +56,7 @@ public class StatsPublishersTest {
   }
 
   @Test public void testHtmlPublisher() {
-    com.google.inject.stat.StatsPublishers.HtmlStatsPublisher publisher = new com.google.inject.stat.StatsPublishers.HtmlStatsPublisher();
+    HtmlStatsPublisher publisher = new HtmlStatsPublisher();
     String expectedOutput = new StringBuilder()
         .append("<html><head><style>\n")
         .append("body { font-family: monospace; }\n")
@@ -67,7 +70,7 @@ public class StatsPublishersTest {
   }
 
   @Test public void testJsonPublisher() {
-    com.google.inject.stat.StatsPublishers.JsonStatsPublisher publisher = new com.google.inject.stat.StatsPublishers.JsonStatsPublisher();
+    JsonStatsPublisher publisher = new JsonStatsPublisher();
     String expectedOutput = new StringBuilder()
         .append("{")
         .append("\"int-stat\":3")
@@ -81,7 +84,7 @@ public class StatsPublishersTest {
   }
 
   @Test public void testTextPublisher() {
-    com.google.inject.stat.StatsPublishers.TextStatsPublisher publisher = new com.google.inject.stat.StatsPublishers.TextStatsPublisher();
+    TextStatsPublisher publisher = new TextStatsPublisher();
     String expectedOutput = new StringBuilder()
         .append("int-stat 3\n")
         .append("float-stat 4.3\n")
@@ -90,7 +93,8 @@ public class StatsPublishersTest {
     assertPublishing(publisher, expectedOutput);
   }
 
-  private void assertPublishing(StatsPublisher publisher, String expectedOutput) {
+  private void assertPublishing(
+      StatsPublisher publisher, String expectedOutput) {
     publisher.publish(snapshot, printWriter);
     printWriter.flush();
     assertEquals(expectedOutput, stringWriter.getBuffer().toString());
