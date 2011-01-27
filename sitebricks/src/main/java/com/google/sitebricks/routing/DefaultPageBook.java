@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 @ThreadSafe @Singleton
-class DefaultPageBook implements PageBook {
+public class DefaultPageBook implements PageBook {
   //multimaps TODO refactor to multimap?
 
   @GuardedBy("lock") // All three following fields
@@ -87,6 +87,20 @@ class DefaultPageBook implements PageBook {
 
   public PageTuple at(String uri, Class<?> clazz) {
     return at(uri, clazz, clazz.isAnnotationPresent(Service.class));
+  }
+
+  public void at(PageTuple page) {
+    // Is Universal?
+    synchronized (lock) {
+      String key = firstPathElement(page.getUri());
+      if (isVariable(key)) {
+        universalMatchingPages.add(page);
+      } else {
+        multiput(pages, key, page);
+      }
+    }
+
+    classToPageMap.put(page.pageClass(), page);
   }
 
   private PageTuple at(String uri, Class<?> clazz, boolean headless) {
@@ -279,6 +293,18 @@ class DefaultPageBook implements PageBook {
     // A map of http methods -> annotation types (e.g. "POST" -> @Post)
     private Map<String, Class<? extends Annotation>> httpMethods;
 
+    public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, boolean headless,
+                     Injector injector, Multimap<String, MethodTuple> methods, Select select,
+                     Map<String, Class<? extends Annotation>> httpMethods) {
+      this.uri = uri;
+      this.matcher = matcher;
+      this.clazz = clazz;
+      this.headless = headless;
+      this.injector = injector;
+      this.methods = methods;
+      this.select = select;
+      this.httpMethods = httpMethods;
+    }
 
     public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, Injector injector,
                      boolean headless) {

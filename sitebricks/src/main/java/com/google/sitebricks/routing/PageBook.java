@@ -72,6 +72,8 @@ public interface PageBook {
 
   Collection<List<Page>> getPageMap();
 
+  void at(DefaultPageBook.PageTuple page);
+
 
   public static interface Page extends Comparable<Page> {
     Renderable widget();
