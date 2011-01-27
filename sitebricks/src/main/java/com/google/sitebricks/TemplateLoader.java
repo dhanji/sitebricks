@@ -119,7 +119,8 @@ class TemplateLoader {
 
   private static InputStream open(String file, ServletContext context) {
     try {
-      return new FileInputStream(new File(context.getRealPath(file)));
+      String path = context.getRealPath(file);
+      return path == null ? null : new FileInputStream(new File(path));
     } catch (FileNotFoundException e) {
       return null;
     }
