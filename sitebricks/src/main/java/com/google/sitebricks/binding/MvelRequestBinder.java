@@ -10,6 +10,7 @@ import net.jcip.annotations.Immutable;
 import org.mvel2.PropertyAccessException;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Level;
@@ -74,6 +75,18 @@ class MvelRequestBinder implements RequestBinder {
       try {
         evaluator.write(key, o, value);
       } catch (PropertyAccessException e) {
+
+        // Do some better error reporting if this is a real exception.
+        if (e.getCause() instanceof InvocationTargetException) {
+          Throwable cause = e.getCause().getCause();
+          StackTraceElement[] stackTrace = cause.getStackTrace();
+          throw new RuntimeException(String.format(
+              "Exception [%s - \"%s\"] thrown by setter [%s] for value[%s]\n\nat %s\n"
+              + "(See below for entire trace.)\n",
+              cause.getClass().getSimpleName(),
+              cause.getMessage(), key, value,
+              stackTrace[0]), e);
+        }
         // Log missing property.
         if (log.isLoggable(Level.FINE)) {
           log.fine(String.format("A property [%s] could not be bound,"
