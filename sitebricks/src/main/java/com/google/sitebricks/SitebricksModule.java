@@ -10,13 +10,11 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.sitebricks.core.CaseWidget;
 import com.google.sitebricks.headless.Service;
-import com.google.sitebricks.http.Delete;
-import com.google.sitebricks.http.Get;
-import com.google.sitebricks.http.Post;
-import com.google.sitebricks.http.Put;
+import com.google.sitebricks.http.*;
 import com.google.sitebricks.http.negotiate.Accept;
 import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
+import com.google.sitebricks.routing.Action;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -34,6 +32,8 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     methods.put("post", Post.class);
     methods.put("put", Put.class);
     methods.put("delete", Delete.class);
+    methods.put("head", Head.class);
+    methods.put("trace", Trace.class);
   }
 
   @Override
@@ -171,7 +171,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
 
   static enum BindingKind {
-    EMBEDDED, PAGE, SERVICE, STATIC_RESOURCE
+    EMBEDDED, PAGE, SERVICE, STATIC_RESOURCE, ACTION
   }
 
   class LinkingBinder implements ShowBinder, ScopedBindingBuilder, EmbedAsBinder {
@@ -234,6 +234,10 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     public void export(String glob) {
       resource = glob;
       this.bindingKind = BindingKind.STATIC_RESOURCE;
+    }
+
+    public ActionBinder perform(Action action) {
+      return new ActionDescriptor(action);
     }
 
     public ScopedBindingBuilder as(String annotation) {
