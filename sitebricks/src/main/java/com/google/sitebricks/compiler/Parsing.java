@@ -24,18 +24,20 @@ public class Parsing {
     if (Strings.empty(expression))
       return Collections.emptyMap();
 
-
-    boolean escape = false;
+    Deque<Character> escapes = new ArrayDeque<Character>();
     List<String> pairs = new ArrayList<String>();
     int index = 0;
     for (int i = 0; i < expression.length(); i++) {
       char c = expression.charAt(i);
 
-      //skip commas in strings
-      if ('"' == c)
-        escape = !escape;
+      if (('"' == c && (escapes.isEmpty() || escapes.peek().charValue() != c))
+          || '[' == c || '{' == c) {
+        escapes.push(c);
+      } else if (('"' == c && escapes.peek().charValue() == c) || ']' == c || '}' == c) {
+        escapes.pop();
+      }
 
-      if (!escape && ',' == c) {
+      if (escapes.isEmpty() && ',' == c) {
         if (index < i)
           pairs.add(expression.substring(index, i));
 
@@ -176,7 +178,7 @@ public class Parsing {
   public static String render(List<Token> tokens, Map<String, Object> arguments) {
     StringBuilder builder = new StringBuilder();
     for (Token token : tokens) {
-        builder.append(token.render(arguments));
+      builder.append(token.render(arguments));
     }
 
     return builder.toString();
@@ -221,7 +223,7 @@ public class Parsing {
   //URI test regex: (([a-zA-Z][0-9a-zA-Z+\\-\\.]*:)?/{0,2}[0-9a-zA-Z;/?:@&=+$\\.\\-_!~*'()%]+)?(#[0-9a-zA-Z;/?:@&=+$\\.\\-_!~*'()%]+)?
   //Taken from stylus studio message board http://www.stylusstudio.com/xmldev/200108/post10890.html
 
-  private final static Pattern URI_REGEX 
+  private final static Pattern URI_REGEX
       = Pattern.compile("(([a-zA-Z][0-9a-zA-Z+\\-\\.]*:)?/{0,2}[0-9a-zA-Z;/?:@&=+$\\.\\-_!~*'()%]+)?(#[0-9a-zA-Z;/?:@&=+$\\.\\-_!~*'()%]+)?");
 
 //      "(([a-zA-Z][0-9a-zA-Z+\\\\-\\\\.]*:)?/{0,2}[0-9a-zA-Z;" +
