@@ -1,0 +1,29 @@
+body {
+  font-family: "Helvetica neue", "Helvetica", sans-serif;
+  font-size: 16px;
+  font-weight: lighter;
+  line-height: 1;
+}
+
+h2 {
+  font-weight: lighter;
+
+}
+
+#header {
+  height: 40px;
+  border: 1px solid gray;
+}
+
+#leftnav {
+  position: absolute;
+  width: 19%;
+  border: 1px dashed blue;
+}
+
+#content {
+  position: absolute;
+  left: 20%;
+  right: 1%;
+  border: 1px dashed #daa520;
+}

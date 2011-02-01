@@ -285,7 +285,7 @@ public class DefaultPageBook implements PageBook {
     private final boolean headless;
     private final Injector injector;
 
-    private final Multimap<String, MethodTuple> methods;
+    private final Multimap<String, Action> methods;
 
     //dispatcher switch (select on request param by default)
     private final Select select;
@@ -294,7 +294,7 @@ public class DefaultPageBook implements PageBook {
     private Map<String, Class<? extends Annotation>> httpMethods;
 
     public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, boolean headless,
-                     Injector injector, Multimap<String, MethodTuple> methods, Select select,
+                     Injector injector, Multimap<String, Action> methods, Select select,
                      Map<String, Class<? extends Annotation>> httpMethods) {
       this.uri = uri;
       this.matcher = matcher;
@@ -336,7 +336,7 @@ public class DefaultPageBook implements PageBook {
      * Returns a map of HTTP-method name to @Annotation-marked methods
      */
     @SuppressWarnings({"JavaDoc"})
-    private Multimap<String, MethodTuple> reflectAndCache(String uri,
+    private Multimap<String, Action> reflectAndCache(String uri,
         Map<String, Class<? extends Annotation>> methodMap) {
       String tail = "";
       if (clazz.isAnnotationPresent(At.class)) {
@@ -351,7 +351,7 @@ public class DefaultPageBook implements PageBook {
           tail = uri.substring(length);
       }
 
-      Multimap<String, MethodTuple> map = HashMultimap.create();
+      Multimap<String, Action> map = HashMultimap.create();
 
       for (Map.Entry<String, Class<? extends Annotation>> entry : methodMap.entrySet()) {
 
@@ -469,14 +469,14 @@ public class DefaultPageBook implements PageBook {
         boolean matched = false;
         for (String event : events) {
           String key = httpMethod + event;
-          Collection<MethodTuple> tuples = methods.get(key);
+          Collection<Action> tuples = methods.get(key);
           Object redirect = null;
           
           if (null != tuples) {
-            for (MethodTuple methodTuple : tuples) {
-              if (methodTuple.shouldCall(request)) {
+            for (Action action : tuples) {
+              if (action.shouldCall(request)) {
                 matched = true;
-                redirect = methodTuple.call(page, map);
+                redirect = action.call(page, map);
                 break;
               }
             }
@@ -491,28 +491,28 @@ public class DefaultPageBook implements PageBook {
 
         // no matched events. Fire default handler
         if (!matched) {
-          return callMethodTuple(httpMethod, page, map, request);
+          return callAction(httpMethod, page, map, request);
         }
 
       } else {
         // Fire default handler (no events defined)
-        return callMethodTuple(httpMethod, page, map, request);
+        return callAction(httpMethod, page, map, request);
       }
 
       //no redirects, render normally
       return null;
     }
 
-    private Object callMethodTuple(String httpMethod, Object page, Map<String, String> pathMap,
-                                   HttpServletRequest request) {
+    private Object callAction(String httpMethod, Object page, Map<String, String> pathMap,
+                              HttpServletRequest request) {
 
       // There may be more than one default handler
-      Collection<MethodTuple> tuple = methods.get(httpMethod);
+      Collection<Action> tuple = methods.get(httpMethod);
       Object redirect = null;
       if (null != tuple) {
-        for (MethodTuple methodTuple : tuple) {
-          if (methodTuple.shouldCall(request)) {
-            redirect = methodTuple.call(page, pathMap);
+        for (Action action : tuple) {
+          if (action.shouldCall(request)) {
+            redirect = action.call(page, pathMap);
             break;
           }
         }
@@ -550,7 +550,7 @@ public class DefaultPageBook implements PageBook {
   }
 
 
-  private static class MethodTuple {
+  private static class MethodTuple implements Action {
     private final Method method;
     private final Injector injector;
     private final List<Object> args;
@@ -613,10 +613,12 @@ public class DefaultPageBook implements PageBook {
      * @return true if this method tuple can be validly called against this request.
      * Used to select for content negotiation.
      */
+    @Override
     public boolean shouldCall(HttpServletRequest request) {
       return negotiator.shouldCall(negotiates, request);
     }
 
+    @Override
     public Object call(Object page, Map<String, String> map) {
       List<Object> arguments = new ArrayList<Object>();
       for (Object arg : args) {
@@ -628,24 +630,6 @@ public class DefaultPageBook implements PageBook {
       }
 
       return call(page, method, arguments.toArray());
-    }
-
-      //the @Accept request header-based event dispatcher
-    private Map<String, String> discoverNegotiates(Method method, Injector injector) {
-      // This ugly gunk gets us the map of headers to negotiation annotations
-      Map<String, Class<? extends Annotation>> negotiationsMap = injector.getInstance(
-          Key.get(new TypeLiteral<Map<String, Class<? extends Annotation>>>(){ }, Negotiation.class));
-
-      Map<String, String> negotiations = Maps.newHashMap();
-      // Gather all the negotiation annotations in this class.
-      for (Map.Entry<String, Class<? extends Annotation>> headerAnn : negotiationsMap.entrySet()) {
-        Annotation annotation = method.getAnnotation(headerAnn.getValue());
-        if (annotation != null) {
-          negotiations.put(headerAnn.getKey(), readAnnotationValue(annotation));
-        }
-      }
-
-      return negotiations;
     }
 
     private static Object call(Object page, final Method method,
@@ -665,6 +649,24 @@ public class DefaultPageBook implements PageBook {
             cause.getMessage(), method,
             stackTrace[0]), e);
       }
+    }
+
+      //the @Accept request header-based event dispatcher
+    private Map<String, String> discoverNegotiates(Method method, Injector injector) {
+      // This ugly gunk gets us the map of headers to negotiation annotations
+      Map<String, Class<? extends Annotation>> negotiationsMap = injector.getInstance(
+          Key.get(new TypeLiteral<Map<String, Class<? extends Annotation>>>(){ }, Negotiation.class));
+
+      Map<String, String> negotiations = Maps.newHashMap();
+      // Gather all the negotiation annotations in this class.
+      for (Map.Entry<String, Class<? extends Annotation>> headerAnn : negotiationsMap.entrySet()) {
+        Annotation annotation = method.getAnnotation(headerAnn.getValue());
+        if (annotation != null) {
+          negotiations.put(headerAnn.getKey(), readAnnotationValue(annotation));
+        }
+      }
+
+      return negotiations;
     }
   }
 
