@@ -32,4 +32,8 @@ public class HelloWorldPage {
     driver.get(AcceptanceTest.BASE_URL + "/hello");
     return PageFactory.initElements(driver, HelloWorldPage.class);
   }
+
+  public boolean hasNonSelfClosingScriptTag() {
+    return driver.getPageSource().contains("<script type=\"text/javascript\"></script>");
+  }
 }
