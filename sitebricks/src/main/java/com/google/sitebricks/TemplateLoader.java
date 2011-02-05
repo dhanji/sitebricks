@@ -51,7 +51,7 @@ class TemplateLoader {
 
         //resolve again, but this time on the webapp resource path
         if (null == stream) {
-          final ResolvedTemplate resolvedTemplate = resolve(pageClass, servletContext);
+          final ResolvedTemplate resolvedTemplate = resolve(pageClass, servletContext, template);
           if (null != resolvedTemplate) {
             template = resolvedTemplate.templateName;
             stream = resolvedTemplate.resource;
@@ -77,7 +77,7 @@ class TemplateLoader {
     return new Template(Template.Kind.kindOf(template), text);
   }
 
-  private ResolvedTemplate resolve(Class<?> pageClass, ServletContext context) {
+  private ResolvedTemplate resolve(Class<?> pageClass, ServletContext context, String template) {
     //first resolve using url conversion
     for (String nameTemplate : fileNameTemplates) {
       String templateName = String.format(nameTemplate, pageClass.getSimpleName());
@@ -91,6 +91,17 @@ class TemplateLoader {
 
       if (null != resource) {
         return new ResolvedTemplate(templateName, resource);
+      }
+
+
+      if (null == template) {
+          continue;
+      }
+      //try to resolve @Show template from web-inf folder    
+      resource = openWebInf(template, context);
+
+      if (null != resource) {
+          return new ResolvedTemplate(template, resource);
       }
     }
 
