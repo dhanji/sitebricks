@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.google.inject.matcher.Matchers.annotatedWith;
+import static com.google.sitebricks.SitebricksModule.BindingKind.ACTION;
 import static com.google.sitebricks.SitebricksModule.BindingKind.EMBEDDED;
 import static com.google.sitebricks.SitebricksModule.BindingKind.PAGE;
 import static com.google.sitebricks.SitebricksModule.BindingKind.SERVICE;
@@ -112,6 +113,8 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
         resourcesService.add(SitebricksModule.class, binding.getResource());
       } else if (SERVICE == binding.bindingKind) {
         pagesToCompile.add(pageBook.serviceAt(binding.uri, binding.pageClass));
+      } else if (ACTION == binding.bindingKind) {
+        pageBook.at(binding.uri, binding.actionDescriptor);
       }
     }
   }

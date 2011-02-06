@@ -183,6 +183,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     private boolean asEagerSingleton;
     private Class<? extends Annotation> scopeAnnotation;
     private Scope scope;
+    ActionDescriptor actionDescriptor;
 
 
     public LinkingBinder(String uri) {
@@ -237,7 +238,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     }
 
     public ActionBinder perform(Action action) {
-      return new ActionDescriptor(action);
+      return actionDescriptor = new ActionDescriptor(action);
     }
 
     public ScopedBindingBuilder as(String annotation) {

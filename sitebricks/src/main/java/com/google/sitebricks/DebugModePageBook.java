@@ -5,7 +5,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.RequestScoped;
 import com.google.sitebricks.compiler.Compilers;
-import com.google.sitebricks.routing.DefaultPageBook.PageTuple;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.Production;
 import com.google.sitebricks.routing.SystemMetrics;
@@ -91,8 +90,8 @@ class DebugModePageBook implements PageBook {
     return book.getPageMap();
   }
 
-  public void at(PageTuple page) {
-    book.at(page);
+  public void at(String uri, ActionDescriptor actionDescriptor) {
+    book.at(uri, actionDescriptor);
   }
 
   private void reload(String identifier, Page page) {

@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
 import com.google.inject.*;
 import com.google.inject.name.Named;
+import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.At;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
@@ -89,7 +90,18 @@ public class DefaultPageBook implements PageBook {
     return at(uri, clazz, clazz.isAnnotationPresent(Service.class));
   }
 
-  public void at(PageTuple page) {
+  @Override
+  public void at(String uri, ActionDescriptor actionDescriptor) {
+    Multimap<String, Action> actions = HashMultimap.create();
+
+    // TODO(dhanji): For each select/header/on binding, generate an action in the multimap
+    //...
+
+    // Register into the book!
+    at(new PageTuple(uri, new PathMatcherChain(uri), null, true, injector, actions));
+  }
+
+  private void at(PageTuple page) {
     // Is Universal?
     synchronized (lock) {
       String key = firstPathElement(page.getUri());
@@ -289,21 +301,22 @@ public class DefaultPageBook implements PageBook {
 
     //dispatcher switch (select on request param by default)
     private final Select select;
+    private static final Key<Map<String, Class<? extends Annotation>>> HTTP_METHODS_KEY =
+        Key.get(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {}, Bricks.class);
 
     // A map of http methods -> annotation types (e.g. "POST" -> @Post)
     private Map<String, Class<? extends Annotation>> httpMethods;
 
     public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, boolean headless,
-                     Injector injector, Multimap<String, Action> methods, Select select,
-                     Map<String, Class<? extends Annotation>> httpMethods) {
+                     Injector injector, Multimap<String, Action> methods) {
       this.uri = uri;
       this.matcher = matcher;
       this.clazz = clazz;
       this.headless = headless;
       this.injector = injector;
       this.methods = methods;
-      this.select = select;
-      this.httpMethods = httpMethods;
+      this.select = PageTuple.class.getAnnotation(Select.class);
+      this.httpMethods = injector.getInstance(HTTP_METHODS_KEY);
     }
 
     public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, Injector injector,
@@ -316,10 +329,7 @@ public class DefaultPageBook implements PageBook {
 
       this.select = discoverSelect(clazz);
 
-      Key<Map<String, Class<? extends Annotation>>> methodMapKey =
-              Key.get(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {}, Bricks.class);
-
-      this.httpMethods = injector.getInstance(methodMapKey);
+      this.httpMethods = injector.getInstance(HTTP_METHODS_KEY);
       this.methods = reflectAndCache(uri, httpMethods);
     }
 

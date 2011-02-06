@@ -4,8 +4,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.Renderable;
-import com.google.sitebricks.routing.DefaultPageBook.PageTuple;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
@@ -73,7 +73,7 @@ public interface PageBook {
 
   Collection<List<Page>> getPageMap();
 
-  void at(PageTuple page);
+  void at(String uri, ActionDescriptor actionDescriptor);
 
 
   public static interface Page extends Comparable<Page> {

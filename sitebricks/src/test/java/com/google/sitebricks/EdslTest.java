@@ -11,7 +11,6 @@ import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
@@ -47,8 +46,7 @@ public class EdslTest {
             .perform(new DummyAction())
             .on(Get.class)
             .select("metadata", "form")
-            .selectHeader("Accept", "image/jpeg")
-            .selectHeader("Accept", Pattern.compile(".*"));
+            .selectHeader("Accept", "image/jpeg");
 
         // Registration of embeddable widgets (simply points to page class)
         embed(EdslTest.class).as("@Blasphemy");
