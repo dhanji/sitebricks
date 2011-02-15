@@ -27,7 +27,6 @@ class Dom {
     static final String LINE_NUMBER_ATTRIBUTE = "__WarpWidgetsSaxLineNumber";
     
     static final String FORM_TAG = "form";
-    static final Pattern WIDGET_ANNOTATION_REGEX = Pattern.compile("(@\\w\\w*(\\([\\w,=\"'()?:><!\\[\\];{}. ]*\\))?[ \n\r\t]*)\\Z");
     static final String XMLNS_ATTRIB_REGEX = " xmlns=\"[a-zA-Z0-9_+%;#/\\-:\\.]*\"";
 
     private Dom() {
@@ -40,7 +39,7 @@ class Dom {
     }
 
     static String stripAnnotation(String text) {
-        final Matcher matcher = WIDGET_ANNOTATION_REGEX
+        final Matcher matcher = AnnotationParser.WIDGET_ANNOTATION_REGEX
                 .matcher(text);
 
         //strip off the ending bit (annotation)
@@ -55,7 +54,7 @@ class Dom {
 
         //if this is a text node, then match for annotations
         if (isText(node)) {
-            final Matcher matcher = WIDGET_ANNOTATION_REGEX
+            final Matcher matcher = AnnotationParser.WIDGET_ANNOTATION_REGEX
                     .matcher(node.asXML());
 
             if (matcher.find()) {

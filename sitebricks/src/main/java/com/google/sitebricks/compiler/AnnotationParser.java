@@ -1,14 +1,9 @@
 package com.google.sitebricks.compiler;
 
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
-
-import static com.google.sitebricks.compiler.Dom.WIDGET_ANNOTATION_REGEX;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_KEY;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_CONTENT;
-
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.jsoup.nodes.Node;
 
 
 /**
@@ -17,6 +12,8 @@ import java.util.regex.Matcher;
 public class AnnotationParser {
 
   // TODO - value will be the type of the annotation ...
+  
+  public static final Pattern WIDGET_ANNOTATION_REGEX = Pattern.compile("(@\\w+(\\([\\w,=\"'()?:><!\\[\\];{}. &]*\\))?[ \n\r\t]*)\\Z");
 
   public static String readAnnotation(String text) {
     String annotation = null;    

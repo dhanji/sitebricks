@@ -38,8 +38,6 @@ public class HtmlParser {
   // private final LinkedList<Node> soup = new LinkedList<Node>();
   private final LinkedList<Node> stack = new LinkedList<Node>();
 
-  static final Pattern EMBEDDED_ANNOTATION_REGEX = Pattern.compile("(@\\w\\w*(\\([\\w,=\"'()?:><!\\[\\];{}. ]*\\))?)");
-  
   // TODO - LineCountingTokenQueue
   static final Pattern LINE_SEPARATOR = Pattern.compile("(\\r\\n|\\n|\\r|\\u0085|\\u2028|\\u2029)");
   static final String LINE_NUMBER_ATTRIBUTE = "_linecount";
@@ -242,7 +240,7 @@ public class HtmlParser {
    */
   private void parseAnnotatableText(String text, Element parent) {
 	  AnnotationNode annotation = null;
-	  Matcher matcher = EMBEDDED_ANNOTATION_REGEX.matcher(text);
+	  Matcher matcher = AnnotationParser.WIDGET_ANNOTATION_REGEX.matcher(text);
 
 	  int previousEnd = 0;
 	  while (matcher.find()){
