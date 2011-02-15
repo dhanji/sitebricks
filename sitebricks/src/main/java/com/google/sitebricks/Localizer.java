@@ -31,7 +31,7 @@ class Localizer {
   private final Set<Localization> localizations;
 
   // These are the processed, individual message sets by locale.
-  private final Map<Locale, Map<String, MessageDescriptor>> localizedValues = Maps.newHashMap();
+  private final Map<String, Map<String, MessageDescriptor>> localizedValues = Maps.newHashMap();
 
   // A map to track if we have bound the proxy for a given i18n interface yet.
   private Set<Class<?>> i18nedSoFar = Sets.newHashSet();
@@ -146,7 +146,7 @@ class Localizer {
                                    Map<String, MessageDescriptor> messages) {
 
     // Add to the value map.
-    localizedValues.put(localization.locale, messages);
+    localizedValues.put(createLocaleInterfaceKey(iface, localization.locale), messages);
 
     // Only need to bind the proxy once, for all locales.
     if (!i18nedSoFar.contains(iface)) {
@@ -168,15 +168,29 @@ class Localizer {
                */
               public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 Locale locale = requestProvider.get().getLocale();
-                Map<String, MessageDescriptor> messages = localizedValues.get(locale);
+                Map<String, MessageDescriptor> messages = getMessagesWithFallback(locale);
 
                 // Use default if we don't support the given locale.
                 if (null == messages) {
-                  messages = localizedValues.get(Locale.getDefault());
+                  messages = getMessagesWithFallback(Locale.getDefault());
                 }
 
-                return messages.get(method.getName()).render(args);
+                MessageDescriptor descriptor = messages.get(method.getName());
+                if (descriptor == null) {
+                	throw new IllegalStateException("Could not find message '" 
+                			+ method.getName() + "' in " + messages);
+                }
+				return descriptor.render(args);
               }
+
+			private Map<String, MessageDescriptor> getMessagesWithFallback(Locale locale) {
+				String localeInterfaceKey = createLocaleInterfaceKey(iface, locale);
+				Map<String, MessageDescriptor> result = localizedValues.get(localeInterfaceKey);
+				if (result == null) {
+					result = localizedValues.get(new Locale(locale.getLanguage()));
+				}
+				return result;
+			}
           });
 
         // return our proxy here.
@@ -187,6 +201,10 @@ class Localizer {
       });
     }
 
+  }
+
+  private String createLocaleInterfaceKey(final Class<?> iface, Locale locale) { 
+    return locale.toString() + ":" + iface.getName();
   }
 
   private static class MessageDescriptor {
