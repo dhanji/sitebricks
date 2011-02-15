@@ -1,5 +1,7 @@
 package com.google.sitebricks.compiler;
 
+import org.mvel2.DataConversion;
+
 import com.google.sitebricks.Evaluator;
 import net.jcip.annotations.Immutable;
 
@@ -35,8 +37,19 @@ class CompiledToken implements Token {
         return isExpression;
     }
 
-    public Object render(Object bound) {
-        return isExpression ? evaluator.evaluate(null, bound) : token;
+    public String render(Object bound) {
+        if (isExpression) {
+        	Object object = evaluator.evaluate(null, bound);
+        	if (object instanceof String) {
+        		return (String) object;
+        	}
+        	else {
+        		return DataConversion.convert(object, String.class);
+        	}
+        }
+        else {
+        	return token;
+        }
     }
 
     //local factories
