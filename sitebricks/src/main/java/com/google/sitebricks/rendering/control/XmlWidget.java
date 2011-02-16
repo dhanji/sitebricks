@@ -102,10 +102,7 @@ class XmlWidget implements Renderable {
         Token token = tokenList.get(i);
 
         if (token.isExpression()) {
-          final Object value = token.render(bound);
-
-          //normalize nulls to "null" (i.e. let responder take care of writing it)
-          respond.write((null == value) ? (String) value : value.toString());
+          respond.write(token.render(bound));
         } else {
           respond.write(
               contextualizeIfNeeded(attribute.getKey(), (0 == i), (String) token.render(bound)));

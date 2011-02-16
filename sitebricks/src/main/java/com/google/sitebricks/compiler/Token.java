@@ -1,5 +1,7 @@
 package com.google.sitebricks.compiler;
 
+import com.google.sitebricks.binding.TypeConverter;
+
 /**
  * Represents a compiled, evaluable expression or raw String token.
  *
@@ -21,10 +23,8 @@ public interface Token {
      *  class of this expression token).
      *
      * @return Returns the result of evaluating the expression token against the provided
-     *  context object. Typically you can call #toString() on the returned object to render
-     *  it in a response stream. If this token is a raw string, the returned object is the
-     *  raw string.
+     *  context object. Values are converted to String using the {@code TypeConverter}.
      *
      */
-    Object render(Object bound);
+    String render(Object bound);
 }
