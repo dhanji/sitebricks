@@ -85,7 +85,7 @@ public class DefaultPageBook implements PageBook {
 
     return at(uri, pageClass, true); 
   }
-
+  
   public PageTuple at(String uri, Class<?> clazz) {
     return at(uri, clazz, clazz.isAnnotationPresent(Service.class));
   }
@@ -145,8 +145,8 @@ public class DefaultPageBook implements PageBook {
   }
 
   public Page embedAs(Class<?> clazz, String as) {
-    Preconditions.checkArgument(null == clazz.getAnnotation(Service.class),
-        "You cannot embed headless web services!");
+//    Preconditions.checkArgument(null == clazz.getAnnotation(Service.class),
+//        "You cannot embed headless web services!");
     PageTuple pageTuple = new PageTuple("", PathMatcherChain.ignoring(), clazz, injector, false);
 
     synchronized (lock) {
@@ -222,11 +222,11 @@ public class DefaultPageBook implements PageBook {
 
     // Do a super crawl to detect the target type.
     while (null == targetType) {
-      Class<?> superClass = aClass.getSuperclass();
-      targetType = classToPageMap.get(superClass);
+      aClass = aClass.getSuperclass();
+      targetType = classToPageMap.get(aClass);
 
       // Stop at the root =D
-      if (Object.class.equals(superClass)) {
+      if (Object.class.equals(aClass)) {
         return null;
       }
     }
