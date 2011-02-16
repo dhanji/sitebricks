@@ -1,14 +1,15 @@
 package com.google.sitebricks.binding;
 
+import java.lang.reflect.Type;
+
+import com.google.inject.ImplementedBy;
+
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ * @author John Patterson (jdpatterson@gmail.com)
+ * @author JRodriguez
  */
-public interface TypeConverter<T> {
-
-    /**
-     *
-     * @param raw A string containing the raw form to coerce
-     * @return Returns an instance of the converted type (from the raw string).
-     */
-    T convert(String raw);
+@ImplementedBy(MvelTypeConverter.class)
+public interface TypeConverter {
+    <T> T convert(Object source, Type type);
 }
