@@ -4,8 +4,6 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,12 +22,10 @@ import com.google.sitebricks.At;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.SitebricksModule;
-import com.google.sitebricks.conversion.StringToDateTimeCalendarConverter;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Select;
 import com.google.sitebricks.rendering.EmbedAs;
-import com.ibm.icu.util.Calendar;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
