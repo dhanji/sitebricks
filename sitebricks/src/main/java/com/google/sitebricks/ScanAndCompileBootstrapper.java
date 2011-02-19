@@ -1,5 +1,17 @@
 package com.google.sitebricks;
 
+import static com.google.inject.matcher.Matchers.annotatedWith;
+import static com.google.sitebricks.SitebricksModule.BindingKind.ACTION;
+import static com.google.sitebricks.SitebricksModule.BindingKind.EMBEDDED;
+import static com.google.sitebricks.SitebricksModule.BindingKind.PAGE;
+import static com.google.sitebricks.SitebricksModule.BindingKind.SERVICE;
+import static com.google.sitebricks.SitebricksModule.BindingKind.STATIC_RESOURCE;
+
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -14,18 +26,6 @@ import com.google.sitebricks.rendering.resource.ResourcesService;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
 
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static com.google.inject.matcher.Matchers.annotatedWith;
-import static com.google.sitebricks.SitebricksModule.BindingKind.ACTION;
-import static com.google.sitebricks.SitebricksModule.BindingKind.EMBEDDED;
-import static com.google.sitebricks.SitebricksModule.BindingKind.PAGE;
-import static com.google.sitebricks.SitebricksModule.BindingKind.SERVICE;
-import static com.google.sitebricks.SitebricksModule.BindingKind.STATIC_RESOURCE;
-
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
@@ -37,10 +37,10 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
   private final WidgetRegistry registry;
   private final SystemMetrics metrics;
   private final Compilers compilers;
-
+  
   @Inject @Bricks
   private final List<SitebricksModule.LinkingBinder> bindings = null;
-
+  
   @Inject
   private final Stage currentStage = null;
 
@@ -74,7 +74,6 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
           .or(annotatedWith(EmbedAs.class).or(annotatedWith(With.class)))
       ).in(pkg));
     }
-
 
     //we need to scan all the pages first (do not collapse into the next loop)
     Set<PageBook.Page> pagesToCompile = scanPagesToCompile(set);

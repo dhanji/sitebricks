@@ -1,5 +1,22 @@
 package com.google.sitebricks.routing;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
@@ -7,20 +24,12 @@ import com.google.sitebricks.At;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.SitebricksModule;
+import com.google.sitebricks.conversion.StringToDateTimeCalendarConverter;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Select;
 import com.google.sitebricks.rendering.EmbedAs;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import static org.easymock.EasyMock.*;
+import com.ibm.icu.util.Calendar;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -353,6 +362,42 @@ public class PageBookImplTest {
     assert "IMAX".equals(bound.title) : "@Get method was not fired, on doGet() with the right arg, instead: " + bound.title;
   }
 
+  
+  @Test
+  public final void fireGetMethodWithPrimitiveArgsOnPage() {
+    Renderable mock = new Renderable() {
+      public void render(Object bound, Respond respond) {
+
+      }
+
+      public <T extends Renderable> Set<T> collect(Class<T> clazz) {
+        return null;
+      }
+    };
+
+    Date date = new Date();
+//    SimpleDateFormat sdf = new SimpleDateFormat(StringToDateTimeCalendarConverter.USA_SHORT);
+    
+    final PageBook pageBook = new DefaultPageBook(injector);
+//    pageBook.at("/wiki/:title/cat/:int/:bool/:float/:date", MyPageWithPrimitivesTemplate.class);
+    pageBook.at("/wiki/:title/cat/:int/:bool/:float", MyPageWithPrimitivesTemplate.class);
+
+    String targetURL = "/wiki/IMAX/cat/1/true/2.5";;
+    PageBook.Page page = pageBook.get(targetURL);
+    page.apply(mock);
+    final MyPageWithPrimitivesTemplate bound = new MyPageWithPrimitivesTemplate();
+    page.doMethod("get", bound, targetURL, fakeRequestWithParams(new HashMap<String, String[]>()));
+
+    assert page.widget().equals(mock);
+    assert "IMAX".equals(bound.title) && bound.id == 1 && bound.bool == true && bound.flt == 2.5
+//    	&& sdf.format(date).equals(sdf.format(bound.date)): 
+    	 : "@Get method did not bind in args correctly, title: " + bound.title + 
+//    	" id: " + bound.id + " bool: " + bound.bool + " float: " + bound.flt + " date: " +  sdf.format(bound.date);
+    	" id: " + bound.id + " bool: " + bound.bool + " float: " + bound.flt;
+    ;
+  }
+  
+
   @Test
   public final void firePostMethodWithArgsOnPage() {
     Renderable mock = new
@@ -570,8 +615,31 @@ public class PageBookImplTest {
       this.post = title;
       this.id = id;
     }
+  }
+  
+
+  @At("/wiki/:title/cat/:int/:bool/:float/:date")
+  @EmbedAs("Hi")
+  public static class MyPageWithPrimitivesTemplate {
+    private String title;
+    private int id;
+    private boolean bool;
+    private Float flt;
+    private Date date;
+
+    @Get
+    public void get(@Named("title") String title, @Named("int") Integer id, @Named("bool") Boolean bool, 
+//    		@Named("float") float flt, @Named("date") Date date) {
+            @Named("float") float flt) {
+      this.title = title;
+      this.id = id;
+      this.bool = bool;
+      this.flt = flt;
+    }
 
   }
+  
+  
 
   @At("/wiki/:title/cat/:id")
   @EmbedAs("Hi")

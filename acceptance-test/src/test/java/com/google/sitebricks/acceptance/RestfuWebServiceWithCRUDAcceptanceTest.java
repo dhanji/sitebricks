@@ -1,10 +1,15 @@
 package com.google.sitebricks.acceptance;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.sitebricks.acceptance.util.AcceptanceTest;
 import com.google.sitebricks.client.Web;
 import com.google.sitebricks.client.WebResponse;
 import com.google.sitebricks.client.transport.Json;
+import com.google.sitebricks.conversion.ConverterRegistry;
+import com.google.sitebricks.conversion.StandardTypeConverter;
+
 import org.testng.annotations.Test;
 
 import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.BASE_SERVICE_PATH;
@@ -23,7 +28,7 @@ public class RestfuWebServiceWithCRUDAcceptanceTest {
   public void create() {
   	String url = AcceptanceTest.BASE_URL + BASE_SERVICE_PATH;
   	System.out.println("POST " + url);
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(url)
         .transports(String.class)
@@ -36,7 +41,7 @@ public class RestfuWebServiceWithCRUDAcceptanceTest {
   public void readCollection() {
   	String url = AcceptanceTest.BASE_URL + BASE_SERVICE_PATH;
   	System.out.println("GET " + url);
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(url)
         .transports(String.class)
@@ -49,7 +54,7 @@ public class RestfuWebServiceWithCRUDAcceptanceTest {
   public void readIndividual() {
   	String url = AcceptanceTest.BASE_URL + BASE_SERVICE_PATH  + "/1";
   	System.out.println("GET " + url);
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(url)
         .transports(String.class)
@@ -62,7 +67,7 @@ public class RestfuWebServiceWithCRUDAcceptanceTest {
   public void update() {
   	String url = AcceptanceTest.BASE_URL + BASE_SERVICE_PATH  + "/1";
   	System.out.println("PUT " + url);
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(url)
         .transports(String.class)
@@ -75,7 +80,7 @@ public class RestfuWebServiceWithCRUDAcceptanceTest {
   public void delete() {
   	String url = AcceptanceTest.BASE_URL + BASE_SERVICE_PATH  + "/1";
   	System.out.println("DELETE " + url);
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(url)
         .transports(String.class)
@@ -84,4 +89,13 @@ public class RestfuWebServiceWithCRUDAcceptanceTest {
 
     assert DELETE.equals(response.toString());
   }
+  
+
+	private Injector createInjector() {
+		return Guice.createInjector(new AbstractModule() {
+	      protected void configure() {
+	        bind(ConverterRegistry.class).toInstance(new StandardTypeConverter());
+	      }
+	    });
+	}
 }

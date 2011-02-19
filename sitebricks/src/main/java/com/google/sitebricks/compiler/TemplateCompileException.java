@@ -69,9 +69,16 @@ public final class TemplateCompileException extends RuntimeException {
 
             builder.append(i.incrementAndGet());
             builder.append(") ");
-            builder.append(cause.getError().getMessage());
-            builder.append("\n\n");
-
+            
+            if (cause == null) {
+	            builder.append("Unknown cause");
+	            builder.append("\n\n");
+            }
+            else {
+	            builder.append(cause.getError().getMessage());
+	            builder.append("\n\n");
+	        }
+            
             // Context (source code) of the error.
             int lineNumber = error.getLine();
             builder.append(lineNumber - 1);
@@ -93,7 +100,11 @@ public final class TemplateCompileException extends RuntimeException {
 
             // Compute offset (line number width + expression offset).
             int columnPad = Integer.toString(contextLineNumber).length() + 4;
-            int offset = fragment.indexOf(cause.getExpression()) + columnPad;
+            int offset;
+            if (cause != null)
+            	offset = fragment.indexOf(cause.getExpression()) + columnPad;
+            else
+            	offset = 0;
 
             // Code pointer (caret).
             // TODO fix this. It should appear directly beneath the line in question.

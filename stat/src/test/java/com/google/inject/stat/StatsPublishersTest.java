@@ -39,7 +39,8 @@ import java.io.StringWriter;
  * @author ffaber@gmail.com (Fred Faber)
  */
 public class StatsPublishersTest {
-
+  private static final String NL = System.getProperty("line.separator");
+  
   StringWriter stringWriter;
   PrintWriter printWriter;
   ImmutableMap<StatDescriptor, Object> snapshot;
@@ -58,13 +59,13 @@ public class StatsPublishersTest {
   @Test public void testHtmlPublisher() {
     HtmlStatsPublisher publisher = new HtmlStatsPublisher();
     String expectedOutput = new StringBuilder()
-        .append("<html><head><style>\n")
-        .append("body { font-family: monospace; }\n")
-        .append("</style></head><body>\n")
-        .append("<b>int-stat:</b> 3<br/>\n")
-        .append("<b>float-stat:</b> 4.3<br/>\n")
-        .append("<b>list-stat:</b> [a, b, c]<br/>\n")
-        .append("</body></html>\n")
+        .append("<html><head><style>").append(NL)
+        .append("body { font-family: monospace; }").append(NL)
+        .append("</style></head><body>").append(NL)
+        .append("<b>int-stat:</b> 3<br/>").append(NL)
+        .append("<b>float-stat:</b> 4.3<br/>").append(NL)
+        .append("<b>list-stat:</b> [a, b, c]<br/>").append(NL)
+        .append("</body></html>").append(NL)
         .toString();
     assertPublishing(publisher, expectedOutput);
   }
@@ -86,9 +87,9 @@ public class StatsPublishersTest {
   @Test public void testTextPublisher() {
     TextStatsPublisher publisher = new TextStatsPublisher();
     String expectedOutput = new StringBuilder()
-        .append("int-stat 3\n")
-        .append("float-stat 4.3\n")
-        .append("list-stat [a, b, c]\n")
+        .append("int-stat 3").append(NL)
+        .append("float-stat 4.3").append(NL)
+        .append("list-stat [a, b, c]").append(NL)
         .toString();
     assertPublishing(publisher, expectedOutput);
   }

@@ -1,9 +1,8 @@
 package com.google.sitebricks.compiler;
 
-import org.mvel2.DataConversion;
+import net.jcip.annotations.Immutable;
 
 import com.google.sitebricks.Evaluator;
-import net.jcip.annotations.Immutable;
 
 /**
  * Created with IntelliJ IDEA.
@@ -44,7 +43,7 @@ class CompiledToken implements Token {
         		return (String) object;
         	}
         	else {
-        		return DataConversion.convert(object, String.class);
+        		return Parsing.getTypeConverter().convert(object, String.class);
         	}
         }
         else {

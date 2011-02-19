@@ -1,11 +1,15 @@
 package com.google.sitebricks.acceptance;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.sitebricks.acceptance.util.AcceptanceTest;
 import com.google.sitebricks.client.Web;
 import com.google.sitebricks.client.WebResponse;
 import com.google.sitebricks.client.transport.Json;
 import com.google.sitebricks.client.transport.Text;
+import com.google.sitebricks.conversion.ConverterRegistry;
+import com.google.sitebricks.conversion.StandardTypeConverter;
 import com.google.sitebricks.example.RestfulWebService;
 import org.testng.annotations.Test;
 
@@ -18,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 public class RestfuWebServiceAcceptanceTest {
 
   public void shouldTransportJsonWithoutTemplate() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/service")
         .transports(String.class)
@@ -28,8 +32,17 @@ public class RestfuWebServiceAcceptanceTest {
     assertBookResponse(response);
   }
 
+
+	private Injector createInjector() {
+		return Guice.createInjector(new AbstractModule() {
+	      protected void configure() {
+	        bind(ConverterRegistry.class).toInstance(new StandardTypeConverter());
+	      }
+	    });
+	}
+
   public void shouldRedirect() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/service")
         .transports(String.class)
@@ -40,7 +53,7 @@ public class RestfuWebServiceAcceptanceTest {
   }
 
   public void shouldTransportJsonWithoutTemplateNoAnnotations() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/no_annotations/service")
         .transports(String.class)
@@ -51,7 +64,7 @@ public class RestfuWebServiceAcceptanceTest {
   }
 
   public void shouldRedirectNoAnnotations() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/no_annotations/service")
         .transports(String.class)

@@ -1,10 +1,14 @@
 package com.google.sitebricks.acceptance;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.sitebricks.acceptance.util.AcceptanceTest;
 import com.google.sitebricks.client.Web;
 import com.google.sitebricks.client.WebResponse;
 import com.google.sitebricks.client.transport.Json;
+import com.google.sitebricks.conversion.ConverterRegistry;
+import com.google.sitebricks.conversion.StandardTypeConverter;
 import com.google.sitebricks.example.RestfulWebServiceWithSubpaths;
 import org.testng.annotations.Test;
 
@@ -17,7 +21,7 @@ import java.util.Date;
 public class RestfuWebServiceWithSubpathsAcceptanceTest {
 
   public void shouldServiceTopLevelPath() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath")
         .transports(String.class)
@@ -28,7 +32,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
   }
 
   public void shouldServiceFirstSubPath() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath/subpath1")
         .transports(String.class)
@@ -39,7 +43,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
   }
 
   public void shouldServiceSecondSubPath() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath/subpath2")
         .transports(String.class)
@@ -50,7 +54,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
   }
 
   public void shouldServiceThirdSubPath() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath/subpath3")
         .transports(String.class)
@@ -61,7 +65,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
   }
 
   public void shouldServiceVariableTwoLevelSubPath() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath/subpath1/a_thing")
         .transports(String.class)
@@ -72,7 +76,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
   }
 
   public void shouldServiceVariableThreeLevelSubPath() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath/subpath1/a_thing/another_thing")
         .transports(String.class)
@@ -84,7 +88,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
 
   public void shouldServiceVariableTwoLevelSubPath2() {
     String aString = "aoskdoaksd" + new Date().hashCode();
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath/subpath3/" + aString)
         .transports(String.class)
@@ -94,4 +98,12 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
     // Should be reflected
     assert aString.equals(response.toString()) : response.toString();
   }
+
+	private Injector createInjector() {
+		return Guice.createInjector(new AbstractModule() {
+	      protected void configure() {
+	        bind(ConverterRegistry.class).toInstance(new StandardTypeConverter());
+	      }
+	    });
+	}
 }

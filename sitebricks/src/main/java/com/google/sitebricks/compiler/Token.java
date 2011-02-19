@@ -1,7 +1,5 @@
 package com.google.sitebricks.compiler;
 
-import com.google.sitebricks.binding.TypeConverter;
-
 /**
  * Represents a compiled, evaluable expression or raw String token.
  *

@@ -1,10 +1,18 @@
 package com.google.sitebricks.compiler;
 
 
-import com.google.sitebricks.rendering.Strings;
-
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
+
+import com.google.inject.Inject;
+import com.google.sitebricks.conversion.TypeConverter;
+import com.google.sitebricks.rendering.Strings;
 
 /**
  * Utility tokenizes text into expressions and raw text, and provides other
@@ -15,9 +23,10 @@ import java.util.regex.Pattern;
  */
 public class Parsing {
 
+  private static TypeConverter converter;
+  
   private Parsing() {
   }
-
 
   //converts comma-separated name/value pairs into expression/variable bindings
   public static Map<String, String> toBindMap(String expression) {
@@ -240,5 +249,14 @@ public class Parsing {
         && URI_REGEX
         .matcher(uri)
         .matches();
+  }
+  
+  public static TypeConverter getTypeConverter() {
+    return Parsing.converter;
+  }
+
+  @Inject
+  public static void setTypeConverter(TypeConverter converter) {
+    Parsing.converter = converter;
   }
 }

@@ -1,10 +1,14 @@
 package com.google.sitebricks.acceptance;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import com.google.sitebricks.acceptance.util.AcceptanceTest;
 import com.google.sitebricks.client.Web;
 import com.google.sitebricks.client.WebResponse;
 import com.google.sitebricks.client.transport.Json;
+import com.google.sitebricks.conversion.ConverterRegistry;
+import com.google.sitebricks.conversion.StandardTypeConverter;
 import com.google.sitebricks.example.RestfulWebServiceWithSubpaths2;
 import org.testng.annotations.Test;
 
@@ -17,7 +21,7 @@ import static com.google.sitebricks.example.RestfulWebServiceWithSubpaths2.TOPLE
 public class RestfuWebServiceWithSubpaths2AcceptanceTest {
 
   public void shouldServiceTopLevelDynamicPath() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath2/" + TOPLEVEL)
         .transports(String.class)
@@ -28,7 +32,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   }
 
   public void shouldServiceFirstLevelStaticPath() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/subpath1")
         .transports(String.class)
@@ -39,7 +43,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   }
 
   public void shouldServiceSameFirstLevelStaticPathWithPutMethod() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/subpath1")
         .transports(String.class)
@@ -51,7 +55,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   }
 
   public void shouldServiceSameFirstLevelStaticPathWithDeleteMethod() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/subpath1")
         .transports(String.class)
@@ -63,7 +67,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   }
 
   public void shouldServiceTwoLevelDynamicPath() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk")
         .transports(String.class)
@@ -74,7 +78,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   }
 
   public void shouldServiceTwoLevelDynamicPathWithDeleteMethod() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk")
         .transports(String.class)
@@ -85,7 +89,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   }
 
   public void shouldServiceThreeLevelDynamicPathWithDeleteMethod() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk")
         .transports(String.class)
@@ -96,7 +100,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   }
 
   public void shouldServiceThreeLevelDynamicPathWithPutMethod() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk")
         .transports(String.class)
@@ -107,7 +111,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   }
 
   public void shouldServiceThreeLevelDynamicPathWithPostMethod() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk")
         .transports(String.class)
@@ -118,7 +122,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   }
 
   public void shouldServiceThreeLevelDynamicPathWithGetMethod() {
-    WebResponse response = Guice.createInjector()
+    WebResponse response = createInjector()
         .getInstance(Web.class)
         .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk")
         .transports(String.class)
@@ -127,9 +131,17 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
 
     assert "get:junk_more_junk_most_junk".equals(response.toString()) : response.toString();
   }
+  
+	private Injector createInjector() {
+		return Guice.createInjector(new AbstractModule() {
+	      protected void configure() {
+	        bind(ConverterRegistry.class).toInstance(new StandardTypeConverter());
+	      }
+	    });
+	}
 //
 //  public void shouldService4LevelMixedPathWithGetMethod() {
-//    WebResponse response = Guice.createInjector()
+//    WebResponse response = createInjector()
 //        .getInstance(Web.class)
 //        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk/4l")
 //        .transports(String.class)
@@ -140,7 +152,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
 //  }
 //
 //  public void shouldService4LevelMixedPathWithPostMethod() {
-//    WebResponse response = Guice.createInjector()
+//    WebResponse response = createInjector()
 //        .getInstance(Web.class)
 //        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk/4l")
 //        .transports(String.class)

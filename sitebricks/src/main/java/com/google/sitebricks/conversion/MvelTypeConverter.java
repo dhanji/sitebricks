@@ -1,4 +1,4 @@
-package com.google.sitebricks.binding;
+package com.google.sitebricks.conversion;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
@@ -9,7 +9,12 @@ import java.lang.reflect.TypeVariable;
 import org.mvel2.DataConversion;
 
 import com.google.inject.Singleton;
+import com.google.sitebricks.conversion.TypeConverter;
 
+/**
+ * @author John Patterson (jdpatterson@gmail.com)
+ *
+ */
 @Singleton
 public class MvelTypeConverter implements TypeConverter {
  	

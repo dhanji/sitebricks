@@ -1,5 +1,9 @@
 package com.google.sitebricks.compiler;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Map;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.sitebricks.Bricks;
@@ -10,10 +14,6 @@ import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Map;
 
 /**
  * A factory for internal template compilers.
@@ -96,4 +96,5 @@ class StandardCompilers implements Compilers {
       }
     }
   }
+
 }

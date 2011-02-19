@@ -12,6 +12,11 @@
   <name>sitebricks</name>
   <url>http://code.google.com/p/google-sitebricks/</url>
 
+  
+  <properties>
+    <guice.version>2.0</guice.version>
+  </properties>
+  
   <scm>
     <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/trunk/sitebricks</connection>
     <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/trunk/sitebricks</developerConnection>
@@ -31,11 +36,6 @@
       <version>2.0.18</version>
     </dependency>
     <dependency>
-      <groupId>com.google.inject.extensions</groupId>
-      <artifactId>guice-servlet</artifactId>
-      <version>2.0</version>
-    </dependency>
-    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>r07</version>
@@ -53,8 +53,18 @@
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <version>2.0</version>
+      <version>${guice.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-servlet</artifactId>
+      <version>${guice.version}</version>
+    </dependency>
+	<dependency>
+		<groupId>com.google.inject.extensions</groupId>
+		<artifactId>guice-multibindings</artifactId>
+		<version>${guice.version}</version>
+	</dependency>
     <dependency>
       <groupId>commons-httpclient</groupId>
       <artifactId>commons-httpclient</artifactId>
@@ -74,11 +84,27 @@
       <groupId>dom4j</groupId>
       <artifactId>dom4j</artifactId>
       <version>1.6.1</version>
+      <exclusions>
+      	<exclusion>
+      		<artifactId>xml-apis</artifactId>
+      		<groupId>xml-apis</groupId>
+      	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>jaxen</groupId>
       <artifactId>jaxen</artifactId>
       <version>1.1.1</version>
+      <exclusions>
+      	<exclusion>
+      		<artifactId>xercesImpl</artifactId>
+      		<groupId>xerces</groupId>
+      	</exclusion>
+      	<exclusion>
+      		<artifactId>xml-apis</artifactId>
+      		<groupId>xml-apis</groupId>
+      	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>saxpath</groupId>

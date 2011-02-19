@@ -1,30 +1,49 @@
 package com.google.sitebricks.routing;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.servlet.http.HttpServletRequest;
+
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.base.Preconditions;
-import com.google.common.collect.*;
-import com.google.inject.*;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.inject.BindingAnnotation;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.At;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.conversion.TypeConverter;
 import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Select;
 import com.google.sitebricks.http.negotiate.ContentNegotiator;
 import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.EmbedAs;
 import com.google.sitebricks.rendering.Strings;
-import net.jcip.annotations.GuardedBy;
-import net.jcip.annotations.ThreadSafe;
-import org.jetbrains.annotations.Nullable;
-
-import javax.servlet.http.HttpServletRequest;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * contains active uri/widget mappings
@@ -559,13 +578,13 @@ public class DefaultPageBook implements PageBook {
     }
   }
 
-
   private static class MethodTuple implements Action {
     private final Method method;
     private final Injector injector;
     private final List<Object> args;
     private final Map<String, String> negotiates;
     private final ContentNegotiator negotiator;
+	private final TypeConverter converter;
 
     private MethodTuple(Method method, Injector injector) {
       this.method = method;
@@ -573,6 +592,7 @@ public class DefaultPageBook implements PageBook {
       this.args = reflect(method);
       this.negotiates = discoverNegotiates(method, injector);
       this.negotiator = injector.getInstance(ContentNegotiator.class);
+      this.converter = injector.getInstance(TypeConverter.class);
     }
 
     private List<Object> reflect(Method method) {
@@ -590,7 +610,7 @@ public class DefaultPageBook implements PageBook {
           if (Named.class.isInstance(annotation)) {
             Named named = (Named) annotation;
 
-            args.add(named.value());
+			args.add(new NamedParameter(named.value(), method.getGenericParameterTypes()[i]));
             namedFound = true;
 
             break;
@@ -628,14 +648,17 @@ public class DefaultPageBook implements PageBook {
       return negotiator.shouldCall(negotiates, request);
     }
 
+	
     @Override
     public Object call(Object page, Map<String, String> map) {
       List<Object> arguments = new ArrayList<Object>();
       for (Object arg : args) {
-        if (arg instanceof String)
-          //noinspection SuspiciousMethodCalls
-          arguments.add(map.get(arg));
-        else
+    	  if (arg instanceof NamedParameter) {
+			NamedParameter np = (NamedParameter) arg;
+			String text = map.get(np.getName());
+			Object value = converter.convert(text, np.getType());
+			arguments.add(value);
+		} else
           arguments.add(injector.getInstance((Key<?>) arg));
       }
 
@@ -678,6 +701,25 @@ public class DefaultPageBook implements PageBook {
 
       return negotiations;
     }
+    
+	public class NamedParameter {
+		private final String name;
+		private final Type type;
+
+		public NamedParameter(String name, Type type) {
+			this.name = name;
+			this.type = type;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public Type getType() {
+			return type;
+		}
+	}
+	
   }
 
   /**

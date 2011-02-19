@@ -1,20 +1,28 @@
 package com.google.sitebricks.headless;
 
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+
+import org.testng.annotations.Test;
+
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.sitebricks.client.transport.Json;
 import com.google.sitebricks.client.transport.Text;
 import com.google.sitebricks.client.transport.Xml;
-import org.testng.annotations.Test;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-import static org.easymock.EasyMock.*;
+import com.google.sitebricks.conversion.ConverterRegistry;
+import com.google.sitebricks.conversion.StandardTypeConverter;
 
 /**
  * A unit test for the reply builder/response populate pipeline.
@@ -68,7 +76,12 @@ public class HeadlessReplyTest {
 
   @Test
   public void jsonReply() throws IOException {
-    Injector injector = Guice.createInjector();
+    Injector injector = Guice.createInjector(new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(ConverterRegistry.class).toInstance(new StandardTypeConverter());
+      }
+    });
     HeadlessRenderer renderer = injector.getInstance(HeadlessRenderer.class);
     HttpServletResponse response = createNiceMock(HttpServletResponse.class);
     ServletOutputStream outputStream = fakeServletOutputStream();
@@ -146,7 +159,7 @@ public class HeadlessReplyTest {
     assert maybeByTheInkspots.equals(song);
   }
 
-  private static class Song {
+  public static class Song {
     private String name;
     private String artist;
     private int length;

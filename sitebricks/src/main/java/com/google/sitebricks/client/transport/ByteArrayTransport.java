@@ -11,6 +11,7 @@ import java.io.OutputStream;
  */
 class ByteArrayTransport extends Xml {
 
+  @SuppressWarnings("unchecked")
   public <T> T in(InputStream in, Class<T> type) throws IOException {
     assert type == byte[].class;
     return (T) IOUtils.toByteArray(in);

@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.inject.*;
 import com.google.sitebricks.*;
+import com.google.sitebricks.conversion.MvelTypeConverter;
+import com.google.sitebricks.conversion.TypeConverter;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
@@ -251,7 +253,10 @@ public class HtmlTemplateCompilerTest {
             .toInstance(methods);
       }
     });
-
+    
+    // make a basic type converter without creating  
+    TypeConverter converter = new MvelTypeConverter();
+    Parsing.setTypeConverter(converter);
 
     final PageBook pageBook = injector.getInstance(PageBook.class);
 
