@@ -16,9 +16,9 @@ import org.codehaus.jackson.map.JsonDeserializer;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.deser.CustomDeserializerFactory;
 import org.codehaus.jackson.map.deser.StdDeserializerProvider;
-import org.testng.v6.Sets;
 
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.google.common.primitives.Primitives;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

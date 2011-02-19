@@ -22,7 +22,7 @@ public class TypeConverterTest {
 
   @Test
   public void stringToPrimitive() {
-    int answer = converter.convert("42", Integer.class);
+    Integer answer = converter.convert("42", Integer.class);
     assert answer == 42;
   }
 
