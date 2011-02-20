@@ -11,7 +11,6 @@ import com.google.inject.stat.testservices.DummyService;
 import com.google.inject.stat.testservices.StatExposerTestingService;
 import com.google.inject.stat.testservices.StaticDummyService;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -22,20 +21,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class StatsIntegrationTest {
-  Injector injector;
 
-  @Before public void setUp() {
-    injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        install(new StatModule("/stat"));
+  Injector injector = Guice.createInjector(new AbstractModule() {
+    @Override protected void configure() {
+      install(new StatModule("/stat"));
 
-        bind(DummyService.class);
-        bind(ChildDummyService.class);
-        bind(StatExposerTestingService.class);
-      }
-    });
-  }
+      bind(DummyService.class);
+      bind(ChildDummyService.class);
+      bind(StatExposerTestingService.class);
+    }
+  });
 
   @Test public final void testPublishingStatsInDummyService() {
     DummyService service = injector.getInstance(DummyService.class);

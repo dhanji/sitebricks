@@ -25,7 +25,6 @@ import com.google.inject.stat.StatsPublishers.HtmlStatsPublisher;
 import com.google.inject.stat.StatsPublishers.JsonStatsPublisher;
 import com.google.inject.stat.StatsPublishers.TextStatsPublisher;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.PrintWriter;
@@ -41,20 +40,15 @@ import java.io.StringWriter;
 public class StatsPublishersTest {
   private static final String NL = System.getProperty("line.separator");
   
-  StringWriter stringWriter;
-  PrintWriter printWriter;
-  ImmutableMap<StatDescriptor, Object> snapshot;
-
-  @Before public void setUp() {
-    stringWriter = new StringWriter(1024);
-    printWriter = new PrintWriter(stringWriter);
-    snapshot = ImmutableMap.<StatDescriptor, Object>builder()
+  StringWriter stringWriter = new StringWriter(1024);
+  PrintWriter printWriter = new PrintWriter(stringWriter);
+  ImmutableMap<StatDescriptor, Object> snapshot =
+      ImmutableMap.<StatDescriptor, Object>builder()
         .put(StatDescriptor.of("int-stat", "", null, null), 3)
         .put(StatDescriptor.of("float-stat", "", null, null), 4.3d)
         .put(StatDescriptor.of("list-stat", "", null, null),
             ImmutableList.of("a", "b", "c"))
         .build();
-  }
 
   @Test public void testHtmlPublisher() {
     HtmlStatsPublisher publisher = new HtmlStatsPublisher();
