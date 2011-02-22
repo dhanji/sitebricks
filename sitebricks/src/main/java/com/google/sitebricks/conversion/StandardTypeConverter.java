@@ -58,7 +58,11 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
   @Override
   @SuppressWarnings("unchecked")
   public <T> T convert(final Object source, Type type) {
-    
+
+    if (source == null) {
+      return (T) nullValue(type);
+    }
+	  
     // use primitive wrapper types
     if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
         type = Primitives.wrap((Class<?>) type);
@@ -103,6 +107,13 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
       throw new IllegalStateException("Cannot convert " + source.getClass() + " to " + type);
     
     return (T) result;
+  }
+
+  protected Object nullValue(Type type) {
+	  if (type == String.class) {
+		  return "";
+	  }
+	  else return null;
   }
 
   @SuppressWarnings("unchecked")
