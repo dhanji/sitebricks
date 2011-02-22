@@ -3,6 +3,7 @@ package com.google.sitebricks.compiler;
 import com.google.common.collect.Sets;
 import com.google.sitebricks.Evaluator;
 import com.google.sitebricks.Visible;
+import com.google.sitebricks.conversion.generics.GenericTypeReflector;
 
 import net.jcip.annotations.NotThreadSafe;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +18,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -167,7 +169,7 @@ public class MvelEvaluatorCompiler implements EvaluatorCompiler {
 
     // read javabean properties -- these override @Visible fields.
     for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-      //skip getClass()
+      // skip getClass()
       if (CLASS.equals(propertyDescriptor.getName()))
         continue;
 
@@ -175,21 +177,24 @@ public class MvelEvaluatorCompiler implements EvaluatorCompiler {
         writeableProperties.add(propertyDescriptor.getName());
       }
 
-      //if this is a collection, determine its type parameter
-      if (Collection.class.isAssignableFrom(propertyDescriptor.getPropertyType())
+      // if this is a collection, determine its type parameter
+      if (Collection.class.isAssignableFrom(propertyDescriptor.getPropertyType())) {
 
-          //for now, skips collections that are not parametric
-          && null != propertyDescriptor.getReadMethod().getGenericReturnType()) {
+        Type propertyType;
+        if (propertyDescriptor.getReadMethod() != null) {
+          propertyType = propertyDescriptor.getReadMethod().getGenericReturnType();
+        }
+        else {
+          propertyType = propertyDescriptor.getWriteMethod().getGenericParameterTypes()[0];
+        }
 
-        final ParameterizedType returnType = (ParameterizedType) propertyDescriptor
-            .getReadMethod()
-            .getGenericReturnType();
+        ParameterizedType collectionType = (ParameterizedType) GenericTypeReflector
+            .getExactSuperType(propertyType, Collection.class);
 
-        //box actual parametric type arguments into a Class<?> array
+        // box actual parametric type arguments into a Class<?> array
         List<Class<?>> typeParameters = new ArrayList<Class<?>>(1);
-        typeParameters.add((Class<?>) returnType.getActualTypeArguments()[0]);
+        typeParameters.add((Class<?>) collectionType.getActualTypeArguments()[0]);
 
-        //TODO unsafe if parametric type is a nested generic?
         context.addInput(propertyDescriptor.getName(), propertyDescriptor.getPropertyType(),
             typeParameters.toArray(new Class[1]));
       } else {
