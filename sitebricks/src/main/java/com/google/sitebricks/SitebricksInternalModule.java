@@ -8,6 +8,7 @@ import com.google.inject.Provides;
 import com.google.inject.Stage;
 import com.google.inject.servlet.RequestScoped;
 import com.google.sitebricks.client.Transport;
+import com.google.sitebricks.conversion.MvelConversionHandlers;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.RoutingDispatcher;
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -43,6 +45,9 @@ class SitebricksInternalModule extends AbstractModule {
       bind(PageBook.class).to(DebugModePageBook.class);
       bind(RoutingDispatcher.class).to(DebugModeRoutingDispatcher.class);
     }
+    
+    // use sitebricks converters in mvel
+    requestStaticInjection(MvelConversionHandlers.class);
   }
 
   @Override
@@ -54,7 +59,7 @@ class SitebricksInternalModule extends AbstractModule {
   public boolean equals(Object obj) {
     return SitebricksInternalModule.class.isInstance(obj);
   }
-
+  
   @Provides @RequestScoped
   Request provideRequest(final HttpServletRequest servletRequest, final Injector injector) {
     ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
@@ -128,5 +133,10 @@ class SitebricksInternalModule extends AbstractModule {
         return servletRequest.getParameter(name);
       }
     };
+  }
+
+  @Provides @RequestScoped
+  Locale provideLocale(HttpServletRequest request) {
+    return request.getLocale();
   }
 }

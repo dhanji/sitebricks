@@ -1,7 +1,7 @@
 package com.google.sitebricks.conversion;
 
 /**
- * Convert from Source to Target and back again.
+ * Convert an instance from type Source to type Target and back again.
  * 
  * Returning null indicates that the conversion was not successful and another
  * converter may be given the chance to handle it. Therefore, null is not a

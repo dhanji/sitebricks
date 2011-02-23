@@ -20,7 +20,7 @@ import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.conversion.Converter;
-import com.google.sitebricks.conversion.DateStringConverter;
+import com.google.sitebricks.conversion.DateConverters;
 import com.google.sitebricks.conversion.NumberConverters;
 import com.google.sitebricks.conversion.ObjectToStringConverter;
 import com.google.sitebricks.conversion.StringToPrimitiveConverters;
@@ -71,14 +71,15 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     // TODO remove when more of sitebricks internals is guiced
     requestStaticInjection(Parsing.class);
     
-    // register the default converters
-    converters.addBinding().to(ObjectToStringConverter.class);
-    StringToPrimitiveConverters.register(this);
-    NumberConverters.register(this);
-    
     // Call down to the implementation.
     configureSitebricks();
 
+    // register the default converters after user converters
+    converters.addBinding().to(ObjectToStringConverter.class);
+    StringToPrimitiveConverters.register(this);
+    NumberConverters.register(this);
+    DateConverters.register(this);
+    
     //insert core widgets set
     packages.add(0, CaseWidget.class.getPackage());
 

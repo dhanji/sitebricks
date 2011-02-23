@@ -733,13 +733,13 @@ public class DefaultPageBook implements PageBook {
          return (String) m.invoke(annotation);
 
        } catch (NoSuchMethodException e) {
-         throw new IllegalStateException("Encountered a configured Negotiation annotation that " +
+         throw new IllegalStateException("Encountered a configured annotation that " +
              "has no value parameter. This should never happen. " + annotation, e);
        } catch (InvocationTargetException e) {
-         throw new IllegalStateException("Encountered a configured Negotiation annotation that " +
+         throw new IllegalStateException("Encountered a configured annotation that " +
              "could not be read." + annotation, e);
        } catch (IllegalAccessException e) {
-         throw new IllegalStateException("Encountered a configured Negotiation annotation that " +
+         throw new IllegalStateException("Encountered a configured annotation that " +
              "could not be read." + annotation, e);
        }
      }

@@ -191,12 +191,11 @@ public class MvelEvaluatorCompiler implements EvaluatorCompiler {
         ParameterizedType collectionType = (ParameterizedType) GenericTypeReflector
             .getExactSuperType(propertyType, Collection.class);
 
-        // box actual parametric type arguments into a Class<?> array
-        List<Class<?>> typeParameters = new ArrayList<Class<?>>(1);
-        typeParameters.add((Class<?>) collectionType.getActualTypeArguments()[0]);
-
-        context.addInput(propertyDescriptor.getName(), propertyDescriptor.getPropertyType(),
-            typeParameters.toArray(new Class[1]));
+        Class<?>[] parameterClasses = new Class[1];
+        Type parameterType = collectionType.getActualTypeArguments()[0];
+        parameterClasses[0] = GenericTypeReflector.erase(parameterType);
+        
+        context.addInput(propertyDescriptor.getName(), propertyDescriptor.getPropertyType(), parameterClasses);
       } else {
         context.addInput(propertyDescriptor.getName(), propertyDescriptor.getPropertyType());
       }

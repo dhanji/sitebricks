@@ -6,6 +6,7 @@ import static com.google.sitebricks.conversion.generics.GenericTypeReflector.get
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,16 +15,17 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.primitives.Primitives;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * @author John Patterson (jdpatterson@gmail.com)
- *
  */
+@Singleton
 public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
   Multimap<Type, Converter<?, ?>> convertersBySource = ArrayListMultimap.create();
   Multimap<Type, Converter<?, ?>> convertersByTarget = ArrayListMultimap.create();
 
-  Map<SourceAndTarget, Converter<?, ?>> convertersBySourceAndTarget = Maps.newHashMap();
+  Multimap<SourceAndTarget, Converter<?, ?>> convertersBySourceAndTarget = ArrayListMultimap.create();
   private static final TypeVariable<? extends Class<?>> sourceTypeParameter = Converter.class.getTypeParameters()[0];
   private static final TypeVariable<? extends Class<?>> targetTypeParameter = Converter.class.getTypeParameters()[1];
 
@@ -84,17 +86,22 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
       
       // first try to find a converter in the forward direction 
       SourceAndTarget key = new SourceAndTarget(sourceType, type);
-      Converter<?, ?> forward = convertersBySourceAndTarget.get(key);
-      if (forward != null) {
-        result = typeSafeTo(forward, source);
-      } else {
-        // now try the reverse direction (target to source)
-        Converter<?, ?> reverse = convertersBySourceAndTarget.get(key.reverse());
-        if (reverse != null) {
-          result = typeSafeFrom(reverse, source);
-        }
+      Collection<Converter<?, ?>> forwards = convertersBySourceAndTarget.get(key);
+      
+      // stop at the first converter that returns non-null
+      for (Converter<?, ?> forward : forwards)
+        if ((result = typeSafeTo(forward, source)) != null) break;
+        
+      if (result == null) {
+        // try the reverse direction (target to source)
+        Collection<Converter<?,?>> reverses = convertersBySourceAndTarget.get(key.reverse());
+
+        // stop at the first converter that returns non-null
+        for (Converter<?, ?> reverse : reverses)
+          if ((result = typeSafeFrom(reverse, source)) != null) break;
       }
       
+      // we have no more super classes to try
       if (sourceType == Object.class) break;
       
       // try every permutation of source and target type

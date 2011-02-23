@@ -1,11 +1,5 @@
 package com.google.sitebricks.acceptance;
 
-import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.BASE_SERVICE_PATH;
-import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.DELETE;
-import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.READ_COLLECTION;
-import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.READ_INDIVIDUAL;
-import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.UPDATE;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

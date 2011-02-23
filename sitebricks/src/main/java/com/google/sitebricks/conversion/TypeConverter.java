@@ -11,5 +11,13 @@ import com.google.inject.ImplementedBy;
  */
 @ImplementedBy(StandardTypeConverter.class)
 public interface TypeConverter {
+  
+    /**
+     * Convert an instance to the given type.
+     * 
+     * @param source Original instance
+     * @param type The type to convert to.
+     * @return A converted instance of type {@code Type}}
+     */
     <T> T convert(Object source, Type type);
 }

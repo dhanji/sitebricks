@@ -1,24 +1,32 @@
 package com.google.sitebricks.example;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
+
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.*;
+import com.google.inject.BindingAnnotation;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.stat.StatModule;
 import com.google.sitebricks.SitebricksModule;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.HttpSessionFlashCache;
+import com.google.sitebricks.conversion.DateConverters;
 import com.google.sitebricks.debug.DebugPage;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.Locale;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 public class SitebricksConfig extends GuiceServletContextListener {
 
-  @Override
+  // a weird format
+  public static final String DEFAULT_DATE_TIME_FORMAT = "dd MM yy SS";
+
+@Override
   protected Injector getInjector() {
     return Guice.createInjector(Stage.DEVELOPMENT, new SitebricksModule() {
 
@@ -45,6 +53,8 @@ public class SitebricksConfig extends GuiceServletContextListener {
             ImmutableMap.of(I18n.HELLO, I18n.HELLO_IN_FRENCH));
         
         install(new StatModule("/stats"));
+        
+        converter(new DateConverters.DateStringConverter(DEFAULT_DATE_TIME_FORMAT));
       }
 
       private void bindExplicitly() {
@@ -58,6 +68,8 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/repeat").show(Repeat.class);
         at("/showif").show(ShowIf.class);
         at("/dynamic.js").show(DynamicJs.class);
+        
+        at("/conversion").show(Conversion.class);
 
         at("/hiddenfieldmethod").show(HiddenFieldMethod.class);
         at("/select").show(SelectRouting.class);

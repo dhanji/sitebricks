@@ -69,7 +69,7 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
     Set<Class<?>> set = Sets.newHashSet();
     for (Package pkg : packages) {
 
-      //look for any classes annotated with @At, @EmbedAs and @Export
+      //look for any classes annotated with @At, @EmbedAs and @With
       set.addAll(Classes.matching(annotatedWith(At.class)
           .or(annotatedWith(EmbedAs.class).or(annotatedWith(With.class)))
       ).in(pkg));
