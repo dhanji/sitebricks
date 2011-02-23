@@ -17,6 +17,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.deser.CustomDeserializerFactory;
 import org.codehaus.jackson.map.deser.StdDeserializerProvider;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Primitives;
@@ -37,7 +38,7 @@ class JacksonJsonTransport extends Json {
 
   private final ObjectMapper objectMapper;
   private Collection<Class<?>> exceptions = Sets.newHashSet();
-
+  
   @Inject
   public JacksonJsonTransport(ConverterRegistry registry) {
     this.objectMapper = new ObjectMapper();
@@ -45,24 +46,48 @@ class JacksonJsonTransport extends Json {
     
     // leave these for Jackson to handle
     exceptions.add(String.class);
+    exceptions.add(Object.class);
     exceptions.addAll(Primitives.allWrapperTypes());
 
-    addConverters(registry, deserializerFactory, true);
-    addConverters(registry, deserializerFactory, false);
-
+    // 
+    Multimap<Type, ConverterDirection> typeToConverterDirection = ArrayListMultimap.create();
+    addConverterDirections(registry, true, typeToConverterDirection);
+    addConverterDirections(registry, false, typeToConverterDirection);
+    createJacksonDeserializers(deserializerFactory, typeToConverterDirection);
+    
     objectMapper.setDeserializerProvider(new StdDeserializerProvider(deserializerFactory));
   }
+  
+  // keep track of which direction we want to use
+  private static class ConverterDirection
+  {
+    Converter<?, ?> converter;
+    boolean forward;
+  }
 
-  // TODO skip primitive wrapper converters?
-  private void addConverters(ConverterRegistry registry, CustomDeserializerFactory deserializerFactory, boolean forward) {
+  private void addConverterDirections(ConverterRegistry registry, boolean forward, Multimap<Type, ConverterDirection> typeToConverterDirections) {
     Multimap<Type, Converter<?, ?>> typeToConverters = forward ? registry.getConvertersByTarget() : registry.getConvertersBySource();
     Set<Type> types = typeToConverters.keySet();
     for (Type type : types) {
       if (exceptions.contains(type)) continue;
       Collection<Converter<?, ?>> converters = typeToConverters.get(type);
-      Class<?> erased = GenericTypeReflector.erase(type);
-      ConvertersDeserializer jds = new ConvertersDeserializer(erased, converters, forward);
-      typesafeAddMapping(erased, jds, deserializerFactory);
+      for (Converter<?, ?> converter : converters) {
+        ConverterDirection converterDirection = new ConverterDirection();
+        converterDirection.converter = converter;
+        converterDirection.forward = forward;
+        typeToConverterDirections.put(type, converterDirection);
+      }
+    }
+  }
+  
+  private void createJacksonDeserializers(CustomDeserializerFactory deserializerFactory, Multimap<Type, ConverterDirection> typeToConverterDirections)
+  {
+    Set<Type> targetTypes = typeToConverterDirections.keySet();
+    for (Type targetType : targetTypes) {
+      Collection<ConverterDirection> converterDirections = typeToConverterDirections.get(targetType);
+      Class<?> targetClass = GenericTypeReflector.erase(targetType);
+      ConvertersDeserializer jds = new ConvertersDeserializer(converterDirections);
+      typesafeAddMapping(targetClass, jds, deserializerFactory);
     }
   }
 
@@ -86,14 +111,11 @@ class JacksonJsonTransport extends Json {
   }
 
   public class ConvertersDeserializer extends JsonDeserializer<Object> {
-    private final Class<?> targetType;
-    private final Collection<Converter<?, ?>> converters;
-    private final boolean forward;
 
-    public ConvertersDeserializer(Class<?> targetType, Collection<Converter<?, ?>> converters, boolean forward) {
-      this.targetType = targetType;
-      this.converters = converters;
-      this.forward = forward;
+    private final Collection<ConverterDirection> converterDirections;
+
+    public ConvertersDeserializer(Collection<ConverterDirection> converterDirections) {
+      this.converterDirections = converterDirections;
     }
 
     public Object deserialize(JsonParser jp, DeserializationContext ctxt) 
@@ -101,22 +123,23 @@ class JacksonJsonTransport extends Json {
 
       Object source = getSourceObject(jp, ctxt);
       
-      for (Converter<?, ?> converter : converters) {
-        Type sourceType = forward ? 
-            StandardTypeConverter.sourceType(converter) : 
-            StandardTypeConverter.targetType(converter);
+      for (ConverterDirection converterDirection : converterDirections) {
+        
+        Type sourceType = converterDirection.forward ? 
+            StandardTypeConverter.sourceType(converterDirection.converter) : 
+            StandardTypeConverter.targetType(converterDirection.converter);
             
         // assume that Jackson only gives us non-generic types
         Class<?> converterSourceClass = GenericTypeReflector.erase(sourceType);
         
         if (converterSourceClass.isAssignableFrom(source.getClass())) {
-          return forward ? 
-              StandardTypeConverter.typeSafeTo(converter, source) : 
-              StandardTypeConverter.typeSafeFrom(converter, source); 
+          return converterDirection.forward ? 
+              StandardTypeConverter.typeSafeTo(converterDirection.converter, source) : 
+              StandardTypeConverter.typeSafeFrom(converterDirection.converter, source); 
         }
       }
 
-      throw ctxt.mappingException(targetType);
+      throw new IllegalStateException("Cannot convert from " + source);
     }
 
     private Object getSourceObject(JsonParser jp, DeserializationContext ctxt) throws JsonParseException, IOException {
