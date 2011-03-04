@@ -40,9 +40,9 @@ public class Parsing {
       char c = expression.charAt(i);
 
       if (('"' == c && (escapes.isEmpty() || escapes.peek().charValue() != c))
-          || '[' == c || '{' == c) {
+          || '[' == c || '{' == c || '(' == c) {
         escapes.push(c);
-      } else if (('"' == c && escapes.peek().charValue() == c) || ']' == c || '}' == c) {
+      } else if (('"' == c && escapes.peek().charValue() == c) || ']' == c || '}' == c || ')' == c) {
         escapes.pop();
       }
 
