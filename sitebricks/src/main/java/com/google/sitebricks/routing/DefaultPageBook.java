@@ -164,8 +164,8 @@ public class DefaultPageBook implements PageBook {
   }
 
   public Page embedAs(Class<?> clazz, String as) {
-//    Preconditions.checkArgument(null == clazz.getAnnotation(Service.class),
-//        "You cannot embed headless web services!");
+    Preconditions.checkArgument(null == clazz.getAnnotation(Service.class),
+        "You cannot embed headless web services!");
     PageTuple pageTuple = new PageTuple("", PathMatcherChain.ignoring(), clazz, injector, false);
 
     synchronized (lock) {
