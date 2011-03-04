@@ -1,11 +1,20 @@
 package com.google.sitebricks.compiler;
 
-import com.google.common.collect.Sets;
-import com.google.sitebricks.Evaluator;
-import com.google.sitebricks.Visible;
-import com.google.sitebricks.conversion.generics.GenericTypeReflector;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import net.jcip.annotations.NotThreadSafe;
+
 import org.jetbrains.annotations.Nullable;
 import org.mvel2.CompileException;
 import org.mvel2.MVEL;
@@ -13,19 +22,10 @@ import org.mvel2.ParserContext;
 import org.mvel2.compiler.CompiledExpression;
 import org.mvel2.compiler.ExpressionCompiler;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.collect.Sets;
+import com.google.sitebricks.Evaluator;
+import com.google.sitebricks.Visible;
+import com.google.sitebricks.conversion.generics.GenericTypeReflector;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
@@ -68,9 +68,26 @@ public class MvelEvaluatorCompiler implements EvaluatorCompiler {
   public Class<?> resolveCollectionTypeParameter(String expression)
       throws ExpressionCompileException {
 
-    return (Class<?>) compileExpression(expression)
-        .getParserContext()
-        .getLastTypeParameters()[0];
+	// compiled expression contains type information
+    CompiledExpression compiled = compileExpression(expression);
+    
+    // mvel only keeps the parameter class - not generic Type
+    Type[] tps = compiled.getParserContext().getLastTypeParameters();
+    if (tps.length == 1) {
+    	return GenericTypeReflector.erase(tps[0]);
+    }
+    else {
+    	// we could have a subclass of Collection
+    	Class<?> collectionSubtype = compiled.getKnownEgressType();
+    	
+    	// get the type of collection items
+    	ParameterizedType collectionType = (ParameterizedType) GenericTypeReflector
+    		.getExactSuperType(collectionSubtype, Collection.class);
+    	Type elementType = collectionType.getActualTypeArguments()[0];
+    	
+    	// even if we know its generic type now, only return erased class
+    	return GenericTypeReflector.erase(elementType);
+    }
   }
 
   public Evaluator compile(String expression) throws ExpressionCompileException {
