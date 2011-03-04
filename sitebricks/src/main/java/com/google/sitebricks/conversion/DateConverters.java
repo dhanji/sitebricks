@@ -24,14 +24,14 @@ public class DateConverters {
     module.converter(CalendarStringConverter.class);
   }
 
-  public static class DateLongConverter implements Converter<Long, Date> {
+  public static class DateLongConverter implements Converter<Date, Long> {
     @Override
-    public Date to(Long source) {
+    public Date from(Long source) {
       return new Date(source);
     }
 
     @Override
-    public Long from(Date target) {
+    public Long to(Date target) {
       return target.getTime();
     }
   }
@@ -51,7 +51,7 @@ public class DateConverters {
     }
   }
 
-  public static class DateStringConverter implements Converter<String, Date> {
+  public static class DateStringConverter implements Converter<Date, String> {
 
     protected DateFormat format;
     
@@ -68,7 +68,7 @@ public class DateConverters {
     }
     
     @Override
-    public Date to(String source) {
+    public Date from(String source) {
       try {
         return getFormat().parse(source);
       }
@@ -78,7 +78,7 @@ public class DateConverters {
     }
 
     @Override
-    public String from(Date target) {
+    public String to(Date target) {
       return format.format(target);
     }
     
