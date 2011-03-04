@@ -34,7 +34,7 @@ import com.google.sitebricks.conversion.generics.GenericTypeReflector;
  * @author JRodriguez
  */
 @Singleton
-class JacksonJsonTransport extends Json {
+public class JacksonJsonTransport extends Json {
 
   private final ObjectMapper objectMapper;
   private Collection<Class<?>> exceptions = Sets.newHashSet();
@@ -56,6 +56,10 @@ class JacksonJsonTransport extends Json {
     createJacksonDeserializers(deserializerFactory, typeToConverterDirection);
     
     objectMapper.setDeserializerProvider(new StdDeserializerProvider(deserializerFactory));
+  }
+  
+  public ObjectMapper getObjectMapper() {
+	return objectMapper;
   }
   
   // keep track of which direction we want to use
