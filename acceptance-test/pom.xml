@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.google.sitebricks</groupId>
     <artifactId>sitebricks-parent</artifactId>
-    <version>0.8.3</version>
+    <version>0.8.4-SNAPSHOT</version>
   </parent>  
   <groupId>com.google.sitebricks</groupId>
   <artifactId>acceptance-test</artifactId>
@@ -80,12 +80,12 @@
     <dependency>
       <groupId>com.google.sitebricks</groupId>
       <artifactId>sitebricks</artifactId>
-      <version>0.8.3</version>
+      <version>0.8.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.google.sitebricks</groupId>
       <artifactId>stat</artifactId>
-      <version>0.8.3</version>
+      <version>0.8.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.seleniumhq.webdriver</groupId>
