@@ -8,15 +8,15 @@
   <groupId>com.google.sitebricks</groupId>
   <artifactId>slf4j</artifactId>
   <packaging>jar</packaging>
-  <version>0.8.3-SNAPSHOT</version>
+  <version>0.8.3</version>
   <name>guice-slf4j</name>
   <url>http://code.google.com/p/google-sitebricks/</url>
   <description>Slf4j logging module for Guice applications (does not require sitebricks)</description>
 
   <scm>
-    <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/trunk/sitebricks</connection>
-    <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/trunk/sitebricks</developerConnection>
-    <url>http://code.google.com/p/google-sitebricks/source/browse</url>
+    <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/tags/sitebricks-parent-0.8.3/sitebricks</connection>
+    <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/tags/sitebricks-parent-0.8.3/sitebricks</developerConnection>
+    <url>http://code.google.com/p/google-sitebricks/source/browse/tags/sitebricks-parent-0.8.3/browse</url>
   </scm>
 
   <dependencies>
