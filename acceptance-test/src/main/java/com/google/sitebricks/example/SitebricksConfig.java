@@ -89,6 +89,9 @@ public class SitebricksConfig extends GuiceServletContextListener {
 
         // MVEL template.
         at("/template/mvel").show(MvelTemplateExample.class);
+        
+        // templating by extension
+        at("/template").show(DecoratedPage.class);
 
         embed(HelloWorld.class).as("Hello");
       }
