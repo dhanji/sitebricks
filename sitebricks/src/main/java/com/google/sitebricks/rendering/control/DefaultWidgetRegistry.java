@@ -47,6 +47,7 @@ class DefaultWidgetRegistry implements WidgetRegistry {
     add("showif", ShowIfWidget.class);
     add("choose", ChooseWidget.class);
     add("include", IncludeWidget.class);
+    add("decorated", DecorateWidget.class);
   }
 
   public void add(String key, Class<? extends Renderable> widget) {

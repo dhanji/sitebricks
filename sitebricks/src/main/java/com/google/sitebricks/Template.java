@@ -3,7 +3,7 @@ package com.google.sitebricks;
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
-class Template {
+public class Template {
   private final Kind templateKind;
   private final String text;
 

@@ -41,7 +41,15 @@ public interface PageBook {
    *  Example: {@code "Hello"} will make this page class
    * available for embedding as <pre>{@literal @}Hello</pre>.
    */
-  Page embedAs(Class<?> page, String as);
+  Page embedAs(Class<?> pageClass, String as);
+  
+  /**
+   * Indicates that the template for this class is to be
+   * inserted into a superclass template using @Decorated
+   * 
+   * @param pageClass
+   */
+  Page decorate(Class<?> pageClass);
 
   /**
    * Same as {@linkplain #get} except guaranteed not to trigger a
@@ -90,6 +98,8 @@ public interface PageBook {
     String getUri();
 
     boolean isHeadless();
+
+    boolean isDecorated();
 
     Set<String> getMethod();
   }

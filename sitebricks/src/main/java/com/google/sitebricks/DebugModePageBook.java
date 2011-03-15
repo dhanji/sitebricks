@@ -25,19 +25,15 @@ import java.util.Set;
 @Singleton
 class DebugModePageBook implements PageBook {
   private final PageBook book;
-  private final Provider<TemplateLoader> templateLoader;
   private final SystemMetrics metrics;
   private final Compilers compilers;
   private final Provider<Memo> memo;
 
   @Inject
   public DebugModePageBook(@Production PageBook book,
-                           Provider<TemplateLoader> templateLoader,
                            SystemMetrics metrics, Compilers compilers,
                            Provider<Memo> memo) {
-
     this.book = book;
-    this.templateLoader = templateLoader;
     this.metrics = metrics;
     this.compilers = compilers;
     this.memo = memo;
@@ -68,7 +64,12 @@ class DebugModePageBook implements PageBook {
   public Page embedAs(Class<?> page, String as) {
     return book.embedAs(page, as);
   }
-
+  
+  @Override
+  public Page decorate(Class<?> pageClass) {
+    return book.decorate(pageClass);
+  }
+  
   public Page nonCompilingGet(String uri) {
     // Simply delegate thru to the real page book.
     return book.get(uri);
@@ -109,28 +110,8 @@ class DebugModePageBook implements PageBook {
     // Otherwise, remember that we already loaded it in this request.
     memo.uris.add(identifier);
 
-
-    final Class<?> pageClass = page.pageClass();
-    final Template template = templateLoader.get().load(pageClass);
-
-    // TODO(dhanji): Merge this with the duplicated code in ScanAndCompileBootstrapper
-    switch (template.getKind()) {
-      case HTML:
-        page.apply(compilers.compileHtml(pageClass, template.getText()));
-        break;
-      case XML:
-        page.apply(compilers.compileXml(pageClass, template.getText()));
-        break;
-      case FLAT:
-        page.apply(compilers.compileFlat(pageClass, template.getText()));
-        break;
-      case MVEL:
-        page.apply(compilers.compileMvel(pageClass, template.getText()));
-        break;
-      case FREEMARKER:
-        page.apply(compilers.compileFreemarker(pageClass, template.getText())); 
-        break;        
-    }
+    // load template and compile
+    compilers.compilePage(page);
   }
 
   @RequestScoped

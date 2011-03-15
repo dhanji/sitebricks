@@ -42,8 +42,8 @@ import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Select;
 import com.google.sitebricks.http.negotiate.ContentNegotiator;
 import com.google.sitebricks.http.negotiate.Negotiation;
-import com.google.sitebricks.rendering.EmbedAs;
 import com.google.sitebricks.rendering.Strings;
+import com.google.sitebricks.rendering.control.DecorateWidget;
 
 /**
  * contains active uri/widget mappings
@@ -117,7 +117,7 @@ public class DefaultPageBook implements PageBook {
     //...
 
     // Register into the book!
-    at(new PageTuple(uri, new PathMatcherChain(uri), null, true, injector, actions));
+    at(new PageTuple(uri, new PathMatcherChain(uri), null, true, false, injector, actions));
   }
 
   private void at(PageTuple page) {
@@ -137,7 +137,7 @@ public class DefaultPageBook implements PageBook {
   private PageTuple at(String uri, Class<?> clazz, boolean headless) {
     final String key = firstPathElement(uri);
     final PageTuple pageTuple =
-        new PageTuple(uri, new PathMatcherChain(uri), clazz, injector, headless);
+        new PageTuple(uri, new PathMatcherChain(uri), clazz, injector, headless, false);
 
     synchronized (lock) {
       //is universal? (i.e. first element is a variable)
@@ -154,24 +154,29 @@ public class DefaultPageBook implements PageBook {
     return pageTuple;
   }
 
-  public Page embedAs(Class<?> clazz) {
-    Preconditions.checkArgument(null == clazz.getAnnotation(Service.class),
-        "You cannot embed headless web services!");
-    String as = clazz.getAnnotation(EmbedAs.class).value();
-    Strings.nonEmpty(as,
-        "@EmbedAs() was empty. You must specify a valid widget name to embed as.");
-    return embedAs(clazz, as);
-  }
-
   public Page embedAs(Class<?> clazz, String as) {
     Preconditions.checkArgument(null == clazz.getAnnotation(Service.class),
         "You cannot embed headless web services!");
-    PageTuple pageTuple = new PageTuple("", PathMatcherChain.ignoring(), clazz, injector, false);
+    PageTuple pageTuple = new PageTuple("", PathMatcherChain.ignoring(), clazz, injector, false, false);
 
     synchronized (lock) {
       pagesByName.put(as.toLowerCase(), pageTuple);
     }
 
+    return pageTuple;
+  }
+  
+  public Page decorate(Class<?> pageClass) {
+    Preconditions.checkArgument(null == pageClass.getAnnotation(Service.class),
+      "You cannot extend headless web services!");
+    PageTuple pageTuple = new PageTuple("", PathMatcherChain.ignoring(), pageClass, injector, false, true);
+    
+    // store page with a special name used by ExtendWidget
+    String name = DecorateWidget.embedNameFor(pageClass);
+    synchronized (lock) {
+      pagesByName.put(name, pageTuple);
+    }
+    
     return pageTuple;
   }
 
@@ -281,7 +286,7 @@ public class DefaultPageBook implements PageBook {
     public Class<?> pageClass() {
       return delegate.pageClass();
     }
-
+    
     public void apply(Renderable widget) {
       delegate.apply(widget);
     }
@@ -293,7 +298,12 @@ public class DefaultPageBook implements PageBook {
     public boolean isHeadless() {
       return delegate.isHeadless();
     }
-
+    
+    @Override
+    public boolean isDecorated() {
+      return delegate.isDecorated();
+    }
+    
     public Set<String> getMethod() {
       return delegate.getMethod();
     }
@@ -314,6 +324,7 @@ public class DefaultPageBook implements PageBook {
     private final AtomicReference<Renderable> pageWidget = new AtomicReference<Renderable>();
     private final Class<?> clazz;
     private final boolean headless;
+    private final boolean extension;
     private final Injector injector;
 
     private final Multimap<String, Action> methods;
@@ -326,12 +337,13 @@ public class DefaultPageBook implements PageBook {
     // A map of http methods -> annotation types (e.g. "POST" -> @Post)
     private Map<String, Class<? extends Annotation>> httpMethods;
 
-    public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, boolean headless,
+    public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, boolean headless, boolean extension,
                      Injector injector, Multimap<String, Action> methods) {
       this.uri = uri;
       this.matcher = matcher;
       this.clazz = clazz;
       this.headless = headless;
+      this.extension = extension;
       this.injector = injector;
       this.methods = methods;
       this.select = PageTuple.class.getAnnotation(Select.class);
@@ -339,12 +351,13 @@ public class DefaultPageBook implements PageBook {
     }
 
     public PageTuple(String uri, PathMatcher matcher, Class<?> clazz, Injector injector,
-                     boolean headless) {
+                     boolean headless, boolean extension) {
       this.uri = uri;
       this.matcher = matcher;
       this.clazz = clazz;
       this.injector = injector;
       this.headless = headless;
+      this.extension = extension;
 
       this.select = discoverSelect(clazz);
 
@@ -468,7 +481,12 @@ public class DefaultPageBook implements PageBook {
     public boolean isHeadless() {
       return headless;
     }
-
+    
+    @Override
+    public boolean isDecorated() {
+      return extension;
+    }
+    
     public Set<String> getMethod() {
       return methods.keySet();
     }
@@ -553,7 +571,7 @@ public class DefaultPageBook implements PageBook {
     public Class<?> pageClass() {
       return clazz;
     }
-
+    
     public void apply(Renderable widget) {
       this.pageWidget.set(widget);
     }

@@ -12,7 +12,7 @@ import java.net.URL;
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 @Immutable
-class TemplateLoader {
+public class TemplateLoader {
   private final Provider<ServletContext> context;
 
   private final String[] fileNameTemplates = new String[] { "%s.html", "%s.xhtml", "%s.xml",
@@ -24,14 +24,17 @@ class TemplateLoader {
   }
 
   public Template load(Class<?> pageClass) {
+	  // try to find the template name
     Show show = pageClass.getAnnotation(Show.class);
-    String template;
-
-    //annotation not present, resolve by name
-    if (null == show) {
-      template = resolve(pageClass);
-    } else {
+    String template = null;
+    if (null != show) {
       template = show.value();
+    }
+    
+    // an empty string means no template name was given
+    if (template == null || template.length() == 0) {
+      // use the default name for the page class
+      template = resolve(pageClass);
     }
 
     String text;

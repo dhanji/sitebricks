@@ -104,7 +104,7 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
       // we have no more super classes to try
       if (sourceType == Object.class) break;
       
-      // try every permutation of source and target type
+      // try every super type of the source
       Class<?> superClass = erase(sourceType).getSuperclass();
       sourceType = getExactSuperType(sourceType, superClass);
     }

@@ -7,10 +7,15 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.sitebricks.Bricks;
+import com.google.sitebricks.MissingTemplateException;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Show;
+import com.google.sitebricks.Template;
+import com.google.sitebricks.TemplateLoader;
 import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
 import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.headless.Reply;
+import com.google.sitebricks.rendering.Decorated;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
@@ -26,14 +31,16 @@ class StandardCompilers implements Compilers {
   private final PageBook pageBook;
   private final SystemMetrics metrics;
   private final Map<String, Class<? extends Annotation>> httpMethods;
+  private final TemplateLoader loader;
 
   @Inject
   public StandardCompilers(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics,
-                           @Bricks Map<String, Class<? extends Annotation>> httpMethods) {
+                           @Bricks Map<String, Class<? extends Annotation>> httpMethods, TemplateLoader loader) {
     this.registry = registry;
     this.pageBook = pageBook;
     this.metrics = metrics;
     this.httpMethods = httpMethods;
+    this.loader = loader;
   }
 
   public Renderable compileXml(Class<?> page, String template) {
@@ -96,5 +103,51 @@ class StandardCompilers implements Compilers {
       }
     }
   }
+  
+  public void compilePage(PageBook.Page page) {
+    // find the template page class
+    Class<?> templateClass = page.pageClass();
+    
+    // root page uses the last template, extension uses its own embedded template
+    if (!page.isDecorated() && templateClass.isAnnotationPresent(Decorated.class)) {
+      // the first superclass with a @Show and no @Extension is the template
+      while (!templateClass.isAnnotationPresent(Show.class) ||
+          templateClass.isAnnotationPresent(Decorated.class)) {
+        templateClass = templateClass.getSuperclass();
+        if (templateClass == Object.class) {
+          throw new MissingTemplateException("Could not find tempate for " + page.pageClass() +
+              ". You must use @Show on a superclass of an @Extension page");
+        }
+      }
+    }
+    
+    final Template template = loader.load(templateClass);
+
+    Renderable widget;
+
+    //is this an HTML, XML, or a flat-file template?
+    switch(template.getKind()) {            
+      default:
+      case HTML:
+        widget = compileHtml(templateClass, template.getText());
+        break;
+      case XML:
+        widget = compileXml(templateClass, template.getText());
+        break;
+      case FLAT:
+        widget = compileFlat(templateClass, template.getText());
+        break;
+      case MVEL:
+        widget = compileMvel(templateClass, template.getText());          
+        break;
+      case FREEMARKER:
+        widget = compileFreemarker(templateClass, template.getText());
+        break;
+    }
+
+    //apply the compiled widget chain to the page (completing compile step)
+    page.apply(widget);
+  }
+
 
 }

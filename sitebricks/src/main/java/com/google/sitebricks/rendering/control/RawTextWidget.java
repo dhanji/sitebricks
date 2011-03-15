@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.Set;
 
 @ThreadSafe @SelfRendering
-class RawTextWidget implements Renderable {
+public class RawTextWidget implements Renderable {
   private String template; //TODO store some metrics to allocate buffers later
 
   RawTextWidget(String template, EvaluatorCompiler compiler) throws ExpressionCompileException {

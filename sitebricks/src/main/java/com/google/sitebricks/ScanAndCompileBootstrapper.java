@@ -20,10 +20,12 @@ import com.google.sitebricks.compiler.Compilers;
 import com.google.sitebricks.compiler.TemplateCompileException;
 import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.rendering.EmbedAs;
+import com.google.sitebricks.rendering.Decorated;
 import com.google.sitebricks.rendering.With;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.rendering.resource.ResourcesService;
 import com.google.sitebricks.routing.PageBook;
+import com.google.sitebricks.routing.PageBook.Page;
 import com.google.sitebricks.routing.SystemMetrics;
 
 /**
@@ -31,7 +33,6 @@ import com.google.sitebricks.routing.SystemMetrics;
  */
 class ScanAndCompileBootstrapper implements Bootstrapper {
   private final PageBook pageBook;
-  private final TemplateLoader loader;
   private final List<Package> packages;
   private final ResourcesService resourcesService;
   private final WidgetRegistry registry;
@@ -48,7 +49,7 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
       ScanAndCompileBootstrapper.class.getName());
 
   @Inject
-  public ScanAndCompileBootstrapper(PageBook pageBook, TemplateLoader loader,
+  public ScanAndCompileBootstrapper(PageBook pageBook,
                                     @Bricks List<Package> packages,
                                     ResourcesService resourcesService,
                                     WidgetRegistry registry,
@@ -56,7 +57,6 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
                                     Compilers compilers) {
 
     this.pageBook = pageBook;
-    this.loader = loader;
     this.packages = packages;
     this.resourcesService = resourcesService;
     this.registry = registry;
@@ -70,23 +70,36 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
     for (Package pkg : packages) {
 
       //look for any classes annotated with @At, @EmbedAs and @With
-      set.addAll(Classes.matching(annotatedWith(At.class)
-          .or(annotatedWith(EmbedAs.class).or(annotatedWith(With.class)))
+      set.addAll(Classes.matching(
+    		  annotatedWith(At.class).or(
+    		  annotatedWith(EmbedAs.class)).or(
+    		  annotatedWith(With.class))
       ).in(pkg));
     }
 
     //we need to scan all the pages first (do not collapse into the next loop)
     Set<PageBook.Page> pagesToCompile = scanPagesToCompile(set);
     collectBindings(bindings, pagesToCompile);
+    extendedPages(pagesToCompile);
 
     // Compile templates for scanned classes (except in dev mode, where faster startup
     // time is more important and compiles are amortized across visits to each page).
+    // TODO make this configurable separately to stage for GAE
     if (Stage.DEVELOPMENT != currentStage) {
       compilePages(pagesToCompile);
     }
 
     //set application mode to started (now debug mechanics can kick in)
     metrics.activate();
+  }
+
+  private void extendedPages(Set<Page> pagesToCompile) {
+    for (Page page : pagesToCompile) {
+      if (page.pageClass().isAnnotationPresent(Decorated.class)) {
+        // recursively add extension pages
+        analyseExtension(pagesToCompile, page.pageClass());
+      }
+    }
   }
 
   //processes all explicit bindings, including static resources.
@@ -122,81 +135,77 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
   private Set<PageBook.Page> scanPagesToCompile(Set<Class<?>> set) {
 
     Set<PageBook.Page> pagesToCompile = Sets.newHashSet();
-    for (Class<?> page : set) {
-      if (page.isAnnotationPresent(EmbedAs.class)) {
-        final String embedAs = page.getAnnotation(EmbedAs.class).value();
-
+    for (Class<?> pageClass : set) {
+      EmbedAs embedAs = pageClass.getAnnotation(EmbedAs.class);
+      if (null != embedAs) {
+        final String embedName = embedAs.value();
+      
         //is this a text rendering or embedding-style widget?
-        if (Renderable.class.isAssignableFrom(page)) {
-          //noinspection unchecked
-          registry.add(embedAs, (Class<? extends Renderable>) page);
+        if (Renderable.class.isAssignableFrom(pageClass)) {
+          @SuppressWarnings("unchecked")
+          Class<? extends Renderable> renderable = (Class<? extends Renderable>) pageClass;
+          registry.add(embedName, renderable);
         } else {
-          pagesToCompile.add(embed(embedAs, page));
+          pagesToCompile.add(embed(embedName, pageClass));
         }
       }
-
-      At at = page.getAnnotation(At.class);
+      
+      At at = pageClass.getAnnotation(At.class);
       if (null != at) {
-        if (page.isAnnotationPresent(Service.class)) {
-          pagesToCompile.add(pageBook.serviceAt(at.value(), page));
-        } else if (page.isAnnotationPresent(Export.class)) {
+        if (pageClass.isAnnotationPresent(Service.class)) {
+          pagesToCompile.add(pageBook.serviceAt(at.value(), pageClass));
+        } else if (pageClass.isAnnotationPresent(Export.class)) {
           //localize the resource to the SitebricksModule's package.
-          resourcesService.add(SitebricksModule.class, page.getAnnotation(Export.class));
-        } else
-          pagesToCompile.add(pageBook.at(at.value(), page));
+          resourcesService.add(SitebricksModule.class, pageClass.getAnnotation(Export.class));
+        }
+        else {
+          pagesToCompile.add(pageBook.at(at.value(), pageClass));
+        }
       }
     }
 
     return pagesToCompile;
   }
 
+  private void analyseExtension(Set<PageBook.Page> pagesToCompile, Class<?> extendClass) {
+    // store the page with a special page name used by ExtendWidget
+    pagesToCompile.add(pageBook.decorate(extendClass));
+    
+    // recursively analyse super class
+    while (extendClass != Object.class) {
+      extendClass = extendClass.getSuperclass();
+      if (extendClass.isAnnotationPresent(Decorated.class)) {
+        analyseExtension(pagesToCompile, extendClass);
+      }
+      else if (extendClass.isAnnotationPresent(Show.class)) {
+        // there is a @Show with no @Extension so this is the outer template
+        return;
+      }
+    }
+    throw new IllegalStateException("Could not find super class annotated with @Show");
+  }
+
   private void compilePages(Set<PageBook.Page> pagesToCompile) {
     final List<TemplateCompileException> failures = Lists.newArrayList();
 
     //perform a compilation pass over all the pages and their templates
-    for (PageBook.Page toCompile : pagesToCompile) {
-      Class<?> page = toCompile.pageClass();
+    for (PageBook.Page page : pagesToCompile) {
+      Class<?> pageClass = page.pageClass();
 
       // Headless web services need to be analyzed but not page-compiled.
-      if (toCompile.isHeadless()) {
+      if (page.isHeadless()) {
         // TODO(dhanji): Feedback errors as return rather than throwing.
-        compilers.analyze(page);
+        compilers.analyze(pageClass);
         continue;
       }
 
       if (log.isLoggable(Level.FINEST)) {
-        log.finest("Compiling template for page " + page.getName());
+        log.finest("Compiling template for page " + pageClass.getName());
       }
 
       try {
-        final Template template = loader.load(page);
-
-        Renderable widget;
-
-        //is this an HTML, XML, or a flat-file template?
-        switch(template.getKind()) {            
-          default:
-          case HTML:
-            widget = compilers.compileHtml(page, template.getText());
-            break;
-          case XML:
-            widget = compilers.compileXml(page, template.getText());
-            break;
-          case FLAT:
-            widget = compilers.compileFlat(page, template.getText());
-            break;
-          case MVEL:
-            widget = compilers.compileMvel(page, template.getText());          
-            break;
-          case FREEMARKER:
-            widget = compilers.compileFreemarker(page, template.getText());
-            break;
-        }
-
-        compilers.analyze(page);
-
-        //apply the compiled widget chain to the page (completing compile step)
-        toCompile.apply(widget);
+        compilers.compilePage(page);
+        compilers.analyze(pageClass);
       } catch (TemplateCompileException e) {
         failures.add(e);
       }
