@@ -65,7 +65,7 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
     }
     
     // special case for handling empty string
-    if (source.equals("") && type != String.class && isEmptyStringNull()) {
+    if ("".equals(source) && type != String.class && isEmptyStringNull()) {
     	return null;
     }
 	  
