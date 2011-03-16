@@ -7,11 +7,9 @@ import static com.google.sitebricks.conversion.generics.GenericTypeReflector.get
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.primitives.Primitives;
 import com.google.inject.Inject;
@@ -61,8 +59,14 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
   @SuppressWarnings("unchecked")
   public <T> T convert(final Object source, Type type) {
 
+	// special case for handling a null source 
     if (source == null) {
       return (T) nullValue(type);
+    }
+    
+    // special case for handling empty string
+    if (source.equals("") && type != String.class && isEmptyStringNull()) {
+    	return null;
     }
 	  
     // use primitive wrapper types
@@ -116,11 +120,15 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
     return (T) result;
   }
 
+  protected boolean isEmptyStringNull() {
+    return true;
+  }
+
   protected Object nullValue(Type type) {
-	  if (type == String.class) {
-		  return "";
-	  }
-	  else return null;
+    if (type == String.class) {
+	  return "";
+	}
+	else return null;
   }
 
   @SuppressWarnings("unchecked")
