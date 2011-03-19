@@ -1,25 +1,5 @@
 package com.google.sitebricks.routing;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.servlet.http.HttpServletRequest;
-
-import net.jcip.annotations.GuardedBy;
-import net.jcip.annotations.ThreadSafe;
-
-import org.jetbrains.annotations.Nullable;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -44,6 +24,23 @@ import com.google.sitebricks.http.negotiate.ContentNegotiator;
 import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.rendering.control.DecorateWidget;
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+import org.jetbrains.annotations.Nullable;
+
+import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * contains active uri/widget mappings
@@ -73,7 +70,7 @@ public class DefaultPageBook implements PageBook {
     this.injector = injector;
   }
 
-  @Override
+  @Override @SuppressWarnings("unchecked")
   public Collection<List<Page>> getPageMap() {
     return (Collection) pages.values();
   }
@@ -110,11 +107,22 @@ public class DefaultPageBook implements PageBook {
   }
 
   @Override
-  public void at(String uri, ActionDescriptor actionDescriptor) {
+  public void at(String uri, List<ActionDescriptor> actionDescriptors,
+                 Map<Class<? extends Annotation>, String> methodSet) {
     Multimap<String, Action> actions = HashMultimap.create();
 
-    // TODO(dhanji): For each select/header/on binding, generate an action in the multimap
-    //...
+    for (ActionDescriptor actionDescriptor : actionDescriptors) {
+      for (Class<? extends Annotation> method : actionDescriptor.getMethods()) {
+        String methodString = methodSet.get(method);
+        Action action = actionDescriptor.getAction();
+
+        if (null == action) {
+          action = injector.getInstance(actionDescriptor.getActionKey());
+        }
+
+        actions.put(methodString, new SpiAction(action, actionDescriptor));
+      }
+    }
 
     // Register into the book!
     at(new PageTuple(uri, new PathMatcherChain(uri), null, true, false, injector, actions));
@@ -131,7 +139,9 @@ public class DefaultPageBook implements PageBook {
       }
     }
 
-    classToPageMap.put(page.pageClass(), page);
+    // Actions are not backed by classes.
+    if (page.pageClass() != null)
+      classToPageMap.put(page.pageClass(), page);
   }
 
   private PageTuple at(String uri, Class<?> clazz, boolean headless) {
@@ -279,7 +289,8 @@ public class DefaultPageBook implements PageBook {
       return instance;
     }
 
-    public Object doMethod(String httpMethod, Object page, String pathInfo, HttpServletRequest request) {
+    public Object doMethod(String httpMethod, Object page, String pathInfo,
+                           HttpServletRequest request) {
       return delegate.doMethod(httpMethod, page, pathInfo, request);
     }
 
@@ -475,7 +486,7 @@ public class DefaultPageBook implements PageBook {
     }
 
     public Object instantiate() {
-      return injector.getInstance(clazz);
+      return clazz == null ? Collections.emptyMap() : injector.getInstance(clazz);
     }
 
     public boolean isHeadless() {

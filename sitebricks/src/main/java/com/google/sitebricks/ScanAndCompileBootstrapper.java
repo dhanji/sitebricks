@@ -1,17 +1,6 @@
 package com.google.sitebricks;
 
-import static com.google.inject.matcher.Matchers.annotatedWith;
-import static com.google.sitebricks.SitebricksModule.BindingKind.ACTION;
-import static com.google.sitebricks.SitebricksModule.BindingKind.EMBEDDED;
-import static com.google.sitebricks.SitebricksModule.BindingKind.PAGE;
-import static com.google.sitebricks.SitebricksModule.BindingKind.SERVICE;
-import static com.google.sitebricks.SitebricksModule.BindingKind.STATIC_RESOURCE;
-
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -19,14 +8,28 @@ import com.google.inject.Stage;
 import com.google.sitebricks.compiler.Compilers;
 import com.google.sitebricks.compiler.TemplateCompileException;
 import com.google.sitebricks.headless.Service;
-import com.google.sitebricks.rendering.EmbedAs;
 import com.google.sitebricks.rendering.Decorated;
+import com.google.sitebricks.rendering.EmbedAs;
 import com.google.sitebricks.rendering.With;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.rendering.resource.ResourcesService;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.PageBook.Page;
 import com.google.sitebricks.routing.SystemMetrics;
+
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static com.google.inject.matcher.Matchers.annotatedWith;
+import static com.google.sitebricks.SitebricksModule.BindingKind.ACTION;
+import static com.google.sitebricks.SitebricksModule.BindingKind.EMBEDDED;
+import static com.google.sitebricks.SitebricksModule.BindingKind.PAGE;
+import static com.google.sitebricks.SitebricksModule.BindingKind.SERVICE;
+import static com.google.sitebricks.SitebricksModule.BindingKind.STATIC_RESOURCE;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -41,7 +44,10 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
   
   @Inject @Bricks
   private final List<SitebricksModule.LinkingBinder> bindings = null;
-  
+
+  @Inject @Bricks
+  private final Map<String, Class<? extends Annotation>> methodMap = null;
+
   @Inject
   private final Stage currentStage = null;
 
@@ -106,6 +112,9 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
   private void collectBindings(List<SitebricksModule.LinkingBinder> bindings,
                                Set<PageBook.Page> pagesToCompile) {
 
+    // Reverse the method map for easy lookup of HTTP method annotations.
+    Map<Class<? extends Annotation>, String> methodSet = HashBiMap.create(methodMap).inverse();
+
     //go thru bindings and obtain pages from them.
     for (SitebricksModule.LinkingBinder binding : bindings) {
 
@@ -126,7 +135,7 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
       } else if (SERVICE == binding.bindingKind) {
         pagesToCompile.add(pageBook.serviceAt(binding.uri, binding.pageClass));
       } else if (ACTION == binding.bindingKind) {
-        pageBook.at(binding.uri, binding.actionDescriptor);
+        pageBook.at(binding.uri, binding.actionDescriptors, methodSet);
       }
     }
   }

@@ -1,9 +1,5 @@
 package com.google.sitebricks.example;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.Locale;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Guice;
@@ -17,6 +13,16 @@ import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.HttpSessionFlashCache;
 import com.google.sitebricks.conversion.DateConverters;
 import com.google.sitebricks.debug.DebugPage;
+import com.google.sitebricks.headless.Reply;
+import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Post;
+import com.google.sitebricks.routing.Action;
+
+import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -41,6 +47,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         // TODO We should run the test suite once with this turned off and with scan() on.
 //        scan(SitebricksConfig.class.getPackage());
         bindExplicitly();
+        bindActions();
 
         at("/no_annotations/service").serve(RestfulWebServiceNoAnnotations.class);
         at("/debug").show(DebugPage.class);
@@ -55,6 +62,14 @@ public class SitebricksConfig extends GuiceServletContextListener {
         install(new StatModule("/stats"));
         
         converter(new DateConverters.DateStringConverter(DEFAULT_DATE_TIME_FORMAT));
+      }
+
+      private void bindActions() {
+        at("/spi/test")
+            .perform(action("get:top"))
+            .on(Get.class)
+            .perform(action("post:junk_subpath1"))
+            .on(Post.class);
       }
 
       private void bindExplicitly() {
@@ -96,6 +111,20 @@ public class SitebricksConfig extends GuiceServletContextListener {
         embed(HelloWorld.class).as("Hello");
       }
     });
+  }
+
+  private Action action(final String reply) {
+    return new Action() {
+      @Override
+      public boolean shouldCall(HttpServletRequest request) {
+        return true;
+      }
+
+      @Override
+      public Object call(Object page, Map<String, String> map) {
+        return Reply.with(reply);
+      }
+    };
   }
 
   @BindingAnnotation

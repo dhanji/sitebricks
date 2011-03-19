@@ -26,6 +26,7 @@ public class StringBuilderRespond implements Respond {
 
   private static final String TEXT_HTML = "text/html";
 
+  @SuppressWarnings("unchecked")
   public StringBuilderRespond() {
     if (null == templates.get()) {
       final Properties properties = new Properties();
@@ -36,7 +37,6 @@ public class StringBuilderRespond implements Respond {
       }
 
       //Concurrent/idempotent
-      //noinspection unchecked
       templates.compareAndSet(null, (Map) properties);
     }
   }

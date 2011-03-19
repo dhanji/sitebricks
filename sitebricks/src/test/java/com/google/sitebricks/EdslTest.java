@@ -44,9 +44,9 @@ public class EdslTest {
 
         at("/stuff/:thing")
             .perform(new DummyAction())
-            .on(Get.class)
             .select("metadata", "form")
-            .selectHeader("Accept", "image/jpeg");
+            .selectHeader("Accept", "image/jpeg")
+            .on(Get.class);
 
         // Registration of embeddable widgets (simply points to page class)
         embed(EdslTest.class).as("@Blasphemy");

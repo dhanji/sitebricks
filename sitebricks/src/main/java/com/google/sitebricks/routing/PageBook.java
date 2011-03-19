@@ -8,8 +8,10 @@ import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.Renderable;
 
 import javax.servlet.http.HttpServletRequest;
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -81,7 +83,8 @@ public interface PageBook {
 
   Collection<List<Page>> getPageMap();
 
-  void at(String uri, ActionDescriptor actionDescriptor);
+  void at(String uri, List<ActionDescriptor> actionDescriptor,
+          Map<Class<? extends Annotation>, String> methodSet);
 
 
   public static interface Page extends Comparable<Page> {

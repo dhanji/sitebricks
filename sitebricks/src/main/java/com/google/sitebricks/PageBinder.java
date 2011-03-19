@@ -1,5 +1,6 @@
 package com.google.sitebricks;
 
+import com.google.inject.Key;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.sitebricks.routing.Action;
 
@@ -28,11 +29,19 @@ public interface PageBinder {
     void with(Class<? extends Annotation> ann);
   }
 
-  static interface ShowBinder {
+  static interface ShowBinder extends PerformBinder {
     ScopedBindingBuilder show(Class<?> clazz);
     ScopedBindingBuilder serve(Class<?> clazz);
     void export(String glob);
+  }
+
+  static interface PerformBinder {
+    ActionBinder perform(Action action, String method);
+    ActionBinder perform(Class<? extends Action> action, String method);
+    ActionBinder perform(Key<? extends Action> action, String method);
     ActionBinder perform(Action action);
+    ActionBinder perform(Class<? extends Action> action);
+    ActionBinder perform(Key<? extends Action> action);
   }
 
   static interface EmbedAsBinder {
@@ -47,7 +56,7 @@ public interface PageBinder {
   }
 
   static interface ActionBinder {
-    ActionBinder on(Class<? extends Annotation>... method);
+    PerformBinder on(Class<? extends Annotation>... method);
     ActionBinder select(String param, String value);
     ActionBinder selectHeader(String param, String value);
     ActionBinder selectHeader(String param, Pattern regex);

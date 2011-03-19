@@ -1,19 +1,11 @@
 package com.google.sitebricks;
 
-import java.lang.annotation.Annotation;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.Set;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.AbstractModule;
+import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
@@ -36,6 +28,15 @@ import com.google.sitebricks.http.negotiate.Accept;
 import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.routing.Action;
+
+import java.lang.annotation.Annotation;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -220,7 +221,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     private boolean asEagerSingleton;
     private Class<? extends Annotation> scopeAnnotation;
     private Scope scope;
-    ActionDescriptor actionDescriptor;
+    List<ActionDescriptor> actionDescriptors = Lists.newArrayList();
 
 
     public LinkingBinder(String uri) {
@@ -275,7 +276,37 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     }
 
     public ActionBinder perform(Action action) {
-      return actionDescriptor = new ActionDescriptor(action);
+      this.bindingKind = BindingKind.ACTION;
+      ActionDescriptor ad = new ActionDescriptor(action, this);
+      actionDescriptors.add(ad);
+      return ad;
+    }
+
+    public ActionBinder perform(Class<? extends Action> action) {
+      this.bindingKind = BindingKind.ACTION;
+      return new ActionDescriptor(Key.get(action), this);
+    }
+
+    public ActionBinder perform(Key<? extends Action> action) {
+      this.bindingKind = BindingKind.ACTION;
+      return new ActionDescriptor(action, this);
+    }
+
+    public ActionBinder perform(Action action, String method) {
+      this.bindingKind = BindingKind.ACTION;
+      return new ActionDescriptor(action, this);
+    }
+
+    @Override
+    public ActionBinder perform(Class<? extends Action> action, String method) {
+      this.bindingKind = BindingKind.ACTION;
+      return new ActionDescriptor(Key.get(action), this);
+    }
+
+    @Override
+    public ActionBinder perform(Key<? extends Action> action, String method) {
+      this.bindingKind = BindingKind.ACTION;
+      return new ActionDescriptor(action, this);
     }
 
     public ScopedBindingBuilder as(String annotation) {

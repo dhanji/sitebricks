@@ -10,9 +10,11 @@ import com.google.sitebricks.routing.Production;
 import com.google.sitebricks.routing.SystemMetrics;
 import net.jcip.annotations.ThreadSafe;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -91,8 +93,10 @@ class DebugModePageBook implements PageBook {
     return book.getPageMap();
   }
 
-  public void at(String uri, ActionDescriptor actionDescriptor) {
-    book.at(uri, actionDescriptor);
+  @Override
+  public void at(String uri, List<ActionDescriptor> actionDescriptor,
+                 Map<Class<? extends Annotation>, String> methodSet) {
+    book.at(uri, actionDescriptor, methodSet);
   }
 
   private void reload(String identifier, Page page) {
