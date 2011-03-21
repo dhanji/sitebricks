@@ -118,6 +118,8 @@ public class DefaultPageBook implements PageBook {
 
         if (null == action) {
           action = injector.getInstance(actionDescriptor.getActionKey());
+        } else {
+          injector.injectMembers(action);
         }
 
         actions.put(methodString, new SpiAction(action, actionDescriptor));

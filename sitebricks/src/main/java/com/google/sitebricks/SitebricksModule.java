@@ -284,29 +284,16 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
     public ActionBinder perform(Class<? extends Action> action) {
       this.bindingKind = BindingKind.ACTION;
-      return new ActionDescriptor(Key.get(action), this);
+      ActionDescriptor ad = new ActionDescriptor(Key.get(action), this);
+      actionDescriptors.add(ad);
+      return ad;
     }
 
     public ActionBinder perform(Key<? extends Action> action) {
       this.bindingKind = BindingKind.ACTION;
-      return new ActionDescriptor(action, this);
-    }
-
-    public ActionBinder perform(Action action, String method) {
-      this.bindingKind = BindingKind.ACTION;
-      return new ActionDescriptor(action, this);
-    }
-
-    @Override
-    public ActionBinder perform(Class<? extends Action> action, String method) {
-      this.bindingKind = BindingKind.ACTION;
-      return new ActionDescriptor(Key.get(action), this);
-    }
-
-    @Override
-    public ActionBinder perform(Key<? extends Action> action, String method) {
-      this.bindingKind = BindingKind.ACTION;
-      return new ActionDescriptor(action, this);
+      ActionDescriptor ad = new ActionDescriptor(action, this);
+      actionDescriptors.add(ad);
+      return ad;
     }
 
     public ScopedBindingBuilder as(String annotation) {

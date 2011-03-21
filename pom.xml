@@ -18,7 +18,7 @@
     <module>stat</module>
     <module>slf4j</module>
   </modules>
-  
+
   <scm>
     <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/trunk</connection>
     <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/trunk</developerConnection>

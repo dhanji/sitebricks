@@ -36,9 +36,6 @@ public interface PageBinder {
   }
 
   static interface PerformBinder {
-    ActionBinder perform(Action action, String method);
-    ActionBinder perform(Class<? extends Action> action, String method);
-    ActionBinder perform(Key<? extends Action> action, String method);
     ActionBinder perform(Action action);
     ActionBinder perform(Class<? extends Action> action);
     ActionBinder perform(Key<? extends Action> action);
