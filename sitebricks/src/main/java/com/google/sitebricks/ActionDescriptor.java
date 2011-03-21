@@ -63,7 +63,7 @@ public class ActionDescriptor implements PageBinder.ActionBinder {
         "Header to selectHeader() must be a non-empty string");
     Preconditions.checkArgument(value != null && !value.isEmpty(),
         "Value to selectHeader() must be a non-empty string");
-    selectParams.put(header, value);
+    selectHeaders.put(header, value);
     return this;
   }
 
