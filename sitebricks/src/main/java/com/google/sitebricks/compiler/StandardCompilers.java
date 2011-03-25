@@ -1,9 +1,5 @@
 package com.google.sitebricks.compiler;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Map;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.sitebricks.Bricks;
@@ -19,6 +15,10 @@ import com.google.sitebricks.rendering.Decorated;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * A factory for internal template compilers.
@@ -120,13 +120,21 @@ class StandardCompilers implements Compilers {
         }
       }
     }
-    
+
+    Renderable widget = compile(templateClass);
+
+    //apply the compiled widget chain to the page (completing compile step)
+    page.apply(widget);
+  }
+
+  @Override
+  public Renderable compile(Class<?> templateClass) {
     final Template template = loader.load(templateClass);
 
     Renderable widget;
 
     //is this an HTML, XML, or a flat-file template?
-    switch(template.getKind()) {            
+    switch(template.getKind()) {
       default:
       case HTML:
         widget = compileHtml(templateClass, template.getText());
@@ -138,16 +146,13 @@ class StandardCompilers implements Compilers {
         widget = compileFlat(templateClass, template.getText());
         break;
       case MVEL:
-        widget = compileMvel(templateClass, template.getText());          
+        widget = compileMvel(templateClass, template.getText());
         break;
       case FREEMARKER:
         widget = compileFreemarker(templateClass, template.getText());
         break;
     }
-
-    //apply the compiled widget chain to the page (completing compile step)
-    page.apply(widget);
+    return widget;
   }
-
 
 }

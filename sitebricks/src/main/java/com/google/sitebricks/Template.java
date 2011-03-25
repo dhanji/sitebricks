@@ -39,6 +39,6 @@ public class Template {
       else
         return FLAT;
     }
-    
+
   }
 }

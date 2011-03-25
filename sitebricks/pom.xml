@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.google.sitebricks</groupId>
@@ -12,11 +14,11 @@
   <name>sitebricks</name>
   <url>http://code.google.com/p/google-sitebricks/</url>
 
-  
+
   <properties>
     <guice.version>2.0</guice.version>
   </properties>
-  
+
   <scm>
     <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/trunk/sitebricks</connection>
     <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/trunk/sitebricks</developerConnection>
@@ -39,7 +41,7 @@
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>r07</version>
-      </dependency>
+    </dependency>
     <dependency>
       <groupId>net.jcip</groupId>
       <artifactId>jcip-annotations</artifactId>
@@ -60,11 +62,11 @@
       <artifactId>guice-servlet</artifactId>
       <version>${guice.version}</version>
     </dependency>
-	<dependency>
-		<groupId>com.google.inject.extensions</groupId>
-		<artifactId>guice-multibindings</artifactId>
-		<version>${guice.version}</version>
-	</dependency>
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-multibindings</artifactId>
+      <version>${guice.version}</version>
+    </dependency>
     <dependency>
       <groupId>commons-httpclient</groupId>
       <artifactId>commons-httpclient</artifactId>
@@ -85,10 +87,10 @@
       <artifactId>dom4j</artifactId>
       <version>1.6.1</version>
       <exclusions>
-      	<exclusion>
-      		<artifactId>xml-apis</artifactId>
-      		<groupId>xml-apis</groupId>
-      	</exclusion>
+        <exclusion>
+          <artifactId>xml-apis</artifactId>
+          <groupId>xml-apis</groupId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -96,14 +98,14 @@
       <artifactId>jaxen</artifactId>
       <version>1.1.1</version>
       <exclusions>
-      	<exclusion>
-      		<artifactId>xercesImpl</artifactId>
-      		<groupId>xerces</groupId>
-      	</exclusion>
-      	<exclusion>
-      		<artifactId>xml-apis</artifactId>
-      		<groupId>xml-apis</groupId>
-      	</exclusion>
+        <exclusion>
+          <artifactId>xercesImpl</artifactId>
+          <groupId>xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xml-apis</artifactId>
+          <groupId>xml-apis</groupId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -169,7 +171,7 @@
       </plugin>
     </plugins>
   </build>
- 
+
   <!-- This should be removed when the googlecode repositories are migrated to the standard Nexus OSS repository infrastructure -->
   <distributionManagement>
     <snapshotRepository>
@@ -180,8 +182,8 @@
     <repository>
       <id>google-with-staging</id>
       <name>Nexus OSS Staging Repository</name>
-      <url> https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
-  
+
 </project>

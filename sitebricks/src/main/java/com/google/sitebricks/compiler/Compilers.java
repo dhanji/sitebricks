@@ -33,4 +33,9 @@ public interface Compilers {
 
   void compilePage(PageBook.Page page);
 
+  /**
+   * Convenience method, use this instead of compileXXX to hide
+   * the underlying template type if you dont care what it is.
+   */
+  Renderable compile(Class<?> templateClass);
 }

@@ -10,6 +10,7 @@ import com.google.sitebricks.compiler.TemplateCompileException;
 import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.rendering.Decorated;
 import com.google.sitebricks.rendering.EmbedAs;
+import com.google.sitebricks.rendering.Templates;
 import com.google.sitebricks.rendering.With;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.rendering.resource.ResourcesService;
@@ -41,6 +42,9 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
   private final WidgetRegistry registry;
   private final SystemMetrics metrics;
   private final Compilers compilers;
+
+  @Inject
+  private final Templates templates = null;
   
   @Inject @Bricks
   private final List<SitebricksModule.LinkingBinder> bindings = null;
@@ -51,8 +55,7 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
   @Inject
   private final Stage currentStage = null;
 
-  private final Logger log = Logger.getLogger(
-      ScanAndCompileBootstrapper.class.getName());
+  private final Logger log = Logger.getLogger(ScanAndCompileBootstrapper.class.getName());
 
   @Inject
   public ScanAndCompileBootstrapper(PageBook pageBook,
@@ -79,7 +82,8 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
       set.addAll(Classes.matching(
     		  annotatedWith(At.class).or(
     		  annotatedWith(EmbedAs.class)).or(
-    		  annotatedWith(With.class))
+    		  annotatedWith(With.class)).or(
+          annotatedWith(Show.class))
       ).in(pkg));
     }
 
@@ -113,7 +117,7 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
                                Set<PageBook.Page> pagesToCompile) {
 
     // Reverse the method map for easy lookup of HTTP method annotations.
-    Map<Class<? extends Annotation>, String> methodSet = HashBiMap.create(methodMap).inverse();
+    Map<Class<? extends Annotation>, String> methodSet = null;
 
     //go thru bindings and obtain pages from them.
     for (SitebricksModule.LinkingBinder binding : bindings) {
@@ -135,6 +139,10 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
       } else if (SERVICE == binding.bindingKind) {
         pagesToCompile.add(pageBook.serviceAt(binding.uri, binding.pageClass));
       } else if (ACTION == binding.bindingKind) {
+        // Lazy create this inverse lookup map, once.
+        if (null == methodSet) {
+          methodSet = HashBiMap.create(methodMap).inverse();
+        }
         pageBook.at(binding.uri, binding.actionDescriptors, methodSet);
       }
     }
@@ -142,7 +150,7 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
 
   //goes through the set of scanned classes and builds pages out of them.
   private Set<PageBook.Page> scanPagesToCompile(Set<Class<?>> set) {
-
+    Set<Templates.Descriptor> templates = Sets.newHashSet();
     Set<PageBook.Page> pagesToCompile = Sets.newHashSet();
     for (Class<?> pageClass : set) {
       EmbedAs embedAs = pageClass.getAnnotation(EmbedAs.class);
@@ -171,6 +179,17 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
           pagesToCompile.add(pageBook.at(at.value(), pageClass));
         }
       }
+
+      if (pageClass.isAnnotationPresent(Show.class)) {
+        // This has a template associated with it.
+        templates.add(new Templates.Descriptor(pageClass,
+            pageClass.getAnnotation(Show.class).value()));
+      }
+    }
+
+    // Eagerly load all detected templates in production mode.
+    if (Stage.DEVELOPMENT != currentStage) {
+      this.templates.loadAll(templates);
     }
 
     return pagesToCompile;
