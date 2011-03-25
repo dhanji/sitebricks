@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 class MvelRequestBinder implements RequestBinder {
   private final Evaluator evaluator;
   private final Provider<FlashCache> cacheProvider;
-  private final Logger log = Logger.getLogger(MvelRequestBinder.class.toString());
+  private final Logger log = Logger.getLogger(MvelRequestBinder.class.getName());
 
   private static final String VALID_BINDING_REGEX = "[\\w\\.$]*";
 
