@@ -88,6 +88,16 @@ public abstract class Reply<E> {
   public abstract Reply<E> error();
 
   /**
+   * Render template associated with the given class. The class must have
+   * an @Show() annotation pointing to a valid Sitebricks template type (can
+   * be any of the supported templates: MVEL, freemarker, SB, etc.)
+   * <p>
+   * The entity passed into with() is used as the template's context during
+   * render.
+   */
+  public abstract Reply<E> template(Class<?> templateKey);
+
+  /**
    * Set a custom status code (call this last, it will be overridden if
    * other response code directives are called afterward).
    */

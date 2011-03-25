@@ -262,8 +262,6 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     }
 
     public ScopedBindingBuilder serve(Class<?> clazz) {
-      Preconditions.checkArgument(!clazz.isAnnotationPresent(Show.class),
-          "Cannot serve() a template page. Did you mean to call show() instead?");
       this.pageClass = clazz;
       this.bindingKind = BindingKind.SERVICE;
 

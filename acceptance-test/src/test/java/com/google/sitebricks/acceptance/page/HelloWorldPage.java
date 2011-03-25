@@ -2,7 +2,6 @@ package com.google.sitebricks.acceptance.page;
 
 import com.google.sitebricks.acceptance.util.AcceptanceTest;
 import com.google.sitebricks.example.HelloWorld;
-
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.PageFactory;
 
@@ -28,8 +27,8 @@ public class HelloWorldPage {
     return driver.getPageSource().contains(new HelloWorld().mangle(HelloWorld.HELLO_MSG));
   }
 
-  public static HelloWorldPage open(WebDriver driver) {
-    driver.get(AcceptanceTest.BASE_URL + "/hello");
+  public static HelloWorldPage open(WebDriver driver, String url) {
+    driver.get(AcceptanceTest.BASE_URL + url);
     return PageFactory.initElements(driver, HelloWorldPage.class);
   }
 

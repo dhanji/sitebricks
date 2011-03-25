@@ -11,13 +11,31 @@ import org.testng.annotations.Test;
 @Test(suiteName = AcceptanceTest.SUITE)
 public class HelloWorldAcceptanceTest {
 
-    public void shouldRenderDynamicTextFromHelloWorld() {
-        WebDriver driver = AcceptanceTest.createWebDriver();
-        HelloWorldPage page = HelloWorldPage.open(driver);
+  public void shouldRenderDynamicTextFromHelloWorld() {
+    WebDriver driver = AcceptanceTest.createWebDriver();
+    HelloWorldPage page = HelloWorldPage.open(driver, "/hello");
 
-        assert page.hasHelloWorldMessage() : "Did not generate dynamic text from el expression";
-        assert page.hasCorrectDoctype() : "Did not contain the expected doctype declaration at the start of the HTML file";
-        assert page.hasMangledString() : "Did not contain method-generated string";
-        assert page.hasNonSelfClosingScriptTag() : "Did not contain proper script tag with closing tag";
-    }
+    assertHelloWorldContent(page);
+  }
+
+  public void shouldRenderDynamicTextFromHelloWorldService() {
+    WebDriver driver = AcceptanceTest.createWebDriver();
+    HelloWorldPage page = HelloWorldPage.open(driver, "/helloservice");
+
+    assertHelloWorldContent(page);
+  }
+
+  public void shouldRenderDynamicTextFromHelloWorldServiceDirect() {
+    WebDriver driver = AcceptanceTest.createWebDriver();
+    HelloWorldPage page = HelloWorldPage.open(driver, "/helloservice/direct");
+
+    assertHelloWorldContent(page);
+  }
+
+  private void assertHelloWorldContent(HelloWorldPage page) {
+    assert page.hasHelloWorldMessage() : "Did not generate dynamic text from el expression";
+    assert page.hasCorrectDoctype() : "Did not contain the expected doctype declaration at the start of the HTML file";
+    assert page.hasMangledString() : "Did not contain method-generated string";
+    assert page.hasNonSelfClosingScriptTag() : "Did not contain proper script tag with closing tag";
+  }
 }

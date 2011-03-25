@@ -7,6 +7,7 @@ import com.google.inject.Key;
 import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.client.transport.Text;
 import com.google.sitebricks.rendering.Strings;
+import com.google.sitebricks.rendering.Templates;
 import org.apache.commons.io.IOUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,6 +31,7 @@ class ReplyMaker<E> extends Reply<E> {
 
   private Key<? extends Transport> transport = Key.get(Text.class);
   private E entity;
+  private Class<?> templateKey;
 
   public ReplyMaker(E entity) {
     this.entity = entity;
@@ -129,6 +131,12 @@ class ReplyMaker<E> extends Reply<E> {
   }
 
   @Override
+  public Reply<E> template(Class<?> templateKey) {
+    this.templateKey = templateKey;
+    return this;
+  }
+
+  @Override
   void populate(Injector injector, HttpServletResponse response) throws IOException {
     // If we should not bother with the chain
     if (Reply.NO_REPLY == this) {
@@ -166,7 +174,10 @@ class ReplyMaker<E> extends Reply<E> {
 
     // Write out data.
     response.setStatus(status);
-    if (null != entity) {
+
+    if (null != templateKey) {
+      response.getWriter().write(injector.getInstance(Templates.class).render(templateKey, entity));
+    } else if (null != entity) {
       if (entity instanceof InputStream) {
         // Stream the response rather than marshalling it through a transport.
         InputStream inputStream = (InputStream) entity;
