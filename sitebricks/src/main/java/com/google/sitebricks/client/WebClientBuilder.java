@@ -65,7 +65,7 @@ class WebClientBuilder implements Web.FormatBuilder {
     }
 
     public WebClient<T> over(Class<? extends Transport> transport) {
-      return new CommonsWebClient<T>(injector, authType, username, password, url, 
+      return new AHCWebClient<T>(injector, authType, username, password, url, 
           headers, transporting, Key.get(transport));
     }
   }
