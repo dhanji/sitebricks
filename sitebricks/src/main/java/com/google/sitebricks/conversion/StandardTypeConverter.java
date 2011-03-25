@@ -27,6 +27,10 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
   private static final TypeVariable<? extends Class<?>> sourceTypeParameter = Converter.class.getTypeParameters()[0];
   private static final TypeVariable<? extends Class<?>> targetTypeParameter = Converter.class.getTypeParameters()[1];
 
+  public StandardTypeConverter()
+  {
+  }
+  
   @Inject
   public StandardTypeConverter(@SuppressWarnings("rawtypes") Set<Converter> converters) {
 	  for (Converter<?, ?> converter : converters) {
