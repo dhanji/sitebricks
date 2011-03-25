@@ -26,7 +26,7 @@ import com.google.inject.Singleton;
 import com.google.sitebricks.conversion.Converter;
 import com.google.sitebricks.conversion.ConverterRegistry;
 import com.google.sitebricks.conversion.StandardTypeConverter;
-import com.google.sitebricks.conversion.generics.GenericTypeReflector;
+import com.google.sitebricks.conversion.generics.Generics;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -89,7 +89,7 @@ public class JacksonJsonTransport extends Json {
     Set<Type> targetTypes = typeToConverterDirections.keySet();
     for (Type targetType : targetTypes) {
       Collection<ConverterDirection> converterDirections = typeToConverterDirections.get(targetType);
-      Class<?> targetClass = GenericTypeReflector.erase(targetType);
+      Class<?> targetClass = Generics.erase(targetType);
       ConvertersDeserializer jds = new ConvertersDeserializer(converterDirections);
       typesafeAddMapping(targetClass, jds, deserializerFactory);
     }
@@ -134,7 +134,7 @@ public class JacksonJsonTransport extends Json {
             StandardTypeConverter.targetType(converterDirection.converter);
             
         // assume that Jackson only gives us non-generic types
-        Class<?> converterSourceClass = GenericTypeReflector.erase(sourceType);
+        Class<?> converterSourceClass = Generics.erase(sourceType);
         
         if (converterSourceClass.isAssignableFrom(source.getClass())) {
           return converterDirection.forward ? 

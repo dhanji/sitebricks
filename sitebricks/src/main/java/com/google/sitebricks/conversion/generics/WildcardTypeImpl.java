@@ -53,7 +53,7 @@ class WildcardTypeImpl implements WildcardType
 	{
 		if (lowerBounds.length > 0)
 		{
-			return "? super " + GenericTypeReflector.getTypeName(lowerBounds[0]);
+			return "? super " + Generics.getTypeName(lowerBounds[0]);
 		}
 		else if (upperBounds[0] == Object.class)
 		{
@@ -61,7 +61,7 @@ class WildcardTypeImpl implements WildcardType
 		}
 		else
 		{
-			return "? extends " + GenericTypeReflector.getTypeName(upperBounds[0]);
+			return "? extends " + Generics.getTypeName(upperBounds[0]);
 		}
 	}
 }

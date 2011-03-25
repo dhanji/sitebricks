@@ -47,7 +47,7 @@ class SitebricksInternalModule extends AbstractModule {
     }
     
     // use sitebricks converters in mvel
-    requestStaticInjection(MvelConversionHandlers.class);
+    requestInjection(new MvelConversionHandlers());
   }
 
   @Override

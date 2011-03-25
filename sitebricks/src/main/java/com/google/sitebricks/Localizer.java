@@ -1,5 +1,17 @@
 package com.google.sitebricks;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Binder;
@@ -12,16 +24,6 @@ import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.compiler.Token;
 import com.google.sitebricks.i18n.Message;
 import com.google.sitebricks.rendering.Strings;
-
-import javax.servlet.http.HttpServletRequest;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A Utility that binds a localizable interface to its instance parameters.
@@ -97,7 +99,7 @@ class Localizer {
           "All i18n interface methods MUST return String: ", iface, method);
 
       int argumentCount = method.getParameterTypes().length;
-      Map<String, Class<?>> arguments = Maps.newLinkedHashMap();
+      Map<String, Type> arguments = Maps.newLinkedHashMap();
 
       for (int i = 0; i < argumentCount; i++) {
         Annotation[] annotations = method.getParameterAnnotations()[i];
@@ -209,9 +211,9 @@ class Localizer {
 
   private static class MessageDescriptor {
     private final List<Token> tokens;
-    private final Map<String, Class<?>> argumentTypes;
+    private final Map<String, Type> argumentTypes;
 
-    private MessageDescriptor(List<Token> tokens, Map<String, Class<?>> argumentTypes) {
+    private MessageDescriptor(List<Token> tokens, Map<String, Type> argumentTypes) {
       this.tokens = tokens;
       this.argumentTypes = argumentTypes;
     }

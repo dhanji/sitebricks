@@ -1,8 +1,8 @@
 package com.google.sitebricks.conversion;
 
-import static com.google.sitebricks.conversion.generics.GenericTypeReflector.erase;
-import static com.google.sitebricks.conversion.generics.GenericTypeReflector.getExactSuperType;
-import static com.google.sitebricks.conversion.generics.GenericTypeReflector.getTypeParameter;
+import static com.google.sitebricks.conversion.generics.Generics.erase;
+import static com.google.sitebricks.conversion.generics.Generics.getExactSuperType;
+import static com.google.sitebricks.conversion.generics.Generics.getTypeParameter;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -27,14 +27,11 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
   private static final TypeVariable<? extends Class<?>> sourceTypeParameter = Converter.class.getTypeParameters()[0];
   private static final TypeVariable<? extends Class<?>> targetTypeParameter = Converter.class.getTypeParameters()[1];
 
-  public StandardTypeConverter() {
-  }
-
   @Inject
   public StandardTypeConverter(@SuppressWarnings("rawtypes") Set<Converter> converters) {
-    for (Converter<?, ?> converter : converters) {
-      register(converter);
-    }
+	  for (Converter<?, ?> converter : converters) {
+		  register(converter);
+	  }
   }
 
   @Override
@@ -77,11 +74,7 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
     if (source.getClass() == type) {
       return (T) source;
     }
-    
-    if (source.getClass() == Object.class || type == Object.class) {
-      throw new IllegalArgumentException("Object is invalid converter type");
-    }
-    
+
     Type sourceType = source.getClass();
     
     // look for converters for exact types or super types  
@@ -120,6 +113,12 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
     return (T) result;
   }
 
+  @Override
+  public Collection<Converter<?, ?>> converter(Type source, Type target) {
+    SourceAndTarget key = new SourceAndTarget(source, target);
+    return convertersBySourceAndTarget.get(key);
+  }
+  
   protected boolean isEmptyStringNull() {
     return true;
   }

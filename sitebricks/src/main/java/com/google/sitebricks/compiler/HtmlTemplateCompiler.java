@@ -1,14 +1,21 @@
 package com.google.sitebricks.compiler;
 
-import com.google.common.collect.Lists;
-import com.google.sitebricks.Renderable;
-import com.google.sitebricks.rendering.Strings;
-import com.google.sitebricks.rendering.control.Chains;
-import com.google.sitebricks.rendering.control.WidgetChain;
-import com.google.sitebricks.rendering.control.WidgetRegistry;
-import com.google.sitebricks.routing.PageBook;
-import com.google.sitebricks.routing.SystemMetrics;
+import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION;
+import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_CONTENT;
+import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_KEY;
+import static com.google.sitebricks.compiler.HtmlParser.LINE_NUMBER_ATTRIBUTE;
+import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
+
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
 import net.jcip.annotations.NotThreadSafe;
+
 import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Attribute;
@@ -20,18 +27,16 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.nodes.XmlDeclaration;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_CONTENT;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_KEY;
-import static com.google.sitebricks.compiler.HtmlParser.LINE_NUMBER_ATTRIBUTE;
-import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.conversion.generics.Generics;
+import com.google.sitebricks.rendering.Strings;
+import com.google.sitebricks.rendering.control.Chains;
+import com.google.sitebricks.rendering.control.WidgetChain;
+import com.google.sitebricks.rendering.control.WidgetRegistry;
+import com.google.sitebricks.routing.PageBook;
+import com.google.sitebricks.routing.SystemMetrics;
 
 /**
  * @author Shawn based on XMLTemplateCompiler by Dhanji R. Prasanna (dhanji@gmail.com)
@@ -347,9 +352,9 @@ class HtmlTemplateCompiler {
 
 
 
-    private Map<String, Class<?>> parseRepeatScope(String[] extract, Node node) {
+    private Map<String,Type> parseRepeatScope(String[] extract, Node node) {
         RepeatToken repeat = registry.parseRepeat(extract[1]);
-        Map<String, Class<?>> context = new HashMap<String, Class<?>>();
+        Map<String, Type> context = Maps.newHashMap();
 
         // Verify that @Repeat was parsed correctly.
         if (null == repeat.var()) {
@@ -368,24 +373,19 @@ class HtmlTemplateCompiler {
         }
 
         try {
-            Class<?> egressType = lexicalScopes.peek().resolveEgressType(repeat.items());
+            Type egressType = lexicalScopes.peek().resolveEgressType(repeat.items());
 
-            Class<?> typeParameter = null;
-            if (Collection.class.isAssignableFrom(egressType)) {
-
-                // Determine collection type parameter (generic).
-                typeParameter = lexicalScopes.peek().resolveCollectionTypeParameter(repeat.items());
-
-            } else {
-                errors.add(
-                    CompileError.in(node.outerHtml())
-                    .near(node.siblingIndex()) // TODO - line number
-                    .causedBy(CompileErrors.REPEAT_OVER_ATOM)
-                );
+            Type elementType = Generics.getTypeParameter(egressType, Collection.class.getTypeParameters()[0]);
+            if (elementType == null) {
+	            errors.add(
+	                CompileError.in(node.outerHtml())
+	                .near(node.siblingIndex()) // TODO - line number
+	                .causedBy(CompileErrors.REPEAT_OVER_ATOM)
+	            );
             }
 
 
-            context.put(repeat.var(), typeParameter);
+            context.put(repeat.var(), elementType);
             context.put(repeat.pageVar(), page);
             context.put("index", int.class);
             context.put("isLast", boolean.class);

@@ -15,6 +15,7 @@ import com.google.sitebricks.conversion.Converter;
 import com.google.sitebricks.conversion.DateConverters;
 import com.google.sitebricks.conversion.NumberConverters;
 import com.google.sitebricks.conversion.ObjectToStringConverter;
+import com.google.sitebricks.conversion.SingletonListConverter;
 import com.google.sitebricks.conversion.StringToPrimitiveConverters;
 import com.google.sitebricks.core.CaseWidget;
 import com.google.sitebricks.headless.Service;
@@ -77,6 +78,9 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
     // register the default converters after user converters
     converters.addBinding().to(ObjectToStringConverter.class);
+    
+    // allow single request parameters to be converted to List<String> 
+    converters.addBinding().to(SingletonListConverter.class);
     StringToPrimitiveConverters.register(this);
     NumberConverters.register(this);
     DateConverters.register(this);

@@ -1,11 +1,11 @@
 package com.google.sitebricks.compiler;
 
-import com.google.sitebricks.Evaluator;
-import com.google.inject.ImplementedBy;
+import java.lang.reflect.Type;
+import java.util.List;
 
 import org.mvel2.ErrorDetail;
 
-import java.util.List;
+import com.google.sitebricks.Evaluator;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -20,17 +20,6 @@ public interface EvaluatorCompiler {
    * @throws ExpressionCompileException If there is a problem compiling the expression.
    */
   Evaluator compile(String expression) throws ExpressionCompileException;
-
-
-  /**
-   * @param expression An expression to compile against this compiler (and context class)
-   *
-   * @return Returns the type parameter OF the egress type of the entire expression chain,
-   *         *assuming* that it is a collection (or really, more like a single parametric type).
-   * @throws ExpressionCompileException If there is a problem compiling the expression.
-   * @see #resolveEgressType(String)
-   */
-  Class<?> resolveCollectionTypeParameter(String expression) throws ExpressionCompileException;
 
 
   /**
@@ -52,7 +41,7 @@ public interface EvaluatorCompiler {
    * @throws com.google.sitebricks.compiler.ExpressionCompileException If there is a problem
    * compiling the expression.
    */
-  Class<?> resolveEgressType(String expression) throws ExpressionCompileException;
+  Type resolveEgressType(String expression) throws ExpressionCompileException;
 
   /**
    * @param property A property of this class to test.

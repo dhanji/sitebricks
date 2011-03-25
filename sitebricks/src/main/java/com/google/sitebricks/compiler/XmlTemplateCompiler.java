@@ -1,26 +1,42 @@
 package com.google.sitebricks.compiler;
 
-import com.google.common.collect.Lists;
-import com.google.sitebricks.Renderable;
-import com.google.sitebricks.rendering.control.Chains;
-import com.google.sitebricks.rendering.control.WidgetChain;
-import com.google.sitebricks.rendering.control.WidgetRegistry;
-import com.google.sitebricks.routing.PageBook;
-import com.google.sitebricks.routing.SystemMetrics;
+import java.io.IOException;
+import java.io.StringReader;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+
 import net.jcip.annotations.NotThreadSafe;
-import org.dom4j.*;
+
+import org.dom4j.Attribute;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentType;
+import org.dom4j.Element;
+import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 import org.jetbrains.annotations.NotNull;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.*;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.conversion.generics.Generics;
+import com.google.sitebricks.rendering.control.Chains;
+import com.google.sitebricks.rendering.control.WidgetChain;
+import com.google.sitebricks.rendering.control.WidgetRegistry;
+import com.google.sitebricks.routing.PageBook;
+import com.google.sitebricks.routing.SystemMetrics;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
+ * 
+ * TODO share code with HtmlTemplateCompiler
  */
 @NotThreadSafe
 class XmlTemplateCompiler {
@@ -359,9 +375,9 @@ class XmlTemplateCompiler {
 
 
 
-    private Map<String, Class<?>> parseRepeatScope(String[] extract, Element element) {
+    private Map<String, Type> parseRepeatScope(String[] extract, Element element) {
         RepeatToken repeat = registry.parseRepeat(extract[1]);
-        Map<String, Class<?>> context = new HashMap<String, Class<?>>();
+        Map<String, Type> context = Maps.newHashMap();
 
         // Verify that @Repeat was parsed correctly.
         if (null == repeat.var()) {
@@ -380,24 +396,10 @@ class XmlTemplateCompiler {
         }
 
         try {
-            Class<?> egressType = lexicalScopes.peek().resolveEgressType(repeat.items());
+            Type egressType = lexicalScopes.peek().resolveEgressType(repeat.items());
+            Type elementType = Generics.getTypeParameter(egressType, Collection.class.getTypeParameters()[0]);
 
-            Class<?> typeParameter = null;
-            if (Collection.class.isAssignableFrom(egressType)) {
-
-                // Determine collection type parameter (generic).
-                typeParameter = lexicalScopes.peek().resolveCollectionTypeParameter(repeat.items());
-
-            } else {
-                errors.add(
-                    CompileError.in(Dom.asRawXml(element))
-                    .near(Dom.lineNumberOf(element))
-                    .causedBy(CompileErrors.REPEAT_OVER_ATOM)
-                );
-            }
-
-
-            context.put(repeat.var(), typeParameter);
+            context.put(repeat.var(), elementType);
             context.put(repeat.pageVar(), page);
             context.put("index", int.class);
             context.put("isLast", boolean.class);

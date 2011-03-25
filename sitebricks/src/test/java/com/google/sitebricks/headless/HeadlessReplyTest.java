@@ -8,6 +8,7 @@ import static org.easymock.EasyMock.verify;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +22,7 @@ import com.google.inject.Injector;
 import com.google.sitebricks.client.transport.Json;
 import com.google.sitebricks.client.transport.Text;
 import com.google.sitebricks.client.transport.Xml;
+import com.google.sitebricks.conversion.Converter;
 import com.google.sitebricks.conversion.ConverterRegistry;
 import com.google.sitebricks.conversion.StandardTypeConverter;
 
@@ -77,9 +79,10 @@ public class HeadlessReplyTest {
   @Test
   public void jsonReply() throws IOException {
     Injector injector = Guice.createInjector(new AbstractModule() {
+      @SuppressWarnings("rawtypes")
       @Override
       protected void configure() {
-        bind(ConverterRegistry.class).toInstance(new StandardTypeConverter());
+        bind(ConverterRegistry.class).toInstance(new StandardTypeConverter(Collections.<Converter>emptySet()));
       }
     });
     HeadlessRenderer renderer = injector.getInstance(HeadlessRenderer.class);

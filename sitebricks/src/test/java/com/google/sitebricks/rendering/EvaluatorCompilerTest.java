@@ -3,9 +3,13 @@ package com.google.sitebricks.rendering;
 import com.google.sitebricks.Evaluator;
 import com.google.sitebricks.compiler.ExpressionCompileException;
 import com.google.sitebricks.compiler.MvelEvaluatorCompiler;
+import com.google.sitebricks.conversion.generics.Generics;
+
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -167,7 +171,7 @@ public class EvaluatorCompilerTest {
         final MvelEvaluatorCompiler evaluatorCompiler = new MvelEvaluatorCompiler(AType.class);
 //        evaluatorCompiler.compile("b.name - 2");
 
-        assert Integer.class.isAssignableFrom(evaluatorCompiler.resolveEgressType("b.name - 2"));
+        assert Integer.class.isAssignableFrom(Generics.erase(evaluatorCompiler.resolveEgressType("b.name - 2")));
     }
 
 //    @Test(expectedExceptions = ExpressionCompileException.class) DISABLED TEMPORARILY
@@ -179,18 +183,17 @@ public class EvaluatorCompilerTest {
 
     @Test
     public final void determineEgressTypeParameter() throws ExpressionCompileException {
-        final Class<?> egressType = new MvelEvaluatorCompiler(AType.class)
-                .resolveCollectionTypeParameter("bs");
+        final Type egressType = new MvelEvaluatorCompiler(AType.class)
+                .resolveEgressType("bs");
         
-        assert BType.class.equals(egressType);
+        assert BType.class.equals(Generics.erase(Generics.getTypeParameter(egressType, Collection.class.getTypeParameters()[0])));
     }
 
     @Test
     public final void determineEgressTypeParameterInExpressionChain() throws ExpressionCompileException {
-        final Class<?> egressType = new MvelEvaluatorCompiler(BType.class)
-                .resolveCollectionTypeParameter("a.bs");
-
-        assert BType.class.equals(egressType);
+        final Type egressType = new MvelEvaluatorCompiler(BType.class)
+                .resolveEgressType("a.bs");
+        assert BType.class.equals(Generics.erase(Generics.getTypeParameter(egressType, Collection.class.getTypeParameters()[0])));
     }
 
     public static class AType {
