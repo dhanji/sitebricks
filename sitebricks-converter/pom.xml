@@ -7,27 +7,10 @@
     <artifactId>sitebricks-parent</artifactId>
     <version>0.8.4-SNAPSHOT</version>
   </parent>
-  <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks-converter</artifactId>
-  <packaging>jar</packaging>
   <name>Sitebricks :: Type Conversion</name>
-  <properties>
-    <guice.version>2.0</guice.version>
-  </properties>
-
-  <scm>
-    <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/trunk/sitebricks</connection>
-    <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/trunk/sitebricks</developerConnection>
-    <url>http://code.google.com/p/google-sitebricks/source/browse</url>
-  </scm>
 
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.mvel</groupId>
       <artifactId>mvel2</artifactId>
@@ -49,70 +32,6 @@
       <version>${guice.version}</version>
     </dependency>
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>1.4</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.5</version>
-    </dependency>
-    <dependency>
-      <groupId>dom4j</groupId>
-      <artifactId>dom4j</artifactId>
-      <version>1.6.1</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>xml-apis</artifactId>
-          <groupId>xml-apis</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>jaxen</groupId>
-      <artifactId>jaxen</artifactId>
-      <version>1.1.1</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>xercesImpl</artifactId>
-          <groupId>xerces</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>xml-apis</artifactId>
-          <groupId>xml-apis</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>saxpath</groupId>
-      <artifactId>saxpath</artifactId>
-      <version>1.0-FCS</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
-    </dependency>
-    <dependency>
-      <groupId>com.thoughtworks.xstream</groupId>
-      <artifactId>xstream</artifactId>
-      <version>1.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.easymock</groupId>
-      <artifactId>easymock</artifactId>
-      <version>2.4</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>5.8</version>
-      <classifier>jdk15</classifier>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-core-asl</artifactId>
       <version>1.3.2</version>
@@ -122,44 +41,5 @@
       <artifactId>jackson-mapper-asl</artifactId>
       <version>1.3.2</version>
     </dependency>
-    <dependency>
-      <!-- jsoup HTML library @ http://jsoup.org/ -->
-      <groupId>org.jsoup</groupId>
-      <artifactId>jsoup</artifactId>
-      <version>1.4.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-      <version>2.3.10</version>
-    </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
-  <!-- This should be removed when the googlecode repositories are migrated to the standard Nexus OSS repository infrastructure -->
-  <distributionManagement>
-    <snapshotRepository>
-      <id>google-snapshots</id>
-      <name>Sonatype OSS Nexus Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>google-with-staging</id>
-      <name>Nexus OSS Staging Repository</name>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
-
 </project>

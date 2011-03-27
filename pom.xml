@@ -12,6 +12,10 @@
   <name>Sitebricks :: Parent</name>
   <url>http://code.google.com/p/google-sitebricks/</url>
 
+  <properties>
+    <guice.version>2.0</guice.version>
+  </properties>
+  
   <modules>
     <module>sitebricks</module>
     <module>sitebricks-client</module>
@@ -21,6 +25,22 @@
     <module>slf4j</module>
   </modules>
 
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>5.8</version>
+      <classifier>jdk15</classifier>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
   <scm>
     <connection>scm:svn:http://google-sitebricks.googlecode.com/svn/trunk</connection>
     <developerConnection>scm:svn:https://google-sitebricks.googlecode.com/svn/trunk</developerConnection>
