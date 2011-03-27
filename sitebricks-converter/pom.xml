@@ -8,13 +8,9 @@
     <version>0.8.4-SNAPSHOT</version>
   </parent>
   <groupId>com.google.sitebricks</groupId>
-  <artifactId>sitebricks</artifactId>
+  <artifactId>sitebricks-converter</artifactId>
   <packaging>jar</packaging>
-  <version>0.8.4-SNAPSHOT</version>
-  <name>sitebricks</name>
-  <url>http://code.google.com/p/google-sitebricks/</url>
-
-
+  <name>Sitebricks :: Type Conversion</name>
   <properties>
     <guice.version>2.0</guice.version>
   </properties>
@@ -27,16 +23,6 @@
 
   <dependencies>
     <dependency>
-	  <groupId>com.google.sitebricks</groupId>
-	  <artifactId>sitebricks-converter</artifactId>
-	  <version>0.8.4-SNAPSHOT</version>
-    </dependency>
-   <dependency>
-	  <groupId>com.google.sitebricks</groupId>
-	  <artifactId>sitebricks-client</artifactId>
-	  <version>0.8.4-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>3.8.1</version>
@@ -46,7 +32,7 @@
       <groupId>org.mvel</groupId>
       <artifactId>mvel2</artifactId>
       <version>2.0.18</version>
-    </dependency>
+    </dependency>    
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>

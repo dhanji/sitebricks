@@ -12,6 +12,7 @@ import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.conversion.Converter;
+import com.google.sitebricks.conversion.ConverterUtils;
 import com.google.sitebricks.conversion.DateConverters;
 import com.google.sitebricks.conversion.NumberConverters;
 import com.google.sitebricks.conversion.ObjectToStringConverter;
@@ -67,24 +68,21 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     // negotiations stuff (make sure we clean this up).
     negotiate("Accept").with(Accept.class);
 
-    // type converters
+    //TODO: yes this is not so nice, but will keep on trying to localize the converter code. jvz.
     converters = Multibinder.newSetBinder(binder(), Converter.class);
-    
+
     // TODO remove when more of sitebricks internals is guiced
     requestStaticInjection(Parsing.class);
-    
+
     // Call down to the implementation.
     configureSitebricks();
 
-    // register the default converters after user converters
-    converters.addBinding().to(ObjectToStringConverter.class);
-    
-    // allow single request parameters to be converted to List<String> 
-    converters.addBinding().to(SingletonListConverter.class);
-    StringToPrimitiveConverters.register(this);
-    NumberConverters.register(this);
-    DateConverters.register(this);
-    
+    // These need to be registered after configureSitebricks because contributions made to the Multibinder
+    // must be allowed to register before all the defaults are registered. In the acceptance tests where the
+    // date format is non-default it tests will fail if the Multibinder is created and the default converters
+    // registered immediately afterward. jvz.
+    /* converters = */ConverterUtils.createConverterMultibinder(converters);
+
     //insert core widgets set
     packages.add(0, CaseWidget.class.getPackage());
 
@@ -108,7 +106,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
     Localizer.localizeAll(binder(), localizations);
   }
-
+  
   /**
    * Optionally supply {@link javax.servlet.Servlet} and/or {@link javax.servlet.Filter} implementations to
    * Guice Servlet. See {@link com.google.sitebricks.SitebricksServletModule} for usage examples.
@@ -129,7 +127,6 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   private final List<LinkingBinder> bindings = Lists.newArrayList();
   private final List<Package> packages = Lists.newArrayList();
   @SuppressWarnings("rawtypes")
-  private Multibinder<Converter> converters;
   private final Map<String, Class<? extends Annotation>> methods = Maps.newHashMap();
   private final Map<String, Class<? extends Annotation>> negotiations = Maps.newHashMap();
   private final Set<Localizer.Localization> localizations = Sets.newHashSet();
@@ -201,15 +198,6 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   protected final void scan(Package pack) {
     Preconditions.checkArgument(null != pack, "Package parameter to scan() cannot be null");
     packages.add(pack);
-  }
-
-  public final void converter(Converter<?, ?> converter)    {
-    Preconditions.checkArgument(null != converter, "Type converters cannot be null");
-    converters.addBinding().toInstance(converter);
-  }
-  
-  public final void converter(Class<? extends Converter<?, ?>> clazz)    {
-    converters.addBinding().to(clazz);
   }
   
   static enum BindingKind {
@@ -321,4 +309,19 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
       this.asEagerSingleton = true;
     }
   }
+  
+  //
+  // Converters
+  //
+  
+  private Multibinder<Converter> converters;
+  
+  public final void converter(Converter<?, ?> converter)    {
+    Preconditions.checkArgument(null != converter, "Type converters cannot be null");
+    converters.addBinding().toInstance(converter);
+  }
+  
+  public final void converter(Class<? extends Converter<?, ?>> clazz) {
+    converters.addBinding().to(clazz);
+  }  
 }

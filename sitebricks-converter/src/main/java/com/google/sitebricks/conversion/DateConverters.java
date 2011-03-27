@@ -3,25 +3,28 @@ package com.google.sitebricks.conversion;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.sitebricks.SitebricksModule;
 
 /**
  * @author JRodriguez
  * @author John Patterson (jdpatterson@gmail.com)
  */
 public class DateConverters {
-  public static void register(SitebricksModule module) {
-    module.converter(LocalizedDateStringConverter.class);
-    module.converter(DateLongConverter.class);
-    module.converter(DateCalendarConverter.class);
-    module.converter(CalendarLongConverter.class);
-    module.converter(CalendarStringConverter.class);
+  public static List<Class<? extends Converter<?, ?>>> converters() {
+    List<Class<? extends Converter<?, ?>>> converters = new ArrayList<Class<? extends Converter<?, ?>>>();
+    converters.add(LocalizedDateStringConverter.class);
+    converters.add(DateLongConverter.class);
+    converters.add(DateCalendarConverter.class);
+    converters.add(CalendarLongConverter.class);
+    converters.add(CalendarStringConverter.class);
+    return converters;
   }
 
   public static class DateLongConverter implements Converter<Date, Long> {

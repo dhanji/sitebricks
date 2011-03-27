@@ -14,6 +14,8 @@
 
   <modules>
     <module>sitebricks</module>
+    <module>sitebricks-client</module>
+    <module>sitebricks-converter</module>
     <module>acceptance-test</module>
     <module>stat</module>
     <module>slf4j</module>
