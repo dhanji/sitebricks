@@ -8,10 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -71,14 +69,7 @@ class Classes {
       String protocol = url.getProtocol();
 
       if ("file".equals(protocol)) {
-        try {
-          findClassesInDirPackage(packageOnly,
-              URLDecoder.decode(url.getFile(), "UTF-8"),
-              recursive,
-              classes);
-        } catch (UnsupportedEncodingException e) {
-          throw new PackageScanFailedException("Could not read from file: " + url, e);
-        }
+        findClassesInDirPackage(packageOnly, toPath(url), recursive, classes);
       } else if ("jar".equals(protocol)) {
         JarFile jar;
 
@@ -174,6 +165,22 @@ class Classes {
 
   public static Classes matching(Matcher<? super Class<?>> matcher) {
     return new Classes(matcher);
+  }
+
+  private static String toPath(final URL url) {
+    String path = url.getPath();
+    StringBuilder buf = new StringBuilder();
+    for ( int i = 0, length = path.length(); i < length; i++ ) {
+      char c = path.charAt( i );
+      if ( '/' == c ) {
+        buf.append( File.separatorChar );
+      } else if ( '%' == c && i < length - 2 ) {
+        buf.append( (char) Integer.parseInt( path.substring( ++i, ++i + 1 ), 16 ) );
+      } else {
+        buf.append( c );
+      }
+    }
+    return buf.toString();
   }
 
 }
