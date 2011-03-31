@@ -3,7 +3,9 @@ package com.google.sitebricks;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.inject.Binding;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Stage;
 import com.google.sitebricks.compiler.Compilers;
 import com.google.sitebricks.compiler.TemplateCompileException;
@@ -55,6 +57,9 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
   @Inject
   private final Stage currentStage = null;
 
+  @Inject
+  private final Injector injector = null;
+
   private final Logger log = Logger.getLogger(ScanAndCompileBootstrapper.class.getName());
 
   @Inject
@@ -97,6 +102,12 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
     // TODO make this configurable separately to stage for GAE
     if (Stage.DEVELOPMENT != currentStage) {
       compilePages(pagesToCompile);
+    }
+
+    // Start all services.
+    List<Binding<Aware>> bindings = injector.findBindingsByType(AWARE_TYPE);
+    for (Binding<Aware> binding : bindings) {
+      binding.getProvider().get().startup();
     }
 
     //set application mode to started (now debug mechanics can kick in)

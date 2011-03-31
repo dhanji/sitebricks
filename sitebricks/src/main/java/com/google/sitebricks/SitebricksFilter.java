@@ -1,12 +1,18 @@
 package com.google.sitebricks;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.routing.RoutingDispatcher;
 import net.jcip.annotations.Immutable;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -18,16 +24,19 @@ import java.io.IOException;
 @Singleton
 class SitebricksFilter implements Filter {
   private final RoutingDispatcher dispatcher;
-  private final Bootstrapper bootstrapper;
+  private final Provider<Bootstrapper> bootstrapper;
+  private final Provider<Shutdowner> teardowner;
 
   @Inject
-  public SitebricksFilter(RoutingDispatcher dispatcher, Bootstrapper bootstrapper) {
+  public SitebricksFilter(RoutingDispatcher dispatcher, Provider<Bootstrapper> bootstrapper,
+                          Provider<Shutdowner> teardowner) {
     this.dispatcher = dispatcher;
     this.bootstrapper = bootstrapper;
+    this.teardowner = teardowner;
   }
 
   public void init(FilterConfig filterConfig) throws ServletException {
-    bootstrapper.start();
+    bootstrapper.get().start();
   }
 
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
@@ -69,5 +78,6 @@ class SitebricksFilter implements Filter {
   }
 
   public void destroy() {
+    teardowner.get().shutdown();
   }
 }

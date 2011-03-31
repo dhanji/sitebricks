@@ -8,7 +8,7 @@ import com.google.sitebricks.rendering.EmbedAs;
  */
 @At("/hello") @EmbedAs("Hello")
 public class HelloWorld {
-  public static final String HELLO_MSG = "Hello from google-sitebricks!";
+  public static volatile String HELLO_MSG = "Hello from google-sitebricks!";
 
   private String message = HELLO_MSG;
 

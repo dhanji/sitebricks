@@ -8,6 +8,7 @@ import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.stat.StatModule;
+import com.google.sitebricks.AwareModule;
 import com.google.sitebricks.SitebricksModule;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.HttpSessionFlashCache;
@@ -62,6 +63,13 @@ public class SitebricksConfig extends GuiceServletContextListener {
         install(new StatModule("/stats"));
         
         converter(new DateConverters.DateStringConverter(DEFAULT_DATE_TIME_FORMAT));
+
+        install(new AwareModule() {
+          @Override
+          protected void configureLifecycle() {
+            observe(StartAware.class).asEagerSingleton();
+          }
+        });
       }
 
       private void bindActions() {

@@ -1,5 +1,6 @@
 package com.google.sitebricks;
 
+import com.google.inject.util.Providers;
 import com.google.sitebricks.routing.RoutingDispatcher;
 import org.testng.annotations.Test;
 
@@ -12,7 +13,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -31,8 +37,8 @@ public class WidgetFilterTest {
 
         replay(bootstrapper);
 
-        new SitebricksFilter(createNiceMock(RoutingDispatcher.class), bootstrapper)
-            .init(filterConfig);
+        new SitebricksFilter(createNiceMock(RoutingDispatcher.class), Providers.of(bootstrapper),
+            Providers.<Shutdowner>of(null)).init(filterConfig);
 
 
         verify(bootstrapper);
@@ -88,8 +94,8 @@ public class WidgetFilterTest {
 
         replay(dispatcher, request, response, filterChain);
 
-        new SitebricksFilter(dispatcher, null)
-                .doFilter(request, response, filterChain);
+        new SitebricksFilter(dispatcher, Providers.<Bootstrapper>of(null),
+            Providers.<Shutdowner>of(null)).doFilter(request, response, filterChain);
 
         assert outOk[0] && !outOk[1] : "Response not written or flushed correctly";
         assert SOME_OUTPUT.equals(output[0]) : "Respond output not used";
@@ -113,7 +119,8 @@ public class WidgetFilterTest {
 
         replay(dispatcher, request, response, filterChain);
 
-        new SitebricksFilter(dispatcher, null)
+        new SitebricksFilter(dispatcher,  Providers.<Bootstrapper>of(null),
+            Providers.<Shutdowner>of(null))
                 .doFilter(request, response, filterChain);
 
         verify(dispatcher, request, response, filterChain);
@@ -139,7 +146,8 @@ public class WidgetFilterTest {
 
         replay(dispatcher, request, response, filterChain, respond);
 
-        new SitebricksFilter(dispatcher, null)
+        new SitebricksFilter(dispatcher, Providers.<Bootstrapper>of(null),
+            Providers.<Shutdowner>of(null))
                 .doFilter(request, response, filterChain);
 
         verify(dispatcher, request, response, filterChain, respond);

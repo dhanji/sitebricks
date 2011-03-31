@@ -15,7 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Show("index.html") @Singleton
 public class Start {
   public static final String PAGE_LOADS = "page-loads";
-  private String message = "Hello from google-sitebricks!";
+  public static volatile String HELLO_MSG = "YOU SHOULD NEVER SEE THIS!";
+  private String message = HELLO_MSG;
 
   @Stat(PAGE_LOADS)
   private final AtomicInteger pageLoads = new AtomicInteger();
