@@ -7,16 +7,23 @@
   <artifactId>sitebricks-web</artifactId>
   <packaging>war</packaging>
   <version>0.8-SNAPSHOT</version>
-  <name>google-sitebricks-web Maven Webapp</name>
+  <name>google-sitebricks-web Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
       <groupId>com.google.sitebricks</groupId>
       <artifactId>sitebricks</artifactId>
-      <version>0.8-SNAPSHOT</version>
+      <version>0.8.4-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
+    <sourceDirectory>src/main/java</sourceDirectory>
+    <testSourceDirectory>src/test/java</testSourceDirectory>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
     <finalName>sitebricks-web</finalName>
   </build>
 </project>
