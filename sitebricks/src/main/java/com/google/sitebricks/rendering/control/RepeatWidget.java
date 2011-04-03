@@ -1,9 +1,11 @@
 package com.google.sitebricks.rendering.control;
 
+import com.google.inject.Inject;
 import com.google.sitebricks.Evaluator;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.compiler.Parsing;
+import com.google.sitebricks.conversion.TypeConverter;
 import com.google.sitebricks.rendering.EmbedAs;
 import net.jcip.annotations.Immutable;
 
@@ -23,10 +25,11 @@ class RepeatWidget implements Renderable {
     private final String var;
     private final String pageVar;
     private final Evaluator evaluator;
+    private TypeConverter converter;
 
     private static final String DEFAULT_PAGEVAR = "__page";
     private static final String DEFAULT_VAR = "__this";
-
+    
     public RepeatWidget(WidgetChain widgetChain, String expression, Evaluator evaluator) {
         this.widgetChain = widgetChain;
 
@@ -49,25 +52,34 @@ class RepeatWidget implements Renderable {
         this.pageVar = pageVar;
         this.evaluator = evaluator;
     }
+    
+    @Inject
+    public void setConverter(TypeConverter converter)
+	{
+		this.converter = converter;
+	}
 
     public void render(Object bound, Respond respond) {
-        Collection<?> things = (Collection<?>) evaluator.evaluate(items, bound);
+        
+    	Object value = evaluator.evaluate(items, bound);
+    	
+    	//do nothing if the collection is unavailable for some reason
+    	if (null == value)
+    		return;
 
-        //do nothing if the collection is unavailable for some reason
-        if (null == things)
-            return;
-
+    	Collection<?> items = converter.convert(value, Collection.class);
+        
         Map<String, Object> context = new HashMap<String, Object>();
 
         //set up context variables
         int i = 0;
-        for (Object thing : things) {
+        for (Object thing : items) {
 
             //decorate with some context
             context.put(var, thing);
             context.put(pageVar, bound);
             context.put("index", i++);
-            context.put("isLast", i == things.size());
+            context.put("isLast", i == items.size());
             widgetChain.render(context, respond);
         }
 

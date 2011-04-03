@@ -8,7 +8,7 @@ import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -374,16 +374,24 @@ class HtmlTemplateCompiler {
 
         try {
             Type egressType = lexicalScopes.peek().resolveEgressType(repeat.items());
-
-            Type elementType = Generics.getTypeParameter(egressType, Collection.class.getTypeParameters()[0]);
-            if (elementType == null) {
-	            errors.add(
-	                CompileError.in(node.outerHtml())
-	                .near(node.siblingIndex()) // TODO - line number
-	                .causedBy(CompileErrors.REPEAT_OVER_ATOM)
-	            );
+            
+            // convert to collection if we need to
+            Type elementType;
+            Class<?> egressClass = Generics.erase(egressType);
+			if (egressClass.isArray()) {
+				elementType = Generics.getArrayComponentType(egressType);
             }
-
+            else if (Collection.class.isAssignableFrom(egressClass)) {
+            	elementType = Generics.getTypeParameter(egressType, Collection.class.getTypeParameters()[0]);
+            }
+            else {
+            	errors.add(
+            			CompileError.in(node.outerHtml())
+            			.near(node.siblingIndex()) // TODO - line number
+            			.causedBy(CompileErrors.REPEAT_OVER_ATOM)
+            	);
+            	return Collections.emptyMap();
+            }
 
             context.put(repeat.var(), elementType);
             context.put(repeat.pageVar(), page);
