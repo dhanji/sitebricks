@@ -5,12 +5,15 @@ import com.google.sitebricks.MvelEvaluator;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.RespondersForTesting;
 import com.google.sitebricks.compiler.ExpressionCompileException;
+import com.google.sitebricks.conversion.DummyTypeConverter;
+import com.google.sitebricks.conversion.TypeConverter;
 import com.google.sitebricks.rendering.DynTypedMvelEvaluatorCompiler;
 
 import org.mvel2.optimizers.OptimizerFactory;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,10 +50,14 @@ public class RepeatWidgetTest {
         };
 
 
-        new RepeatWidget(mockChain, "items=beans", new MvelEvaluator())
-                .render(new HashMap<String, Object>() {{
+        RepeatWidget widget = new RepeatWidget(mockChain, "items=beans", new MvelEvaluator());
+        widget.setConverter(new DummyTypeConverter());
+        widget.render(new HashMap<String, Object>() {{
                     put("beans", ints);
                 }}, RespondersForTesting.newRespond());
+        
+        
+        
 
         assert times[0] == should : "Did not run expected number of times: " + should;
     }
