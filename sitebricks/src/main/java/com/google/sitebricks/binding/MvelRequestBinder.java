@@ -76,25 +76,28 @@ class MvelRequestBinder implements RequestBinder {
         evaluator.write(key, o, value);
       } catch (PropertyAccessException e) {
 
-        // Do some better error reporting if this is a real exception.
-        if (e.getCause() instanceof InvocationTargetException) {
-          Throwable cause = e.getCause().getCause();
-          StackTraceElement[] stackTrace = cause.getStackTrace();
-          throw new RuntimeException(String.format(
-              "Exception [%s - \"%s\"] thrown by setter [%s] for value[%s]\n\nat %s\n"
-              + "(See below for entire trace.)\n",
-              cause.getClass().getSimpleName(),
-              cause.getMessage(), key, value,
-              stackTrace[0]), e);
-        }
+    		// Do some better error reporting if this is a real exception.
+    		  if (e.getCause() instanceof InvocationTargetException) {
+    			  addContextAndThrow(o, key, value, e.getCause());
+    		  }
         // Log missing property.
         if (log.isLoggable(Level.FINE)) {
           log.fine(String.format("A property [%s] could not be bound,"
               + " but not necessarily an error.", key));
         }
       }
+      catch (Exception e) {
+          addContextAndThrow(o, key, value, e);
+      }
     }
   }
+
+	private void addContextAndThrow(Object bound, String key, Object value, Throwable cause)
+	{
+	  throw new RuntimeException(String.format(
+	    "Problem setting [%s] on instance [%s] with value [%s]",
+	    key, bound, value), cause);
+	}
 
   //TODO optimize this to be aggressive based on collection type
   //Linear collection search by hashcode
