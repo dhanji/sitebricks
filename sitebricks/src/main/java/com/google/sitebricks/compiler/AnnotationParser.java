@@ -11,9 +11,8 @@ import org.jsoup.nodes.Node;
  */
 public class AnnotationParser {
 
-  // TODO - value will be the type of the annotation ...
-  
-  public static final Pattern WIDGET_ANNOTATION_REGEX = Pattern.compile("(@\\w+(\\([\\w,=\"'/()?:><!\\[\\];{}. &+-]*\\))?[ \n\r\t]*)\\Z");
+  // TODO regex is not powerful enough to parse annotation expressions
+  public static final Pattern WIDGET_ANNOTATION_REGEX = Pattern.compile("(@\\w+(\\([\\w,=\"'/()?:><!\\[\\];{}. \\|&+-]*\\))?[ \n\r\t]*)\\Z");
 
   public static String readAnnotation(String text) {
     String annotation = null;    
