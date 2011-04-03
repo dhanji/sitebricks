@@ -6,6 +6,7 @@ import static com.google.sitebricks.conversion.generics.Generics.getTypeParamete
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.primitives.Primitives;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.sitebricks.conversion.generics.Generics;
 
 /**
  * @author John Patterson (jdpatterson@gmail.com)
@@ -60,26 +62,49 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
   @SuppressWarnings("unchecked")
   public <T> T convert(final Object source, Type type) {
 
-	// special case for handling a null source 
+	// special case for handling a null source values
     if (source == null) {
       return (T) nullValue(type);
+    }
+
+    // check we already have the exact type
+    if (source.getClass() == type) {
+      return (T) source;
+    }
+    
+    // check if we already have a sub type
+    if (Generics.isSuperType(type, source.getClass()))
+    {
+      return (T) source;
     }
     
     // special case for handling empty string
     if ("".equals(source) && type != String.class && isEmptyStringNull()) {
     	return null;
     }
+    
+    Type sourceType = source.getClass();
+    Class<?> sourceClass = Generics.erase(sourceType);
+    
+    // conversion of all array types to collections
+    if (sourceClass.isArray() && Generics.isSuperType(Collection.class, type))
+    {
+      return (T) Arrays.asList(source);
+    }
 	  
+    // conversion of all collections to arrays
+    Class<?> targetClass = Generics.erase(type);
+    if (Collection.class.isAssignableFrom(sourceClass) && targetClass.isArray())
+    {
+      // TODO: convert collections to arrays
+      throw new UnsupportedOperationException("Not implemented yet");
+    }
+    
     // use primitive wrapper types
     if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
         type = Primitives.wrap((Class<?>) type);
     }
-    
-    if (source.getClass() == type) {
-      return (T) source;
-    }
 
-    Type sourceType = source.getClass();
     
     // look for converters for exact types or super types  
     Object result = null;
