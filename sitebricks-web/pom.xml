@@ -6,7 +6,7 @@
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks-web</artifactId>
   <packaging>jar</packaging>
-  <version>0.8-SNAPSHOT</version>
+  <version>0.8.4-SNAPSHOT</version>
   <name>google-sitebricks-web Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
@@ -33,5 +33,16 @@
   </dependencies>
   <build>
     <finalName>sitebricks-web</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+    </plugins>
+
   </build>
 </project>

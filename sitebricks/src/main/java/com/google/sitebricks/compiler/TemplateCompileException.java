@@ -4,8 +4,8 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -83,6 +83,9 @@ public final class TemplateCompileException extends RuntimeException {
             int lineNumber = error.getLine();
             builder.append(lineNumber - 1);
             builder.append(": ");
+          if (lineNumber > templateLines.size() - 1) {
+            continue;
+          }
             builder.append(templateLines.get(lineNumber - 1));
             builder.append('\n');
             builder.append(lineNumber);
