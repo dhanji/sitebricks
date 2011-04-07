@@ -20,7 +20,7 @@
     <module>sitebricks</module>
     <module>sitebricks-client</module>
     <module>sitebricks-converter</module>
-    <module>acceptance-test</module>
+    <module>sitebricks-acceptance-tests</module>
     <module>stat</module>
     <module>slf4j</module>
     <module>sitebricks-web</module>
