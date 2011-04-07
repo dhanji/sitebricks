@@ -11,7 +11,7 @@
   <artifactId>sitebricks</artifactId>
   <packaging>jar</packaging>
   <version>0.8.4-SNAPSHOT</version>
-  <name>sitebricks</name>
+  <name>Sitebricks :: Core</name>
   <url>http://code.google.com/p/google-sitebricks/</url>
 
 

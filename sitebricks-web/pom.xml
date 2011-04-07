@@ -1,13 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+  <!--
+   | 
+   | We will make a Maven archetype out of this project
+   |
+   |-->
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks-web</artifactId>
   <packaging>jar</packaging>
   <version>0.8.4-SNAPSHOT</version>
-  <name>google-sitebricks-web Maven Webapp</name>
+  <name>Sitebricks :: Archetype</name>
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>
@@ -43,6 +47,5 @@
         </configuration>
       </plugin>
     </plugins>
-
   </build>
 </project>

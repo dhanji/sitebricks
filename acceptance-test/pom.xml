@@ -8,7 +8,7 @@
   </parent>  
   <groupId>com.google.sitebricks</groupId>
   <artifactId>acceptance-test</artifactId>
-  <name>acceptance-test</name>
+  <name>Sitebricks :: Acceptance Tests</name>
   <url>http://code.google.com/p/google-sitebricks/</url>
 
   <repositories>
