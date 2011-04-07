@@ -122,21 +122,23 @@ public class DateConverters {
 
   public static class CalendarStringConverter implements Converter<Calendar, String> {
 
-    private final TypeConverter converter;
-
+    private final Provider<TypeConverter> provider;
+    
     @Inject
-    public CalendarStringConverter(TypeConverter converter) {
-      this.converter = converter;
+    public CalendarStringConverter(Provider<TypeConverter> provider) {
+      this.provider = provider;
     }
     
     @Override
     public String to(Calendar source) {
+      TypeConverter converter = provider.get();
       Date date = converter.convert(source, Date.class);
       return converter.convert(date, String.class);
     }
 
     @Override
     public Calendar from(String target) {
+      TypeConverter converter = provider.get();
       Date date = converter.convert(target, Date.class);
       return converter.convert(date, Calendar.class);
     }
@@ -144,21 +146,23 @@ public class DateConverters {
 
   public static class CalendarLongConverter implements Converter<Calendar, Long> {
 
-    private final TypeConverter converter;
+    private final Provider<TypeConverter> provider;
 
     @Inject
-    public CalendarLongConverter(TypeConverter converter) {
-      this.converter = converter;
+    public CalendarLongConverter(Provider<TypeConverter> provider) {
+      this.provider = provider;
     }
     
     @Override
     public Long to(Calendar source) {
+      TypeConverter converter = provider.get();
       Date date = converter.convert(source, Date.class);
       return converter.convert(date, Long.class);
     }
 
     @Override
     public Calendar from(Long target) {
+      TypeConverter converter = provider.get();
       Date date = converter.convert(target, Date.class);
       return converter.convert(date, Calendar.class);
     }
