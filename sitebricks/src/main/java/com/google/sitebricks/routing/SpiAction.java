@@ -24,7 +24,8 @@ public class SpiAction implements Action {
 
   @Override
   public boolean shouldCall(HttpServletRequest request) {
-    boolean should = true;
+    boolean should;
+
     if (null != selectParams) {
       for (Map.Entry<String, String> select : selectParams.entrySet()) {
         if (!select.getValue().equals(request.getParameter(select.getKey()))) {
@@ -40,6 +41,11 @@ public class SpiAction implements Action {
         }
       }
     }
+
+    // (JFA) Might be a good idea to pass the value of should as a request attribute
+    // so an action can see if what was the value before getting invoked and take a decision based on it.
+    should = action.shouldCall(request);  
+
     return should;
   }
 
