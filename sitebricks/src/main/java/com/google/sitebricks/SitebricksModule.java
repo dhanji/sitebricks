@@ -1,5 +1,14 @@
 package com.google.sitebricks;
 
+import java.lang.annotation.Annotation;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Set;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -13,11 +22,6 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.conversion.Converter;
 import com.google.sitebricks.conversion.ConverterUtils;
-import com.google.sitebricks.conversion.DateConverters;
-import com.google.sitebricks.conversion.NumberConverters;
-import com.google.sitebricks.conversion.ObjectToStringConverter;
-import com.google.sitebricks.conversion.SingletonListConverter;
-import com.google.sitebricks.conversion.StringToPrimitiveConverters;
 import com.google.sitebricks.core.CaseWidget;
 import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Delete;
@@ -30,15 +34,6 @@ import com.google.sitebricks.http.negotiate.Accept;
 import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.routing.Action;
-
-import java.lang.annotation.Annotation;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.Set;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -126,7 +121,6 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   // Bindings.
   private final List<LinkingBinder> bindings = Lists.newArrayList();
   private final List<Package> packages = Lists.newArrayList();
-  @SuppressWarnings("rawtypes")
   private final Map<String, Class<? extends Annotation>> methods = Maps.newHashMap();
   private final Map<String, Class<? extends Annotation>> negotiations = Maps.newHashMap();
   private final Set<Localizer.Localization> localizations = Sets.newHashSet();
@@ -314,6 +308,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   // Converters
   //
   
+  @SuppressWarnings("rawtypes")
   private Multibinder<Converter> converters;
   
   public final void converter(Converter<?, ?> converter)    {
