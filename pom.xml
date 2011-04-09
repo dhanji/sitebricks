@@ -24,6 +24,7 @@
     <module>stat</module>
     <module>slf4j</module>
     <module>sitebricks-web</module>
+    <module>sitebricks-mail</module>
   </modules>
 
   <dependencies>
