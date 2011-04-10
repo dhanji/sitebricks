@@ -1,5 +1,6 @@
 package com.google.sitebricks.mail;
 
+import com.google.sitebricks.mail.Mail.Auth;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
@@ -15,22 +16,26 @@ import javax.net.ssl.SSLEngine;
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-public class MailClientPipelineFactory implements ChannelPipelineFactory {
+class MailClientPipelineFactory implements ChannelPipelineFactory {
   private final MailClientHandler mailClientHandler;
+  private final MailClientConfig config;
 
-  public MailClientPipelineFactory(MailClientHandler mailClientHandler) {
+  public MailClientPipelineFactory(MailClientHandler mailClientHandler, MailClientConfig config) {
     this.mailClientHandler = mailClientHandler;
+    this.config = config;
   }
 
   public ChannelPipeline getPipeline() throws Exception {
     // Create a default pipeline implementation.
     ChannelPipeline pipeline = Channels.pipeline();
 
-    SSLEngine sslEngine = SSLContext.getDefault().createSSLEngine();
-    sslEngine.setUseClientMode(true);
-    SslHandler sslHandler = new SslHandler(sslEngine);
-    sslHandler.setEnableRenegotiation(true);
-    pipeline.addLast("ssl", sslHandler);
+    if (config.getAuthType() == Auth.SSL) {
+      SSLEngine sslEngine = SSLContext.getDefault().createSSLEngine();
+      sslEngine.setUseClientMode(true);
+      SslHandler sslHandler = new SslHandler(sslEngine);
+      sslHandler.setEnableRenegotiation(true);
+      pipeline.addLast("ssl", sslHandler);
+    }
 
     // Add the text line codec combination first,
     pipeline.addLast("framer", new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
