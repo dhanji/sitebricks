@@ -1,6 +1,6 @@
 package com.google.sitebricks.rendering.control;
 
-import com.google.inject.internal.ToStringBuilder;
+import com.google.common.base.Objects;
 import com.google.sitebricks.Evaluator;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.rendering.SelfRendering;
@@ -100,7 +100,7 @@ class WidgetWrapper {
 
   @Override
   public String toString() {
-    return new ToStringBuilder(WidgetWrapper.class)
+    return Objects.toStringHelper(WidgetWrapper.class)
         .add("key", key)
         .add("class", clazz)
         .add("kind", kind)

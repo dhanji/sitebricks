@@ -3,12 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.google.sitebricks</groupId>
+  <parent>
+    <groupId>com.google.sitebricks</groupId>
+    <artifactId>sitebricks-parent</artifactId>
+    <version>0.8.4-SNAPSHOT</version>
+  </parent>  
   <artifactId>sitebricks-mail</artifactId>
-  <packaging>jar</packaging>
-  <version>0.8.4-SNAPSHOT</version>
-  <name>google-sitebricks-mail Maven Webapp</name>
-  <url>http://maven.apache.org</url>
+  <name>Sitebricks :: Mail Client</name>
 
   <repositories>
     <repository>
