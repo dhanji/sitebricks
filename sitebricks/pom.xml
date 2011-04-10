@@ -12,12 +12,12 @@
 
   <dependencies>
     <dependency>
-	  <groupId>com.google.sitebricks</groupId>
-	  <artifactId>sitebricks-converter</artifactId>
+      <groupId>com.google.sitebricks</groupId>      
+      <artifactId>sitebricks-converter</artifactId>
     </dependency>
-   <dependency>
-	  <groupId>com.google.sitebricks</groupId>
-	  <artifactId>sitebricks-client</artifactId>
+    <dependency>
+     <groupId>com.google.sitebricks</groupId>
+     <artifactId>sitebricks-client</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
