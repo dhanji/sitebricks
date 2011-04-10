@@ -1,5 +1,6 @@
 package com.google.sitebricks.mail;
 
+import com.google.common.util.concurrent.ValueFuture;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -79,5 +80,12 @@ public class MailClient {
 
   public List<String> capabilities() {
     return mailClientHandler.getCapabilities();
+  }
+
+  public void listFolders() {
+    final ValueFuture<List<String>> valueFuture = ValueFuture.create();
+
+    send(". list \"\" \"*\"");
+
   }
 }

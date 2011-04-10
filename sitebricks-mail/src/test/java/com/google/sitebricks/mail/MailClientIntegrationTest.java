@@ -19,12 +19,14 @@ public class MailClientIntegrationTest {
         .connect(Auth.SSL, "telnet.imap@gmail.com", System.getProperty("sitebricks-mail.password"));
 
     List<String> capabilities = client.capabilities();
-    System.out.println("CAPS! " + capabilities);
-//    Thread.sleep(5000L);
+    System.out.println("CAPS: " + capabilities);
+
+    client.listFolders();
+
+
     client.disconnect();
     
 
-//    client.listFolders();
 //    client.list("Mail");
 //    client.fetch();
   }
