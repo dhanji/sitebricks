@@ -31,15 +31,20 @@
       <artifactId>netty</artifactId>
       <version>3.2.4.Final</version>
     </dependency>
-        <dependency>
-        <groupId>org.apache.james</groupId>
-        <artifactId>james-server-imapserver</artifactId>
-        <version>3.0-M2</version>
-    </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>0.9.9</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.james</groupId>
+      <artifactId>james-server-imapserver</artifactId>
+      <version>3.0-M2</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.2</version>
     </dependency>
   </dependencies>
   <build>

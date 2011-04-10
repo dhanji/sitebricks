@@ -8,10 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -19,64 +17,63 @@ import java.util.concurrent.atomic.AtomicReference;
 public class MailClient {
   private static final Logger log = LoggerFactory.getLogger(MailClient.class);
 
-  private static final String USERNAME = System.getProperty("sitebricks-mail.username");
-  private static final String PASSWORD = System.getProperty("sitebricks-mail.password");
   public static final int WAIT_DELAY = 5;
 
-  private static AtomicReference<Channel> channelRef = new AtomicReference<Channel>();
+  private final ClientBootstrap bootstrap = new ClientBootstrap(
+      new NioClientSocketChannelFactory(
+          Executors.newCachedThreadPool(),
+          Executors.newCachedThreadPool()));
 
-  public static void main(String[] args) throws Exception {
-    // Parse options.
-    String host = "imap.gmail.com";
-    int port = 993;
+  private final MailClientConfig config;
+  private final MailClientHandler mailClientHandler;
 
-    // Configure the client.
-    ClientBootstrap bootstrap = new ClientBootstrap(
-        new NioClientSocketChannelFactory(
-            Executors.newCachedThreadPool(),
-            Executors.newCachedThreadPool()));
+  private volatile Channel channel;
 
-    // Configure the pipeline factory.
-    bootstrap.setPipelineFactory(new MailClientPipelineFactory());
+  public MailClient(MailClientPipelineFactory pipelineFactory, MailClientConfig config,
+                    MailClientHandler mailClientHandler) {
+    this.config = config;
+    this.mailClientHandler = mailClientHandler;
+    bootstrap.setPipelineFactory(pipelineFactory);
+  }
 
-    // Start the connection attempt.
-    ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port));
+  /**
+   * Connects to the IMAP server logs in with the given credentials.
+   */
+  public void connect() {
+    ChannelFuture future = bootstrap.connect(new InetSocketAddress(config.getHost(),
+        config.getPort()));
 
-    // Wait until the connection attempt succeeds or fails.
     Channel channel = future.awaitUninterruptibly().getChannel();
     if (!future.isSuccess()) {
-      future.getCause().printStackTrace();
       bootstrap.releaseExternalResources();
-      return;
+      throw new RuntimeException("Could not connect channel", future.getCause());
     }
-    channelRef.set(channel);
 
-    // Sends a command line to the server.
-    send(". login " + USERNAME + " " + PASSWORD + "\n");
+    this.channel = channel;
+    login();
+  }
 
-    // TODO(dhanji): Make this not necessary by chaining the callbacks together.
-    Thread.sleep(5000L);
-    // Wait until the server closes the connection.
+  private void login() {
+    send(". login " + config.getUsername() + " " + config.getPassword() + "\n");
+    mailClientHandler.awaitLogin();
+  }
+
+  /**
+   * Logs out of the current IMAP session and releases all resources, including
+   * executor services.
+   */
+  public void disconnect() {
+    // Log out of the IMAP Server.
+    send(". logout");
+
+    // Shut down all thread pools and exit.
     channel.close().awaitUninterruptibly(WAIT_DELAY, TimeUnit.SECONDS);
-
-    // Close the connection.  Make sure the close operation ends because
-    // all I/O operations are asynchronous in Netty.
-    channel.close().awaitUninterruptibly();
-
-    // Shut down all thread pools to exit.
     bootstrap.releaseExternalResources();
   }
 
-  private static ExecutorService executor = Executors.newSingleThreadExecutor();
+  ChannelFuture send(final String command) {
+    log.debug("Sending {} to server...", command);
 
-  static void send(final String command) {
-    log.debug("Writing {}", command);
-
-    executor.submit(new Runnable() {
-      @Override
-      public void run() {
-        channelRef.get().write(command).awaitUninterruptibly(WAIT_DELAY, TimeUnit.SECONDS);
-      }
-    });
+    return channel.write(command);
   }
 }

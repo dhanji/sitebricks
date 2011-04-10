@@ -16,6 +16,12 @@ import javax.net.ssl.SSLEngine;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class MailClientPipelineFactory implements ChannelPipelineFactory {
+  private final MailClientHandler mailClientHandler;
+
+  public MailClientPipelineFactory(MailClientHandler mailClientHandler) {
+    this.mailClientHandler = mailClientHandler;
+  }
+
   public ChannelPipeline getPipeline() throws Exception {
     // Create a default pipeline implementation.
     ChannelPipeline pipeline = Channels.pipeline();
@@ -32,7 +38,7 @@ public class MailClientPipelineFactory implements ChannelPipelineFactory {
     pipeline.addLast("encoder", new StringEncoder());
 
     // and then business logic.
-    pipeline.addLast("handler", new MailClientHandler());
+    pipeline.addLast("handler", mailClientHandler);
 
     return pipeline;
   }
