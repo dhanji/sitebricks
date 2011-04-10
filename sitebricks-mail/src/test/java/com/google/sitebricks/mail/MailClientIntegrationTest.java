@@ -4,6 +4,8 @@ import com.google.inject.Guice;
 import com.google.sitebricks.mail.Mail.Auth;
 import org.junit.Test;
 
+import java.util.List;
+
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
@@ -16,10 +18,12 @@ public class MailClientIntegrationTest {
     MailClient client = mail.clientOf("imap.gmail.com", 993)
         .connect(Auth.SSL, "telnet.imap@gmail.com", System.getProperty("sitebricks-mail.password"));
 
+    List<String> capabilities = client.capabilities();
+    System.out.println("CAPS! " + capabilities);
 //    Thread.sleep(5000L);
     client.disconnect();
     
-//    client.capabilities();
+
 //    client.listFolders();
 //    client.list("Mail");
 //    client.fetch();

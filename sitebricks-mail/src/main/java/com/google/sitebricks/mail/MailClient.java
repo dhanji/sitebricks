@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -16,8 +17,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class MailClient {
   private static final Logger log = LoggerFactory.getLogger(MailClient.class);
-
-  public static final int WAIT_DELAY = 5;
 
   private final ClientBootstrap bootstrap = new ClientBootstrap(
       new NioClientSocketChannelFactory(
@@ -55,6 +54,7 @@ public class MailClient {
 
   private void login() {
     send(". login " + config.getUsername() + " " + config.getPassword() + "\n");
+    send(". CAPABILITY\n");
     mailClientHandler.awaitLogin();
   }
 
@@ -67,13 +67,17 @@ public class MailClient {
     send(". logout");
 
     // Shut down all thread pools and exit.
-    channel.close().awaitUninterruptibly(WAIT_DELAY, TimeUnit.SECONDS);
+    channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
     bootstrap.releaseExternalResources();
   }
 
   ChannelFuture send(final String command) {
-    log.debug("Sending {} to server...", command);
+    log.trace("Sending {} to server...", command);
 
     return channel.write(command);
+  }
+
+  public List<String> capabilities() {
+    return mailClientHandler.getCapabilities();
   }
 }

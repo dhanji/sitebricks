@@ -11,13 +11,16 @@ class MailClientConfig {
   private final Auth authType;
   private final String username;
   private final String password;
+  private final long timeout;
 
-  public MailClientConfig(String host, int port, Auth authType, String username, String password) {
+  public MailClientConfig(String host, int port, Auth authType, String username, String password,
+                          long timeout) {
     this.host = host;
     this.port = port;
     this.authType = authType;
     this.username = username;
     this.password = password;
+    this.timeout = timeout;
   }
 
   public String getHost() {
@@ -38,5 +41,9 @@ class MailClientConfig {
 
   public String getPassword() {
     return password;
+  }
+
+  public long getTimeout() {
+    return timeout;
   }
 }

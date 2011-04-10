@@ -2,6 +2,8 @@ package com.google.sitebricks.mail;
 
 import com.google.inject.ImplementedBy;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
@@ -12,7 +14,8 @@ public interface Mail {
   public enum Auth { PLAIN, SSL }
 
   public static interface AuthBuilder {
-//    CompletionBuilder auth();
+    AuthBuilder timeout(long amount, TimeUnit unit);
+
     MailClient connect(Auth authType, String username, String password);
   }
 }
