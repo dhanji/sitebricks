@@ -1,4 +1,4 @@
-package com.google.sitebricks.mail.ryter;
+package com.google.sitebricks.mail.webapp;
 
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;

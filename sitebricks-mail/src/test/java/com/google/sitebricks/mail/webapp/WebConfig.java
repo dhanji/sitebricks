@@ -1,4 +1,4 @@
-package com.google.sitebricks.mail.ryter;
+package com.google.sitebricks.mail.webapp;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;

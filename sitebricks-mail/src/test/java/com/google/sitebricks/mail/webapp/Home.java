@@ -1,4 +1,4 @@
-package com.google.sitebricks.mail.ryter;
+package com.google.sitebricks.mail.webapp;
 
 import com.google.sitebricks.At;
 import com.google.sitebricks.Visible;

@@ -16,7 +16,7 @@
   </filter-mapping>
 
   <listener>
-    <listener-class>com.google.sitebricks.mail.ryter.WebConfig</listener-class>
+    <listener-class>com.google.sitebricks.mail.webapp.WebConfig</listener-class>
   </listener>
 
 </web-app>
