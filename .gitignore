@@ -17,3 +17,4 @@ slf4j/sitebricks-slf4j.iml
 slf4j/target/
 stat/sitebricks-stat.iml
 stat/target/
+.idea/
