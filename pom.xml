@@ -198,14 +198,6 @@
       </dependency>      
 
       <dependency>
-        <groupId>org.testng</groupId>
-        <artifactId>testng</artifactId>
-        <version>${org.testng.version}</version>
-        <classifier>jdk15</classifier>
-        <scope>test</scope>
-      </dependency>      
-      
-      <dependency>
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
         <version>2.4</version>
