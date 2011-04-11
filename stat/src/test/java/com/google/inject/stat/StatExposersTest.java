@@ -17,23 +17,23 @@
 
 package com.google.inject.stat;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.inject.stat.StatExposers.IdentityExposer;
 import com.google.inject.stat.StatExposers.InferenceExposer;
 import com.google.inject.stat.StatExposers.ToStringExposer;
-
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertSame;
+import static org.testng.FileAssert.fail;
+
 
 /**
  * This class includes tests for the various implementations of
@@ -43,7 +43,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class StatExposersTest {
 
   @SuppressWarnings("unchecked")
-  @Test public void testInferenceExposer() {
+  @Test
+  public void testInferenceExposer() {
     InferenceExposer inferenceExposer = new InferenceExposer();
 
     List<Integer> rawList = Lists.newArrayList(1, 2, 3);

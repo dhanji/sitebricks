@@ -3,11 +3,12 @@ package com.google.inject.slf4j;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.junit.Test;
 import org.slf4j.Logger;
+import org.testng.annotations.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.testng.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
+
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)

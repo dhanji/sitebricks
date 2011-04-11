@@ -17,18 +17,19 @@
 
 package com.google.inject.stat;
 
-import static org.junit.Assert.assertEquals;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.stat.StatsPublishers.HtmlStatsPublisher;
 import com.google.inject.stat.StatsPublishers.JsonStatsPublisher;
 import com.google.inject.stat.StatsPublishers.TextStatsPublisher;
-
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+
+import static org.testng.Assert.assertEquals;
+
 
 /**
  * This test class contains tests for the various types of
@@ -40,8 +41,8 @@ import java.io.StringWriter;
 public class StatsPublishersTest {
   private static final String NL = System.getProperty("line.separator");
   
-  StringWriter stringWriter = new StringWriter(1024);
-  PrintWriter printWriter = new PrintWriter(stringWriter);
+  StringWriter stringWriter;
+  PrintWriter printWriter;
   ImmutableMap<StatDescriptor, Object> snapshot =
       ImmutableMap.<StatDescriptor, Object>builder()
         .put(StatDescriptor.of("int-stat", "", null, null), 3)
@@ -50,7 +51,14 @@ public class StatsPublishersTest {
             ImmutableList.of("a", "b", "c"))
         .build();
 
-  @Test public void testHtmlPublisher() {
+  @BeforeMethod
+  public final void before() {
+    stringWriter = new StringWriter(1024);
+    printWriter = new PrintWriter(stringWriter);
+  }
+
+  @Test
+  public void testHtmlPublisher() {
     HtmlStatsPublisher publisher = new HtmlStatsPublisher();
     String expectedOutput = new StringBuilder()
         .append("<html><head><style>").append(NL)

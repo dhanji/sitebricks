@@ -17,16 +17,16 @@
 
 package com.google.inject.stat;
 
-import static org.junit.Assert.assertEquals;
-
 import com.google.common.collect.Lists;
-
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
+
+import static org.testng.Assert.assertEquals;
+
 
 /**
  * This class includes tests for the logic within {@link StatReaders}.
@@ -58,7 +58,8 @@ public class StatReadersTest {
   Method instanceMethod;
   TestClass testClass;
   
-  @Before public void setUp() throws Exception {
+  @BeforeMethod
+  public void setUp() throws Exception {
     testClass = new TestClass();
     TestClass.staticField = STATIC_FIELD_STARTING_VALUE;
     testClass.instanceField = INSTANCE_FIELD_STARTING_VALUE;
@@ -69,7 +70,8 @@ public class StatReadersTest {
     instanceMethod = TestClass.class.getDeclaredMethod("getInstanceFieldValue");
   }
 
-  @Test public void testInstanceFieldReader() {
+  @Test
+  public void testInstanceFieldReader() {
     StatReader statReader = StatReaders.forField(instanceField, testClass);
     assertEquals(testClass.instanceField, statReader.readStat());
 

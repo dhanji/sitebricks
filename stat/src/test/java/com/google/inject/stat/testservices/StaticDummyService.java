@@ -40,4 +40,8 @@ public class StaticDummyService {
   public void call() {
     calls.incrementAndGet();
   }
+
+  public static void reset() {
+    calls.set(0);
+  }
 }

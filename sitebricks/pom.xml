@@ -12,17 +12,19 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.google.sitebricks</groupId>      
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>${org.testng.version}</version>
+      <classifier>jdk15</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.sitebricks</groupId>
       <artifactId>sitebricks-converter</artifactId>
     </dependency>
     <dependency>
      <groupId>com.google.sitebricks</groupId>
      <artifactId>sitebricks-client</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mvel</groupId>
