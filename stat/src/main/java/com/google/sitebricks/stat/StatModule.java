@@ -1,15 +1,15 @@
-package com.google.inject.stat;
+package com.google.sitebricks.stat;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.inject.stat.StatsServlet.DEFAULT_FORMAT;
+import static com.google.sitebricks.stat.StatsServlet.DEFAULT_FORMAT;
 
 import com.google.inject.matcher.Matchers;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.servlet.ServletModule;
-import com.google.inject.stat.StatsPublishers.HtmlStatsPublisher;
-import com.google.inject.stat.StatsPublishers.JsonStatsPublisher;
-import com.google.inject.stat.StatsPublishers.TextStatsPublisher;
+import com.google.sitebricks.stat.StatsPublishers.HtmlStatsPublisher;
+import com.google.sitebricks.stat.StatsPublishers.JsonStatsPublisher;
+import com.google.sitebricks.stat.StatsPublishers.TextStatsPublisher;
 
 /**
  * This module enables publishing values annotated with {@link Stat} to a given

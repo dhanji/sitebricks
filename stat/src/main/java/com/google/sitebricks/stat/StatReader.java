@@ -15,7 +15,7 @@
  *
  */
 
-package com.google.inject.stat;
+package com.google.sitebricks.stat;
 
 /**
  * A {@link StatReader} is ble to read the value of a stat, be it a direct

@@ -15,10 +15,9 @@
  *
  */
 
-package com.google.inject.stat;
+package com.google.sitebricks.stat;
 
 import com.google.common.collect.MapMaker;
-import com.google.inject.stat.StatExposers.InferenceExposer;
 
 import java.lang.reflect.Member;
 import java.util.List;
@@ -37,7 +36,7 @@ public final class StatRegistrar {
    * javac bugs, such as is described here:
    * https://bugs.eclipse.org/bugs/show_bug.cgi?id=324931
    */
-  Class<? extends StatExposer> DEFAULT_EXPOSER_CLASS = InferenceExposer.class;
+  Class<? extends StatExposer> DEFAULT_EXPOSER_CLASS = StatExposers.InferenceExposer.class;
 
   private final Map<Class<?>, List<MemberAnnotatedWithAtStat>>
       classesToInstanceMembers =

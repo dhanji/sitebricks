@@ -1,7 +1,7 @@
 package com.google.sitebricks.example;
 
 import com.google.inject.Singleton;
-import com.google.inject.stat.Stat;
+import com.google.sitebricks.stat.Stat;
 import com.google.sitebricks.At;
 import com.google.sitebricks.Show;
 import com.google.sitebricks.http.Get;

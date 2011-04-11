@@ -1,6 +1,4 @@
-package com.google.inject.stat;
-
-import com.google.inject.stat.StatExposers.InferenceExposer;
+package com.google.sitebricks.stat;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -26,5 +24,5 @@ public @interface Stat {
    * Class of the exposer to apply before exposing a reference to the stat
    * value.
    */
-  Class<? extends StatExposer> exposer() default InferenceExposer.class;
+  Class<? extends StatExposer> exposer() default StatExposers.InferenceExposer.class;
 }

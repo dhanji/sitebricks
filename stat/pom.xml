@@ -5,9 +5,9 @@
     <artifactId>sitebricks-parent</artifactId>
     <version>0.8.4-SNAPSHOT</version>
   </parent>  
-  <artifactId>stat</artifactId>
+  <artifactId>sitebricks-stat</artifactId>
   <name>Sitebricks :: Statistics</name>
-  <description>Statistics module for Guice applications (does not require sitebricks)</description>
+  <description>Statistics/Monitoring for Guice applications (does not require sitebricks)</description>
 
   <repositories>
     <repository>

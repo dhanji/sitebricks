@@ -7,7 +7,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.servlet.GuiceServletContextListener;
-import com.google.inject.stat.StatModule;
+import com.google.sitebricks.stat.StatModule;
 import com.google.sitebricks.AwareModule;
 import com.google.sitebricks.SitebricksModule;
 import com.google.sitebricks.binding.FlashCache;

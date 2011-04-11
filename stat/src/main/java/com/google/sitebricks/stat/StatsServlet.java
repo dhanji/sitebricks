@@ -1,4 +1,4 @@
-package com.google.inject.stat;
+package com.google.sitebricks.stat;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

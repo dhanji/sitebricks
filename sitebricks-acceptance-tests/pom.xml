@@ -76,7 +76,8 @@
     </dependency>
     <dependency>
       <groupId>com.google.sitebricks</groupId>
-      <artifactId>stat</artifactId>
+      <artifactId>sitebricks-stat</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>

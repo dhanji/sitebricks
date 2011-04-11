@@ -26,10 +26,10 @@
     <module>sitebricks-client</module>
     <module>sitebricks-converter</module>
     <module>sitebricks-acceptance-tests</module>
-    <module>stat</module>
-    <module>slf4j</module>
     <module>sitebricks-web</module>
     <module>sitebricks-mail</module>
+    <module>stat</module>
+    <module>slf4j</module>
   </modules>
   
   <dependencyManagement>

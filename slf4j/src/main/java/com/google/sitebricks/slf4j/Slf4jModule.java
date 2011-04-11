@@ -1,4 +1,4 @@
-package com.google.inject.slf4j;
+package com.google.sitebricks.slf4j;
 
 import com.google.inject.AbstractModule;
 

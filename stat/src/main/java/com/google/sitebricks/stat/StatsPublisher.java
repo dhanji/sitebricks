@@ -15,7 +15,7 @@
  *
  */
 
-package com.google.inject.stat;
+package com.google.sitebricks.stat;
 
 import com.google.common.collect.ImmutableMap;
 

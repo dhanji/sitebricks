@@ -5,9 +5,9 @@
     <artifactId>sitebricks-parent</artifactId>
     <version>0.8.4-SNAPSHOT</version>
   </parent>  
-  <artifactId>slf4j</artifactId>
+  <artifactId>sitebricks-slf4j</artifactId>
   <name>Sitebricks :: SLF4J Module</name>
-  <description>Slf4j logging module for Guice applications (does not require sitebricks)</description>
+  <description>Slf4j logging support for Guice applications (does not require sitebricks)</description>
 
   <dependencies>
     <dependency>
