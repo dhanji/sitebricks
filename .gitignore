@@ -1,20 +1,22 @@
-sitebricks-acceptance-tests/sitebricks-acceptance-tests.iml
-sitebricks-acceptance-tests/target/
-sitebricks-client/sitebricks-client.iml
-sitebricks-client/target/
-sitebricks-converter/sitebricks-converter.iml
-sitebricks-converter/target/
-sitebricks-mail/sitebricks-mail.iml
-sitebricks-mail/target/
-sitebricks-parent.iml
-sitebricks-parent.ipr
-sitebricks-parent.iws
-sitebricks-web/sitebricks-web.iml
-sitebricks-web/target/
-sitebricks/sitebricks.iml
-sitebricks/target/
-slf4j/sitebricks-slf4j.iml
-slf4j/target/
-stat/sitebricks-stat.iml
-stat/target/
+# Maven
+target/
+*.ser
+*.ec
+
+# IntelliJ Idea
 .idea/
+out/
+*.ipr
+*.iws
+*.iml
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Svn
+.svn/
+
+# Other
+bin/
