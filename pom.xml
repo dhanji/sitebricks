@@ -257,8 +257,8 @@
   </dependencyManagement>
   
   <scm>
-    <connection>git@github.com:dhanji/sitebricks.git</connection>
-    <developerConnection>git@github.com:dhanji/sitebricks.git</developerConnection>
+    <connection>scm:git:git@github.com:dhanji/sitebricks.git</connection>
+    <developerConnection>scm:git:git@github.com:dhanji/sitebricks.git</developerConnection>
     <url>https://github.com/dhanji/sitebricks</url>
   </scm>
 
