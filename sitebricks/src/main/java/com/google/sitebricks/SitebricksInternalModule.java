@@ -47,7 +47,7 @@ class SitebricksInternalModule extends AbstractModule {
       bind(PageBook.class).to(DebugModePageBook.class);
       bind(RoutingDispatcher.class).to(DebugModeRoutingDispatcher.class);
     }
-    
+
     // use sitebricks converters in mvel
     requestInjection(new MvelConversionHandlers());
   }
@@ -61,56 +61,16 @@ class SitebricksInternalModule extends AbstractModule {
   public boolean equals(Object obj) {
     return SitebricksInternalModule.class.isInstance(obj);
   }
-  
-  @Provides @RequestScoped
+
+  @Provides
+  @RequestScoped
   Request provideRequest(final HttpServletRequest servletRequest, final Injector injector) {
-    // TODO(dhanji): these should all be made lazy.
-    ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
-
-    @SuppressWarnings("unchecked") // Guaranteed by servlet spec
-    Map<String, String[]> parameterMap = servletRequest.getParameterMap();
-    for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
-      builder.putAll(entry.getKey(), entry.getValue());
-    }
-
-    // Build once per request only (so do it here).
-    final ImmutableMultimap<String, String> params = builder.build();
-
-    // Do the request headers now.
-    builder = ImmutableMultimap.builder();
-
-    @SuppressWarnings("unchecked") // Guaranteed by servlet spec
-    Enumeration<String> headerNames = servletRequest.getHeaderNames();
-    while (headerNames.hasMoreElements()) {
-      String header = headerNames.nextElement();
-
-      @SuppressWarnings("unchecked") // Guaranteed by servlet spec
-      Enumeration<String> values = servletRequest.getHeaders(header);
-      while (values.hasMoreElements()) {
-        builder.put(header, values.nextElement());
-      }
-    }
-
-    final ImmutableMultimap<String, String> headers = builder.build();
-
-    // Do the matrix parameters now.
-    builder = ImmutableMultimap.builder();
-    String uri = servletRequest.getRequestURI();
-    String[] pieces = uri.split("[/]+");
-    for (String piece : pieces) {
-      String[] pairs = piece.split("[;]+");
-
-      for (String pair : pairs) {
-        String[] singlePair = pair.split("[=]+");
-        if (singlePair.length > 1) {
-          builder.put(singlePair[0], singlePair[1]);
-        }
-      }
-    }
-
-    final ImmutableMultimap<String, String> matrix = builder.build();
 
     return new Request() {
+      ImmutableMultimap<String, String> matrix;
+      ImmutableMultimap<String, String> headers;
+      ImmutableMultimap<String, String> params;
+
       @Override
       public <E> RequestRead<E> read(final Class<E> type) {
         return new RequestRead<E>() {
@@ -140,21 +100,33 @@ class SitebricksInternalModule extends AbstractModule {
 
       @Override
       public Multimap<String, String> headers() {
+        if (null == headers) {
+          readHeaders();
+        }
         return headers;
       }
 
       @Override
       public Multimap<String, String> params() {
+        if (null == params) {
+          readParams();
+        }
         return params;
       }
 
       @Override
       public Multimap<String, String> matrix() {
+        if (null == matrix) {
+          readMatrix();
+        }
         return matrix;
       }
 
       @Override
       public String matrixParam(String name) {
+        if (null == matrix) {
+          readMatrix();
+        }
         ImmutableCollection<String> values = matrix.get(name);
         if (values.size() > 1) {
           throw new IllegalStateException("This matrix parameter has multiple values, "
@@ -167,10 +139,68 @@ class SitebricksInternalModule extends AbstractModule {
       public String param(String name) {
         return servletRequest.getParameter(name);
       }
+
+      @Override
+      public String header(String name) {
+        return servletRequest.getHeader(name);
+      }
+
+      private void readParams() {
+        ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
+
+        @SuppressWarnings("unchecked") // Guaranteed by servlet spec
+            Map<String, String[]> parameterMap = servletRequest.getParameterMap();
+        for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
+          builder.putAll(entry.getKey(), entry.getValue());
+        }
+
+        this.params = builder.build();
+      }
+
+      private void readMatrix() {
+        // Do the matrix parameters now.
+        ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
+        String uri = servletRequest.getRequestURI();
+        String[] pieces = uri.split("[/]+");
+        for (String piece : pieces) {
+          String[] pairs = piece.split("[;]+");
+
+          for (String pair : pairs) {
+            String[] singlePair = pair.split("[=]+");
+            if (singlePair.length > 1) {
+              builder.put(singlePair[0], singlePair[1]);
+            }
+          }
+        }
+
+        this.matrix = builder.build();
+      }
+
+      private void readHeaders() {
+        // Build once per request only (so do it here).
+        ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
+
+        @SuppressWarnings("unchecked") // Guaranteed by servlet spec
+            Enumeration<String> headerNames = servletRequest.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+          String header = headerNames.nextElement();
+
+          @SuppressWarnings("unchecked") // Guaranteed by servlet spec
+              Enumeration<String> values = servletRequest.getHeaders(header);
+          while (values.hasMoreElements()) {
+            builder.put(header, values.nextElement());
+          }
+        }
+
+        this.headers = builder.build();
+      }
+
     };
   }
 
-  @Provides @RequestScoped
+
+  @Provides
+  @RequestScoped
   Locale provideLocale(HttpServletRequest request) {
     return request.getLocale();
   }

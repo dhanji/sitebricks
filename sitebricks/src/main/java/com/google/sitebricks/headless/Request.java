@@ -65,6 +65,14 @@ public interface Request {
    */
   String param(String name);
 
+  /**
+   * Returns the only value of a request header or null if the header
+   * was not present.
+   * <p>
+   * Behaves exactly like {@link javax.servlet.http.HttpServletRequest#getHeader(String)}.
+   */
+  String header(String name);
+
   public static interface RequestRead<E> {
     E as(Class<? extends Transport> transport);
   }

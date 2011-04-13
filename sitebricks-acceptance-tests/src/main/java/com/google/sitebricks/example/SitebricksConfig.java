@@ -72,14 +72,6 @@ public class SitebricksConfig extends GuiceServletContextListener {
         });
       }
 
-      private void bindActions() {
-        at("/spi/test")
-            .perform(action("get:top"))
-            .on(Get.class)
-            .perform(action("post:junk_subpath1"))
-            .on(Post.class);
-      }
-
       private void bindExplicitly() {
         //TODO explicit bindings should override scanned ones.
         at("/").show(Start.class);
@@ -91,7 +83,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/repeat").show(Repeat.class);
         at("/showif").show(ShowIf.class);
         at("/dynamic.js").show(DynamicJs.class);
-        
+
         at("/conversion").show(Conversion.class);
 
         at("/hiddenfieldmethod").show(HiddenFieldMethod.class);
@@ -103,6 +95,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/service").serve(RestfulWebService.class);
         at("/postable").serve(PostableRestfulWebService.class);
         at("/superpath").serve(RestfulWebServiceWithSubpaths.class);
+        at("/matrixpath").serve(RestfulWebServiceWithMatrixParams.class);
         at("/superpath2/:dynamic").serve(RestfulWebServiceWithSubpaths2.class);
         at("/json/:type").serve(RestfulWebServiceWithCRUD.class);
         at("/jsonConversion").serve(RestfulWebServiceWithCRUDConversions.class);
@@ -114,11 +107,19 @@ public class SitebricksConfig extends GuiceServletContextListener {
 
         // MVEL template.
         at("/template/mvel").show(MvelTemplateExample.class);
-        
+
         // templating by extension
         at("/template").show(DecoratedPage.class);
 
         embed(HelloWorld.class).as("Hello");
+      }
+
+      private void bindActions() {
+        at("/spi/test")
+            .perform(action("get:top"))
+            .on(Get.class)
+            .perform(action("post:junk_subpath1"))
+            .on(Post.class);
       }
     });
   }
