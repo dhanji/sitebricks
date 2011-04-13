@@ -81,7 +81,15 @@ h2 {
   padding: 8px 12px;
   font-size: 20px;
   background: #555;
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.0, #666),
+    color-stop(1.0, #111)
+  );
   color: #eee;
+  text-shadow: -1px 1px 2px #777;
   -webkit-border-radius: 8px;
 }
 

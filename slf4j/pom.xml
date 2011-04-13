@@ -22,18 +22,9 @@
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-core</artifactId>
-      <scope>test</scope>
+      <version>${ch.qos.logback.version}</version>
     </dependency>
   </dependencies>
 
@@ -49,7 +40,7 @@
       </plugin>
     </plugins>
   </build>
- 
+
   <!-- This should be removed when the googlecode repositories are migrated to the standard Nexus OSS repository infrastructure -->
   <distributionManagement>
     <snapshotRepository>

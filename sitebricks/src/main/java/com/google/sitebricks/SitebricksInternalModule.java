@@ -1,6 +1,8 @@
 package com.google.sitebricks;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -62,6 +64,7 @@ class SitebricksInternalModule extends AbstractModule {
   
   @Provides @RequestScoped
   Request provideRequest(final HttpServletRequest servletRequest, final Injector injector) {
+    // TODO(dhanji): these should all be made lazy.
     ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
 
     @SuppressWarnings("unchecked") // Guaranteed by servlet spec
@@ -89,6 +92,23 @@ class SitebricksInternalModule extends AbstractModule {
     }
 
     final ImmutableMultimap<String, String> headers = builder.build();
+
+    // Do the matrix parameters now.
+    builder = ImmutableMultimap.builder();
+    String uri = servletRequest.getRequestURI();
+    String[] pieces = uri.split("[/]+");
+    for (String piece : pieces) {
+      String[] pairs = piece.split("[;]+");
+
+      for (String pair : pairs) {
+        String[] singlePair = pair.split("[=]+");
+        if (singlePair.length > 1) {
+          builder.put(singlePair[0], singlePair[1]);
+        }
+      }
+    }
+
+    final ImmutableMultimap<String, String> matrix = builder.build();
 
     return new Request() {
       @Override
@@ -126,6 +146,21 @@ class SitebricksInternalModule extends AbstractModule {
       @Override
       public Multimap<String, String> params() {
         return params;
+      }
+
+      @Override
+      public Multimap<String, String> matrix() {
+        return matrix;
+      }
+
+      @Override
+      public String matrixParam(String name) {
+        ImmutableCollection<String> values = matrix.get(name);
+        if (values.size() > 1) {
+          throw new IllegalStateException("This matrix parameter has multiple values, "
+              + name + "=" + values);
+        }
+        return values.isEmpty() ? null : Iterables.getOnlyElement(values);
       }
 
       @Override

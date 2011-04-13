@@ -47,6 +47,17 @@ public interface Request {
   Multimap<String, String> params();
 
   /**
+   * Returns matrix parameters as a multimap (to account for repeated values).
+   */
+  Multimap<String, String> matrix();
+
+  /**
+   * Returns the only value of a matrix parameter or null if the parameter
+   * was not present.
+   */
+  String matrixParam(String name);
+
+  /**
    * Returns the only value of a request parameter or null if the parameter
    * was not present.
    * <p>

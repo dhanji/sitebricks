@@ -57,8 +57,9 @@ class NettyImapClient implements MailClient {
   }
 
   private void login() {
-    channel.write(". login " + config.getUsername() + " " + config.getPassword() + "\n");
     channel.write(". CAPABILITY\n");
+    channel.write(". STARTTLS\n");
+    channel.write(". login " + config.getUsername() + " " + config.getPassword() + "\n");
     mailClientHandler.awaitLogin();
   }
 
@@ -94,7 +95,7 @@ class NettyImapClient implements MailClient {
   public ListenableFuture<List<String>> listFolders() {
     ValueFuture<List<String>> valueFuture = ValueFuture.create();
 
-    send(". fetch 1 body[]", valueFuture);
+    send(". examine inbox\n", valueFuture);
 
     return valueFuture;
   }

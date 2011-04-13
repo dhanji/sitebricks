@@ -65,7 +65,7 @@ class StandardCompilers implements Compilers {
   }
 
   public Renderable compileFreemarker( Class<?> page, String template ) {
-      return new FreemarkerTemplateCompiler(page).compile(template);
+    return new FreemarkerTemplateCompiler(page).compile(template);
   }
 
   // TODO(dhanji): Feedback errors as return rather than throwing.

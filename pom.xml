@@ -18,7 +18,7 @@
     <org.mortbay.jetty.version>6.1.9</org.mortbay.jetty.version>
     <org.seleniumhq.webdriver.version>0.9.7376</org.seleniumhq.webdriver.version>
     <org.testng.version>5.8</org.testng.version>
-    <ch.qos.logback.version>0.9.26</ch.qos.logback.version>
+    <ch.qos.logback.version>0.9.9</ch.qos.logback.version>
   </properties>
   
   <modules>
@@ -183,7 +183,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.6.1</version>
+        <version>1.5.5</version>
       </dependency>
       
       <dependency>
