@@ -36,6 +36,16 @@
     </repository>
   </repositories>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.6.1</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
@@ -86,12 +96,6 @@
       <artifactId>testng</artifactId>
       <classifier>jdk15</classifier>
     </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>${ch.qos.logback.version}</version>
-    </dependency>
-
   </dependencies>
 
   <build>
