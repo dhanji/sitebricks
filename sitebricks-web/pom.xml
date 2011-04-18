@@ -14,7 +14,20 @@
   </parent>
   <artifactId>sitebricks-web</artifactId>
   <name>Sitebricks :: Info Website</name>
-  
+  <repositories>
+    <repository>
+      <id>scala-tools</id>
+      <url>http://scala-tools.org/repo-releases</url>
+    </repository>
+    <repository>
+      <id>http://source.db4o.com/maven</id>
+      <url>http://source.db4o.com/maven</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>com.google.sitebricks</groupId>
@@ -42,5 +55,11 @@
       <artifactId>lucene-core</artifactId>
       <version>3.0.2</version>
     </dependency>
+    <dependency>
+      <groupId>com.db4o</groupId>
+      <artifactId>db4o-full-java5</artifactId>
+      <version>8.0-SNAPSHOT</version>
+    </dependency>
+
   </dependencies>
 </project>
