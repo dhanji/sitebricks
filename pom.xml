@@ -128,7 +128,7 @@
       <dependency>
         <groupId>com.ning</groupId>
         <artifactId>async-http-client</artifactId>
-        <version>1.6.2</version>
+        <version>1.6.3</version>
       </dependency>      
       
       <dependency>
