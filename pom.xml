@@ -281,5 +281,12 @@
       <url> https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
-  
+
+  <repositories>
+    <repository>
+      <id>scala.org</id>
+      <name>Scala.org Repository</name>
+      <url>http://scala-tools.org/repo-releases/</url>
+    </repository>
+</repositories>
 </project>
