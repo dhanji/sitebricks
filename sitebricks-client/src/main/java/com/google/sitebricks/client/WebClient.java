@@ -11,4 +11,9 @@ public interface WebClient<T> {
     WebResponse put(T t);
 
     WebResponse delete();
+
+    /**
+     * Close the underlying client.
+     */
+    void close();
 }

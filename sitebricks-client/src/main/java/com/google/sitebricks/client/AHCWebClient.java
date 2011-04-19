@@ -144,4 +144,9 @@ class AHCWebClient<T> implements WebClient<T> {
     public WebResponse delete() {
         return simpleRequest((new RequestBuilder("DELETE")).setUrl(url));
     }
+
+    @Override
+    public void close() {
+        httpClient.close();    
+    }
 }

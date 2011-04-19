@@ -37,5 +37,7 @@ public class WebClientEdslIntegrationTest {
     final String responseAsString = response.toString();
 
     System.out.println(responseAsString);
+
+    webClient.close();
   }
 }
