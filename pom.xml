@@ -28,6 +28,7 @@
     <module>sitebricks-acceptance-tests</module>
     <module>sitebricks-web</module>
     <module>sitebricks-mail</module>
+    <module>sitebricks-options</module>
     <module>stat</module>
     <module>slf4j</module>
   </modules>
