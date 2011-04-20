@@ -1,11 +1,5 @@
 package com.google.sitebricks.acceptance;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.testng.annotations.Test;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -17,6 +11,10 @@ import com.google.sitebricks.conversion.ConverterRegistry;
 import com.google.sitebricks.conversion.StandardTypeConverter;
 import com.google.sitebricks.example.RestfulWebServiceWithCRUDConversions;
 import com.google.sitebricks.example.RestfulWebServiceWithCRUDConversions.Widget;
+import org.testng.annotations.Test;
+
+import java.util.Date;
+import java.util.List;
 
 @Test(suiteName = AcceptanceTest.SUITE)
 public class RestfuWebServiceWithCRUDConversionsAcceptanceTest {
@@ -47,8 +45,8 @@ public class RestfuWebServiceWithCRUDConversionsAcceptanceTest {
 			.transports(String.class)
 			.over(Json.class).get();
 
-		List<Widget> result = new ArrayList<Widget>();
-		result = response.to(result.getClass()).using(Json.class);
+    @SuppressWarnings("unchecked")
+		List<Widget> result = response.to(List.class).using(Json.class);
 
 		assert result.size() == RestfulWebServiceWithCRUDConversions.widgets.size();
 	}
