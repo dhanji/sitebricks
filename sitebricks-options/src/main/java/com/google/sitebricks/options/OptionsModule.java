@@ -1,5 +1,8 @@
 package com.google.sitebricks.options;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.sitebricks.conversion.MvelTypeConverter;
@@ -9,9 +12,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -21,7 +27,7 @@ public class OptionsModule extends AbstractModule {
 
   private final List<Class<?>> optionClasses = new ArrayList<Class<?>>();
 
-  public OptionsModule(String[] commandLine) {
+  public OptionsModule(String[] commandLine, Iterable<Map<String, String>> freeOptions) {
     options = new HashMap<String, String>(commandLine.length);
     for (String option : commandLine) {
       if (option.startsWith("--") && option.length() > 2) {
@@ -35,6 +41,49 @@ public class OptionsModule extends AbstractModule {
         }
       }
     }
+
+    for (Map<String, String> freeOptionMap : freeOptions) {
+      options.putAll(freeOptionMap);
+    }
+  }
+
+  public OptionsModule(String[] commandLine) {
+    this(commandLine, ImmutableList.<Map<String,String>>of());
+  }
+
+  public OptionsModule(Iterable<Map<String, String>> freeOptions) {
+    this(new String[0], freeOptions);
+  }
+
+  public OptionsModule(Properties...freeOptions) {
+    this(new String[0], toMaps(freeOptions));
+  }
+
+  public OptionsModule(ResourceBundle...freeOptions) {
+    this(new String[0], toMaps(freeOptions));
+  }
+
+  private static Iterable<Map<String, String>> toMaps(ResourceBundle[] freeOptions) {
+    List<Map<String, String>> maps = Lists.newArrayList();
+    for (ResourceBundle bundle : freeOptions) {
+      Map<String, String> asMap = Maps.newHashMap();
+      Enumeration<String> keys = bundle.getKeys();
+      while (keys.hasMoreElements()) {
+        String key = keys.nextElement();
+        asMap.put(key, bundle.getString(key));
+      }
+
+      maps.add(asMap);
+    }
+    return maps;
+  }
+
+  private static Iterable<Map<String, String>> toMaps(Properties[] freeOptions) {
+    List<Map<String, String>> maps = Lists.newArrayList();
+    for (Properties freeOption : freeOptions) {
+      maps.add(Maps.fromProperties(freeOption));
+    }
+    return maps;
   }
 
   @Override

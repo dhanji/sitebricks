@@ -3,6 +3,9 @@ package com.google.sitebricks.options;
 import com.google.inject.Guice;
 import org.testng.annotations.Test;
 
+import java.util.Properties;
+import java.util.ResourceBundle;
+
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
@@ -38,7 +41,7 @@ public class OptionsTest {
   }
 
   @Test
-  public final void testTypedOptionsInterfaceWithNamespaceFromCommandLine() {
+  public final void testTypedOptionsInterfaceFromCommandLine() {
 
     String[] commandLine =
         ("--name=optimusprimer --score=0.8 --port=1034").split("[ ]+");
@@ -49,6 +52,35 @@ public class OptionsTest {
     assert "optimusprimer".equals(opts.name());
     assert new Double(0.8).equals(opts.score());
     assert 1034 == opts.port();
+  }
+
+  @Test
+  public final void testTypedOptionsInterfaceWithNamespaceFromProperties() {
+    Properties properties = new Properties();
+    properties.put("name", "optimusprimer");
+    properties.put("score", "0.7");
+    properties.put("port", "65535");
+
+    MyTypedOpts opts = Guice.createInjector(new OptionsModule(properties)
+        .options(MyTypedOpts.class))
+        .getInstance(MyTypedOpts.class);
+
+    assert "optimusprimer".equals(opts.name());
+    assert new Double(0.7).equals(opts.score());
+    assert 65535 == opts.port();
+  }
+
+  @Test
+  public final void testTypedOptionsInterfaceWithNamespaceFromPropertiesFile() {
+    ResourceBundle bundle = ResourceBundle.getBundle(Options.class.getPackage().getName()
+        + ".options");
+    MyTypedOpts opts = Guice.createInjector(new OptionsModule(bundle)
+        .options(MyTypedOpts.class))
+        .getInstance(MyTypedOpts.class);
+
+    assert "optimusprimer".equals(opts.name());
+    assert new Double(0.7).equals(opts.score());
+    assert 65534 == opts.port();
   }
 
   @Options
