@@ -23,9 +23,20 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.google.sitebricks</groupId>
+      <artifactId>sitebricks-converter</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
       <version>3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>5.8</version>
+      <classifier>jdk15</classifier>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

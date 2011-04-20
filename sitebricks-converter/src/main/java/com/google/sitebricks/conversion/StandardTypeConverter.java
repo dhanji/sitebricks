@@ -1,8 +1,11 @@
 package com.google.sitebricks.conversion;
 
-import static com.google.sitebricks.conversion.generics.Generics.erase;
-import static com.google.sitebricks.conversion.generics.Generics.getExactSuperType;
-import static com.google.sitebricks.conversion.generics.Generics.getTypeParameter;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.primitives.Primitives;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.sitebricks.conversion.generics.Generics;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -10,12 +13,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.primitives.Primitives;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.sitebricks.conversion.generics.Generics;
+import static com.google.sitebricks.conversion.generics.Generics.erase;
+import static com.google.sitebricks.conversion.generics.Generics.getExactSuperType;
+import static com.google.sitebricks.conversion.generics.Generics.getTypeParameter;
 
 /**
  * @author John Patterson (jdpatterson@gmail.com)
@@ -29,10 +29,6 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
   private static final TypeVariable<? extends Class<?>> sourceTypeParameter = Converter.class.getTypeParameters()[0];
   private static final TypeVariable<? extends Class<?>> targetTypeParameter = Converter.class.getTypeParameters()[1];
 
-  public StandardTypeConverter()
-  {
-  }
-  
   @Inject
   public StandardTypeConverter(@SuppressWarnings("rawtypes") Set<Converter> converters) {
 	  for (Converter<?, ?> converter : converters) {
@@ -87,22 +83,20 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
     Class<?> sourceClass = Generics.erase(sourceType);
     
     // conversion of all array types to collections
-    if (sourceClass.isArray() && Generics.isSuperType(Collection.class, type))
-    {
+    if (sourceClass.isArray() && Generics.isSuperType(Collection.class, type)) {
       return (T) Arrays.asList(source);
     }
 	  
     // conversion of all collections to arrays
     Class<?> targetClass = Generics.erase(type);
-    if (Collection.class.isAssignableFrom(sourceClass) && targetClass.isArray())
-    {
+    if (Collection.class.isAssignableFrom(sourceClass) && targetClass.isArray()) {
       // TODO: convert collections to arrays
       throw new UnsupportedOperationException("Not implemented yet");
     }
     
     // use primitive wrapper types
     if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
-        type = Primitives.wrap((Class<?>) type);
+      type = Primitives.wrap((Class<?>) type);
     }
 
     
@@ -133,8 +127,7 @@ public class StandardTypeConverter implements TypeConverter, ConverterRegistry {
       // try every super type of the source
       Class<?> superClass = erase(sourceType).getSuperclass();
       sourceType = getExactSuperType(sourceType, superClass);
-    }
-    while (result == null);
+    } while (result == null);
     
     if (result == null)
       throw new IllegalStateException("Cannot convert " + source.getClass() + " to " + type);

@@ -1,5 +1,6 @@
 package com.google.sitebricks.acceptance;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -8,6 +9,7 @@ import com.google.sitebricks.client.Web;
 import com.google.sitebricks.client.WebResponse;
 import com.google.sitebricks.client.transport.Json;
 import com.google.sitebricks.client.transport.Text;
+import com.google.sitebricks.conversion.Converter;
 import com.google.sitebricks.conversion.ConverterRegistry;
 import com.google.sitebricks.conversion.StandardTypeConverter;
 import com.google.sitebricks.example.RestfulWebService;
@@ -36,7 +38,8 @@ public class RestfuWebServiceAcceptanceTest {
 	private Injector createInjector() {
 		return Guice.createInjector(new AbstractModule() {
 	      protected void configure() {
-	        bind(ConverterRegistry.class).toInstance(new StandardTypeConverter());
+	        bind(ConverterRegistry.class).toInstance(new StandardTypeConverter(
+              ImmutableSet.<Converter>of()));
 	      }
 	    });
 	}
