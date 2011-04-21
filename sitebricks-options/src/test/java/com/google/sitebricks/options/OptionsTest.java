@@ -83,6 +83,20 @@ public class OptionsTest {
     assert 65534 == opts.port();
   }
 
+  @Test
+  public final void testTypedOptionsAbstractClassWithNamespaceFromPropertiesFile() {
+    ResourceBundle bundle = ResourceBundle.getBundle(Options.class.getPackage().getName()
+        + ".options");
+    MyAbstractOpts opts = Guice.createInjector(new OptionsModule(bundle)
+        .options(MyAbstractOpts.class))
+        .getInstance(MyAbstractOpts.class);
+
+    assert "optimusprimer".equals(opts.name());
+    assert new Double(0.7).equals(opts.score());
+    assert 65534 == opts.port(); // Default overridden.
+    assert 22 == opts.code(); // Default.
+  }
+
   @Options
   public static interface MyOpts {
     String host();
@@ -108,5 +122,20 @@ public class OptionsTest {
     Double score();
 
     int port();
+  }
+
+  @Options
+  public static abstract class MyAbstractOpts {
+    abstract String name();
+
+    abstract Double score();
+
+    int port() {
+      return 22;
+    }
+
+    int code() {
+      return 22;
+    }
   }
 }
