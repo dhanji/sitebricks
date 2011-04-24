@@ -3,6 +3,10 @@
 <head>
   <title>Sitebricks :: A Web platform</title>
   <link rel="stylesheet" href="main.css">
+  <script type="text/javascript" src="js/jquery-1.4.3.min.js"></script>
+  <script type="text/javascript" src="js/json2.js"></script>
+  <script type="text/javascript" src="js/rpc.js"></script>
+  <script type="text/javascript" src="js/sitebricks.js"></script>
 </head>
 <body>
 <header>
@@ -16,34 +20,33 @@
   <form>
     <input class="searchbox" type="text" value="Search"/>
   </form>
-  <h1>sitebricks</h1>
+  <h1>sitebricks<span>.info</span></h1>
+  <nav id="controls">
+    <div class="view">
+      <button id="edit">Edit</button>
+      <button id="delete">Delete</button>
+    </div>
+    <div class="edit">
+      <button id="save">Save</button>
+      <button id="discard">Discard</button>
+    </div>
+  </nav>
   <div class="groove"></div>
 </header>
 <nav id="left">
   <ul>
-    <li class="back"><a href="#">&uarr; Up</a></li>
-    <li><a href="#">5 minute tutorial</a></li>
-    <li><a href="#">Contribute</a></li>
-    <li><a href="#">About</a></li>
+    <li id="top" class="back"><a href="#">&uarr; Top</a></li>
+    <li id="back" class="back"><a href="#">&larr; Back</a></li>
+
+    @Repeat(items=index.list(), var="node")
+    <li><a class="wikilink" href="#" name="${node.name}">${node.topic}</a></li>
   </ul>
 </nav>
 <section id="main">
-  <article>
-    <h2>Tutorial</h2>
-    <p>Lorem ispium diaz. Check us out on our awesome <a href="#">YouTube</a> channel</p>
-    <pre>
-  public static void main() {
-    <b>doStuff();</b>
-  }</pre>
-    <p>Lorem ispium diaz. Check us out on our awesome channel. Lorem ispium diaz. Check us out on
-      our awesome channel. Lorem ispium diaz. Check us out on our awesome channel</p>
-    <h3>Subheading #1</h3>
-    <p>Lorem ispium diaz. Check us out on our awesome channel. Lorem ispium diaz. Check us out on
-      our awesome channel. Lorem ispium diaz. Check us out on our awesome channel</p>
-    <h4>Subheading #2</h4>
-    <p>Lorem ispium diaz. Check us out on our awesome channel. Lorem ispium diaz. Check us out on
-      our awesome channel. Lorem ispium diaz. Check us out on our awesome channel</p>
-  </article>
+  ${this.renderHome()}
 </section>
+<div id="editor">
+  <article contenteditable="true"></article>
+</div>
 </body>
 </html>

@@ -18,6 +18,11 @@ h1 {
   padding: 0 14px;
 }
 
+h1 > span {
+  font-size: 60%;
+  color: #666;
+}
+
 header {
   height: 40px;
 }
@@ -29,13 +34,17 @@ header div.groove {
 
 header nav {
   position: absolute;
-  left: 18%;
+  left: 220px;
 }
 
 header nav ul {
   position: relative;
   top: -8px;
   list-style-type: none;
+}
+
+header nav ul li:hover {
+  background: #9f9f9f;
 }
 
 header nav ul li {
@@ -51,13 +60,15 @@ header nav ul li {
 }
 
 input.searchbox {
-  float: right;
+  position: absolute;
   padding: 3px 8px;
-  margin-right: 10%;
+  left: 640px;
+  margin-top: 8px;
 
   width: 220px;
   outline: none;
-  /*-webkit-border-radius: 2px;*/
+  -webkit-border-radius: 22px;
+  border: 1px solid #aaa;
 }
 
 /** left nav **/
@@ -69,6 +80,7 @@ nav#left {
 }
 
 nav#left ul {
+  margin-left: 10px;
   margin-top: 28px;
   list-style-type: none;
 }
@@ -85,7 +97,11 @@ nav#left ul a {
 }
 
 nav#left ul li:first-child {
-  margin-left: -14px;
+  margin-bottom: 22px;
+}
+
+nav#left ul li.back {
+  margin-left: -19px;
 }
 
 nav#left ul li {
@@ -122,11 +138,11 @@ h4 {
 
 section#main {
   position: absolute;
-  left: 22%;
+  left: 258px;
   right: 0;
   bottom: 0;
   top: 49px;
-  overflow: auto;
+  overflow-y: auto;
 }
 
 article {
@@ -135,7 +151,7 @@ article {
 }
 
 article a {
-  color: #666;
+  color: #888;
   text-decoration: none;
 }
 
@@ -145,8 +161,7 @@ article a:hover {
 
 article p {
   line-height: 1.3;
-  padding: 4px 8px;
-  /*text-shadow: 1px 1px 1px #fff;*/
+  padding: 4px 8px; /*text-shadow: 1px 1px 1px #fff;*/
 }
 
 article pre {
@@ -162,4 +177,79 @@ article pre {
 pre b {
   font-weight: bold;
   color: #2D8DD5;
+}
+
+article header {
+  float: right;
+  color: #ccc;
+  margin-top: 14px;
+  margin-right: 13px;
+  font-style: italic;
+  font-size: 12px;
+}
+
+article header span.author {
+  font-weight: normal;
+}
+
+/** General action button **/
+button:hover {
+  box-shadow: 0 0 6px #fff;
+}
+
+button {
+  cursor: pointer;
+  padding: 3px 8px;
+  color: white;
+  border: none;
+
+  font-weight: bold;
+  text-shadow: 0px 1px 1px #aaa;
+  /*box-shadow: 0 1px 2px #666;*/
+  box-shadow: 0 0px 2px #222;
+  -webkit-border-radius: 4px;
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    /*from(#409FE8),*/
+    from(#93DDFD),
+    to(#2380c4)
+  );
+}
+
+/** Controls menu **/
+nav#controls {
+  position: absolute;
+  top: 68px;
+  left: 920px;
+  z-index: 999;
+}
+
+nav#controls .edit {
+  display: none;
+}
+
+
+/** Overlay editor **/
+#editor {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+
+  top: 126px;
+  left: 240px;
+  width: 660px;
+  height: 80%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #e4e2e2;
+
+  box-shadow: 2px 4px 12px #555;
+  -webkit-border-radius: 20px;
+}
+
+#editor article {
+  outline: none;
+  padding: 12px 28px 12px 18px;
 }
