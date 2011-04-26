@@ -1,10 +1,13 @@
 package com.google.sitebricks.mail;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Guice;
 import com.google.sitebricks.mail.Mail.Auth;
+import com.google.sitebricks.mail.imap.Folder;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -13,16 +16,46 @@ public class MailClientIntegrationTest {
   public static void main(String...args) throws InterruptedException, ExecutionException {
     Mail mail = Guice.createInjector().getInstance(Mail.class);
 
-    MailClient client = mail.clientOf("imap.gmail.com", 993)
+    final MailClient client = mail.clientOf("imap.gmail.com", 993)
         .connect(Auth.SSL, "telnet.imap@gmail.com", System.getProperty("sitebricks-mail.password"));
 
     List<String> capabilities = client.capabilities();
     System.out.println("CAPS: " + capabilities);
 
-    client.listFolders();
-    System.out.println("Folders retrieved were: ");
+    client.statusOf("[Gmail]/All Mail");
+    ListenableFuture<Folder> future = client.open("[Gmail]/All Mail");
+    final Folder allMail = future.get();
+    System.out.println("Folder opened: " + allMail.getName() + " with count " + allMail.getCount());
 
-    Thread.sleep(100000L);
-    client.disconnect();
+    future.addListener(new Runnable() {
+      @Override
+      public void run() {
+        client.watch(allMail, new FolderObserver() {
+          @Override
+          public void onMailAdded() {
+            System.out.println("New mail arrived!!");
+          }
+
+          @Override
+          public void onMailRemoved() {
+            System.out.println("Old mail removed!!");
+          }
+        });
+
+//        ListenableFuture<List<MessageStatus>> messages = client.list(allMail, 1, allMail.getCount());
+//        try {
+//          System.out.println("Fetched: " + messages.get());
+//        } catch (InterruptedException e) {
+//          e.printStackTrace();
+//        } catch (ExecutionException e) {
+//          e.printStackTrace();
+//        }
+//        client.disconnect();
+
+//        System.exit(0);
+      }
+    }, Executors.newCachedThreadPool());
+
+
   }
 }

@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 public interface Mail {
   AuthBuilder clientOf(String host, int port);
 
-  public enum Auth { PLAIN, SSL }
+  public enum Auth { PLAIN, SSL, OAUTH }
 
   public static interface AuthBuilder {
     AuthBuilder timeout(long amount, TimeUnit unit);

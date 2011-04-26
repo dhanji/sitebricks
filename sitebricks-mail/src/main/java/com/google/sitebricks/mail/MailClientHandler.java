@@ -1,7 +1,5 @@
 package com.google.sitebricks.mail;
 
-import com.google.common.collect.MapMaker;
-import com.google.sitebricks.mail.imap.Command;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
@@ -11,10 +9,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 
 /**
+ * A command/response handler for a single mail connection/user.
+ *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class MailClientHandler extends SimpleChannelHandler {
@@ -24,11 +25,12 @@ class MailClientHandler extends SimpleChannelHandler {
   private final CountDownLatch loginComplete = new CountDownLatch(2);
   private volatile boolean isLoggedIn = false;
   private volatile List<String> capabilities;
+  private volatile FolderObserver observer;
 
-  private final ConcurrentMap<Command, CommandCompletion> completions = new MapMaker().makeMap();
+  private final Queue<CommandCompletion> completions = new ConcurrentLinkedQueue<CommandCompletion>();
 
-  public void enqueue(Command command, CommandCompletion completion) {
-    completions.put(command, completion);
+  public void enqueue(Long sequence, CommandCompletion completion) {
+    completions.add(completion);
   }
 
   @Override
@@ -37,7 +39,6 @@ class MailClientHandler extends SimpleChannelHandler {
     log.debug("Message received [{}] from {}", e.getMessage(), e.getRemoteAddress());
 
     if (message.startsWith(CAPABILITY_PREFIX)) {
-      log.debug("Capabilities received {}", message);
       this.capabilities = Arrays.asList(
           message.substring(CAPABILITY_PREFIX.length() + 1).split("[ ]+"));
       loginComplete.countDown();
@@ -54,23 +55,30 @@ class MailClientHandler extends SimpleChannelHandler {
       return;
     }
 
+    if (null != observer) {
+      message = message.toLowerCase();
+      if (message.endsWith("exists")) {
+        observer.onMailAdded();
+        return;
+      } else if (message.endsWith("expunge")) {
+        observer.onMailRemoved();
+        return;
+      }
+    }
+
     complete(message);
   }
 
   private void complete(String message) {
-    Command command = Command.response(message);
-    if (command == null) {
-      log.error("Could not find the command that the received message was a response to {}",
-          message);
-      return;
-    }
-    CommandCompletion completion = completions.remove(command);
+    CommandCompletion completion = completions.peek();
     if (completion == null) {
-      log.error("Could not find the completion for command {} (Was it ever issued?)", command);
+      log.error("Could not find the completion for message {} (Was it ever issued?)", message);
       return;
     }
 
-    completion.complete(message);
+    if (completion.complete(message)) {
+      completions.poll();
+    }
   }
 
   @Override
@@ -88,5 +96,14 @@ class MailClientHandler extends SimpleChannelHandler {
     } catch (InterruptedException e) {
       throw new RuntimeException("Interruption while awaiting server login", e);
     }
+  }
+
+  /**
+   * Registers a FolderObserver to receive events happening with a particular
+   * folder. Typically an IMAP IDLE feature. If called multiple times, will
+   * overwrite the currently set observer.
+   */
+  void observe(FolderObserver observer) {
+    this.observer = observer;
   }
 }

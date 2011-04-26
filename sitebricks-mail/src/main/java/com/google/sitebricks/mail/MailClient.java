@@ -1,6 +1,9 @@
 package com.google.sitebricks.mail;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.sitebricks.mail.imap.Folder;
+import com.google.sitebricks.mail.imap.FolderStatus;
+import com.google.sitebricks.mail.imap.MessageStatus;
 
 import java.util.List;
 
@@ -22,4 +25,14 @@ public interface MailClient {
   List<String> capabilities();
 
   ListenableFuture<List<String>> listFolders();
+
+  ListenableFuture<FolderStatus> statusOf(String folder);
+
+  ListenableFuture<Folder> open(String folder);
+
+  ListenableFuture<List<MessageStatus>> list(Folder folder, int start, int end);
+
+  void watch(Folder folder, FolderObserver observer);
+
+  void unwatch();
 }
