@@ -3,6 +3,8 @@ package com.google.sitebricks.mail;
 import com.google.common.base.Preconditions;
 import com.google.sitebricks.mail.Mail.AuthBuilder;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -13,6 +15,9 @@ class SitebricksMail implements Mail, AuthBuilder {
   private int port;
 
   private long timeout;
+
+  private ExecutorService bossPool;
+  private ExecutorService workerPool;
 
   @Override
   public AuthBuilder clientOf(String host, int port) {
@@ -32,12 +37,26 @@ class SitebricksMail implements Mail, AuthBuilder {
   }
 
   @Override
+  public AuthBuilder executors(ExecutorService bossPool, ExecutorService workerPool) {
+    Preconditions.checkArgument(bossPool != null, "Boss executor cannot be null!");
+    Preconditions.checkArgument(workerPool != null, "Worker executor cannot be null!");
+    this.bossPool = bossPool;
+    this.workerPool = workerPool;
+    return this;
+  }
+
+  @Override
   public MailClient connect(Auth authType, String username, String password) {
+    if (null == bossPool) {
+      bossPool = Executors.newCachedThreadPool();
+      workerPool = Executors.newCachedThreadPool();
+    }
+
     MailClientConfig config = new MailClientConfig(host, port, authType, username,
         password, timeout);
     MailClientHandler mailClientHandler = new MailClientHandler();
     MailClient client = new NettyImapClient(new MailClientPipelineFactory(mailClientHandler,
-        config), config, mailClientHandler);
+        config), config, mailClientHandler, bossPool, workerPool);
 
     // Blocks until connected (timeout specified in config).
     client.connect();

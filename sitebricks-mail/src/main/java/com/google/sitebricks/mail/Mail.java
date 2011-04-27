@@ -2,6 +2,7 @@ package com.google.sitebricks.mail;
 
 import com.google.inject.ImplementedBy;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -15,6 +16,8 @@ public interface Mail {
 
   public static interface AuthBuilder {
     AuthBuilder timeout(long amount, TimeUnit unit);
+
+    AuthBuilder executors(ExecutorService bossPool, ExecutorService workerPool);
 
     MailClient connect(Auth authType, String username, String password);
   }

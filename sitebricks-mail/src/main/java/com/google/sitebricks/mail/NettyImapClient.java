@@ -16,10 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -28,11 +25,8 @@ import java.util.concurrent.atomic.AtomicLong;
 class NettyImapClient implements MailClient {
   private static final Logger log = LoggerFactory.getLogger(NettyImapClient.class);
 
-  private ExecutorService workerPool = Executors.newCachedThreadPool();
-  private final ClientBootstrap bootstrap = new ClientBootstrap(
-      new NioClientSocketChannelFactory(
-          Executors.newCachedThreadPool(),
-          workerPool));
+  private final ExecutorService workerPool;
+  private final ClientBootstrap bootstrap;
 
   private final MailClientConfig config;
   private final MailClientHandler mailClientHandler;
@@ -42,11 +36,19 @@ class NettyImapClient implements MailClient {
 
   private volatile Folder currentFolder = null;
 
-  public NettyImapClient(MailClientPipelineFactory pipelineFactory, MailClientConfig config,
-                         MailClientHandler mailClientHandler) {
+  public NettyImapClient(MailClientPipelineFactory pipelineFactory,
+                         MailClientConfig config,
+                         MailClientHandler mailClientHandler,
+                         ExecutorService bossPool,
+                         ExecutorService workerPool) {
+    this.workerPool = workerPool;
+    this.bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
+          bossPool,
+          workerPool));
+
     this.config = config;
     this.mailClientHandler = mailClientHandler;
-    bootstrap.setPipelineFactory(pipelineFactory);
+    this.bootstrap.setPipelineFactory(pipelineFactory);
   }
 
   /**
@@ -87,12 +89,16 @@ class NettyImapClient implements MailClient {
     // Shut down all thread pools and exit.
     channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
     bootstrap.releaseExternalResources();
+
+    // TODO Shut down thread pools?
   }
 
   <D> ChannelFuture send(Command command, String args, ValueFuture<D> valueFuture) {
     Long seq = sequence.incrementAndGet();
 
-    String commandString = seq + " " + command.toString() + " " + args + "\r\n";
+    String commandString = seq + " " + command.toString()
+        + (null == args ? "" : " " + args)
+        + "\r\n";
     log.debug("Sending {} to server...", commandString);
 
     // Enqueue command.
@@ -134,9 +140,9 @@ class NettyImapClient implements MailClient {
         try {
           currentFolder = valueFuture.get();
         } catch (InterruptedException e) {
-          e.printStackTrace();
+          log.error("Interrupted while attempting to open a folder", e);
         } catch (ExecutionException e) {
-          e.printStackTrace();
+          log.error("Execution exception while attempting to open a folder", e);
         }
       }
     }, workerPool);
@@ -165,7 +171,8 @@ class NettyImapClient implements MailClient {
   public void watch(Folder folder, FolderObserver observer) {
     checkCurrentFolder(folder);
 
-    channel.write(". " + Command.IDLE.toString() + "\r\n");
+    send(Command.IDLE, null, ValueFuture.<Object>create());
+//    channel.write(". " + Command.IDLE.toString() + "\r\n");
 
     mailClientHandler.observe(observer);
   }
