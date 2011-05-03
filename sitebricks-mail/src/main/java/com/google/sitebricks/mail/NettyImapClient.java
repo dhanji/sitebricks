@@ -3,10 +3,7 @@ package com.google.sitebricks.mail;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ValueFuture;
-import com.google.sitebricks.mail.imap.Command;
-import com.google.sitebricks.mail.imap.Folder;
-import com.google.sitebricks.mail.imap.FolderStatus;
-import com.google.sitebricks.mail.imap.MessageStatus;
+import com.google.sitebricks.mail.imap.*;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -16,7 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -168,11 +167,24 @@ class NettyImapClient implements MailClient {
   }
 
   @Override
+  public ListenableFuture<List<Message>> fetch(Folder folder, int start, int end) {
+    checkCurrentFolder(folder);
+    Preconditions.checkArgument(start <= end, "Start must be <= end");
+    Preconditions.checkArgument(start > 0, "Start must be greater than zero (IMAP uses 1-based " +
+        "indexing)");
+    ValueFuture<List<Message>> valueFuture = ValueFuture.create();
+
+    String args = start + ":" + end + " all";
+    send(Command.FETCH_FULL, args, valueFuture);
+
+    return valueFuture;
+  }
+
+  @Override
   public void watch(Folder folder, FolderObserver observer) {
     checkCurrentFolder(folder);
 
     send(Command.IDLE, null, ValueFuture.<Object>create());
-//    channel.write(". " + Command.IDLE.toString() + "\r\n");
 
     mailClientHandler.observe(observer);
   }

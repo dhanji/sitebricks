@@ -1,0 +1,20 @@
+("Fri, 8 Apr 2011 23:12:09 -0700"
+ "Get Gmail on your mobile phone"
+  (("Gmail Team" NIL "mail-noreply" "google.com")) from
+   (("Gmail Team" NIL "mail-noreply" "google.com")) sender
+    (("Gmail Team" NIL "mail-noreply" "google.com")) reply-to
+     (("imap test" NIL "telnet.imap" "gmail.com")) to
+      NIL NIL NIL cc/bcc?
+      "<BANLkTi=zC_UQExUuaNqiP0dJXoswDej1Ww@mail.gmail.com>")
+
+
+("Tue, 26 Apr 2011 23:02:08 +1000"
+ "Fwd: test push"
+  (("Dhanji R. Prasanna" NIL "dhanji" "gmail.com")) from
+   (("Dhanji R. Prasanna" NIL "dhanji" "gmail.com")) sender
+    (("Dhanji R. Prasanna" NIL "dhanji" "gmail.com")) reply-to
+     ((NIL NIL "telnet.imap" "gmail.com")) to
+      NIL cc
+       NIL bcc
+       "<BANLkTimjaJFW9=GpE=SUiBWi=jP7eW0ZTA@mail.gmail.com>" in-reply-to
+       "<BANLkTi=YD8t1Wa_riCpZS0Ew2ydj1vD1jg@mail.gmail.com>")

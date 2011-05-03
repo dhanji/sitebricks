@@ -14,11 +14,22 @@ public class MessageStatus {
   private final String subject;
   private final EnumSet<Flag> flags;
 
-  public MessageStatus(String messageUid, Date receivedDate, String subject, EnumSet<Flag> flags) {
+  private final String from;
+  private final String sender;
+  private final String replyTo;
+
+  public MessageStatus(String messageUid,
+                       Date receivedDate,
+                       String subject,
+                       EnumSet<Flag> flags,
+                       String from, String sender, String replyTo) {
     this.messageUid = messageUid;
     this.receivedDate = receivedDate;
     this.subject = subject;
     this.flags = flags;
+    this.from = from;
+    this.sender = sender;
+    this.replyTo = replyTo;
   }
 
   public String getMessageUid() {
@@ -44,6 +55,9 @@ public class MessageStatus {
         ", receivedDate=" + receivedDate +
         ", subject='" + subject + '\'' +
         ", flags=" + flags +
+        ", from='" + from + '\'' +
+        ", sender='" + sender + '\'' +
+        ", replyTo='" + replyTo + '\'' +
         '}';
   }
 }

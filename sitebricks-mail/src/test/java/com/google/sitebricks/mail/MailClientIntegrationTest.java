@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Guice;
 import com.google.sitebricks.mail.Mail.Auth;
 import com.google.sitebricks.mail.imap.Folder;
+import com.google.sitebricks.mail.imap.MessageStatus;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -30,29 +31,29 @@ public class MailClientIntegrationTest {
     future.addListener(new Runnable() {
       @Override
       public void run() {
-        client.watch(allMail, new FolderObserver() {
-          @Override
-          public void onMailAdded() {
-            System.out.println("New mail arrived!!");
-          }
+//        client.watch(allMail, new FolderObserver() {
+//          @Override
+//          public void onMailAdded() {
+//            System.out.println("New mail arrived!!");
+//          }
+//
+//          @Override
+//          public void onMailRemoved() {
+//            System.out.println("Old mail removed!!");
+//          }
+//        });
 
-          @Override
-          public void onMailRemoved() {
-            System.out.println("Old mail removed!!");
-          }
-        });
+        ListenableFuture<List<MessageStatus>> messages = client.list(allMail, 1, allMail.getCount());
+        try {
+          System.out.println("Fetched: " + messages.get());
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        } catch (ExecutionException e) {
+          e.printStackTrace();
+        }
+        client.disconnect();
 
-//        ListenableFuture<List<MessageStatus>> messages = client.list(allMail, 1, allMail.getCount());
-//        try {
-//          System.out.println("Fetched: " + messages.get());
-//        } catch (InterruptedException e) {
-//          e.printStackTrace();
-//        } catch (ExecutionException e) {
-//          e.printStackTrace();
-//        }
-//        client.disconnect();
-
-//        System.exit(0);
+        System.exit(0);
       }
     }, Executors.newCachedThreadPool());
 

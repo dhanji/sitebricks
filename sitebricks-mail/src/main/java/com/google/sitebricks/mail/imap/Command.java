@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public enum Command {
   LIST_FOLDERS("list"),
-  FETCH("fetch"),
+  FETCH_FULL("fetch"),
   FOLDER_STATUS("status"),
   FOLDER_OPEN("select"),
   FETCH_HEADERS("fetch"),

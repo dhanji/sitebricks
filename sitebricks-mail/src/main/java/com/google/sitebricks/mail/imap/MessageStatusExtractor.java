@@ -57,18 +57,22 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     // First piece is always the received date.
     String receivedDateRaw = tokens.get(0);
     String subject = tokens.get(1);
-    String senderName = tokens.get(2);
 
-    // sender/recipient addresses are a bit funky.
+    // sender/recipient etc. are parsed as 4-part address structures.
+    String from = parseAddress(tokens, 2);
+    String sender = parseAddress(tokens, 5);
+    String replyTo = "";//parseAddress(tokens, 9);
 
     // Skip ahead to last-but-one (message uid).
     String messageUidRaw = tokens.get(tokens.size() - 2);
-    String messageUid = messageUidRaw.substring(messageUidRaw.indexOf('<'),
-        messageUidRaw.length() - 1);
+    String messageUid = "";
+//        messageUidRaw.substring(messageUidRaw.indexOf('<'),
+//        messageUidRaw.length() - 1);
 
     // Last token is the combined Flags and internaldate token.
     EnumSet<Flag> flags = EnumSet.noneOf(Flag.class);
     String last = tokens.get(tokens.size() - 1);
+    System.out.println(tokens);
     for (String fragment : last.split("[ ]+")) {
       if (fragment.startsWith("\\")) {
         // This is an IMAP flag. Do something with it.
@@ -97,17 +101,66 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       throw new RuntimeException("Unable to parse date from " + last, e);
     }
 
-    return new MessageStatus(messageUid, internalDate, subject, flags);
+    return new MessageStatus(messageUid, internalDate, subject, flags, from, sender, replyTo);
+  }
+
+  private static String parseAddress(List<String> tokens, int start) {
+    StringBuilder builder = new StringBuilder();
+
+    // Name of addressee.
+    String token = tokens.get(start);
+    if (isValid(token)) {
+      builder.append('"');
+      builder.append(token);
+      builder.append("\" ");
+    }
+
+    // Build the email address itself.
+    // TODO: Im not really sure what the start + 1 field is supposed to be.
+    token = tokens.get(start + 1);
+    builder.append(token);
+    builder.append('@');
+    builder.append(tokens.get(start + 2));
+
+    return builder.toString();
+  }
+
+  private static boolean isValid(String token) {
+    return !"NIL".equalsIgnoreCase(token);
   }
 
   private static List<String> tokenize(String message) {
+    System.out.println(message);
     List<String> pieces = Lists.newArrayList();
     char[] chars = message.toCharArray();
     boolean inString = false;
+    int paren = 0;
     StringBuilder token = new StringBuilder();
     for (int i = 0; i < chars.length; i++) {
       char c = chars[i];
-      if (c == '"') {
+
+      // Skip top-level parentheticals, but honor 2nd-level ones.
+      if (!inString) {
+        if (c == '(') {
+          paren++;
+//          if (paren < 2) { // Skip 2 levels
+            continue;
+//          }
+          
+        } else if (c == ')') {
+          paren--;
+
+          // Time to bake this as a token (skip top level).
+          if (paren > 1) {
+//            token.append(c);
+            pieces.add(token.toString().trim());
+            token = new StringBuilder();
+          }
+          continue;
+        }
+      }      
+
+      if (c == '"' && paren < 2) {
 
         // Close of string, bake this token.
         if (inString) {
@@ -120,12 +173,14 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         continue;
       }
 
-      // Skip parentheticals
-      if (!inString && (c == '(' || c == ')')) {
-        continue;
-      }
-
       token.append(c);
+    }
+
+    System.out.println();
+    System.out.println();
+    System.out.println();
+    for (String piece : pieces) {
+      System.out.println(piece);
     }
     return pieces;
   }
