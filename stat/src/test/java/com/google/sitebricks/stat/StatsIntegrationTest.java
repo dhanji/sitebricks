@@ -53,19 +53,21 @@ public class StatsIntegrationTest {
     // Here we check the value of the field, NUMBER_OF_CALLS
     StatDescriptor numberOfCallsDescriptor =
         getByName(DummyService.NUMBER_OF_CALLS, snapshot);
+    String numberOfCallsValue = (String) snapshot.get(numberOfCallsDescriptor);
+    assertEquals(String.valueOf(service.getCalls()), numberOfCallsValue);
 
     // Here we check the value of the method, CALL_LATENCY_NS
     StatDescriptor callLatencyNsDescriptor =
         getByName(DummyService.CALL_LATENCY_NS, snapshot);
+    String callLatencyValue = (String) snapshot.get(callLatencyNsDescriptor);
+    assertEquals(service.getCallLatencyMs().toString(), callLatencyValue);
   }
 
   /**
-   * This test illustrates how stats are not published from parent classes.
-   * Adding such behavior is a TODO, as it most likely would be the expected
-   * behavior.
+   * This test illustrates how stats are published from parent classes when
+   * a child class is published.
    */
-  @Test
-  public void testPublishingStatsInChildService() {
+  @Test public void testPublishingStatsInChildService() {
     ChildDummyService service = injector.getInstance(ChildDummyService.class);
 
     service.call();
@@ -74,13 +76,25 @@ public class StatsIntegrationTest {
     Stats stats = injector.getInstance(Stats.class);
     ImmutableMap<StatDescriptor, Object> snapshot = stats.snapshot();
 
-    assertEquals(snapshot.size(), 1);
+    // We expect 1 stat from the child class and 2 from its parent
+    assertEquals(snapshot.size(), 3);
     StatDescriptor numberOfChildCallsDescriptor =
         getByName(ChildDummyService.NUMBER_OF_CHILD_CALLS, snapshot);
     String numberOfChildCallsValue =
         (String) snapshot.get(numberOfChildCallsDescriptor);
     assertEquals(
         String.valueOf(service.getChildCalls()), numberOfChildCallsValue);
+
+    // Below we check the value of the stats on the parent class
+    StatDescriptor numberOfCallsDescriptor =
+        getByName(DummyService.NUMBER_OF_CALLS, snapshot);
+    String numberOfCallsValue = (String) snapshot.get(numberOfCallsDescriptor);
+    assertEquals(String.valueOf(service.getCalls()), numberOfCallsValue);
+
+    StatDescriptor callLatencyNsDescriptor =
+        getByName(DummyService.CALL_LATENCY_NS, snapshot);
+    String callLatencyValue = (String) snapshot.get(callLatencyNsDescriptor);
+    assertEquals(service.getCallLatencyMs().toString(), callLatencyValue);
   }
 
   @Test

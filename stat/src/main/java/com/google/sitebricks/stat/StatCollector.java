@@ -32,8 +32,6 @@ import java.util.List;
  *
  * @author ffaber@gmail.com (Fred Faber)
  */
-// TODO(ffaber): add logic to climb the class hierarchy and pull in members
-// of super types.
 class StatCollector
     implements Function<Class<?>, List<MemberAnnotatedWithAtStat>> {
 
@@ -62,19 +60,28 @@ class StatCollector
     this.staticMemberPolicy = staticMemberPolicy;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * <p>Climbs the class hierarchy finding all annotated members.
+   */
   @Override public List<MemberAnnotatedWithAtStat> apply(Class<?> clazz) {
     List<MemberAnnotatedWithAtStat> annotatedMembers = Lists.newArrayList();
 
-    for (Method method : clazz.getDeclaredMethods()) {
-      Stat stat = method.getAnnotation(Stat.class);
-      if (stat != null && staticMemberPolicy.shouldAccept(method)) {
-        annotatedMembers.add(new MemberAnnotatedWithAtStat(stat, method));
+    for (Class<?> currentClass = clazz;
+        currentClass != Object.class;
+        currentClass = currentClass.getSuperclass()) {
+      for (Method method : currentClass.getDeclaredMethods()) {
+        Stat stat = method.getAnnotation(Stat.class);
+        if (stat != null && staticMemberPolicy.shouldAccept(method)) {
+          annotatedMembers.add(new MemberAnnotatedWithAtStat(stat, method));
+        }
       }
-    }
-    for (Field field : clazz.getDeclaredFields()) {
-      Stat stat = field.getAnnotation(Stat.class);
-      if (stat != null && staticMemberPolicy.shouldAccept(field)) {
-        annotatedMembers.add(new MemberAnnotatedWithAtStat(stat, field));
+      for (Field field : currentClass.getDeclaredFields()) {
+        Stat stat = field.getAnnotation(Stat.class);
+        if (stat != null && staticMemberPolicy.shouldAccept(field)) {
+          annotatedMembers.add(new MemberAnnotatedWithAtStat(stat, field));
+        }
       }
     }
 
