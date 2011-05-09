@@ -22,6 +22,9 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
   private static final String ENVELOPE_PREFIX = "(ENVELOPE ";
   private static final String INTERNALDATE = "INTERNALDATE";
 
+  static final String RECEIVED_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss ZZZZZ";
+  static final String INTERNAL_DATE_FORMAT = "dd-MMM-yyyy HH:mm:ss ZZZZZ";
+
   @Override
   public List<MessageStatus> extract(List<String> messages) {
     List<MessageStatus> statuses = Lists.newArrayList();
@@ -60,19 +63,22 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
 
     // sender/recipient etc. are parsed as 4-part address structures.
     String from = parseAddress(tokens, 2);
-    String sender = parseAddress(tokens, 5);
-    String replyTo = "";//parseAddress(tokens, 9);
+    String sender = parseAddress(tokens, 3);
+    String replyTo = parseAddress(tokens, 4);
+    String to = parseAddress(tokens, 5); // TODO handle multiple recipients.
+    
+
+    // TODO Should we reimplement the parser to split these NIL tokens? Yes, I think so.
+    System.out.println(tokens.get(6));
 
     // Skip ahead to last-but-one (message uid).
     String messageUidRaw = tokens.get(tokens.size() - 2);
-    String messageUid = "";
-//        messageUidRaw.substring(messageUidRaw.indexOf('<'),
-//        messageUidRaw.length() - 1);
+    String messageUid = messageUidRaw.substring(messageUidRaw.indexOf('<') + 1,
+        messageUidRaw.length() - 1);
 
     // Last token is the combined Flags and internaldate token.
     EnumSet<Flag> flags = EnumSet.noneOf(Flag.class);
     String last = tokens.get(tokens.size() - 1);
-    System.out.println(tokens);
     for (String fragment : last.split("[ ]+")) {
       if (fragment.startsWith("\\")) {
         // This is an IMAP flag. Do something with it.
@@ -93,19 +99,23 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     // Parse date from this final piece.
     Date internalDate, receivedDate;
     try {
-      SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss ZZZZZ");
+      SimpleDateFormat dateFormat = new SimpleDateFormat(INTERNAL_DATE_FORMAT);
       internalDate = dateFormat.parse(last);
-//      receivedDate = dateFormat.parse(receivedDateRaw);
+      dateFormat = new SimpleDateFormat(RECEIVED_DATE_FORMAT);
+      receivedDate = dateFormat.parse(receivedDateRaw);
 
     } catch (ParseException e) {
-      throw new RuntimeException("Unable to parse date from " + last, e);
+      throw new RuntimeException("Unable to parse date from " + receivedDateRaw, e);
     }
 
-    return new MessageStatus(messageUid, internalDate, subject, flags, from, sender, replyTo);
+    return new MessageStatus(messageUid, receivedDate, internalDate, subject, flags, from, sender,
+        replyTo);
   }
 
   private static String parseAddress(List<String> tokens, int start) {
     StringBuilder builder = new StringBuilder();
+    tokens = tokenize(tokens.get(start));
+    start = 0;
 
     // Name of addressee.
     String token = tokens.get(start);
@@ -116,11 +126,23 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     }
 
     // Build the email address itself.
-    // TODO: Im not really sure what the start + 1 field is supposed to be.
+    // TODO: Im not really sure what the start + 1 field is supposed to be (see addresses RFC).
     token = tokens.get(start + 1);
+    String[] pieces = token.split("[ ]+");
+
+    // Strip out any NIL components and rebuild the email address token.
+    StringBuilder smaller = new StringBuilder();
+    for (String piece : pieces) {
+      if (isValid(piece))
+        smaller.append(piece);
+    }
+    token = smaller.toString();
+
+    builder.append('<');
     builder.append(token);
     builder.append('@');
     builder.append(tokens.get(start + 2));
+    builder.append('>');
 
     return builder.toString();
   }
@@ -130,7 +152,6 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
   }
 
   private static List<String> tokenize(String message) {
-    System.out.println(message);
     List<String> pieces = Lists.newArrayList();
     char[] chars = message.toCharArray();
     boolean inString = false;
@@ -176,12 +197,6 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       token.append(c);
     }
 
-    System.out.println();
-    System.out.println();
-    System.out.println();
-    for (String piece : pieces) {
-      System.out.println(piece);
-    }
     return pieces;
   }
 }

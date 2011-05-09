@@ -11,6 +11,7 @@ import java.util.EnumSet;
 public class MessageStatus {
   private final String messageUid;
   private final Date receivedDate;
+  private final Date internalDate;
   private final String subject;
   private final EnumSet<Flag> flags;
 
@@ -20,11 +21,13 @@ public class MessageStatus {
 
   public MessageStatus(String messageUid,
                        Date receivedDate,
+                       Date internalDate,
                        String subject,
                        EnumSet<Flag> flags,
                        String from, String sender, String replyTo) {
     this.messageUid = messageUid;
     this.receivedDate = receivedDate;
+    this.internalDate = internalDate;
     this.subject = subject;
     this.flags = flags;
     this.from = from;
@@ -40,6 +43,10 @@ public class MessageStatus {
     return receivedDate;
   }
 
+  public Date getInternalDate() {
+    return internalDate;
+  }
+
   public String getSubject() {
     return subject;
   }
@@ -53,6 +60,7 @@ public class MessageStatus {
     return "MessageStatus{" +
         "messageUid='" + messageUid + '\'' +
         ", receivedDate=" + receivedDate +
+        ", internalDate=" + internalDate +
         ", subject='" + subject + '\'' +
         ", flags=" + flags +
         ", from='" + from + '\'' +
