@@ -26,7 +26,10 @@
     <module>sitebricks-client</module>
     <module>sitebricks-converter</module>
     <module>sitebricks-acceptance-tests</module>
+    <!--
+    We'll move the examples to their own repo shortly
     <module>sitebricks-web</module>
+    -->
     <module>sitebricks-mail</module>
     <module>sitebricks-options</module>
     <module>sitebricks-jetty-archetype</module>
