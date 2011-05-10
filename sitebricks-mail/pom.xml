@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.google.sitebricks</groupId>
     <artifactId>sitebricks-parent</artifactId>
-    <version>0.8.5</version>
+    <version>0.8.6-SNAPSHOT</version>
   </parent>
   <artifactId>sitebricks-mail</artifactId>
   <name>Sitebricks :: Mail Client</name>
@@ -23,7 +23,7 @@
     <dependency>
       <groupId>com.google.sitebricks</groupId>
       <artifactId>sitebricks</artifactId>
-      <version>0.8.5</version>
+      <version>0.8.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.jboss.netty</groupId>
