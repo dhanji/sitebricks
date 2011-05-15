@@ -546,7 +546,8 @@ public class HtmlParser {
   }
 
   private void whitespace() {
-    if (tq.peek().equals(Character.LINE_SEPARATOR)) linecount++;
+    if (tq.peek() == Character.LINE_SEPARATOR)
+      linecount++;
     tq.consumeWhitespace();
   }
 
