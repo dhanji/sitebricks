@@ -8,17 +8,24 @@ import com.google.sitebricks.compiler.EvaluatorCompiler;
 import com.google.sitebricks.compiler.ExpressionCompileException;
 import com.google.sitebricks.compiler.HtmlTemplateCompilerTest;
 import com.google.sitebricks.compiler.MvelEvaluatorCompiler;
+import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.routing.PageBook;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.eq;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -117,7 +124,7 @@ public class EmbedWidgetTest {
         .andReturn(myEmbeddedPage);
 
     expect(page.doMethod(isA(String.class), anyObject(), isA(String.class),
-        isA(HttpServletRequest.class)))
+        isA(Request.class)))
         .andReturn(null);
     expect(page.widget())
         .andReturn(widget);
@@ -188,7 +195,7 @@ public class EmbedWidgetTest {
         .andReturn(myEmbeddedPage);
 
     expect(page.doMethod(isA(String.class), anyObject(), isA(String.class),
-        isA(HttpServletRequest.class)))
+        isA(Request.class)))
         .andReturn(null);
     expect(page.widget())
         .andReturn(bodyWrapper);
@@ -251,7 +258,7 @@ public class EmbedWidgetTest {
         .andReturn(myEmbeddedPage);
 
     expect(page.doMethod(isA(String.class), anyObject(), isA(String.class),
-        isA(HttpServletRequest.class)))
+        isA(Request.class)))
         .andReturn(null);
     expect(page.widget())
         .andReturn(bodyWrapper);
@@ -316,7 +323,7 @@ public class EmbedWidgetTest {
         .andReturn(myEmbeddedPage);
 
     expect(page.doMethod(isA(String.class), anyObject(), isA(String.class),
-        isA(HttpServletRequest.class)))
+        isA(Request.class)))
         .andReturn(null);
     expect(page.widget())
         .andReturn(widget);
@@ -362,7 +369,7 @@ public class EmbedWidgetTest {
 
 
     expect(page.doMethod(isA(String.class), anyObject(), isA(String.class),
-        isA(HttpServletRequest.class)))
+        isA(Request.class)))
         .andReturn(null);
     expect(page.widget())
         .andReturn(widget);
@@ -404,7 +411,7 @@ public class EmbedWidgetTest {
         .andReturn(myEmbeddedPage);
 
     expect(page.doMethod(isA(String.class), anyObject(), isA(String.class),
-        isA(HttpServletRequest.class)))
+        isA(Request.class)))
         .andReturn(null);
 
     expect(page.widget())
@@ -444,7 +451,7 @@ public class EmbedWidgetTest {
         .andReturn(myEmbeddedPage);
 
     expect(page.doMethod(isA(String.class), anyObject(), isA(String.class),
-        isA(HttpServletRequest.class)))
+        isA(Request.class)))
         .andReturn(null);
     expect(page.widget())
         .andReturn(widget);

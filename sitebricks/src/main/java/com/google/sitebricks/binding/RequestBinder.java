@@ -1,8 +1,7 @@
 package com.google.sitebricks.binding;
 
 import com.google.inject.ImplementedBy;
-
-import javax.servlet.http.HttpServletRequest;
+import com.google.sitebricks.headless.Request;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -11,5 +10,5 @@ import javax.servlet.http.HttpServletRequest;
 public interface RequestBinder {
     String COLLECTION_BIND_PREFIX = "[C/";
 
-    void bind(HttpServletRequest request, Object o);
+    void bind(Request request, Object o);
 }

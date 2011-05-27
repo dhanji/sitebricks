@@ -4,15 +4,11 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.sitebricks.headless.Reply;
+import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.routing.RoutingDispatcher;
 import net.jcip.annotations.Immutable;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -27,12 +23,15 @@ class SitebricksFilter implements Filter {
   private final Provider<Bootstrapper> bootstrapper;
   private final Provider<Shutdowner> teardowner;
 
+  private final Provider<Request> requestProvider;
+
   @Inject
   public SitebricksFilter(RoutingDispatcher dispatcher, Provider<Bootstrapper> bootstrapper,
-                          Provider<Shutdowner> teardowner) {
+                          Provider<Shutdowner> teardowner, Provider<Request> requestProvider) {
     this.dispatcher = dispatcher;
     this.bootstrapper = bootstrapper;
     this.teardowner = teardowner;
+    this.requestProvider = requestProvider;
   }
 
   public void init(FilterConfig filterConfig) throws ServletException {
@@ -43,15 +42,15 @@ class SitebricksFilter implements Filter {
                        FilterChain filterChain)
       throws IOException, ServletException {
 
-    HttpServletRequest request = (HttpServletRequest) servletRequest;
+    HttpServletRequest requestProvider = (HttpServletRequest) servletRequest;
     HttpServletResponse response = (HttpServletResponse) servletResponse;
 
     //dispatch
-    final Respond respond = dispatcher.dispatch(request, response);
+    final Respond respond = dispatcher.dispatch(this.requestProvider.get(), response);
 
     //was there any matching page? (if it was a headless response, we don't need to do anything).
     // Also we do not do anything if the page elected to do nothing.
-    if (null != respond && null == request.getAttribute(Reply.NO_REPLY_ATTR)) {
+    if (null != respond && null == requestProvider.getAttribute(Reply.NO_REPLY_ATTR)) {
 
       // Only use the string rendering pipeline if this is not a headless request.
       if (Respond.HEADLESS != respond) {
@@ -73,7 +72,7 @@ class SitebricksFilter implements Filter {
       }
     } else {
       //continue down filter-chain
-      filterChain.doFilter(request, response);
+      filterChain.doFilter(requestProvider, response);
     }
   }
 

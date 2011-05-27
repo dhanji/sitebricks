@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.sitebricks.compiler.TemplateCompileException;
+import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.Production;
 import com.google.sitebricks.routing.RoutingDispatcher;
@@ -11,7 +12,6 @@ import com.google.sitebricks.routing.SystemMetrics;
 import net.jcip.annotations.ThreadSafe;
 import org.mvel2.PropertyAccessException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -45,14 +45,14 @@ class DebugModeRoutingDispatcher implements RoutingDispatcher {
   }
 
 
-  public Respond dispatch(HttpServletRequest request, HttpServletResponse response)
+  public Respond dispatch(Request request, HttpServletResponse response)
       throws IOException {
     long start = System.currentTimeMillis();
 
     // Attempt to discover page class.
     final PageBook.Page page = pageBook.get(request
-        .getRequestURI()
-        .substring(request.getContextPath().length()));
+        .uri()
+        .substring(request.context().length()));
 
     // This may be a static resource (in which case we dont gather metrics for it).
     Class<?> pageClass = null;

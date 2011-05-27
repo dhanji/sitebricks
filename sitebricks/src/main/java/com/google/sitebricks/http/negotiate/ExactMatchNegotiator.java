@@ -1,11 +1,10 @@
 package com.google.sitebricks.http.negotiate;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
+import com.google.sitebricks.headless.Request;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A strategy for deciding whether or not a header is acceptable to the given
@@ -13,25 +12,29 @@ import java.util.Map;
  * a header annotation to the value of the given header, and is case sensitive.
  */
 class ExactMatchNegotiator implements ContentNegotiator {
-  public boolean shouldCall(Map<String, String> negotiations, HttpServletRequest request) {
-      for (Map.Entry<String, String> negotiate : negotiations.entrySet()) {
+  public boolean shouldCall(Map<String, String> negotiations, Request request) {
+    Multimap<String, String> headers = request.headers();
+    for (Map.Entry<String, String> negotiate : negotiations.entrySet()) {
 
-        @SuppressWarnings("unchecked") // Guaranteed by servlet spec.
-        Enumeration<String> headerValues = request.getHeaders(negotiate.getKey());
+      Collection<String> collectionOfHeader = headers.get(negotiate.getKey());
+      if (null == collectionOfHeader)
+        continue;
+      Iterator<String> headerValues = collectionOfHeader.iterator();
 
-        // Guaranteed never to throw NPE.
-        boolean shouldFire = false;
-        while(headerValues.hasMoreElements()) {
-          String value = headerValues.nextElement();
+      // Guaranteed never to throw NPE.
+      boolean shouldFire = false;
+      while (headerValues.hasNext()) {
+        String value = headerValues.next();
 
-          // Everything has to pass for us to say OK.
-          shouldFire |= Iterables.contains(Arrays.asList(value.split(",[ ]*")), negotiate.getValue());
-        }
-        if (!shouldFire) {
-          return false;
-        }
+        // Everything has to pass for us to say OK.
+        shouldFire |= Iterables.contains(Arrays.asList(value.split(",[ ]*")),
+            negotiate.getValue());
       }
-
-      return true;
+      if (!shouldFire) {
+        return false;
+      }
     }
+
+    return true;
+  }
 }

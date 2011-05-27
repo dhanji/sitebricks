@@ -3,9 +3,11 @@ package com.google.sitebricks.routing;
 import com.google.inject.Provider;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
+import com.google.sitebricks.TestRequestCreator;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.headless.HeadlessRenderer;
+import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.resource.ResourcesService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -23,6 +25,7 @@ import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.matches;
 import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.same;
 import static org.easymock.EasyMock.verify;
 
 /**
@@ -79,7 +82,7 @@ public class WidgetRoutingDispatcherTest {
     expect(pageBook.get("/thing"))
         .andReturn(page);
 
-    binder.bind(request, pageOb);
+    binder.bind(isA(Request.class), same(pageOb));
     expectLastCall().once();
 
     expect(page.isHeadless())
@@ -94,7 +97,7 @@ public class WidgetRoutingDispatcherTest {
     expect(request.getMethod())
         .andReturn("GET");
 
-    expect(page.doMethod("get", pageOb, "/thing", request))
+    expect(page.doMethod(eq("get"), same(pageOb), eq("/thing"), isA(Request.class)))
         .andReturn(null);
 
 
@@ -109,7 +112,8 @@ public class WidgetRoutingDispatcherTest {
         return respond;
       }
     }, createNiceMock(ResourcesService.class), flashCacheProvider,
-        createNiceMock(HeadlessRenderer.class)).dispatch(request, response);
+        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null),
+        response);
 
 
     assert out == respond : "Did not respond correctly";
@@ -129,7 +133,6 @@ public class WidgetRoutingDispatcherTest {
 
     Object pageOb = new Object();
 
-
     expect(request.getRequestURI())
         .andReturn("/thing")
         .anyTimes();
@@ -141,7 +144,7 @@ public class WidgetRoutingDispatcherTest {
     expect(pageBook.get("/thing"))
         .andReturn(page);
 
-    binder.bind(request, pageOb);
+    binder.bind(isA(Request.class), same(pageOb)); 
     expectLastCall().once();
 
 
@@ -162,7 +165,7 @@ public class WidgetRoutingDispatcherTest {
         .andReturn(parameterMap)
         .anyTimes();
 
-    expect(page.doMethod("get", pageOb, "/thing", request))
+    expect(page.doMethod(eq("get"), same(pageOb), eq("/thing"), isA(Request.class)))
         .andReturn(null);
 
     widget.render(pageOb, respond);
@@ -176,7 +179,8 @@ public class WidgetRoutingDispatcherTest {
         return respond;
       }
     }, createNiceMock(ResourcesService.class), flashCacheProvider,
-        createNiceMock(HeadlessRenderer.class)).dispatch(request, response);
+        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null),
+        response);
 
 
     assert out == respond : "Did not respond correctly";
@@ -212,7 +216,7 @@ public class WidgetRoutingDispatcherTest {
     expect(pageBook.get("/thing"))
         .andReturn(page);
 
-    binder.bind(request, pageOb);
+    binder.bind(isA(Request.class), same(pageOb));
     expectLastCall().once();
 
 
@@ -229,7 +233,7 @@ public class WidgetRoutingDispatcherTest {
         .andReturn("POST");
 
     //noinspection unchecked
-    expect(page.doMethod(matches("post"), eq(pageOb), eq("/thing"), isA(HttpServletRequest.class)))
+    expect(page.doMethod(matches("post"), eq(pageOb), eq("/thing"), isA(Request.class)))
         .andReturn(null);
 //        expectLastCall().once();
 
@@ -245,7 +249,8 @@ public class WidgetRoutingDispatcherTest {
         return respond;
       }
     }, createNiceMock(ResourcesService.class), flashCacheProvider,
-        createNiceMock(HeadlessRenderer.class)).dispatch(request, response);
+        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null),
+        response);
 
 
     assert out == respond : "Did not respond correctly";
@@ -280,7 +285,7 @@ public class WidgetRoutingDispatcherTest {
     expect(pageBook.get("/thing"))
         .andReturn(page);
 
-    binder.bind(request, pageOb);
+    binder.bind(isA(Request.class), same(pageOb));
     expectLastCall().once();
 
     expect(page.isHeadless())
@@ -295,7 +300,7 @@ public class WidgetRoutingDispatcherTest {
     respond.redirect(REDIRECTED_POST);
 
     //noinspection unchecked
-    expect(page.doMethod(matches("post"), eq(pageOb), eq("/thing"), isA(HttpServletRequest.class)))
+    expect(page.doMethod(matches("post"), eq(pageOb), eq("/thing"), isA(Request.class)))
         .andReturn(REDIRECTED_POST);
 
 
@@ -310,7 +315,8 @@ public class WidgetRoutingDispatcherTest {
         return respond;
       }
     }, createNiceMock(ResourcesService.class), flashCacheProvider,
-        createNiceMock(HeadlessRenderer.class)).dispatch(request, response);
+        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null),
+        response);
 
 
     assert out == respond : "Did not respond correctly";
@@ -346,7 +352,7 @@ public class WidgetRoutingDispatcherTest {
     expect(pageBook.get("/thing"))
         .andReturn(page);
 
-    binder.bind(request, pageOb);
+    binder.bind(isA(Request.class), same(pageOb));
     expectLastCall().once();
 
     expect(page.isHeadless())
@@ -361,7 +367,7 @@ public class WidgetRoutingDispatcherTest {
     respond.redirect(REDIRECTED_GET);
 
     //noinspection unchecked
-    expect(page.doMethod(matches("get"), eq(pageOb), eq("/thing"), isA(HttpServletRequest.class)))
+    expect(page.doMethod(matches("get"), eq(pageOb), eq("/thing"), isA(Request.class)))
         .andReturn(REDIRECTED_GET);
 
 
@@ -376,7 +382,8 @@ public class WidgetRoutingDispatcherTest {
         return respond;
       }
     }, createNiceMock(ResourcesService.class), flashCacheProvider,
-        createNiceMock(HeadlessRenderer.class)).dispatch(request, response);
+        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null),
+        response);
 
 
     assert out == respond : "Did not respond correctly";
@@ -407,9 +414,11 @@ public class WidgetRoutingDispatcherTest {
 
     replay(request, pageBook, respond, binder);
 
-    Respond out = new WidgetRoutingDispatcher(pageBook, binder, respond, createNiceMock(ResourcesService.class),
+    Respond out = new WidgetRoutingDispatcher(pageBook, binder, respond,
+        createNiceMock(ResourcesService.class),
         flashCacheProvider,
-        createNiceMock(HeadlessRenderer.class)).dispatch(request, response);
+        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null),
+        response);
 
 
     assert out == null : "Did not respond correctly";
@@ -444,7 +453,8 @@ public class WidgetRoutingDispatcherTest {
     replay(request, pageBook, respond, binder, resourcesService);
 
     Respond out = new WidgetRoutingDispatcher(pageBook, binder, respond, resourcesService,
-        flashCacheProvider, createNiceMock(HeadlessRenderer.class)).dispatch(request, response);
+        flashCacheProvider, createNiceMock(HeadlessRenderer.class)).dispatch(
+        TestRequestCreator.from(request, null), response);
 
 
     assert out != null : "Did not respond correctly";

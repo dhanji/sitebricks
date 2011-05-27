@@ -3,6 +3,7 @@ package com.google.sitebricks.binding;
 import com.google.inject.Guice;
 import com.google.inject.Provider;
 import com.google.sitebricks.Evaluator;
+import com.google.sitebricks.TestRequestCreator;
 import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,8 +43,7 @@ public class MvelRequestBinderTest {
       public FlashCache get() {
         return new HttpSessionFlashCache();
       }
-    })
-        .bind(request, o);
+    }).bind(TestRequestCreator.from(request, null), o);
 
     assert "Dhanji".equals(o.getName());
     assert 27 == (o.getAge());
@@ -81,7 +81,7 @@ public class MvelRequestBinderTest {
         return cache;
       }
     })
-        .bind(request, o);
+        .bind(TestRequestCreator.from(request, null), o);
 
     assert choice.equals(o.getSelect()) : "Collection selectee was not bound: " + o.getSelect();
     verify(request);
@@ -114,7 +114,7 @@ public class MvelRequestBinderTest {
         return new HttpSessionFlashCache();
       }
     })
-        .bind(request, o);
+        .bind(TestRequestCreator.from(request, null), o);
 
     assert "Dhanji".equals(o.getName());
     assert 27 == (o.getAge());
@@ -150,7 +150,7 @@ public class MvelRequestBinderTest {
         return new HttpSessionFlashCache();
       }
     })
-        .bind(request, o);
+        .bind(TestRequestCreator.from(request, null), o);
 
   }
 

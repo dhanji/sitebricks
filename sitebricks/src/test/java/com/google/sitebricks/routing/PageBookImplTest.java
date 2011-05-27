@@ -1,31 +1,28 @@
 package com.google.sitebricks.routing;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
+import com.google.common.collect.Iterators;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.name.Named;
+import com.google.sitebricks.*;
+import com.google.sitebricks.headless.Request;
+import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Post;
+import com.google.sitebricks.http.Select;
+import com.google.sitebricks.rendering.EmbedAs;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.name.Named;
-import com.google.sitebricks.At;
-import com.google.sitebricks.Renderable;
-import com.google.sitebricks.Respond;
-import com.google.sitebricks.SitebricksModule;
-import com.google.sitebricks.http.Get;
-import com.google.sitebricks.http.Post;
-import com.google.sitebricks.http.Select;
-import com.google.sitebricks.rendering.EmbedAs;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -371,14 +368,13 @@ public class PageBookImplTest {
       }
     };
 
-    Date date = new Date();
 //    SimpleDateFormat sdf = new SimpleDateFormat(StringToDateTimeCalendarConverter.USA_SHORT);
     
     final PageBook pageBook = new DefaultPageBook(injector);
 //    pageBook.at("/wiki/:title/cat/:int/:bool/:float/:date", MyPageWithPrimitivesTemplate.class);
     pageBook.at("/wiki/:title/cat/:int/:bool/:float", MyPageWithPrimitivesTemplate.class);
 
-    String targetURL = "/wiki/IMAX/cat/1/true/2.5";;
+    String targetURL = "/wiki/IMAX/cat/1/true/2.5";
     PageBook.Page page = pageBook.get(targetURL);
     page.apply(mock);
     final MyPageWithPrimitivesTemplate bound = new MyPageWithPrimitivesTemplate();
@@ -524,13 +520,14 @@ public class PageBookImplTest {
 
   }
 
-  public static HttpServletRequest fakeRequestWithParams(Map<String, String[]> map) {
+  public static Request fakeRequestWithParams(Map<String, String[]> map) {
     HttpServletRequest request = createMock(HttpServletRequest.class);
 
     expect(request.getParameterMap()).andReturn(map);
+    expect(request.getHeaderNames()).andReturn(Iterators.asEnumeration(Iterators.<Object>emptyIterator()));
     replay(request);
 
-    return request;
+    return TestRequestCreator.from(request, null);
   }
 
   @At("/wiki")

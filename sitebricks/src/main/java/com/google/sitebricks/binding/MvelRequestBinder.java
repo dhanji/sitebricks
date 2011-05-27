@@ -1,15 +1,17 @@
 package com.google.sitebricks.binding;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.sitebricks.Evaluator;
+import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.Strings;
 import net.jcip.annotations.Immutable;
 import org.mvel2.PropertyAccessException;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
@@ -34,26 +36,25 @@ class MvelRequestBinder implements RequestBinder {
     this.cacheProvider = cacheProvider;
   }
 
-  public void bind(HttpServletRequest request, Object o) {
-    @SuppressWarnings("unchecked")
-    final Map<String, String[]> map = request.getParameterMap();
+  public void bind(Request request, Object o) {
+    final Multimap<String, String> map = request.params();
 
     //bind iteratively (last incoming param-value per key, gets bound)
-    for (Map.Entry<String, String[]> entry : map.entrySet()) {
+    for (Map.Entry<String, Collection<String>> entry : map.asMap().entrySet()) {
       String key = entry.getKey();
 
       // If there are multiple entry, then this is a collection bind:
-      final String[] values = entry.getValue();
+      final Collection<String> values = entry.getValue();
 
       validate(key);
 
       Object value;
 
-      if (values.length > 1) {
+      if (values.size() > 1) {
         value = Lists.newArrayList(values);
       } else {
         // If there is only one value, bind as per normal
-        String rawValue = values[0];   //choose first (and only value)
+        String rawValue = Iterables.getOnlyElement(values);   //choose first (and only value)
 
         //bind from collection?
         if (rawValue.startsWith(COLLECTION_BIND_PREFIX)) {

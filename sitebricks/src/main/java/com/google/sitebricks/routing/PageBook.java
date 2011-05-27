@@ -6,8 +6,8 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.headless.Request;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
@@ -92,7 +92,7 @@ public interface PageBook {
 
     Object instantiate();
 
-    Object doMethod(String httpMethod, Object page, String pathInfo, HttpServletRequest request);
+    Object doMethod(String httpMethod, Object page, String pathInfo, Request request);
 
     Class<?> pageClass();
 

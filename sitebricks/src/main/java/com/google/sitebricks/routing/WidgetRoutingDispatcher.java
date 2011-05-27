@@ -7,6 +7,7 @@ import com.google.sitebricks.Respond;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.headless.HeadlessRenderer;
+import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.resource.ResourcesService;
 import net.jcip.annotations.Immutable;
 
@@ -39,8 +40,8 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     this.flashCacheProvider = flashCacheProvider;
   }
 
-  public Respond dispatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    String uri = getPathInfo(request);
+  public Respond dispatch(Request request, HttpServletResponse response) throws IOException {
+    String uri = request.path();
 
     //first try dispatching as a static resource service
     Respond respond = resourcesService.serve(uri);
@@ -81,7 +82,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     return respond;
   }
 
-  private void bindAndReply(HttpServletRequest request, HttpServletResponse response,
+  private void bindAndReply(Request request, HttpServletResponse response,
                             PageBook.Page page, Object instance) throws IOException {
     // bind request (sets request params, etc).
     binder.bind(request, instance);
@@ -95,7 +96,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     return request.getRequestURI().substring(request.getContextPath().length());
   }
 
-  private void bindAndRespond(HttpServletRequest request, PageBook.Page page, Respond respond,
+  private void bindAndRespond(Request request, PageBook.Page page, Respond respond,
                               Object instance) {
     //bind request
     binder.bind(request, instance);
@@ -130,14 +131,14 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
 
   // We're sure the request parameter map is a Map<String, String[]>
   @SuppressWarnings("unchecked")
-  private Object fireEvent(HttpServletRequest request, PageBook.Page page, Object instance) {
-    final String method = request.getMethod();
-    final String pathInfo = getPathInfo(request);
+  private Object fireEvent(Request request, PageBook.Page page, Object instance) {
+    final String method = request.method();
+    final String pathInfo = request.path();
 
     return page.doMethod(method.toLowerCase(), instance, pathInfo, request);
   }
 
-  private static String contextualize(HttpServletRequest request, String targetUri) {
-    return request.getContextPath() + targetUri;
+  private static String contextualize(Request request, String targetUri) {
+    return request.context() + targetUri;
   }
 }

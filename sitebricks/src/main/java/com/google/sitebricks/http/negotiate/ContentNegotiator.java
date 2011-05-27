@@ -1,8 +1,8 @@
 package com.google.sitebricks.http.negotiate;
 
 import com.google.inject.ImplementedBy;
+import com.google.sitebricks.headless.Request;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -27,5 +27,5 @@ public interface ContentNegotiator {
    * @param request The current http request to match against.
    * @return True if the negotiation succeeded on this method.
    */
-  boolean shouldCall(Map<String, String> negotiations, HttpServletRequest request);
+  boolean shouldCall(Map<String, String> negotiations, Request request);
 }

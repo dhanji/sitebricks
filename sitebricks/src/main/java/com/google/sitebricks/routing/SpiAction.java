@@ -1,8 +1,8 @@
 package com.google.sitebricks.routing;
 
 import com.google.sitebricks.ActionDescriptor;
+import com.google.sitebricks.headless.Request;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -23,12 +23,12 @@ public class SpiAction implements Action {
   }
 
   @Override
-  public boolean shouldCall(HttpServletRequest request) {
+  public boolean shouldCall(Request request) {
     boolean should;
 
     if (null != selectParams) {
       for (Map.Entry<String, String> select : selectParams.entrySet()) {
-        if (!select.getValue().equals(request.getParameter(select.getKey()))) {
+        if (!select.getValue().equals(request.param(select.getKey()))) {
           should = false;
         }
       }
@@ -36,7 +36,7 @@ public class SpiAction implements Action {
 
     if (null != selectHeaders) {
       for (Map.Entry<String, String> header : selectHeaders.entrySet()) {
-        if (!header.getValue().equals(request.getHeader(header.getKey()))) {
+        if (!header.getValue().equals(request.header(header.getKey()))) {
           should = false;
         }
       }

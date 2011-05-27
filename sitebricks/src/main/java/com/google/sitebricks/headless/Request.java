@@ -73,6 +73,14 @@ public interface Request {
    */
   String header(String name);
 
+  String uri();
+
+  String path();
+
+  String context();
+
+  String method();
+
   public static interface RequestRead<E> {
     E as(Class<? extends Transport> transport);
   }

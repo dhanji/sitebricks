@@ -7,11 +7,11 @@ import com.google.sitebricks.Respond;
 import com.google.sitebricks.compiler.EvaluatorCompiler;
 import com.google.sitebricks.compiler.ExpressionCompileException;
 import com.google.sitebricks.compiler.Token;
+import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.Attributes;
 import com.google.sitebricks.rendering.SelfRendering;
 import net.jcip.annotations.ThreadSafe;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -28,7 +28,7 @@ class XmlWidget implements Renderable {
   private final Map<String, List<Token>> attributes;
 
   // HACK Extremely ouch! Replace with Assisted inject.
-  private static volatile Provider<HttpServletRequest> request;
+  private static volatile Provider<Request> request;
 
   private static final Set<String> CONTEXTUAL_ATTRIBS;
 
@@ -105,7 +105,7 @@ class XmlWidget implements Renderable {
           respond.write(token.render(bound));
         } else {
           respond.write(
-              contextualizeIfNeeded(attribute.getKey(), (0 == i), (String) token.render(bound)));
+              contextualizeIfNeeded(attribute.getKey(), (0 == i), token.render(bound)));
         }
       }
 
@@ -119,7 +119,7 @@ class XmlWidget implements Renderable {
     if (isFirstToken && CONTEXTUAL_ATTRIBS.contains(attribute)) {
       //add context to path if needed
       if (raw.startsWith("/"))
-        raw = request.get().getContextPath() + raw;
+        raw = request.get().context() + raw;
     }
 
     return raw;
@@ -131,7 +131,7 @@ class XmlWidget implements Renderable {
   }
 
   @Inject
-  public void setRequestProvider(Provider<HttpServletRequest> requestProvider) {
+  public void setRequestProvider(Provider<Request> requestProvider) {
     XmlWidget.request = requestProvider;
   }
 }

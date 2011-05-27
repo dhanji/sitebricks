@@ -6,6 +6,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.TypeLiteral;
 import com.google.sitebricks.*;
+import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
@@ -19,11 +20,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 
-import static com.google.sitebricks.compiler.HtmlTemplateCompilerTest.mockRequestProviderForContext;
+import static com.google.sitebricks.compiler.HtmlTemplateCompilerTest
+.mockRequestProviderForContext;
 import static org.easymock.EasyMock.createNiceMock;
 
 /**
@@ -45,7 +46,7 @@ public class XmlTemplateCompilerTest {
 
     injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(Request.class).toProvider(mockRequestProviderForContext());
         bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
         })
             .annotatedWith(Bricks.class)
@@ -155,7 +156,7 @@ public class XmlTemplateCompilerTest {
   public final void readShowIfWidgetFalse() {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(Request.class).toProvider(mockRequestProviderForContext());
       }
     });
 
@@ -185,7 +186,7 @@ public class XmlTemplateCompilerTest {
     final Evaluator evaluator = new MvelEvaluator();
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(Request.class).toProvider(mockRequestProviderForContext());
       }
     });
 
@@ -239,7 +240,7 @@ public class XmlTemplateCompilerTest {
   public final void readAndRenderRequireWidget() {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(Request.class).toProvider(mockRequestProviderForContext());
         bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
         })
             .annotatedWith(Bricks.class)
@@ -343,7 +344,7 @@ public class XmlTemplateCompilerTest {
   public final void readEmbedWidgetAndStoreAsPage() {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(Request.class).toProvider(mockRequestProviderForContext());
         bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
         })
             .annotatedWith(Bricks.class)
@@ -383,7 +384,7 @@ public class XmlTemplateCompilerTest {
   public final void readEmbedWidgetOnly() {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(Request.class).toProvider(mockRequestProviderForContext());
         bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
         })
             .annotatedWith(Bricks.class)
@@ -424,7 +425,7 @@ public class XmlTemplateCompilerTest {
 //        final Evaluator evaluator = new MvelEvaluator();
 //        final Injector injector = Guice.createInjector(new AbstractModule() {
 //            protected void configure() {
-//                bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+//                bind(Request.class).toProvider(mockRequestProviderForContext());
 //            }
 //        });
 //        final PageBook book = injector.getInstance(PageBook.class);           //hacky, where are you super-packages!

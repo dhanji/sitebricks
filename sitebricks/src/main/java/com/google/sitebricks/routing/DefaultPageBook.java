@@ -1,23 +1,15 @@
 package com.google.sitebricks.routing;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.MapMaker;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.inject.BindingAnnotation;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Singleton;
-import com.google.inject.TypeLiteral;
+import com.google.common.collect.*;
+import com.google.inject.*;
 import com.google.inject.name.Named;
 import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.At;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.conversion.TypeConverter;
+import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Select;
 import com.google.sitebricks.http.negotiate.ContentNegotiator;
@@ -28,17 +20,11 @@ import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 import org.jetbrains.annotations.Nullable;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -291,8 +277,7 @@ public class DefaultPageBook implements PageBook {
       return instance;
     }
 
-    public Object doMethod(String httpMethod, Object page, String pathInfo,
-                           HttpServletRequest request) {
+    public Object doMethod(String httpMethod, Object page, String pathInfo, Request request) {
       return delegate.doMethod(httpMethod, page, pathInfo, request);
     }
 
@@ -509,22 +494,21 @@ public class DefaultPageBook implements PageBook {
     }
 
     public Object doMethod(String httpMethod, Object page, String pathInfo,
-                           HttpServletRequest request) {
+                           Request request) {
 
       //nothing to fire
       if (Strings.empty(httpMethod)) {
         return null;
       }
 
-      @SuppressWarnings("unchecked")  // Guaranteed by javax.servlet
-      Map<String, String[]> params = (Map<String, String[]>) request.getParameterMap();
+      Multimap<String, String> params = request.params();
 
       // Extract injectable pieces of the pathInfo.
       final Map<String, String> map = matcher.findMatches(pathInfo);
 
       //find method(s) to dispatch
       //  to
-      final String[] events = params.get(select.value());
+      final Collection<String> events = params.get(select.value());
       if (null != events) {
         boolean matched = false;
         for (String event : events) {
@@ -564,7 +548,7 @@ public class DefaultPageBook implements PageBook {
     }
 
     private Object callAction(String httpMethod, Object page, Map<String, String> pathMap,
-                              HttpServletRequest request) {
+                              Request request) {
 
       // There may be more than one default handler
       Collection<Action> tuple = methods.get(httpMethod);
@@ -675,7 +659,7 @@ public class DefaultPageBook implements PageBook {
      * Used to select for content negotiation.
      */
     @Override
-    public boolean shouldCall(HttpServletRequest request) {
+    public boolean shouldCall(Request request) {
       return negotiator.shouldCall(negotiates, request);
     }
 

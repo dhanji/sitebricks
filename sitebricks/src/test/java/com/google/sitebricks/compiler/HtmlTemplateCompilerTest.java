@@ -6,6 +6,7 @@ import com.google.inject.*;
 import com.google.sitebricks.*;
 import com.google.sitebricks.conversion.MvelTypeConverter;
 import com.google.sitebricks.conversion.TypeConverter;
+import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
@@ -23,7 +24,10 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -45,7 +49,7 @@ public class HtmlTemplateCompilerTest {
 
     injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(Request.class).toProvider(mockRequestProviderForContext());
         bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
         })
             .annotatedWith(Bricks.class)
@@ -162,7 +166,7 @@ public class HtmlTemplateCompilerTest {
   public final void readShowIfWidgetFalse() {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(Request.class).toProvider(mockRequestProviderForContext());
       }
     });
 
@@ -192,7 +196,7 @@ public class HtmlTemplateCompilerTest {
     final Evaluator evaluator = new MvelEvaluator();
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(Request.class).toProvider(mockRequestProviderForContext());
       }
     });
 
@@ -246,7 +250,7 @@ public class HtmlTemplateCompilerTest {
   public final void readAndRenderRequireWidget() {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(Request.class).toProvider(mockRequestProviderForContext());
         bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
         })
             .annotatedWith(Bricks.class)
@@ -350,7 +354,7 @@ public class HtmlTemplateCompilerTest {
   public final void readEmbedWidgetAndStoreAsPage() {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(Request.class).toProvider(mockRequestProviderForContext());
         bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
         })
             .annotatedWith(Bricks.class)
@@ -390,7 +394,7 @@ public class HtmlTemplateCompilerTest {
   public final void readEmbedWidgetOnly() {
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(HttpServletRequest.class).toProvider(mockRequestProviderForContext());
+        bind(Request.class).toProvider(mockRequestProviderForContext());
         bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
         })
             .annotatedWith(Bricks.class)
@@ -463,9 +467,9 @@ public class HtmlTemplateCompilerTest {
 //                .equals(s) : "Did not write expected output, instead: " + s;
 //    }
 
-  public static Provider<HttpServletRequest> mockRequestProviderForContext() {
-    return new Provider<HttpServletRequest>() {
-      public HttpServletRequest get() {
+  public static Provider<Request> mockRequestProviderForContext() {
+    return new Provider<Request>() {
+      public Request get() {
         final HttpServletRequest request = createMock(HttpServletRequest.class);
         expect(request.getContextPath())
             .andReturn("")
@@ -478,7 +482,7 @@ public class HtmlTemplateCompilerTest {
             .anyTimes();
         replay(request);
 
-        return request;
+        return TestRequestCreator.from(request, null);
       }
     };
   }

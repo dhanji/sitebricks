@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.sitebricks.TestRequestCreator;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -117,8 +118,13 @@ public class WildcardNegotiatorTest {
       public Enumeration getHeaders(String name) {
         return Iterators.asEnumeration(headers.get(name).iterator());
       }
+
+      @Override public Enumeration getHeaderNames() {
+        return Iterators.asEnumeration(headers.keys().iterator());
+      }
     };
 
-    assert shouldPass == new WildcardNegotiator().shouldCall(negotiations, request);
+    assert shouldPass == new WildcardNegotiator().shouldCall(negotiations, TestRequestCreator.from(
+        request, null));
   }
 }

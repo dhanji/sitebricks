@@ -145,6 +145,22 @@ class SitebricksInternalModule extends AbstractModule {
         return servletRequest.getHeader(name);
       }
 
+      @Override public String uri() {
+        return servletRequest.getRequestURI();
+      }
+
+      @Override public String path() {
+        return servletRequest.getRequestURI().substring(servletRequest.getContextPath().length());
+      }
+
+      @Override public String context() {
+        return servletRequest.getContextPath();
+      }
+
+      @Override public String method() {
+        return servletRequest.getMethod();
+      }
+
       private void readParams() {
         ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
 
@@ -181,7 +197,7 @@ class SitebricksInternalModule extends AbstractModule {
         ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
 
         @SuppressWarnings("unchecked") // Guaranteed by servlet spec
-            Enumeration<String> headerNames = servletRequest.getHeaderNames();
+        Enumeration<String> headerNames = servletRequest.getHeaderNames();
         while (headerNames.hasMoreElements()) {
           String header = headerNames.nextElement();
 

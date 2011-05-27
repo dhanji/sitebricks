@@ -1,6 +1,7 @@
 package com.google.sitebricks.routing;
 
-import javax.servlet.http.HttpServletRequest;
+import com.google.sitebricks.headless.Request;
+
 import java.util.Map;
 
 /**
@@ -17,7 +18,7 @@ public interface Action {
    * All dispatch rules have succeeded and this is a last-resort
    * gate (for example, to handle special headers or gate IPs etc.).
    */
-  boolean shouldCall(HttpServletRequest request);
+  boolean shouldCall(Request request);
 
   /**
    * Invoke this action!

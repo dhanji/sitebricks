@@ -1,15 +1,11 @@
 package com.google.sitebricks.http.negotiate;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.google.sitebricks.headless.Request;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,18 +48,21 @@ public class WildcardNegotiator implements ContentNegotiator {
     return multimatch;
   }
 
-  public boolean shouldCall(Map<String, String> negotiations, HttpServletRequest request) {
+  public boolean shouldCall(Map<String, String> negotiations, Request request) {
+    Multimap<String, String> headers = request.headers();
     for (Map.Entry<String, String> negotiate : negotiations.entrySet()) {
-      @SuppressWarnings("unchecked") // Guaranteed by servlet spec.
-      Enumeration<String> headerValues = request.getHeaders(negotiate.getKey());
 
+      Collection<String> collectionOfHeader = headers.get(negotiate.getKey());
+      if (null == collectionOfHeader)
+        continue;
+      Iterator<String> headerValues = collectionOfHeader.iterator();
       boolean shouldFire = false;
 
       List<String> matches = Arrays.asList(negotiate.getValue().split(",[ ]*"));
       HashMultimap<String,String> mediaMatches = createMultimatch(matches);
 
-      while (headerValues.hasMoreElements()) {
-        String value = headerValues.nextElement();
+      while (headerValues.hasNext()) {
+        String value = headerValues.next();
 
         List<String> values = Arrays.asList(value.split(",[ ]*"));
         HashMultimap<String,String> mediaValues = createMultimatch(values);

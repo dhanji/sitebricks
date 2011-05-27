@@ -4,12 +4,12 @@ import com.google.inject.Guice;
 import com.google.inject.Scopes;
 import com.google.inject.servlet.RequestScoped;
 import com.google.sitebricks.headless.Reply;
+import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.routing.Action;
 import org.testng.annotations.Test;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -58,7 +58,7 @@ public class EdslTest {
 
   private static class DummyAction implements Action {
     @Override
-    public boolean shouldCall(HttpServletRequest request) {
+    public boolean shouldCall(Request request) {
       return true;
     }
 

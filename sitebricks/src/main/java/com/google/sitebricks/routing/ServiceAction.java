@@ -5,7 +5,6 @@ import com.google.inject.Provider;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -19,7 +18,7 @@ public abstract class ServiceAction implements Action {
   private Provider<Request> requestProvider;
 
   @Override
-  public boolean shouldCall(HttpServletRequest request) {
+  public boolean shouldCall(Request request) {
     return true;
   }
 
