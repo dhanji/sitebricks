@@ -39,7 +39,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     this.flashCacheProvider = flashCacheProvider;
   }
 
-  public Object dispatch(Request request) throws IOException {
+  public Object dispatch(Request request, Events event) throws IOException {
     String uri = request.path();
 
     //first try dispatching as a static resource service

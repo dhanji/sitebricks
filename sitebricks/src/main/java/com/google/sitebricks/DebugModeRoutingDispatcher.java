@@ -44,14 +44,12 @@ class DebugModeRoutingDispatcher implements RoutingDispatcher {
   }
 
 
-  public Object dispatch(Request request)
+  public Object dispatch(Request request, Events event)
       throws IOException {
     long start = System.currentTimeMillis();
 
     // Attempt to discover page class.
-    final PageBook.Page page = pageBook.get(request
-        .uri()
-        .substring(request.context().length()));
+    final PageBook.Page page = pageBook.get(request.path());
 
     // This may be a static resource (in which case we dont gather metrics for it).
     Class<?> pageClass = null;
@@ -59,7 +57,7 @@ class DebugModeRoutingDispatcher implements RoutingDispatcher {
       pageClass = page.pageClass();
 
     try {
-      return dispatcher.dispatch(request);
+      return dispatcher.dispatch(request, Events.DURING);
 
 
     } catch (TemplateCompileException tce) {

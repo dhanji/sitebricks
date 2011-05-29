@@ -20,6 +20,8 @@ class NettySitebricks implements Sitebricks {
   private final Config config = new Config();
   private final WebSocketHandler handler;
 
+  @Inject private java.util.logging.Logger log;
+
   @Inject
   public NettySitebricks(WebSocketHandler handler) {
     this.handler = handler;
@@ -63,7 +65,11 @@ class NettySitebricks implements Sitebricks {
     // Start Netty.
     this.bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(bossPool, workerPool));
     this.bootstrap.setPipelineFactory(new SitebricksWebsocketPipelineFactory(config, handler));
-    this.bootstrap.bind(new InetSocketAddress(config.host, config.port));
+    InetSocketAddress address = new InetSocketAddress(config.host, config.port);
+    this.bootstrap.bind(address);
+
+    log.info("Sitebricks Async started. Listening at http(s)://" + config.host + ":"
+        + config.port);
   }
 
   @Override public synchronized void shutdown() {

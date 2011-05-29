@@ -112,8 +112,8 @@ public class WidgetRoutingDispatcherTest {
         return respond;
       }
     }, createNiceMock(ResourcesService.class), flashCacheProvider,
-        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null)
-    );
+        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null),
+        Events.DURING);
 
 
     assert out == respond : "Did not respond correctly";
@@ -179,8 +179,8 @@ public class WidgetRoutingDispatcherTest {
         return respond;
       }
     }, createNiceMock(ResourcesService.class), flashCacheProvider,
-        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null)
-    );
+        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null),
+        Events.DURING);
 
 
     assert out == respond : "Did not respond correctly";
@@ -249,8 +249,8 @@ public class WidgetRoutingDispatcherTest {
         return respond;
       }
     }, createNiceMock(ResourcesService.class), flashCacheProvider,
-        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null)
-    );
+        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null),
+        Events.DURING);
 
 
     assert out == respond : "Did not respond correctly";
@@ -315,8 +315,8 @@ public class WidgetRoutingDispatcherTest {
         return respond;
       }
     }, createNiceMock(ResourcesService.class), flashCacheProvider,
-        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null)
-    );
+        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null),
+        Events.DURING);
 
 
     assert out == respond : "Did not respond correctly";
@@ -382,8 +382,8 @@ public class WidgetRoutingDispatcherTest {
         return respond;
       }
     }, createNiceMock(ResourcesService.class), flashCacheProvider,
-        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null)
-    );
+        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null),
+        Events.DURING);
 
 
     assert out == respond : "Did not respond correctly";
@@ -417,8 +417,8 @@ public class WidgetRoutingDispatcherTest {
     Respond out = (Respond) new WidgetRoutingDispatcher(pageBook, binder, respond,
         createNiceMock(ResourcesService.class),
         flashCacheProvider,
-        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null)
-    );
+        createNiceMock(HeadlessRenderer.class)).dispatch(TestRequestCreator.from(request, null),
+        Events.DURING);
 
 
     assert out == null : "Did not respond correctly";
@@ -454,7 +454,7 @@ public class WidgetRoutingDispatcherTest {
 
     Respond out = (Respond) new WidgetRoutingDispatcher(pageBook, binder, respond, resourcesService,
         flashCacheProvider, createNiceMock(HeadlessRenderer.class)).dispatch(
-        TestRequestCreator.from(request, null));
+        TestRequestCreator.from(request, null), Events.DURING);
 
 
     assert out != null : "Did not respond correctly";

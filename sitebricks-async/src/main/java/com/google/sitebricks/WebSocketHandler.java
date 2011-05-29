@@ -10,7 +10,10 @@ import com.google.sitebricks.headless.NettyReplyMaker;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.routing.RoutingDispatcher;
+import com.google.sitebricks.routing.RoutingDispatcher.Events;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
@@ -76,20 +79,31 @@ class WebSocketHandler extends SimpleChannelUpstreamHandler {
       ServletScopes.scopeRequest(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
-              handleHttpRequest(ctx);
+              // Close channel once we're done with request.
+              handleHttpRequest(ctx).addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                  try {
+                    dispatcher.dispatch(requestProvider.get(), Events.AFTER);
+                  } finally {
+                    ChannelFutureListener.CLOSE.operationComplete(future);
+                  }
+                }
+              });
               return null;
             }
           }, seedMap).call();
+
 
     } else if (message instanceof WebSocketFrame) {
       // Handle websocket frame.
     }
   }
 
-  private void handleHttpRequest(ChannelHandlerContext ctx) throws IOException {
+  private ChannelFuture handleHttpRequest(ChannelHandlerContext ctx) throws IOException {
     // Because this method executes within a request scope, we can obtain the Sitebricks
     // request directly from its provider.
-    Object respondObject = dispatcher.dispatch(this.requestProvider.get());
+    Object respondObject = dispatcher.dispatch(this.requestProvider.get(), Events.DURING);
 
     //was there any matching page? (if it was a headless response, we don't need to do anything).
     // Also we do not do anything if the page elected to do nothing.
@@ -106,7 +120,7 @@ class WebSocketHandler extends SimpleChannelUpstreamHandler {
           DefaultHttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1,
               HttpResponseStatus.TEMPORARY_REDIRECT);
           response.setHeader(Names.LOCATION, redirect);
-          ctx.getChannel().write(response);
+          return ctx.getChannel().write(response);
         } else { //successful render
 
           // by checking if a content type was set, we allow users to override content-type
@@ -119,17 +133,18 @@ class WebSocketHandler extends SimpleChannelUpstreamHandler {
           // Apparently you only need this for a keepAlive connection? Handle them...
           response.setHeader(Names.CONTENT_LENGTH, response.getContent().readableBytes());
 
-          ctx.getChannel().write(response);
+          return ctx.getChannel().write(response);
         }
       } else { // It must be a headless Reply. Render the headless response.
         assert respondObject instanceof Reply; // This just has to be true.
-        ctx.getChannel().write(replyMaker.populate((Reply<Object>) respondObject));
+        return ctx.getChannel().write(replyMaker.populate((Reply<Object>) respondObject));
       }
     } else {
       // Resource not found, reject (TODO we should serve static resources here from the file system)
       DefaultHttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1,
           HttpResponseStatus.NOT_FOUND);
-      ctx.getChannel().write(response);
+      System.out.println("Not found for " + requestProvider.get().path());
+      return ctx.getChannel().write(response);
     }
   }
 }

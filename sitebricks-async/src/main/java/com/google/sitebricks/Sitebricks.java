@@ -1,10 +1,13 @@
 package com.google.sitebricks;
 
+import com.google.inject.ImplementedBy;
+
 import java.util.concurrent.ExecutorService;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
+@ImplementedBy(NettySitebricks.class)
 public interface Sitebricks {
   /**
    * Specifies the host and port to listen for incoming HTTP requests on. Defaults

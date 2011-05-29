@@ -55,7 +55,7 @@ class SitebricksFilter implements Filter {
     HttpServletResponse response = (HttpServletResponse) servletResponse;
 
     //dispatch
-    Object respondObject = dispatcher.dispatch(this.requestProvider.get());
+    Object respondObject = dispatcher.dispatch(this.requestProvider.get(), Events.DURING);
 
     //was there any matching page? (if it was a headless response, we don't need to do anything).
     // Also we do not do anything if the page elected to do nothing.

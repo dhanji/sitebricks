@@ -14,8 +14,6 @@ class SitebricksInternalModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    install(new SitebricksServletSupportModule());
-
     //set up MVEL namespace (when jarjar-ed, it will use the repackaged namespace)
     System.setProperty("mvel.namespace",
         MVEL.class.getPackage().getName().replace('.', '/') + "/");

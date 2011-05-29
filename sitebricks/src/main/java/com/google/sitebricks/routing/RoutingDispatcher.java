@@ -10,5 +10,9 @@ import java.io.IOException;
  */
 @ImplementedBy(WidgetRoutingDispatcher.class)
 public interface RoutingDispatcher {
-  Object dispatch(Request request) throws IOException;
+  Object dispatch(Request request, Events event) throws IOException;
+
+  public static enum Events {
+    BEFORE, DURING, AFTER
+  }
 }
