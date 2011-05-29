@@ -2,8 +2,18 @@ package com.google.sitebricks.compiler;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.inject.*;
-import com.google.sitebricks.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
+import com.google.sitebricks.Bricks;
+import com.google.sitebricks.Evaluator;
+import com.google.sitebricks.MvelEvaluator;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Respond;
+import com.google.sitebricks.RespondersForTesting;
+import com.google.sitebricks.TestRequestCreator;
 import com.google.sitebricks.conversion.MvelTypeConverter;
 import com.google.sitebricks.conversion.TypeConverter;
 import com.google.sitebricks.headless.Request;
@@ -24,7 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.util.Map;
 
-import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
@@ -470,7 +479,7 @@ public class HtmlTemplateCompilerTest {
   public static Provider<Request> mockRequestProviderForContext() {
     return new Provider<Request>() {
       public Request get() {
-        final HttpServletRequest request = createMock(HttpServletRequest.class);
+        final HttpServletRequest request = createNiceMock(HttpServletRequest.class);
         expect(request.getContextPath())
             .andReturn("")
             .anyTimes();

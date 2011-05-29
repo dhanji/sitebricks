@@ -57,7 +57,7 @@ public class WidgetRoutingDispatcherTest {
 
   @Test
   public final void dispatchRequestAndRespondOnGet() throws IOException {
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
+    final HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     PageBook pageBook = createMock(PageBook.class);
     PageBook.Page page = createMock(PageBook.Page.class);
     Renderable widget = createMock(Renderable.class);
@@ -124,7 +124,7 @@ public class WidgetRoutingDispatcherTest {
 
   @Test
   public final void dispatchRequestToCorrectEventHandlerOnGet() throws IOException {
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
+    final HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     PageBook pageBook = createMock(PageBook.class);
     PageBook.Page page = createMock(PageBook.Page.class);
     Renderable widget = createMock(Renderable.class);
@@ -192,7 +192,7 @@ public class WidgetRoutingDispatcherTest {
 
   @Test
   public final void dispatchRequestAndRespondOnPost() throws IOException {
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
+    final HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     PageBook pageBook = createMock(PageBook.class);
     PageBook.Page page = createMock(PageBook.Page.class);
     Renderable widget = createMock(Renderable.class);
@@ -261,7 +261,7 @@ public class WidgetRoutingDispatcherTest {
 
   @Test
   public final void dispatchRequestAndRedirectOnPost() throws IOException {
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
+    final HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     PageBook pageBook = createMock(PageBook.class);
     PageBook.Page page = createMock(PageBook.Page.class);
     Renderable widget = createMock(Renderable.class);
@@ -327,7 +327,7 @@ public class WidgetRoutingDispatcherTest {
 
   @Test
   public final void dispatchRequestAndRedirectOnGet() throws IOException {
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
+    final HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     PageBook pageBook = createMock(PageBook.class);
     PageBook.Page page = createMock(PageBook.Page.class);
     Renderable widget = createMock(Renderable.class);
@@ -394,7 +394,7 @@ public class WidgetRoutingDispatcherTest {
 
   @Test
   public final void dispatchNothingBecauseOfNoUriMatch() throws IOException {
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
+    final HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     PageBook pageBook = createMock(PageBook.class);
     RequestBinder binder = createMock(RequestBinder.class);
 
@@ -429,7 +429,7 @@ public class WidgetRoutingDispatcherTest {
 
   @Test
   public final void dispatchStaticResource() throws IOException {
-    final HttpServletRequest request = createMock(HttpServletRequest.class);
+    final HttpServletRequest request = createNiceMock(HttpServletRequest.class);
     PageBook pageBook = createMock(PageBook.class);
     RequestBinder binder = createMock(RequestBinder.class);
     ResourcesService resourcesService = createMock(ResourcesService.class);

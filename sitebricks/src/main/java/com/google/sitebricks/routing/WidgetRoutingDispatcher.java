@@ -11,7 +11,6 @@ import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.resource.ResourcesService;
 import net.jcip.annotations.Immutable;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -90,10 +89,6 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     // call the appropriate handler.
     headlessRenderer.render(response, fireEvent(request, page, instance));
 
-  }
-
-  private String getPathInfo(HttpServletRequest request) {
-    return request.getRequestURI().substring(request.getContextPath().length());
   }
 
   private void bindAndRespond(Request request, PageBook.Page page, Respond respond,

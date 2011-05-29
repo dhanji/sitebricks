@@ -1,8 +1,17 @@
 package com.google.sitebricks.routing;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.*;
-import com.google.inject.*;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.inject.BindingAnnotation;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.At;
@@ -24,7 +33,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -501,14 +515,14 @@ public class DefaultPageBook implements PageBook {
         return null;
       }
 
+      // NOTE(dhanji): This slurps the entire Map. It could potentially be optimized...
       Multimap<String, String> params = request.params();
 
       // Extract injectable pieces of the pathInfo.
       final Map<String, String> map = matcher.findMatches(pathInfo);
 
-      //find method(s) to dispatch
-      //  to
-      final Collection<String> events = params.get(select.value());
+      // Find method(s) to dispatch to.
+      Collection<String> events = params.get(select.value());
       if (null != events) {
         boolean matched = false;
         for (String event : events) {
@@ -526,8 +540,8 @@ public class DefaultPageBook implements PageBook {
             }
           }
 
-          //redirects interrupt the event dispatch sequence. Note this might cause inconsistent behaviour depending on
-          // the order of processing for events.
+          // Redirects interrupt the event dispatch sequence. Note this might cause inconsistent
+          // behaviour depending on the order of processing for events.
           if (null != redirect) {
             return redirect;
           }
@@ -625,7 +639,7 @@ public class DefaultPageBook implements PageBook {
           if (Named.class.isInstance(annotation)) {
             Named named = (Named) annotation;
 
-			args.add(new NamedParameter(named.value(), method.getGenericParameterTypes()[i]));
+			      args.add(new NamedParameter(named.value(), method.getGenericParameterTypes()[i]));
             namedFound = true;
 
             break;

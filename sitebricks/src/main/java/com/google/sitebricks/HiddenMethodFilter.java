@@ -32,9 +32,10 @@ class HiddenMethodFilter implements Filter {
   private static final String HIDDEN_FIELD_NAME = "hiddenFieldName";
 
   /**
-   * Name of the hidden field.
+   * Name of the hidden field. Shared across the entire App. Is guarded by
+   * init so no danger of visibility issues.
    */
-  private String hiddenFieldName = "__sitebricks__action";
+  static String hiddenFieldName = "__sitebricks__action";
   private String filterDoneAttributeName;
 
   public void init(FilterConfig filterConfig) throws ServletException {
@@ -97,5 +98,4 @@ class HiddenMethodFilter implements Filter {
       return this.method;
     }
   }
-
 }

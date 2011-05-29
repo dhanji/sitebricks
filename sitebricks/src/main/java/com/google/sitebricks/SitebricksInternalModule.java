@@ -70,6 +70,7 @@ class SitebricksInternalModule extends AbstractModule {
       ImmutableMultimap<String, String> matrix;
       ImmutableMultimap<String, String> headers;
       ImmutableMultimap<String, String> params;
+      String method;
 
       @Override
       public <E> RequestRead<E> read(final Class<E> type) {
@@ -158,7 +159,13 @@ class SitebricksInternalModule extends AbstractModule {
       }
 
       @Override public String method() {
-        return servletRequest.getMethod();
+        // This ugly hack is required because Sitebricks supports simulating PUT/DELETE requests
+        // via browser POST and special form fields.
+        if (method == null) {
+          String ghostMethod = servletRequest.getParameter(HiddenMethodFilter.hiddenFieldName);
+          method = (ghostMethod != null) ? ghostMethod : servletRequest.getMethod();
+        }
+        return method;
       }
 
       private void readParams() {
@@ -213,7 +220,6 @@ class SitebricksInternalModule extends AbstractModule {
 
     };
   }
-
 
   @Provides
   @RequestScoped

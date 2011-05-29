@@ -27,7 +27,6 @@
     <module>sitebricks-async</module>
     <module>sitebricks-client</module>
     <module>sitebricks-acceptance-tests</module>
-    <module>sitebricks-async-acceptance-tests</module>
     <!--
     We'll move the examples to their own repo shortly
     <module>sitebricks-web</module>

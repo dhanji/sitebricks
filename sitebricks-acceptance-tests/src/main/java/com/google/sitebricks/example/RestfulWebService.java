@@ -6,11 +6,10 @@ import com.google.inject.Injector;
 import com.google.sitebricks.At;
 import com.google.sitebricks.client.transport.Json;
 import com.google.sitebricks.headless.Reply;
+import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
@@ -22,7 +21,7 @@ public class RestfulWebService {
   public static final int PAGE_COUNT = 789;
 
   @Get
-  public Reply<Book> books(Injector injector, HttpServletRequest request,
+  public Reply<Book> books(Injector injector, Request request,
                        @SitebricksConfig.Test Start start) {
     Preconditions.checkNotNull(injector, "method argument injection failed");
     Preconditions.checkNotNull(request, "method argument injection failed");
