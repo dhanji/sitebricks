@@ -9,7 +9,7 @@ import com.google.inject.TypeLiteral;
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
 @ImplementedBy(ScanAndCompileBootstrapper.class)
-interface Bootstrapper {
+public interface Bootstrapper {
   TypeLiteral<Aware> AWARE_TYPE = new TypeLiteral<Aware>(){};
 
   void start();

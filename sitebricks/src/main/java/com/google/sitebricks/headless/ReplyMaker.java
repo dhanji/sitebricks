@@ -22,16 +22,16 @@ import java.util.Map;
 class ReplyMaker<E> extends Reply<E> {
 
   // By default, we cool.
-  private int status = HttpServletResponse.SC_OK;
+  int status = HttpServletResponse.SC_OK;
 
-  private String contentType;
+  String contentType;
 
-  private String redirectUri;
-  private Map<String, String> headers = Maps.newHashMap();
+  String redirectUri;
+  Map<String, String> headers = Maps.newHashMap();
 
-  private Key<? extends Transport> transport = Key.get(Text.class);
-  private E entity;
-  private Class<?> templateKey;
+  Key<? extends Transport> transport = Key.get(Text.class);
+  E entity;
+  Class<?> templateKey;
 
   public ReplyMaker(E entity) {
     this.entity = entity;
@@ -163,7 +163,6 @@ class ReplyMaker<E> extends Reply<E> {
         response.setContentType(contentType);
       }
     }
-
 
     // Send redirect
     if (null != redirectUri) {

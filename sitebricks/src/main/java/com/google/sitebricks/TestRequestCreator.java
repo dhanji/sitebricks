@@ -10,6 +10,6 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class TestRequestCreator {
   public static Request from(HttpServletRequest request, Injector injector) {
-    return new SitebricksInternalModule().provideRequest(request, injector);
+    return new SitebricksServletSupportModule().provideRequest(request, injector);
   }
 }

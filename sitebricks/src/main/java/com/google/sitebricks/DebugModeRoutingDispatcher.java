@@ -12,7 +12,6 @@ import com.google.sitebricks.routing.SystemMetrics;
 import net.jcip.annotations.ThreadSafe;
 import org.mvel2.PropertyAccessException;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -45,7 +44,7 @@ class DebugModeRoutingDispatcher implements RoutingDispatcher {
   }
 
 
-  public Respond dispatch(Request request, HttpServletResponse response)
+  public Object dispatch(Request request)
       throws IOException {
     long start = System.currentTimeMillis();
 
@@ -60,7 +59,7 @@ class DebugModeRoutingDispatcher implements RoutingDispatcher {
       pageClass = page.pageClass();
 
     try {
-      return dispatcher.dispatch(request, response);
+      return dispatcher.dispatch(request);
 
 
     } catch (TemplateCompileException tce) {

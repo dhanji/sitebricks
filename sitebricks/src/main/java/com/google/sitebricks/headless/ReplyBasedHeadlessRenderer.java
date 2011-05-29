@@ -12,7 +12,7 @@ import java.io.IOException;
  * web services using the Reply.with() API.
  */
 @Singleton
-class ReplyBasedHeadlessRenderer implements HeadlessRenderer {
+public class ReplyBasedHeadlessRenderer implements HeadlessRenderer {
   private final Injector injector;
 
   @Inject

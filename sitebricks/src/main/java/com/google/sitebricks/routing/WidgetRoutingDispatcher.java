@@ -9,9 +9,9 @@ import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.headless.HeadlessRenderer;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.resource.ResourcesService;
+import com.google.sitebricks.routing.PageBook.Page;
 import net.jcip.annotations.Immutable;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -39,7 +39,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     this.flashCacheProvider = flashCacheProvider;
   }
 
-  public Respond dispatch(Request request, HttpServletResponse response) throws IOException {
+  public Object dispatch(Request request) throws IOException {
     String uri = request.path();
 
     //first try dispatching as a static resource service
@@ -68,9 +68,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
 
     final Object instance = page.instantiate();
     if (page.isHeadless()) {
-      respond = Respond.HEADLESS;
-
-      bindAndReply(request, response, page, instance);
+      return bindAndReply(request, page, instance);
     } else {
       respond = respondProvider.get();
 
@@ -81,14 +79,12 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     return respond;
   }
 
-  private void bindAndReply(Request request, HttpServletResponse response,
-                            PageBook.Page page, Object instance) throws IOException {
+  private Object bindAndReply(Request request, Page page, Object instance) throws IOException {
     // bind request (sets request params, etc).
     binder.bind(request, instance);
 
     // call the appropriate handler.
-    headlessRenderer.render(response, fireEvent(request, page, instance));
-
+    return fireEvent(request, page, instance);
   }
 
   private void bindAndRespond(Request request, PageBook.Page page, Respond respond,

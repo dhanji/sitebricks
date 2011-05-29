@@ -37,7 +37,8 @@
     </dependency>
   </dependencies>
 
-  <!-- This should be removed when the googlecode repositories are migrated to the standard Nexus OSS repository infrastructure -->
+  <!-- This should be removed when the googlecode repositories are migrated to the
+       standard Nexus OSS repository infrastructure -->
   <distributionManagement>
     <snapshotRepository>
       <id>google-snapshots</id>

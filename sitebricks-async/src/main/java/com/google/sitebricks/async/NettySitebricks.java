@@ -15,11 +15,15 @@ import java.util.concurrent.Executors;
 class NettySitebricks implements Sitebricks {
   private ExecutorService bossPool;
   private ExecutorService workerPool;
-  private final Config config = new Config();
   private ServerBootstrap bootstrap;
 
+  private final Config config = new Config();
+  private final WebSocketHandler handler;
+
   @Inject
-  private WebSocketHandler handler;
+  public NettySitebricks(WebSocketHandler handler) {
+    this.handler = handler;
+  }
 
   @Override
   public Sitebricks executors(ExecutorService bossPool, ExecutorService workerPool) {
