@@ -1,10 +1,12 @@
 package com.google.sitebricks.headless;
 
 import com.google.common.collect.Multimap;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.sitebricks.client.Transport;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.annotation.Annotation;
 
 /**
  * Sitebricks abstraction of a request. May be a standard HTTP request, a tunneled
@@ -35,6 +37,18 @@ public interface Request {
    * @throws IOException If an error occurs during the streaming.
    */
   void readTo(OutputStream out) throws IOException;
+
+  /**
+   * Reads the request data into an object of the given type, but does so
+   * asynchronously. In Sitebricks Sync (the servlet flavor) this won't do
+   * anything special, since the request is read in the same thread. In
+   * Sitebricks Async, this will read the request body asynchronously and
+   * fire the chained callback when the network is done, freeing up user
+   * threads to process other requests.
+   *
+   * @param type The target type to unmarshall the raw request data into.
+   */
+  <E> AsyncRequestRead<E> readAsync(final Class<E> type);
 
   /**
    * Returns request headers as a multimap (to account for repeated headers).
@@ -83,5 +97,20 @@ public interface Request {
 
   public static interface RequestRead<E> {
     E as(Class<? extends Transport> transport);
+  }
+
+  public static interface AsyncRequestRead<E> {
+    AsyncCompletion<E> as(Class<? extends Transport> transport);
+  }
+
+  public static interface AsyncCompletion<E> {
+    ListenableFuture<E> future();
+
+    /**
+     * Use for debugging, prefer the other flavor in production quality code.
+     */
+    void callback(Object target, String methodName);
+
+    void callback(Object target, Class<? extends Annotation> methodAnnotatedWith);
   }
 }

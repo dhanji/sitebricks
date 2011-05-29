@@ -33,7 +33,7 @@ import java.util.concurrent.Callable;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 @Singleton
-class WebSocketHandler extends SimpleChannelUpstreamHandler {
+class SitebricksAsyncHandler extends SimpleChannelUpstreamHandler {
   private static final Key<HttpRequest> HTTP_REQUEST_KEY = Key.get(HttpRequest.class);
   private final RoutingDispatcher dispatcher;
   private final Provider<Bootstrapper> bootstrapper;
@@ -42,10 +42,10 @@ class WebSocketHandler extends SimpleChannelUpstreamHandler {
   private final NettyReplyMaker replyMaker;
 
   @Inject
-  WebSocketHandler(RoutingDispatcher dispatcher, Provider<Bootstrapper> bootstrapper,
-                   Provider<Shutdowner> teardowner,
-                   Provider<Request> requestProvider,
-                   NettyReplyMaker replyMaker) {
+  SitebricksAsyncHandler(RoutingDispatcher dispatcher, Provider<Bootstrapper> bootstrapper,
+                         Provider<Shutdowner> teardowner,
+                         Provider<Request> requestProvider,
+                         NettyReplyMaker replyMaker) {
     this.dispatcher = dispatcher;
     this.bootstrapper = bootstrapper;
     this.teardowner = teardowner;
@@ -93,7 +93,6 @@ class WebSocketHandler extends SimpleChannelUpstreamHandler {
               return null;
             }
           }, seedMap).call();
-
 
     } else if (message instanceof WebSocketFrame) {
       // Handle websocket frame.

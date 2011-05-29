@@ -2,6 +2,8 @@ package com.google.sitebricks;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ValueFuture;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -14,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.annotation.Annotation;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -66,6 +69,31 @@ class ServletRequestProvider implements Provider<Request> {
       @Override
       public void readTo(OutputStream out) throws IOException {
         IOUtils.copy(servletRequest.getInputStream(), out);
+      }
+
+      @Override
+      public <E> AsyncRequestRead<E> readAsync(final Class<E> type) {
+        return new AsyncRequestRead<E>() {
+          @Override
+          public AsyncCompletion<E> as(final Class<? extends Transport> transport) {
+            return new AsyncCompletion<E>() {
+              @Override
+              public ListenableFuture<E> future() {
+                ValueFuture<E> future = ValueFuture.create();
+                future.set(read(type).as(transport));
+                return future;
+              }
+
+              @Override
+              public void callback(Object target, String methodName) {
+              }
+
+              @Override
+              public void callback(Object target, Class<? extends Annotation> methodAnnotatedWith) {
+              }
+            };
+          }
+        };
       }
 
       @Override

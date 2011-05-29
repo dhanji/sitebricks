@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -20,6 +21,7 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -79,8 +81,27 @@ class NettyRequestProvider implements Provider<Request> {
         IOUtils.copy(new ByteArrayInputStream(request.getContent().array()), out);
       }
 
-      public <E> RequestRead<E> readAsync(final Class<E> type) {
-        throw new UnsupportedOperationException("TBI");
+      @Override
+      public <E> AsyncRequestRead<E> readAsync(final Class<E> type) {
+        return new AsyncRequestRead<E>() {
+          @Override
+          public AsyncCompletion<E> as(Class<? extends Transport> transport) {
+            return new AsyncCompletion<E>() {
+              @Override
+              public ListenableFuture<E> future() {
+                return null;
+              }
+
+              @Override
+              public void callback(Object target, String methodName) {
+              }
+
+              @Override
+              public void callback(Object target, Class<? extends Annotation> methodAnnotatedWith) {
+              }
+            };
+          }
+        };
       }
 
       @Override

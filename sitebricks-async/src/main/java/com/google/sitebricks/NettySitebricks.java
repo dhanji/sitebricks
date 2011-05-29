@@ -18,12 +18,12 @@ class NettySitebricks implements Sitebricks {
   private ServerBootstrap bootstrap;
 
   private final Config config = new Config();
-  private final WebSocketHandler handler;
+  private final SitebricksAsyncHandler handler;
 
   @Inject private java.util.logging.Logger log;
 
   @Inject
-  public NettySitebricks(WebSocketHandler handler) {
+  public NettySitebricks(SitebricksAsyncHandler handler) {
     this.handler = handler;
   }
 
