@@ -1,4 +1,4 @@
-package com.google.sitebricks.async;
+package com.google.sitebricks;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;

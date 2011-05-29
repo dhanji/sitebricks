@@ -1,4 +1,4 @@
-package com.google.sitebricks.async;
+package com.google.sitebricks;
 
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;

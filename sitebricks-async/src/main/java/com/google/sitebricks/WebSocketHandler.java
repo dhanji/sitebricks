@@ -1,4 +1,4 @@
-package com.google.sitebricks.async;
+package com.google.sitebricks;
 
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -6,9 +6,6 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletScopes;
-import com.google.sitebricks.Bootstrapper;
-import com.google.sitebricks.Respond;
-import com.google.sitebricks.Shutdowner;
 import com.google.sitebricks.headless.NettyReplyMaker;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;

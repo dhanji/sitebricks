@@ -1,4 +1,4 @@
-package com.google.sitebricks.async;
+package com.google.sitebricks;
 
 import java.util.concurrent.ExecutorService;
 

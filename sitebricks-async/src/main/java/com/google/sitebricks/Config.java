@@ -1,4 +1,4 @@
-package com.google.sitebricks.async;
+package com.google.sitebricks;
 
 /**
  * Internal Sitebricks Async configuration value object.

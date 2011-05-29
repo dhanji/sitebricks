@@ -1,4 +1,4 @@
-package com.google.sitebricks.async;
+package com.google.sitebricks;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMultimap;
@@ -10,6 +10,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.servlet.RequestScoped;
+import com.google.inject.util.Providers;
 import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Parameters;
@@ -30,6 +31,7 @@ import java.util.Set;
 class SitebricksNettySupportModule extends AbstractModule {
   @Override
   protected void configure() {
+    bind(HttpRequest.class).toProvider(Providers.<HttpRequest>of(null)).in(RequestScoped.class);
   }
 
   @Provides

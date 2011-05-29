@@ -1,8 +1,6 @@
-package com.google.sitebricks.async;
+package com.google.sitebricks;
 
 import com.google.inject.util.Modules;
-import com.google.sitebricks.SitebricksModule;
-import com.google.sitebricks.SitebricksServletSupportModule;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)

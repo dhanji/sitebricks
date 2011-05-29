@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-public class SitebricksServletSupportModule extends AbstractModule {
+class SitebricksServletSupportModule extends AbstractModule {
   @Override
   protected void configure() {
   }
@@ -29,7 +29,6 @@ public class SitebricksServletSupportModule extends AbstractModule {
   @Provides
   @RequestScoped
   Request provideRequest(final HttpServletRequest servletRequest, final Injector injector) {
-
     return new Request() {
       Multimap<String, String> matrix;
       Multimap<String, String> headers;
