@@ -9,6 +9,7 @@ import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.headless.HeadlessRenderer;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.resource.ResourcesService;
+import com.google.sitebricks.routing.RoutingDispatcher.Events;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

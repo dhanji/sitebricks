@@ -7,6 +7,7 @@ import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.ReplyBasedHeadlessRenderer;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.routing.RoutingDispatcher;
+import com.google.sitebricks.routing.RoutingDispatcher.Events;
 import net.jcip.annotations.Immutable;
 
 import javax.servlet.Filter;
