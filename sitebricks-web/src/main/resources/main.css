@@ -161,6 +161,7 @@ article a:hover {
 
 article p {
   line-height: 1.3;
+  font-size: 15px;
   padding: 4px 8px; /*text-shadow: 1px 1px 1px #fff;*/
 }
 
