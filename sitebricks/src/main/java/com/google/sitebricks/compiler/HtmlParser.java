@@ -18,12 +18,29 @@ import java.util.regex.Pattern;
  * this is a relaxed version of Jonathan Hedley's {@link org.jsoup.parser.Parser}
  */
 public class HtmlParser {
-  private static final ImmutableSet<String> closingOptional = ImmutableSet
-      .of("a", "form", "label", "dt", "dd", "li",
-          "thead", "tfoot", "tbody", "colgroup", "tr", "th", "td");
+  private static final ImmutableSet<String> closingOptional;
+  private static final ImmutableSet<String> headTags;
+  static final ImmutableSet<String> SKIP_ATTR;
 
-  private static final ImmutableSet<String> headTags = ImmutableSet
-      .of("base", "script", "noscript", "link", "meta", "title", "style", "object");
+  // TODO - LineCountingTokenQueue
+  static final Pattern LINE_SEPARATOR = Pattern.compile("(\\r\\n|\\n|\\r|\\u0085|\\u2028|\\u2029)");
+  static final String LINE_NUMBER_ATTRIBUTE = "_linecount";
+
+  static {
+    ImmutableSet.Builder<String> closingOptionalBuilder = ImmutableSet.builder();
+    ImmutableSet.Builder<String> skipAttrBuilder = ImmutableSet.builder();
+    closingOptionalBuilder.add(
+        "a", "form", "label", "dt", "dd", "li",
+        "thead", "tfoot", "tbody", "colgroup", "tr", "th", "td");
+    ImmutableSet.Builder<String> headTagsBuilder = ImmutableSet.builder();
+    headTagsBuilder.add("base", "script", "noscript", "link", "meta", "title", "style", "object");
+
+    closingOptional = closingOptionalBuilder.build();
+    headTags = headTagsBuilder.build();
+    skipAttrBuilder.add(LINE_NUMBER_ATTRIBUTE,
+      AnnotationNode.ANNOTATION, AnnotationNode.ANNOTATION_KEY, AnnotationNode.ANNOTATION_CONTENT);
+    SKIP_ATTR = skipAttrBuilder.build();
+  }
 
   private static final String SQ = "'";
   private static final String DQ = "\"";
@@ -38,10 +55,6 @@ public class HtmlParser {
   // private final LinkedList<Node> soup = new LinkedList<Node>();
   private final LinkedList<Node> stack = new LinkedList<Node>();
 
-  // TODO - LineCountingTokenQueue
-  static final Pattern LINE_SEPARATOR = Pattern.compile("(\\r\\n|\\n|\\r|\\u0085|\\u2028|\\u2029)");
-  static final String LINE_NUMBER_ATTRIBUTE = "_linecount";
-
   private final TokenQueue tq;
 
   private String baseUri = "";
@@ -53,9 +66,6 @@ public class HtmlParser {
   private AnnotationNode pendingAnnotation = null;
 
   private int linecount = 0;
-
-  static final ImmutableSet<String> SKIP_ATTR = ImmutableSet.of(LINE_NUMBER_ATTRIBUTE,
-      AnnotationNode.ANNOTATION, AnnotationNode.ANNOTATION_KEY, AnnotationNode.ANNOTATION_CONTENT);
 
   private HtmlParser(String html) {
     Validate.notNull(html);
