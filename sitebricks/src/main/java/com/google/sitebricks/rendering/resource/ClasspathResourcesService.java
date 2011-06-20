@@ -175,5 +175,9 @@ class ClasspathResourcesService implements ResourcesService {
     @Override
     public void clear() {
     }
+
+    @Override public Object pageObject() {
+      return null;
+    }
   }
 }

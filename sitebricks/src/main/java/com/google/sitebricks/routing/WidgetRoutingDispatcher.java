@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.sitebricks.Respond;
+import com.google.sitebricks.StringBuilderRespond;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.headless.HeadlessRenderer;
@@ -22,19 +23,18 @@ import java.io.IOException;
 class WidgetRoutingDispatcher implements RoutingDispatcher {
   private final PageBook book;
   private final RequestBinder binder;
-  private final Provider<Respond> respondProvider;
   private final ResourcesService resourcesService;
   private final Provider<FlashCache> flashCacheProvider;
   private final HeadlessRenderer headlessRenderer;
 
   @Inject
-  public WidgetRoutingDispatcher(PageBook book, RequestBinder binder, Provider<Respond> respondProvider,
-                                 ResourcesService resourcesService, Provider<FlashCache> flashCacheProvider,
+  public WidgetRoutingDispatcher(PageBook book, RequestBinder binder,
+                                 ResourcesService resourcesService,
+                                 Provider<FlashCache> flashCacheProvider,
                                  HeadlessRenderer headlessRenderer) {
     this.headlessRenderer = headlessRenderer;
     this.book = book;
     this.binder = binder;
-    this.respondProvider = respondProvider;
     this.resourcesService = resourcesService;
     this.flashCacheProvider = flashCacheProvider;
   }
@@ -70,7 +70,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     if (page.isHeadless()) {
       return bindAndReply(request, page, instance);
     } else {
-      respond = respondProvider.get();
+      respond = new StringBuilderRespond(instance);
 
       //fire events and render reponders
       bindAndRespond(request, page, respond, instance);

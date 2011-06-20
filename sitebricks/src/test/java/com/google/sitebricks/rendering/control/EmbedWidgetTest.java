@@ -143,7 +143,7 @@ public class EmbedWidgetTest {
     widgetChain.addWidget(new ShowIfWidget(targetWidgetChain, "true", evaluator));
 
     final EmbedWidget embedWidget = new EmbedWidget(Collections.<String, ArgumentWidget>emptyMap(), expression, evaluator, pageBook, pageName);
-    embedWidget.init(new EmbeddedRespondFactory(RespondersForTesting.newRespond()), HtmlTemplateCompilerTest.mockRequestProviderForContext());
+    embedWidget.init(new EmbeddedRespondFactory(), HtmlTemplateCompilerTest.mockRequestProviderForContext());
     embedWidget
         .render(new MyParentPage(passOn), respond);
 
@@ -204,7 +204,7 @@ public class EmbedWidgetTest {
 
 
     final EmbedWidget embedWidget = new EmbedWidget(Collections.<String, ArgumentWidget>emptyMap(), expression, evaluator, pageBook, pageName);
-    embedWidget.init(new EmbeddedRespondFactory(RespondersForTesting.newRespond()), HtmlTemplateCompilerTest.mockRequestProviderForContext());
+    embedWidget.init(new EmbeddedRespondFactory(), HtmlTemplateCompilerTest.mockRequestProviderForContext());
     embedWidget
         .render(new MyParentPage(passOn), respond);
 
@@ -274,7 +274,7 @@ public class EmbedWidgetTest {
 
 
     final EmbedWidget embedWidget = new EmbedWidget(inners, expression, evaluator, pageBook, targetPageName);
-    embedWidget.init(new EmbeddedRespondFactory(RespondersForTesting.newRespond()), HtmlTemplateCompilerTest.mockRequestProviderForContext());
+    embedWidget.init(new EmbeddedRespondFactory(), HtmlTemplateCompilerTest.mockRequestProviderForContext());
     embedWidget
         .render(new MyParentPage(passOn), respond);
 
@@ -332,7 +332,7 @@ public class EmbedWidgetTest {
 
 
     final EmbedWidget embedWidget = new EmbedWidget(Collections.<String, ArgumentWidget>emptyMap(), expression, evaluator, pageBook, pageName);
-    embedWidget.init(new EmbeddedRespondFactory(RespondersForTesting.newRespond()), HtmlTemplateCompilerTest.mockRequestProviderForContext());
+    embedWidget.init(new EmbeddedRespondFactory(), HtmlTemplateCompilerTest.mockRequestProviderForContext());
     embedWidget
         .render(new MyParentPage(passOn), respond);
 
@@ -380,7 +380,7 @@ public class EmbedWidgetTest {
     replay(pageBook, page, mockRespond, widget);
 
     final EmbedWidget embedWidget = new EmbedWidget(Collections.<String, ArgumentWidget>emptyMap(), expression, new MvelEvaluator(), pageBook, pageName);
-    embedWidget.init(new EmbeddedRespondFactory(RespondersForTesting.newRespond()), HtmlTemplateCompilerTest.mockRequestProviderForContext());
+    embedWidget.init(new EmbeddedRespondFactory(), HtmlTemplateCompilerTest.mockRequestProviderForContext());
     embedWidget
         .render(new MyParentPage(passOn), mockRespond);
 
@@ -462,7 +462,7 @@ public class EmbedWidgetTest {
     replay(pageBook, page, mockRespond, widget);
 
     final EmbedWidget embedWidget = new EmbedWidget(Collections.<String, ArgumentWidget>emptyMap(), expression, new MvelEvaluator(), pageBook, pageName);
-    embedWidget.init(new EmbeddedRespondFactory(RespondersForTesting.newRespond()), HtmlTemplateCompilerTest.mockRequestProviderForContext());
+    embedWidget.init(new EmbeddedRespondFactory(), HtmlTemplateCompilerTest.mockRequestProviderForContext());
     embedWidget
         .render(new MyParentPage(passOn), mockRespond);
 

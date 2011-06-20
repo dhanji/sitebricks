@@ -25,9 +25,11 @@ public class StringBuilderRespond implements Respond {
       new AtomicReference<Map<String, String>>();
 
   private static final String TEXT_HTML = "text/html";
+  private Object page;
 
   @SuppressWarnings("unchecked")
-  public StringBuilderRespond() {
+  public StringBuilderRespond(Object context) {
+    this.page = context;
     if (null == templates.get()) {
       final Properties properties = new Properties();
       try {
@@ -99,6 +101,10 @@ public class StringBuilderRespond implements Respond {
     if (null != head) {
       head.delete(0, head.length());
     }
+  }
+
+  @Override public Object pageObject() {
+    return page;
   }
 
   @Override

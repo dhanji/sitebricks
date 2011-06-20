@@ -1,8 +1,5 @@
 package com.google.sitebricks.rendering.control;
 
-import java.util.Collections;
-import java.util.Set;
-
 import com.google.inject.Inject;
 import com.google.sitebricks.Evaluator;
 import com.google.sitebricks.Renderable;
@@ -10,6 +7,9 @@ import com.google.sitebricks.Respond;
 import com.google.sitebricks.StringBuilderRespond;
 import com.google.sitebricks.rendering.Decorated;
 import com.google.sitebricks.routing.PageBook;
+
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * @author John Patterson (jdpatterson@gmail.com)
@@ -51,7 +51,7 @@ public class DecorateWidget implements Renderable {
 	    PageBook.Page page = book.forName(DecorateWidget.embedNameFor(templateClass));
 	
 	    // create a dummy respond to collect the output of the embedded page
-	    StringBuilderRespond sbrespond = new StringBuilderRespond();
+	    StringBuilderRespond sbrespond = new StringBuilderRespond(new Object());
 	    EmbeddedRespond embedded = new EmbeddedRespond(null, sbrespond);
 	    page.widget().render(bound, embedded);
 	

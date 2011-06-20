@@ -1,7 +1,6 @@
 package com.google.sitebricks;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.sitebricks.compiler.TemplateCompileException;
 import com.google.sitebricks.headless.Request;
@@ -29,18 +28,15 @@ class DebugModeRoutingDispatcher implements RoutingDispatcher {
   private final RoutingDispatcher dispatcher;
   private final SystemMetrics metrics;
   private final PageBook pageBook;
-  private final Provider<Respond> respondProvider;
 
   @Inject
   public DebugModeRoutingDispatcher(@Production RoutingDispatcher dispatcher,
                                     SystemMetrics metrics,
-                                    PageBook pageBook,
-                                    Provider<Respond> respondProvider) {
+                                    PageBook pageBook) {
 
     this.dispatcher = dispatcher;
     this.metrics = metrics;
     this.pageBook = pageBook;
-    this.respondProvider = respondProvider;
   }
 
 
@@ -63,7 +59,7 @@ class DebugModeRoutingDispatcher implements RoutingDispatcher {
     } catch (TemplateCompileException tce) {
       // NOTE(dhanji): Don't log error metrics here, they are better handled by the compiler.
 
-      final Respond respond = respondProvider.get();
+      final Respond respond = new StringBuilderRespond(new Object());
 
       respond.write("<h3>");
       respond.write("Compile errors in page");
@@ -79,7 +75,7 @@ class DebugModeRoutingDispatcher implements RoutingDispatcher {
 
 
     } catch (PropertyAccessException pae) {
-      final Respond respond = respondProvider.get();
+      final Respond respond = new StringBuilderRespond(new Object());
 
       Throwable cause = pae.getCause();
 

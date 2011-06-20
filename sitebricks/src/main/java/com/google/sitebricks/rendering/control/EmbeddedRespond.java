@@ -121,6 +121,10 @@ class EmbeddedRespond implements Respond {
     delegate.clear();
   }
 
+  @Override public Object pageObject() {
+    return delegate.pageObject();
+  }
+
   @Override
   public String toString() {
     if (null == body) {

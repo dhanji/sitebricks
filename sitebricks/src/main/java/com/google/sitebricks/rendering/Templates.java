@@ -52,7 +52,7 @@ public class Templates {
     }
     Preconditions.checkArgument(null != compiled, "No template found attached to: %s", clazz);
 
-    StringBuilderRespond respond = new StringBuilderRespond();
+    StringBuilderRespond respond = new StringBuilderRespond(context);
     //noinspection ConstantConditions
     compiled.render(context, respond);
 

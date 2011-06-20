@@ -77,7 +77,7 @@ class RepeatWidget implements Renderable {
 
             //decorate with some context
             context.put(var, thing);
-            context.put(pageVar, bound);
+            context.put(pageVar, respond.pageObject());
             context.put("index", i++);
             context.put("isLast", i == items.size());
             widgetChain.render(context, respond);

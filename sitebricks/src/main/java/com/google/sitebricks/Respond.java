@@ -1,13 +1,10 @@
 package com.google.sitebricks;
 
-import com.google.inject.ImplementedBy;
-
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
-@ImplementedBy(StringBuilderRespond.class)
 public interface Respond {
-  Respond HEADLESS = new StringBuilderRespond();
+  Respond HEADLESS = new StringBuilderRespond(new Object());
 
   void write(String text);
 
@@ -34,6 +31,8 @@ public interface Respond {
   String getHead();
 
   void clear();
+
+  Object pageObject();
 
   public static interface HtmlTagBuilder {
     void textField(String value, String s);

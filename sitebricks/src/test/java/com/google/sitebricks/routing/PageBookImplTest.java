@@ -711,6 +711,10 @@ public class PageBookImplTest {
     @Override
     public void clear() {
     }
+
+    @Override public Object pageObject() {
+      return null;
+    }
   }
 
   @At("/wiki")

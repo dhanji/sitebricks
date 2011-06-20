@@ -11,7 +11,7 @@ public class RespondTest {
 
     @Test
     public final void respondWriteStringCharAndChew() {
-        final Respond respond = new StringBuilderRespond();
+        final Respond respond = new StringBuilderRespond(new Object());
         respond.write(A_STRING);
         respond.write(A_CHAR);
         respond.write(A_CHAR);
@@ -22,7 +22,7 @@ public class RespondTest {
 
     @Test
     public final void respondWriteNull() {
-        final Respond respond = new StringBuilderRespond();
+        final Respond respond = new StringBuilderRespond(new Object());
         respond.write(null);
 
         assert ("" + null).equals(respond.toString());
