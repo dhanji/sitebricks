@@ -2,7 +2,7 @@ package com.google.sitebricks.mail;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ValueFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.sitebricks.mail.imap.*;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
@@ -92,7 +92,7 @@ class NettyImapClient implements MailClient {
     // TODO Shut down thread pools?
   }
 
-  <D> ChannelFuture send(Command command, String args, ValueFuture<D> valueFuture) {
+  <D> ChannelFuture send(Command command, String args, SettableFuture<D> valueFuture) {
     Long seq = sequence.incrementAndGet();
 
     String commandString = seq + " " + command.toString()
@@ -113,7 +113,7 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<List<String>> listFolders() {
-    ValueFuture<List<String>> valueFuture = ValueFuture.create();
+    SettableFuture<List<String>> valueFuture = SettableFuture.create();
 
     send(Command.LIST_FOLDERS, "\"[Gmail]\" \"*\"", valueFuture);
 
@@ -122,7 +122,7 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<FolderStatus> statusOf(String folder) {
-    ValueFuture<FolderStatus> valueFuture = ValueFuture.create();
+    SettableFuture<FolderStatus> valueFuture = SettableFuture.create();
 
     String args = '"' + folder + "\" (UIDNEXT RECENT MESSAGES UNSEEN)";
     send(Command.FOLDER_STATUS, args, valueFuture);
@@ -132,7 +132,7 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<Folder> open(String folder) {
-    final ValueFuture<Folder> valueFuture = ValueFuture.create();
+    final SettableFuture<Folder> valueFuture = SettableFuture.create();
     valueFuture.addListener(new Runnable() {
       @Override
       public void run() {
@@ -158,7 +158,7 @@ class NettyImapClient implements MailClient {
     Preconditions.checkArgument(start <= end, "Start must be <= end");
     Preconditions.checkArgument(start > 0, "Start must be greater than zero (IMAP uses 1-based " +
         "indexing)");
-    ValueFuture<List<MessageStatus>> valueFuture = ValueFuture.create();
+    SettableFuture<List<MessageStatus>> valueFuture = SettableFuture.create();
 
     String args = start + ":" + end + " all";
     send(Command.FETCH_HEADERS, args, valueFuture);
@@ -172,7 +172,7 @@ class NettyImapClient implements MailClient {
     Preconditions.checkArgument(start <= end, "Start must be <= end");
     Preconditions.checkArgument(start > 0, "Start must be greater than zero (IMAP uses 1-based " +
         "indexing)");
-    ValueFuture<List<Message>> valueFuture = ValueFuture.create();
+    SettableFuture<List<Message>> valueFuture = SettableFuture.create();
 
     String args = start + ":" + end + " all";
     send(Command.FETCH_FULL, args, valueFuture);
@@ -184,7 +184,7 @@ class NettyImapClient implements MailClient {
   public void watch(Folder folder, FolderObserver observer) {
     checkCurrentFolder(folder);
 
-    send(Command.IDLE, null, ValueFuture.<Object>create());
+    send(Command.IDLE, null, SettableFuture.<Object>create());
 
     mailClientHandler.observe(observer);
   }

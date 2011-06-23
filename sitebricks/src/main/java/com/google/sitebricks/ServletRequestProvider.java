@@ -3,7 +3,7 @@ package com.google.sitebricks;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ValueFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -79,7 +79,7 @@ class ServletRequestProvider implements Provider<Request> {
             return new AsyncCompletion<E>() {
               @Override
               public ListenableFuture<E> future() {
-                ValueFuture<E> future = ValueFuture.create();
+                SettableFuture<E> future = SettableFuture.create();
                 future.set(read(type).as(transport));
                 return future;
               }

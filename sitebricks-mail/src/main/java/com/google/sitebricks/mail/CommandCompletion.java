@@ -1,7 +1,7 @@
 package com.google.sitebricks.mail;
 
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ValueFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.sitebricks.mail.imap.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,14 +16,14 @@ import java.util.List;
  */
 class CommandCompletion {
   private static final Logger log = LoggerFactory.getLogger(CommandCompletion.class);
-  private final ValueFuture<Object> valueFuture;
+  private final SettableFuture<Object> valueFuture;
   private final List<String> value = Lists.newArrayList();
   private final Long sequence;
   private final Command command;
 
   @SuppressWarnings("unchecked") // Ugly gunk needed to prevent generics from spewing everywhere
-  public CommandCompletion(Command command, Long sequence, ValueFuture<?> valueFuture) {
-    this.valueFuture = (ValueFuture<Object>) valueFuture;
+  public CommandCompletion(Command command, Long sequence, SettableFuture<?> valueFuture) {
+    this.valueFuture = (SettableFuture<Object>) valueFuture;
     this.sequence = sequence;
     this.command = command;
   }
