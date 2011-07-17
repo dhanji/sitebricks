@@ -24,7 +24,7 @@ public class StringBuilderRespond implements Respond {
   private static final AtomicReference<Map<String, String>> templates =
       new AtomicReference<Map<String, String>>();
 
-  private static final String TEXT_HTML = "text/html";
+  private static final String TEXT_HTML = "text/html;charset=utf-8";
   private Object page;
 
   @SuppressWarnings("unchecked")
