@@ -24,6 +24,7 @@ import com.google.sitebricks.http.Trace;
 import com.google.sitebricks.http.negotiate.Accept;
 import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
+import com.google.sitebricks.rendering.Templates;
 import com.google.sitebricks.routing.Action;
 
 import java.lang.annotation.Annotation;
@@ -91,7 +92,11 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     bind(new TypeLiteral<List<Package>>() {})
         .annotatedWith(Bricks.class)
         .toInstance(packages);
-
+    
+    bind(new TypeLiteral<Map<Class<?>,Templates.Descriptor>>() {})
+	    .annotatedWith(Bricks.class)
+	    .toInstance(templates);
+    
     bind(new TypeLiteral<List<LinkingBinder>>() {})
         .annotatedWith(Bricks.class)
         .toInstance(bindings);
@@ -124,14 +129,25 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
   protected void configureSitebricks() {
   }
-
+  // Templates
+  private final Map<Class<?>,Templates.Descriptor> templates = Maps.newHashMap();
   // Bindings.
   private final List<LinkingBinder> bindings = Lists.newArrayList();
   private final List<Package> packages = Lists.newArrayList();
   private final Map<String, Class<? extends Annotation>> methods = Maps.newHashMap();
   private final Map<String, Class<? extends Annotation>> negotiations = Maps.newHashMap();
   private final Set<Localizer.Localization> localizations = Sets.newHashSet();
-
+  
+  /**
+   * Custom class template other than default and Show
+   * @param clazz
+   * @param templateName
+   */
+  public final void template(Class<?> clazz,String templateName) {
+	  Templates.Descriptor descriptor = new Templates.Descriptor(clazz,templateName);
+	  templates.put(clazz, descriptor);
+  }
+  
   public final ShowBinder at(String uri) {
     LinkingBinder binding = new LinkingBinder(uri);
     bindings.add(binding);
@@ -286,7 +302,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
       actionDescriptors.add(ad);
       return ad;
     }
-
+   
     public ScopedBindingBuilder as(String annotation) {
       this.embedAs = annotation;
       return this;

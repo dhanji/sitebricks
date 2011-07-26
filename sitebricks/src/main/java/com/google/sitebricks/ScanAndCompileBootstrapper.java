@@ -49,6 +49,9 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
   private final Templates templates = null;
   
   @Inject @Bricks
+  private final Map<Class<?>,Templates.Descriptor> customTemplates = null;
+  
+  @Inject @Bricks
   private final List<SitebricksModule.LinkingBinder> bindings = null;
 
   @Inject @Bricks
@@ -163,7 +166,12 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
   private Set<PageBook.Page> scanPagesToCompile(Set<Class<?>> set) {
     Set<Templates.Descriptor> templates = Sets.newHashSet();
     Set<PageBook.Page> pagesToCompile = Sets.newHashSet();
+    boolean customTemplatesExist = false;
+    if(!customTemplates.isEmpty()) {
+    	customTemplatesExist = true;
+    }
     for (Class<?> pageClass : set) {
+    	
       EmbedAs embedAs = pageClass.getAnnotation(EmbedAs.class);
       if (null != embedAs) {
         final String embedName = embedAs.value();
@@ -190,11 +198,23 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
           pagesToCompile.add(pageBook.at(at.value(), pageClass));
         }
       }
-
-      if (pageClass.isAnnotationPresent(Show.class)) {
-        // This has a template associated with it.
-        templates.add(new Templates.Descriptor(pageClass,
-            pageClass.getAnnotation(Show.class).value()));
+      //get templates for eagerly load in production mode
+      if (Stage.DEVELOPMENT != currentStage) {
+	      if(customTemplatesExist) {
+	    	  if(customTemplates.containsKey(pageClass)) {
+	    		  Templates.Descriptor descriptor = customTemplates.get(pageClass);
+	    		  templates.add(descriptor);
+	    		  //customTemplate,don't care Show annotation
+	    		  continue;
+	    	  }
+	      }
+	      
+	      if (pageClass.isAnnotationPresent(Show.class)) {
+	    	  log.info("replace default template with "+ pageClass.getAnnotation(Show.class).value());
+	        // This has a template associated with it.
+	        templates.add(new Templates.Descriptor(pageClass,
+	            pageClass.getAnnotation(Show.class).value()));
+	      }
       }
     }
 
