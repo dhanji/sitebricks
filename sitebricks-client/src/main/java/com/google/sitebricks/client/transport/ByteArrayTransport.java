@@ -9,7 +9,7 @@ import java.io.OutputStream;
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
-class ByteArrayTransport extends Xml {
+class ByteArrayTransport extends Raw {
 
   @SuppressWarnings("unchecked")
   public <T> T in(InputStream in, Class<T> type) throws IOException {
