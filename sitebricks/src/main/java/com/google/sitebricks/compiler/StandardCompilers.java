@@ -2,16 +2,19 @@ package com.google.sitebricks.compiler;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.sitebricks.*;
+import com.google.sitebricks.Bricks;
+import com.google.sitebricks.MissingTemplateException;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Show;
+import com.google.sitebricks.Template;
+import com.google.sitebricks.TemplateLoader;
 import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
-import com.google.sitebricks.compiler.template.SelfLoadingMvelTemplateRegistry;
 import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.rendering.Decorated;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
-import org.mvel2.templates.TemplateRegistry;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -29,7 +32,6 @@ class StandardCompilers implements Compilers {
   private final SystemMetrics metrics;
   private final Map<String, Class<? extends Annotation>> httpMethods;
   private final TemplateLoader loader;
-  private volatile TemplateRegistry mvelTemplateRegistry;
 
   @Inject
   public StandardCompilers(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics,
@@ -59,10 +61,7 @@ class StandardCompilers implements Compilers {
   }
 
   public Renderable compileMvel(Class<?> page, String template) {
-    if (null == mvelTemplateRegistry) {
-      mvelTemplateRegistry = new SelfLoadingMvelTemplateRegistry();
-    }
-    return new MvelTemplateCompiler(page, mvelTemplateRegistry).compile(template);
+    return new MvelTemplateCompiler(page).compile(template);
   }
 
   public Renderable compileFreemarker( Class<?> page, String template ) {
@@ -104,11 +103,11 @@ class StandardCompilers implements Compilers {
       }
     }
   }
-
+  
   public void compilePage(PageBook.Page page) {
     // find the template page class
     Class<?> templateClass = page.pageClass();
-
+    
     // root page uses the last template, extension uses its own embedded template
     if (!page.isDecorated() && templateClass.isAnnotationPresent(Decorated.class)) {
       // the first superclass with a @Show and no @Extension is the template
