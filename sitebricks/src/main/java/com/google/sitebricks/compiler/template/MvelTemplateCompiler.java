@@ -7,6 +7,7 @@ import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.templates.TemplateCompiler;
 import org.mvel2.templates.TemplateRuntime;
 
+import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -27,7 +28,7 @@ public class MvelTemplateCompiler {
       @Override
       public void render(Object bound, Respond respond) {
         assert page.isInstance(bound);
-        respond.write(TemplateRuntime.execute(compiledTemplate, bound).toString());
+        respond.write(TemplateRuntime.execute(compiledTemplate, bound, new HashMap()).toString());
       }
 
       @Override
