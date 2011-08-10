@@ -45,17 +45,22 @@ public class MessageStatusExtractorTest {
     List<String> data =
         Resources.readLines(MessageStatusExtractorTest.class.getResource("fetch_all_data.txt"),
             Charsets.UTF_8);
+    List<String> assertions =
+        Resources.readLines(MessageStatusExtractorTest.class.getResource("fetch_all_data_assertion.txt"),
+            Charsets.UTF_8);
 
     List<MessageStatus> statuses =
         new MessageStatusExtractor().extract(data);
 
     MessageStatus status = statuses.get(0);
+    assertEquals(statuses.size(), 9);
     assertEquals(EnumSet.noneOf(Flag.class), status.getFlags());
     assertEquals("<BANLkTi=zC_UQExUuaNqiP0dJXoswDej1Ww@mail.gmail.com>", status.getMessageUid());
     assertEquals("Get Gmail on your mobile phone", status.getSubject());
 
-    for (MessageStatus st : statuses) {
-      System.out.println(st);
+    for (int i = 0, statusesSize = statuses.size(); i < statusesSize; i++) {
+      MessageStatus st = statuses.get(i);
+      assertEquals(st.toString(), assertions.get(i));
     }
   }
 }

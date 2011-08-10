@@ -28,6 +28,9 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
   public List<MessageStatus> extract(List<String> messages) {
     List<MessageStatus> statuses = Lists.newArrayList();
     for (String message : messages) {
+      if (null == message || message.isEmpty())
+        continue;
+
       // Discard the fetch token.
       message = message.replaceFirst("\\d+[ ]+FETCH ", "");
       statuses.add(parseEnvelope(message));
