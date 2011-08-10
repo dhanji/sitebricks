@@ -4,7 +4,9 @@ import com.google.common.collect.Lists;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -32,7 +34,9 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         continue;
 
       // Discard the fetch token.
-      message = message.replaceFirst("\\d+[ ]+FETCH ", "");
+      message = message.replaceFirst("\\d+[ ]* ", "");
+      if (Command.isEndOfSequence(message.toLowerCase()))
+        continue;
       statuses.add(parseEnvelope(message));
     }
 
@@ -43,7 +47,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     Queue<String> tokens = tokenize(message);
 
     // Assert that we have an envelope.
-    eat(tokens, "(", "ENVELOPE", "(");
+    eat(tokens, "FETCH", "(", "ENVELOPE", "(");
 
     MessageStatus status = new MessageStatus();
     String receivedDate = tokens.peek();

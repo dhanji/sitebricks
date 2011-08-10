@@ -98,10 +98,12 @@ class NettyImapClient implements MailClient {
     String commandString = seq + " " + command.toString()
         + (null == args ? "" : " " + args)
         + "\r\n";
-    log.debug("Sending {} to server...", commandString);
+
+    // Log the command but clip the \r\n
+    log.debug("Sending {} to server...", commandString.substring(0, commandString.length() - 2));
 
     // Enqueue command.
-    mailClientHandler.enqueue(seq, new CommandCompletion(command, seq, valueFuture));
+    mailClientHandler.enqueue(new CommandCompletion(command, seq, valueFuture));
 
     return channel.write(commandString);
   }

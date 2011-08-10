@@ -32,13 +32,13 @@ class CommandCompletion {
     String[] pieces = message.split("[ ]+", 2);
 
     String status = pieces[1].toLowerCase();
-    if (status.startsWith("ok") && status.contains("success")) {
+    if (Command.isEndOfSequence(status)) {
       // Ensure sequencing was correct.
       if (!Long.valueOf(pieces[0]).equals(sequence)) {
         log.error("Sequencing incorrect, expected {} but was {} ", sequence, pieces[0]);
       }
 
-      // Give it the final message and then process the data.      
+      // Once we see the OK message, we should process the data and return.
       value.add(pieces[1]);
       valueFuture.set(command.extract(value));
       return true;

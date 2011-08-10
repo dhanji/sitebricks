@@ -22,6 +22,11 @@ public enum Command {
   }
 
   private static final Map<Command, Extractor<?>> dataExtractors;
+
+  public static boolean isEndOfSequence(String status) {
+    return status.startsWith("ok") && status.contains("success");
+  }
+
   static {
     dataExtractors = Maps.newHashMap();
 

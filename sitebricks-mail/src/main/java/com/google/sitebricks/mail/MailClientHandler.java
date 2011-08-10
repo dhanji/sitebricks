@@ -29,7 +29,7 @@ class MailClientHandler extends SimpleChannelHandler {
 
   private final Queue<CommandCompletion> completions = new ConcurrentLinkedQueue<CommandCompletion>();
 
-  public void enqueue(Long sequence, CommandCompletion completion) {
+  public void enqueue(CommandCompletion completion) {
     completions.add(completion);
   }
 
