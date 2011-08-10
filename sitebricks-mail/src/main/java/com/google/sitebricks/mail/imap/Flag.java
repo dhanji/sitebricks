@@ -10,11 +10,19 @@ import java.util.Map;
 public enum Flag {
   SEEN,
   RECENT,
+  DELETED,
+  DRAFT,
+  FLAGGED,
+  ANSWERED,
   ;
   private static Map<String, Flag> flagMap = Maps.newHashMap();
   static {
     flagMap.put("\\seen", SEEN);
     flagMap.put("\\recent", RECENT);
+    flagMap.put("\\deleted", DELETED);
+    flagMap.put("\\draft", DRAFT);
+    flagMap.put("\\flagged", FLAGGED);
+    flagMap.put("\\answered", ANSWERED);
   }
 
   public static Flag parse(String flag) {

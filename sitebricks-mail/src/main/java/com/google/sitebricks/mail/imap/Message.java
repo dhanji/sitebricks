@@ -8,4 +8,5 @@ package com.google.sitebricks.mail.imap;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class Message {
+  private MessageStatus status;
 }

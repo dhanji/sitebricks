@@ -68,7 +68,8 @@ public interface MailClient {
   public ListenableFuture<List<Message>> fetch(Folder folder, int start, int end);
 
   /**
-   *
+   * Watches a folder for changes. This is an implementation of the IMAP IDLE command and
+   * is the preferred method for push notification.
    * <p>
    * <b>NOTE: you must call {@link #open(String)} first.</b>
    */
