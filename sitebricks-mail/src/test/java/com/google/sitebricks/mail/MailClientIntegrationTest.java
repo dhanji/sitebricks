@@ -23,7 +23,7 @@ public class MailClientIntegrationTest {
     List<String> capabilities = client.capabilities();
     System.out.println("CAPS: " + capabilities);
 
-    client.statusOf("[Gmail]/All Mail");
+//    client.statusOf("[Gmail]/All Mail");
     ListenableFuture<Folder> future = client.open("[Gmail]/All Mail");
     final Folder allMail = future.get();
     System.out.println("Folder opened: " + allMail.getName() + " with count " + allMail.getCount());

@@ -1,12 +1,11 @@
 package com.google.sitebricks.mail.imap;
 
 import com.google.common.collect.Lists;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Extracts a MessageStatus from a partial IMAP fetch. Specifically
@@ -19,184 +18,206 @@ import java.util.List;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
-  private static final String ENVELOPE_PREFIX = "(ENVELOPE ";
-  private static final String INTERNALDATE = "INTERNALDATE";
 
-  static final String RECEIVED_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss ZZZZZ";
-  static final String INTERNAL_DATE_FORMAT = "dd-MMM-yyyy HH:mm:ss ZZZZZ";
+  static final DateTimeFormatter RECEIVED_DATE = DateTimeFormat.forPattern(
+      "EEE, dd MMM yyyy HH:mm:ss Z");
+  static final DateTimeFormatter INTERNAL_DATE = DateTimeFormat.forPattern(
+      "dd-MMM-yyyy HH:mm:ss Z");
 
   @Override
   public List<MessageStatus> extract(List<String> messages) {
     List<MessageStatus> statuses = Lists.newArrayList();
     for (String message : messages) {
-      String[] split = message.split("[ ]+", 3);
-
-      // Only parse Fetch responses.
-      if (split.length > 1 && "FETCH".equalsIgnoreCase(split[1])) {
-        // Strip the "XX FETCH" sequence prefix first.
-        statuses.add(parseEnvelope(split[2]));
-      }
+      // Discard the fetch token.
+      message = message.replaceFirst("\\d+[ ]+FETCH ", "");
+      statuses.add(parseEnvelope(message));
     }
 
     return statuses;
   }
 
   private static MessageStatus parseEnvelope(String message) {
-    // Now we have only the envelope remaining.
-    if (!message.startsWith(ENVELOPE_PREFIX)) {
-      // Something's wrong, we can't handle this.
-      throw new RuntimeException("Illegal data format, expecting envelope prefix, " +
-          "found " + message);
+    Queue<String> tokens = tokenize(message);
+
+    // Assert that we have an envelope.
+    eat(tokens, "(", "ENVELOPE", "(");
+
+    MessageStatus status = new MessageStatus();
+    String receivedDate = tokens.peek();
+    if (isValid(receivedDate)) {
+      receivedDate = match(tokens, String.class);
+      status.setReceivedDate(RECEIVED_DATE.parseDateTime(receivedDate).toDate());
     }
 
-    // Strip envelope wrapper.
-    message = message.substring(ENVELOPE_PREFIX.length(), message.length() - 1);
+    status.setSubject(match(tokens, String.class));
 
-    // Parse strings or paren-groups.
-    List<String> tokens = tokenize(message);
+    status.setFrom(readAddresses(tokens));
+    status.setSender(readAddresses(tokens));
+    status.setReplyTo(readAddresses(tokens));
+    status.setTo(readAddresses(tokens));
+    status.setCc(readAddresses(tokens));
+    status.setBcc(readAddresses(tokens));
 
-    // Parse semantic message information out of the token stream.
+    status.setInReplyTo(match(tokens, String.class));
+    status.setMessageUid(match(tokens, String.class));
 
-    // First piece is always the received date.
-    String receivedDateRaw = tokens.get(0);
-    String subject = tokens.get(1);
+    // Close envelope, and open flags...
+    eat(tokens, ")", "FLAGS", "(");
 
-    // sender/recipient etc. are parsed as 4-part address structures.
-    String from = parseAddress(tokens, 2);
-    String sender = parseAddress(tokens, 3);
-    String replyTo = parseAddress(tokens, 4);
-    String to = parseAddress(tokens, 5); // TODO handle multiple recipients.
-    
+    // Check if there are flags to set.
+    while (!")".equals(tokens.peek())) {
+      status.getFlags().add(Flag.parse(tokens.poll()));
+    }
+    eat(tokens, ")", "INTERNALDATE");
 
-    // TODO Should we reimplement the parser to split these NIL tokens? Yes, I think so.
-    System.out.println(tokens.get(6));
-
-    // Skip ahead to last-but-one (message uid).
-    String messageUidRaw = tokens.get(tokens.size() - 2);
-    String messageUid = messageUidRaw.substring(messageUidRaw.indexOf('<') + 1,
-        messageUidRaw.length() - 1);
-
-    // Last token is the combined Flags and internaldate token.
-    EnumSet<Flag> flags = EnumSet.noneOf(Flag.class);
-    String last = tokens.get(tokens.size() - 1);
-    for (String fragment : last.split("[ ]+")) {
-      if (fragment.startsWith("\\")) {
-        // This is an IMAP flag. Do something with it.
-        Flag flag = Flag.named(fragment.substring(1).toUpperCase());
-        if (null != flag)
-          flags.add(flag);
-        // Else maybe log warning that we encountered an unknown flag?
-      }
-
-      // Are we done processing flags?
-      if (INTERNALDATE.equalsIgnoreCase(fragment)) {
-        break;
-      }
+    String internalDate = tokens.peek();
+    if (isValid(internalDate)) {
+      internalDate = match(tokens, String.class);
+      status.setInternalDate(INTERNAL_DATE.parseDateTime(internalDate).toDate());
     }
 
-    last = last.substring(last.indexOf(INTERNALDATE) + INTERNALDATE.length() + 1);
+    eat(tokens, "RFC822.SIZE");
+    status.setSize(match(tokens, int.class));
 
-    // Parse date from this final piece.
-    Date internalDate, receivedDate;
-    try {
-      SimpleDateFormat dateFormat = new SimpleDateFormat(INTERNAL_DATE_FORMAT);
-      internalDate = dateFormat.parse(last);
-      dateFormat = new SimpleDateFormat(RECEIVED_DATE_FORMAT);
-      receivedDate = dateFormat.parse(receivedDateRaw);
+    // We don't really need to bother closing the last ')'
 
-    } catch (ParseException e) {
-      throw new RuntimeException("Unable to parse date from " + receivedDateRaw, e);
-    }
-
-    return new MessageStatus(messageUid, receivedDate, internalDate, subject, flags, from, sender,
-        replyTo);
+    return status;
   }
 
-  private static String parseAddress(List<String> tokens, int start) {
-    StringBuilder builder = new StringBuilder();
-    tokens = tokenize(tokens.get(start));
-    start = 0;
+  private static List<String> readAddresses(Queue<String> tokens) {
+    if (isValid(tokens.peek())) {
+      eat(tokens, "(");
+      List<String> addresses = Lists.newArrayList();
 
-    // Name of addressee.
-    String token = tokens.get(start);
-    if (isValid(token)) {
-      builder.append('"');
-      builder.append(token);
-      builder.append("\" ");
+      while ("(".equals(tokens.peek()))
+        addresses.add(readAddress(tokens));
+
+      eat(tokens, ")");
+      return addresses;
+    }
+    tokens.poll();  // Discard 'NIL'
+    return null;
+  }
+
+  private static String readAddress(Queue<String> tokens) {// := ( a b c d )
+    StringBuilder address = new StringBuilder();
+    eat(tokens, "(");
+    String namePiece = match(tokens, String.class);
+    String sourceRoute = match(tokens, String.class);
+    String mailboxName = match(tokens, String.class);  // mail username
+    String hostname = match(tokens, String.class);     // domain
+    eat(tokens, ")");
+
+    if (namePiece != null)
+      address.append('"').append(namePiece).append("\" ");
+
+    // I duno what source route is for ...
+    return address.append(mailboxName).append('@').append(hostname).toString();
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T> T match(Queue<String> tokens, Class<T> clazz) {
+    String token = tokens.poll();
+    if (!isValid(token))
+      return null;
+
+    if (String.class == clazz) {
+      if (token.startsWith("\"") && token.endsWith("\""))
+        return (T)token.substring(1, token.length() - 1);
+      else
+        throw new IllegalArgumentException("Expected a string but found: " + token);
+    } else if (int.class == clazz) {
+      return (T) Integer.valueOf(token);
+    }
+    throw new IllegalArgumentException("Unsupported type: " + clazz.getName());
+  }
+
+  private static String matchAnyOf(Queue<String> tokens, String... match) {
+    for (String piece : match) {
+      if (piece.equals(tokens.peek())) {
+        return tokens.poll();
+      }
     }
 
-    // Build the email address itself.
-    // TODO: Im not really sure what the start + 1 field is supposed to be (see addresses RFC).
-    token = tokens.get(start + 1);
-    String[] pieces = token.split("[ ]+");
+    // None found.
+    return null;
+  }
 
-    // Strip out any NIL components and rebuild the email address token.
-    StringBuilder smaller = new StringBuilder();
-    for (String piece : pieces) {
-      if (isValid(piece))
-        smaller.append(piece);
+  private static void eat(Queue<String> tokens, String... match) {
+    for (String piece : match) {
+      if (piece.equals(tokens.peek())) {
+        tokens.poll();
+      } else
+        throw new IllegalArgumentException("Expected token " + piece + " but found " + tokens.peek());
     }
-    token = smaller.toString();
-
-    builder.append('<');
-    builder.append(token);
-    builder.append('@');
-    builder.append(tokens.get(start + 2));
-    builder.append('>');
-
-    return builder.toString();
   }
 
   private static boolean isValid(String token) {
     return !"NIL".equalsIgnoreCase(token);
   }
 
-  private static List<String> tokenize(String message) {
-    List<String> pieces = Lists.newArrayList();
-    char[] chars = message.toCharArray();
+  static Queue<String> tokenize(String message) {
+    Queue<String> tokens = new LinkedBlockingQueue<String>();
+
+    char[] charArray = message.toCharArray();
     boolean inString = false;
-    int paren = 0;
-    StringBuilder token = new StringBuilder();
-    for (int i = 0; i < chars.length; i++) {
-      char c = chars[i];
+    StringBuilder currentToken = new StringBuilder();
+    for (int i = 0, charArrayLength = charArray.length; i < charArrayLength; i++) {
+      char c = charArray[i];
 
-      // Skip top-level parentheticals, but honor 2nd-level ones.
-      if (!inString) {
-        if (c == '(') {
-          paren++;
-//          if (paren < 2) { // Skip 2 levels
-            continue;
-//          }
-          
-        } else if (c == ')') {
-          paren--;
-
-          // Time to bake this as a token (skip top level).
-          if (paren > 1) {
-//            token.append(c);
-            pieces.add(token.toString().trim());
-            token = new StringBuilder();
-          }
-          continue;
-        }
-      }      
-
-      if (c == '"' && paren < 2) {
-
-        // Close of string, bake this token.
+      if (c == '"') {
         if (inString) {
-          pieces.add(token.toString().trim());
-          token = new StringBuilder();
           inString = false;
-        } else
-          inString = true;
 
+          // Bake string token.
+          currentToken.append('"');
+          bakeToken(tokens, currentToken);
+          currentToken = new StringBuilder();
+        } else {
+          inString = true;
+          // We've entered a string, so bake whatever has come so far.
+          bakeToken(tokens, currentToken);
+          currentToken = new StringBuilder();
+          currentToken.append('"');
+        }
         continue;
+
+        // Handle parentheses as their own tokens.
       }
 
-      token.append(c);
+      if (!inString)
+        if (c == '(') {
+          bakeToken(tokens, currentToken);
+          tokens.add("(");
+          currentToken = new StringBuilder();
+          continue;
+        } else if (c == ')') {
+          bakeToken(tokens, currentToken);
+          tokens.add(")");
+          currentToken = new StringBuilder();
+          continue;
+
+          // Otherwise whitespace is a delimiter for non-strings.
+        } else if (c == ' ') {
+          bakeToken(tokens, currentToken);
+          currentToken = new StringBuilder();
+          continue;
+        }
+
+      currentToken.append(c);
     }
 
-    return pieces;
+    // Close up dangling tokens.
+    if (currentToken.length() > 0) {
+      bakeToken(tokens, currentToken);
+    }
+
+    return tokens;
+  }
+
+  private static void bakeToken(Collection<String> tokens, StringBuilder currentToken) {
+    String trim = currentToken.toString().trim();
+    if (trim.length() > 0)
+      tokens.add(trim);
   }
 }

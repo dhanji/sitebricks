@@ -6,40 +6,56 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class MessageStatusExtractorTest {
 
+  @Test
+  public final void testTokenizer() throws IOException, ParseException {
+    Queue<String> tokens =
+        MessageStatusExtractor.tokenize("7 FETCH (ENVELOPE (\"Sun, 10 Apr 2011 16:38:38 +1000\" " +
+            "\"test\" ((\"Scott Bakula\" NIL \"test.account\" \" gmail.  om\")) ((\"Scott " +
+            "Bakula\" " +
+            "NIL \"agent.bain\" \"gmail.com\")) ((\"Scott Bakula\" NIL \"test.account\" \"gmail" +
+            ".com\")) ((NIL NIL \"telnet.imap\" \"gmail.com\")) NIL NIL NIL " +
+            "\"<BANLkTimf9tS+aJXa1QLdMiH4OgtdK7k=FQ@mail.gmail.com>\") FLAGS () INTERNALDATE " +
+            "\"10-Apr-2011 06:38:59 +0000\" RFC822.SIZE 2005)");
+
+    String[] expected = new String[] { "7", "FETCH", "(", "ENVELOPE", "(", "\"Sun, 10 Apr 2011 16:38:38 +1000\"", "\"test\"", "(", "(",
+        "\"Scott Bakula\"", "NIL", "\"test.account\"", "\" gmail.  om\"", ")", ")", "(", "(", "\"Scott Bakula\"",
+        "NIL", "\"agent.bain\"", "\"gmail.com\"", ")", ")", "(", "(", "\"Scott Bakula\"", "NIL", "\"test.account\"",
+        "\"gmail.com\"", ")", ")", "(", "(", "NIL", "NIL", "\"telnet.imap\"", "\"gmail.com\"", ")", ")", "NIL", "NIL",
+        "NIL", "\"<BANLkTimf9tS+aJXa1QLdMiH4OgtdK7k=FQ@mail.gmail.com>\"", ")", "FLAGS", "(", ")",
+        "INTERNALDATE", "\"10-Apr-2011 06:38:59 +0000\"", "RFC822.SIZE", "2005", ")" } ;
+
+    assertEquals(new ArrayList<String>(tokens), Arrays.asList(expected));
+  }
+
   /**
    * WARNING: THIS TEST IS DATA-DEPENDENT!
    */
   @Test
   public final void testTypicalGmailInboxHeaders() throws IOException, ParseException {
-    List<String> lines =
+
+    List<String> data =
         Resources.readLines(MessageStatusExtractorTest.class.getResource("fetch_all_data.txt"),
             Charsets.UTF_8);
 
-    List<MessageStatus> statuses = new MessageStatusExtractor().extract(lines.subList(0, 1));
+    List<MessageStatus> statuses =
+        new MessageStatusExtractor().extract(data);
 
     MessageStatus status = statuses.get(0);
-    assert EnumSet.noneOf(Flag.class).equals(status.getFlags());
-    assert "BANLkTi=zC_UQExUuaNqiP0dJXoswDej1Ww@mail.gmail.com".equals(status.getMessageUid());
-    assert new SimpleDateFormat(MessageStatusExtractor.RECEIVED_DATE_FORMAT)
-        .parse("Fri, 8 Apr 2011 23:12:09 -0700")
-        .equals(status.getReceivedDate());
-    assert new SimpleDateFormat(MessageStatusExtractor.INTERNAL_DATE_FORMAT)
-        .parse("09-Apr-2011 06:12:09 +0000")
-        .equals(status.getInternalDate());
-    assert "Get Gmail on your mobile phone".equals(status.getSubject());
+    assertEquals(EnumSet.noneOf(Flag.class), status.getFlags());
+    assertEquals("<BANLkTi=zC_UQExUuaNqiP0dJXoswDej1Ww@mail.gmail.com>", status.getMessageUid());
+    assertEquals("Get Gmail on your mobile phone", status.getSubject());
 
     for (MessageStatus st : statuses) {
       System.out.println(st);
     }
   }
-
 }
