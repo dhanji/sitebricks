@@ -53,7 +53,7 @@ class Parsing {
       if (token.startsWith("\"") && token.endsWith("\""))
         return (T)token.substring(1, token.length() - 1);
       else
-        throw new IllegalArgumentException("Expected a string but found: " + token);
+        return (T)token;
     } else if (int.class == clazz) {
       return (T) Integer.valueOf(token);
     }

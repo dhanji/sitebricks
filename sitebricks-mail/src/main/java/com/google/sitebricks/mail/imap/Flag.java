@@ -1,7 +1,6 @@
 package com.google.sitebricks.mail.imap;
 
-import org.testng.v6.Maps;
-
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,7 +14,7 @@ public enum Flag {
   FLAGGED,
   ANSWERED,
   ;
-  private static Map<String, Flag> flagMap = Maps.newHashMap();
+  private static Map<String, Flag> flagMap = new HashMap<String, Flag>();
   static {
     flagMap.put("\\seen", SEEN);
     flagMap.put("\\recent", RECENT);
