@@ -18,7 +18,7 @@ public class MessageStatusExtractorTest {
   @Test
   public final void testTokenizer() throws IOException, ParseException {
     Queue<String> tokens =
-        MessageStatusExtractor.tokenize("7 FETCH (ENVELOPE (\"Sun, 10 Apr 2011 16:38:38 +1000\" " +
+        Parsing.tokenize("7 FETCH (ENVELOPE (\"Sun, 10 Apr 2011 16:38:38 +1000\" " +
             "\"test\" ((\"Scott Bakula\" NIL \"test.account\" \" gmail.  om\")) ((\"Scott " +
             "Bakula\" " +
             "NIL \"agent.bain\" \"gmail.com\")) ((\"Scott Bakula\" NIL \"test.account\" \"gmail" +
