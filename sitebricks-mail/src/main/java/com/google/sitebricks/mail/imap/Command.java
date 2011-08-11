@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public enum Command {
   LIST_FOLDERS("list"),
-  FETCH_FULL("fetch"),
+  FETCH_BODY("fetch"),
   FOLDER_STATUS("status"),
   FOLDER_OPEN("select"),
   FETCH_HEADERS("fetch"),
@@ -34,6 +34,7 @@ public enum Command {
     dataExtractors.put(FOLDER_STATUS, new FolderStatusExtractor());
     dataExtractors.put(FOLDER_OPEN, new FolderExtractor());
     dataExtractors.put(FETCH_HEADERS, new MessageStatusExtractor());
+    dataExtractors.put(FETCH_BODY, new MessageBodyExtractor());
   }
 
   @SuppressWarnings("unchecked") // Heterogenous collections are a pita in Java.

@@ -29,9 +29,16 @@ class CommandCompletion {
   }
 
   public boolean complete(String message) {
+    // Base case (empty/newline message).
+    if (message.isEmpty()) {
+      value.add(message);
+      return false;
+    }
+
     String[] pieces = message.split("[ ]+", 2);
 
-    String status = pieces[1].toLowerCase();
+    String content = (pieces.length > 1) ? pieces[1] : message;
+    String status = content.toLowerCase();
     if (Command.isEndOfSequence(status)) {
       // Ensure sequencing was correct.
       if (!Long.valueOf(pieces[0]).equals(sequence)) {
@@ -39,12 +46,12 @@ class CommandCompletion {
       }
 
       // Once we see the OK message, we should process the data and return.
-      value.add(pieces[1]);
+      value.add(content);
       valueFuture.set(command.extract(value));
       return true;
     }
 
-    value.add(pieces[1]);
+    value.add(content);
 
     return false;
   }

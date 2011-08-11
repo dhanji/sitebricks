@@ -176,8 +176,8 @@ class NettyImapClient implements MailClient {
         "indexing)");
     SettableFuture<List<Message>> valueFuture = SettableFuture.create();
 
-    String args = start + ":" + end + " all";
-    send(Command.FETCH_FULL, args, valueFuture);
+    String args = start + ":" + end + " body[]";
+    send(Command.FETCH_BODY, args, valueFuture);
 
     return valueFuture;
   }

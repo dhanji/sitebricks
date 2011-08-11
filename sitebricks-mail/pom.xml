@@ -58,6 +58,11 @@
       <version>2.0</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.james</groupId>
+      <artifactId>apache-mime4j</artifactId>
+      <version>0.7</version>
+    </dependency>
+    <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
       <version>5.8</version>

@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Guice;
 import com.google.sitebricks.mail.Mail.Auth;
 import com.google.sitebricks.mail.imap.Folder;
-import com.google.sitebricks.mail.imap.MessageStatus;
+import com.google.sitebricks.mail.imap.Message;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -43,7 +43,8 @@ public class MailClientIntegrationTest {
 //          }
 //        });
 
-        ListenableFuture<List<MessageStatus>> messages = client.list(allMail, 1, allMail.getCount());
+//        ListenableFuture<List<MessageStatus>> messages = client.list(allMail, 1, 4);
+        ListenableFuture<List<Message>> messages = client.fetch(allMail, 1, 2);
         try {
           System.out.println("Fetched: " + messages.get());
         } catch (InterruptedException e) {
