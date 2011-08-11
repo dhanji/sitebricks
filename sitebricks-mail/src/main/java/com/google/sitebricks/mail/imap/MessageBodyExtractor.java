@@ -8,7 +8,7 @@ import java.util.*;
  * Extracts a full Message body from an IMAP fetch. Specifically
  * a "fetch body[]" command which comes back with the raw content of the
  * message including all headers and mime body parts.
- * <p>
+ * <p/>
  * A faster, lighter form of fetch exists for message status info which
  * would contain flags, recipients, subject, etc.
  *
@@ -46,7 +46,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
     // Normalize mimetype case.
     mimeType = mimeType.toLowerCase();
-    parseBodyParts(iterator, email, mimeType, null /* no boundary */);
+    parseBodyParts(iterator, email, mimeType, boundary(mimeType));
 
     emails.add(email);
 
@@ -68,26 +68,51 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       String boundaryToken = boundary(mimeType);
 
       // Skip everything upto the first occurrence of boundary (called the "Preamble")
-      while (iterator.hasNext() && !boundaryToken.equals(iterator.next()));
-      Message.BodyPart bodyPart = new Message.BodyPart();
-      entity.getBodyParts().add(bodyPart);
+      while (iterator.hasNext() && !boundaryToken.equals(iterator.next())) ;
 
-      // OK now we're in the mime stream. It may have headers.
-      parseHeaderSection(iterator, bodyPart.getHeaders());
+      // Now parse the multipart body in sequence, recursing down as needed...
+      while (iterator.hasNext()) {
+        Message.BodyPart bodyPart = new Message.BodyPart();
+        entity.getBodyParts().add(bodyPart);
 
-      // And parse the body itself (seek up to the next occurrence of boundary token).
-      // Recurse down this method to slurp up different content types.
-      bodyPart.setBodyParts(new ArrayList<Message.BodyPart>());
-      String partMimeType = mimeType(bodyPart.getHeaders());
-      parseBodyParts(iterator, bodyPart, partMimeType, boundary(partMimeType));
+        // OK now we're in the mime stream. It may have headers.
+        parseHeaderSection(iterator, bodyPart.getHeaders());
+
+        // And parse the body itself (seek up to the next occurrence of boundary token).
+        // Recurse down this method to slurp up different content types.
+        String partMimeType = mimeType(bodyPart.getHeaders());
+        String innerBoundary = boundary(partMimeType);
+
+        // If the internal body part is not multipart alternative, then use the parent boundary.
+        if (innerBoundary == null) {
+          innerBoundary = boundary;
+        }
+
+        // Is this going to be a multi-level recursion?
+        if (partMimeType.startsWith("multipart/"))
+          bodyPart.setBodyParts(new ArrayList<Message.BodyPart>());
+
+        parseBodyParts(iterator, bodyPart, partMimeType, innerBoundary);
+
+        // we're only done if the last line has a terminal suffix of '--'
+        String lastLineRead = iterator.previous();
+        if (lastLineRead.startsWith(boundary + "--")) {
+          // Yes this is the end. Otherwise continue!
+          break;
+        } else
+          iterator.next();
+      }
+
     } else {
       entity.setBody(readBodyAsBytes(iterator, boundary));
     }
   }
 
   private static String boundary(String mimeType) {
-    return "--"
-            + mimeType.substring(mimeType.indexOf(BOUNDARY_PREFIX) + BOUNDARY_PREFIX.length());
+    int boundaryIndex = mimeType.indexOf(BOUNDARY_PREFIX);
+    if (boundaryIndex == -1)
+      return null;
+    return "--" + mimeType.substring(boundaryIndex + BOUNDARY_PREFIX.length());
   }
 
   private static byte[] readBodyAsBytes(ListIterator<String> iterator, String boundary) {
@@ -98,7 +123,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         // end of section.
         break;
       }
-      builder.append(line);
+      builder.append(line).append("\r\n");
     }
     return builder.toString().getBytes();
   }
@@ -112,12 +137,13 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         // end of section.
         return textBody.toString();
       }
-      textBody.append(line);
+      textBody.append(line).append("\r\n");
     }
     return textBody.toString();
   }
 
-  private static void parseHeaderSection(ListIterator<String> iterator, Map<String, String> headers) {
+  private static void parseHeaderSection(ListIterator<String> iterator,
+                                         Map<String, String> headers) {
     while (iterator.hasNext()) {
       String message = iterator.next();
       // Watch for the end of sequence marker. If we see it, the mime-stream is ended.
@@ -136,7 +162,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     String[] split = message.split(": ", 2);
     String value = split[1];
 
-    // Check if the next line begins with a LWSP. If it does, then it is a continuation of this line.
+    // Check if the next line begins with a LWSP. If it does, then it is a continuation of this
+    // line.
     // This is called "Unfolding" as per RFC 822. http://www.faqs.org/rfcs/rfc822.html
     while (iterator.hasNext()) {
       String next = iterator.next();
