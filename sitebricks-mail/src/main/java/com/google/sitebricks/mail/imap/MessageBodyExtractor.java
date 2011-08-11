@@ -1,7 +1,12 @@
 package com.google.sitebricks.mail.imap;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.io.IOUtils;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeUtility;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -63,12 +68,17 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   private static void parseBodyParts(ListIterator<String> iterator, HasBodyParts entity,
                                      String mimeType, String boundary) {
     if (mimeType.startsWith("text/plain") || mimeType.startsWith("text/html")) {
-      entity.setBody(readBodyAsString(iterator, boundary));
+      String body = readBodyAsString(iterator, boundary);
+      String encoding = entity.getHeaders().get("Content-Transfer-Encoding");
+      if (null == encoding)
+        encoding = "7bit"; // default to 7-bit as per the MIME RFC.
+      entity.setBody(decode(body, encoding, charset(mimeType)));
     } else if (mimeType.startsWith("multipart/") /* mixed|alternative */) {
       String boundaryToken = boundary(mimeType);
 
       // Skip everything upto the first occurrence of boundary (called the "Preamble")
-      while (iterator.hasNext() && !boundaryToken.equals(iterator.next())) ;
+      //noinspection StatementWithEmptyBody
+      while (iterator.hasNext() && !boundaryToken.equals(iterator.next()));
 
       // Now parse the multipart body in sequence, recursing down as needed...
       while (iterator.hasNext()) {
@@ -105,6 +115,24 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
     } else {
       entity.setBody(readBodyAsBytes(iterator, boundary));
+    }
+  }
+
+  private static String charset(String mimeType) {
+    int i = mimeType.indexOf("charset=");
+    if (i == -1)
+      return "UTF-8";
+
+    return mimeType.substring(i + "charset=".length());
+  }
+
+  private static String decode(String body, String encoding, String charset) {
+    try {
+      return IOUtils.toString(MimeUtility.decode(new ByteArrayInputStream(body.getBytes()), encoding), charset);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    } catch (MessagingException e) {
+      throw new RuntimeException(e);
     }
   }
 
