@@ -32,17 +32,20 @@ public class MailClientIntegrationTest {
     future.addListener(new Runnable() {
       @Override
       public void run() {
-//        client.watch(allMail, new FolderObserver() {
-//          @Override
-//          public void onMailAdded() {
-//            System.out.println("New mail arrived!!");
-//          }
-//
-//          @Override
-//          public void onMailRemoved() {
-//            System.out.println("Old mail removed!!");
-//          }
-//        });
+        client.watch(allMail, new FolderObserver() {
+          @Override
+          public void onMailAdded() {
+            System.out.println("New mail arrived!!");
+          }
+
+          @Override
+          public void onMailRemoved() {
+            System.out.println("Old mail removed!!");
+          }
+        });
+
+        // Can't send other commands over the channel while idling.
+        client.listFolders();
 
         ListenableFuture<List<MessageStatus>> messages = client.list(allMail, 1, 4);
 //        ListenableFuture<List<Message>> messages = client.fetch(allMail, 1, 9);

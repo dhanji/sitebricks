@@ -36,7 +36,7 @@ class MailClientHandler extends SimpleChannelHandler {
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     String message = e.getMessage().toString();
-    log.debug("Message received [{}] from {}", e.getMessage(), e.getRemoteAddress());
+    log.trace("Message received [{}] from {}", e.getMessage(), e.getRemoteAddress());
 
     if (message.startsWith(CAPABILITY_PREFIX)) {
       this.capabilities = Arrays.asList(
@@ -47,7 +47,7 @@ class MailClientHandler extends SimpleChannelHandler {
 
     if (!isLoggedIn) {
       if (message.matches("[.] OK .*@.* \\(Success\\)")) {
-        log.debug("Authentication success.");
+        log.trace("Authentication success.");
         isLoggedIn = true;
         loginComplete.countDown();
       }

@@ -41,9 +41,7 @@ class NettyImapClient implements MailClient {
                          ExecutorService bossPool,
                          ExecutorService workerPool) {
     this.workerPool = workerPool;
-    this.bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
-          bossPool,
-          workerPool));
+    this.bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(bossPool, workerPool));
 
     this.config = config;
     this.mailClientHandler = mailClientHandler;
@@ -80,6 +78,8 @@ class NettyImapClient implements MailClient {
    */
   @Override
   public void disconnect() {
+    Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
+
     currentFolder = null;
 
     // Log out of the IMAP Server.
@@ -88,8 +88,6 @@ class NettyImapClient implements MailClient {
     // Shut down all thread pools and exit.
     channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
     bootstrap.releaseExternalResources();
-
-    // TODO Shut down thread pools?
   }
 
   <D> ChannelFuture send(Command command, String args, SettableFuture<D> valueFuture) {
@@ -115,6 +113,8 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<List<String>> listFolders() {
+    Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
+
     SettableFuture<List<String>> valueFuture = SettableFuture.create();
 
     send(Command.LIST_FOLDERS, "\"[Gmail]\" \"*\"", valueFuture);
@@ -134,6 +134,8 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<Folder> open(String folder) {
+    Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
+
     final SettableFuture<Folder> valueFuture = SettableFuture.create();
     valueFuture.addListener(new Runnable() {
       @Override
@@ -156,6 +158,8 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<List<MessageStatus>> list(Folder folder, int start, int end) {
+    Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
+
     checkCurrentFolder(folder);
     Preconditions.checkArgument(start <= end, "Start must be <= end");
     Preconditions.checkArgument(start > 0, "Start must be greater than zero (IMAP uses 1-based " +
@@ -170,6 +174,8 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<List<Message>> fetch(Folder folder, int start, int end) {
+    Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
+
     checkCurrentFolder(folder);
     Preconditions.checkArgument(start <= end, "Start must be <= end");
     Preconditions.checkArgument(start > 0, "Start must be greater than zero (IMAP uses 1-based " +
@@ -182,9 +188,13 @@ class NettyImapClient implements MailClient {
     return valueFuture;
   }
 
+  private volatile boolean idling = false;
+
   @Override
   public void watch(Folder folder, FolderObserver observer) {
     checkCurrentFolder(folder);
+    Preconditions.checkState(!idling, "Already idling...");
+    idling = true;
 
     send(Command.IDLE, null, SettableFuture.<Object>create());
 
@@ -193,10 +203,14 @@ class NettyImapClient implements MailClient {
 
   @Override
   public void unwatch() {
+    if (!idling)
+      return;
+
     // Stop watching folders.
     mailClientHandler.observe(null);
 
     channel.write(". DONE");
+    idling = false;
   }
 
   private void checkCurrentFolder(Folder folder) {
