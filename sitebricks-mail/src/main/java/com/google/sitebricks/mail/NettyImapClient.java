@@ -48,6 +48,10 @@ class NettyImapClient implements MailClient {
     this.bootstrap.setPipelineFactory(pipelineFactory);
   }
 
+  static {
+    System.setProperty("mail.mime.decodetext.strict", "false");
+  }
+
   /**
    * Connects to the IMAP server logs in with the given credentials.
    */

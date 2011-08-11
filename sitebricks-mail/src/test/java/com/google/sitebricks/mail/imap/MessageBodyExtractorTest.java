@@ -8,6 +8,10 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
+import java.util.regex.Pattern;
+
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -27,8 +31,7 @@ public class MessageBodyExtractorTest {
 //        Resources.readLines(MessageBodyExtractorTest.class.getResource("fetch_all_data_assertion.txt"),
 //            Charsets.UTF_8);
 
-    List<Message> statuses =
-        new MessageBodyExtractor().extract(data);
+    List<Message> statuses = new MessageBodyExtractor().extract(data);
 
     for (int i = 0, statusesSize = statuses.size(); i < statusesSize; i++) {
       Message message = statuses.get(i);
@@ -38,5 +41,24 @@ public class MessageBodyExtractorTest {
         System.out.println(ToStringBuilder.reflectionToString(bodyPart));
       }
     }
+  }
+
+  @Test
+  public final void testRegex() {
+    Pattern pattern = MessageBodyExtractor.MESSAGE_START_REGEX;
+
+    assertTrue(pattern.matcher("* 5 FETCH (BODY[] {2346}").find());
+    assertTrue(pattern.matcher("* 235 FETCH (BODY[]").find());
+    assertTrue(pattern.matcher("* 1 FETCH (BODY[] AOKSDOAKSD").find());
+
+    assertFalse(pattern.matcher(" * 1 FETCH (BODY[] AOKSDOAKSD").find());
+    assertFalse(pattern.matcher("X * 1 FETCH (BODY[] AOKSDOAKSD").find());
+
+    assertFalse(pattern.matcher(" 1 FETCH (BODY[] AOKSDOAKSD").find());
+    assertFalse(pattern.matcher("* 1 FETCH(BODY[] AOKSDOAKSD").find());
+    assertFalse(pattern.matcher("* 1 FETCH (BODY [ ] AOKSDOAKSD").find());
+    assertFalse(pattern.matcher("* 1 FETCH (BODY [] {2345}").find());
+    assertFalse(pattern.matcher(" * 1 FETCH (BODY [] {2345}").find());
+    assertFalse(pattern.matcher("T * 1 FETCH (BODY [] {2345}").find());
   }
 }

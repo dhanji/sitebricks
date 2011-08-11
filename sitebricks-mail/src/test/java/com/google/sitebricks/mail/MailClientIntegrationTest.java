@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Guice;
 import com.google.sitebricks.mail.Mail.Auth;
 import com.google.sitebricks.mail.imap.Folder;
-import com.google.sitebricks.mail.imap.MessageStatus;
+import com.google.sitebricks.mail.imap.Message;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.List;
@@ -15,6 +15,19 @@ import java.util.concurrent.Executors;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class MailClientIntegrationTest {
+
+  private static final FolderObserver PRINTING_OBSERVER = new FolderObserver() {
+    @Override
+    public void onMailAdded() {
+      System.out.println("New mail arrived!!");
+    }
+
+    @Override
+    public void onMailRemoved() {
+      System.out.println("Old mail removed!!");
+    }
+  };
+
   public static void main(String...args) throws InterruptedException, ExecutionException {
     Mail mail = Guice.createInjector().getInstance(Mail.class);
 
@@ -32,33 +45,23 @@ public class MailClientIntegrationTest {
     future.addListener(new Runnable() {
       @Override
       public void run() {
-        client.watch(allMail, new FolderObserver() {
-          @Override
-          public void onMailAdded() {
-            System.out.println("New mail arrived!!");
-          }
-
-          @Override
-          public void onMailRemoved() {
-            System.out.println("Old mail removed!!");
-          }
-        });
+//        client.watch(allMail, PRINTING_OBSERVER);
 
         // Can't send other commands over the channel while idling.
         client.listFolders();
 
-        ListenableFuture<List<MessageStatus>> messages = client.list(allMail, 1, 4);
-//        ListenableFuture<List<Message>> messages = client.fetch(allMail, 1, 9);
+//        ListenableFuture<List<MessageStatus>> messages = client.list(allMail, 1, 4);
+        ListenableFuture<List<Message>> messages = client.fetch(allMail, 1, 9);
         try {
-//          for (Message message : messages.get()) {
-//            System.out.println(ToStringBuilder.reflectionToString(message));
-//            for (Message.BodyPart bodyPart : message.getBodyParts()) {
-//              System.out.println(ToStringBuilder.reflectionToString(bodyPart));
-//            }
-//          }
-          for (MessageStatus message : messages.get()) {
+          for (Message message : messages.get()) {
             System.out.println(ToStringBuilder.reflectionToString(message));
+            for (Message.BodyPart bodyPart : message.getBodyParts()) {
+              System.out.println(ToStringBuilder.reflectionToString(bodyPart));
+            }
           }
+//          for (MessageStatus message : messages.get()) {
+//            System.out.println(ToStringBuilder.reflectionToString(message));
+//          }
           System.out.println("Fetched: " + messages.get().size());
         } catch (InterruptedException e) {
           e.printStackTrace();

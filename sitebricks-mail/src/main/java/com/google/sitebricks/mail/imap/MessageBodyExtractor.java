@@ -2,12 +2,15 @@ package com.google.sitebricks.mail.imap;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
+import org.apache.james.mime4j.codec.DecodeMonitor;
+import org.apache.james.mime4j.codec.DecoderUtil;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Extracts a full Message body from an IMAP fetch. Specifically
@@ -20,8 +23,10 @@ import java.util.*;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class MessageBodyExtractor implements Extractor<List<Message>> {
-
   private static final String BOUNDARY_PREFIX = "boundary=";
+  static final Pattern MESSAGE_START_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(BODY\\[\\]",
+      Pattern.CASE_INSENSITIVE);
+  static final Pattern EOS_REGEX = Pattern.compile("^\\d+ ok success", Pattern.CASE_INSENSITIVE);
 
   @Override
   public List<Message> extract(List<String> messages) {
@@ -59,6 +64,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     // Normalize mimetype case.
     mimeType = mimeType.toLowerCase();
     parseBodyParts(iterator, email, mimeType, boundary(mimeType));
+
+    // Try to chew up the end of sequence marker if it exists.
+    if (iterator.hasNext() && !EOS_REGEX.matcher(iterator.next()).find())
+      iterator.previous();
+
     return email;
   }
 
@@ -159,6 +169,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       if (boundary != null && line.startsWith(boundary)) {
         // end of section.
         break;
+      } else  {
+        if (isEndOfMessage(iterator, line))
+          break;
       }
       builder.append(line).append("\r\n");
     }
@@ -173,10 +186,32 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       if (boundary != null && line.startsWith(boundary)) {
         // end of section.
         return textBody.toString();
+      } else {
+        // Check for IMAP command stream delimiter.
+        if (isEndOfMessage(iterator, line))
+          return textBody.toString();
       }
       textBody.append(line).append("\r\n");
     }
     return textBody.toString();
+  }
+
+  private static boolean isEndOfMessage(ListIterator<String> iterator,
+                                        String line) {
+    if (")".equals(line)) {
+      if (iterator.hasNext()) {
+        String next = iterator.next();
+        if (EOS_REGEX.matcher(next).find())
+          return true;
+        if (MESSAGE_START_REGEX.matcher(next).find()) {
+          iterator.previous();
+          return true;
+        }
+        else  // oops, go back.
+          iterator.previous();
+      }
+    }
+    return false;
   }
 
   private static void parseHeaderSection(ListIterator<String> iterator,
@@ -212,6 +247,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       }
     }
 
+    // Header values can be specially encoded.
+    value = DecoderUtil.decodeEncodedWords(value, DecodeMonitor.SILENT);
     headers.put(split[0], value);
   }
 }
