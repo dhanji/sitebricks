@@ -32,7 +32,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         continue;
 
       // Discard the fetch token.
-      message = message.replaceFirst("\\d+[ ]* ", "");
+      message = message.replaceFirst("[*]?[ ]*\\d+[ ]* ", "");
       if (Command.isEndOfSequence(message.toLowerCase()))
         continue;
       statuses.add(parseEnvelope(message));

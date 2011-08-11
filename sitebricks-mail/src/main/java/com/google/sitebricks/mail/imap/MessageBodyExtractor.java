@@ -28,10 +28,17 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     List<Message> emails = Lists.newArrayList();
     ListIterator<String> iterator = messages.listIterator();
 
+    while (iterator.hasNext())
+      emails.add(parseMessage(iterator));
+
+    return emails;
+  }
+
+  private Message parseMessage(ListIterator<String> iterator) {
     Message email = new Message();
     // Read the leading message (command response).
     String firstLine = iterator.next();
-    firstLine = firstLine.replaceFirst("\\* \\d+[ ]* ", "");
+    firstLine = firstLine.replaceFirst("[*]? \\d+[ ]* ", "");
     Queue<String> tokens = Parsing.tokenize(firstLine);
     Parsing.eat(tokens, "FETCH", "(", "BODY[]");
     String sizeString = Parsing.match(tokens, String.class);
@@ -52,10 +59,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     // Normalize mimetype case.
     mimeType = mimeType.toLowerCase();
     parseBodyParts(iterator, email, mimeType, boundary(mimeType));
-
-    emails.add(email);
-
-    return emails;
+    return email;
   }
 
   private static String mimeType(Map<String, String> headers) {
@@ -108,6 +112,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         String lastLineRead = iterator.previous();
         if (lastLineRead.startsWith(boundary + "--")) {
           // Yes this is the end. Otherwise continue!
+          iterator.next();
           break;
         } else
           iterator.next();
@@ -123,7 +128,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     if (i == -1)
       return "UTF-8";
 
-    return mimeType.substring(i + "charset=".length());
+    int end = mimeType.indexOf(";", i);
+    if (end == -1)
+      end = mimeType.length();
+
+    return mimeType.substring(i + "charset=".length(), end);
   }
 
   private static String decode(String body, String encoding, String charset) {

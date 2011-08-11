@@ -4,7 +4,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Guice;
 import com.google.sitebricks.mail.Mail.Auth;
 import com.google.sitebricks.mail.imap.Folder;
-import com.google.sitebricks.mail.imap.Message;
+import com.google.sitebricks.mail.imap.MessageStatus;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -23,7 +24,7 @@ public class MailClientIntegrationTest {
     List<String> capabilities = client.capabilities();
     System.out.println("CAPS: " + capabilities);
 
-//    client.statusOf("[Gmail]/All Mail");
+    client.statusOf("[Gmail]/All Mail");
     ListenableFuture<Folder> future = client.open("[Gmail]/All Mail");
     final Folder allMail = future.get();
     System.out.println("Folder opened: " + allMail.getName() + " with count " + allMail.getCount());
@@ -43,10 +44,19 @@ public class MailClientIntegrationTest {
 //          }
 //        });
 
-//        ListenableFuture<List<MessageStatus>> messages = client.list(allMail, 1, 4);
-        ListenableFuture<List<Message>> messages = client.fetch(allMail, 1, 2);
+        ListenableFuture<List<MessageStatus>> messages = client.list(allMail, 1, 4);
+//        ListenableFuture<List<Message>> messages = client.fetch(allMail, 1, 9);
         try {
-          System.out.println("Fetched: " + messages.get());
+//          for (Message message : messages.get()) {
+//            System.out.println(ToStringBuilder.reflectionToString(message));
+//            for (Message.BodyPart bodyPart : message.getBodyParts()) {
+//              System.out.println(ToStringBuilder.reflectionToString(bodyPart));
+//            }
+//          }
+          for (MessageStatus message : messages.get()) {
+            System.out.println(ToStringBuilder.reflectionToString(message));
+          }
+          System.out.println("Fetched: " + messages.get().size());
         } catch (InterruptedException e) {
           e.printStackTrace();
         } catch (ExecutionException e) {

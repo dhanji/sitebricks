@@ -46,12 +46,12 @@ class CommandCompletion {
       }
 
       // Once we see the OK message, we should process the data and return.
-      value.add(content);
+      value.add(message);
       valueFuture.set(command.extract(value));
       return true;
     }
 
-    value.add(content);
+    value.add(message);
 
     return false;
   }
