@@ -11,17 +11,12 @@
   <artifactId>sitebricks-mail</artifactId>
   <name>Sitebricks :: Mail Client</name>
 
-  <repositories>
-    <repository>
-      <id>jboss-maven2-public-repository</id>
-      <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <dependencies>
+    <dependency>
+      <groupId>org.apache.james</groupId>
+      <artifactId>apache-mime4j</artifactId>
+      <version>0.6</version>
+    </dependency>
     <dependency>
       <groupId>com.google.sitebricks</groupId>
       <artifactId>sitebricks</artifactId>
@@ -31,11 +26,6 @@
       <groupId>org.jboss.netty</groupId>
       <artifactId>netty</artifactId>
       <version>3.2.4.Final</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.james</groupId>
-      <artifactId>james-server-imapserver</artifactId>
-      <version>3.0-M2</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -58,9 +48,9 @@
       <version>2.0</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.james</groupId>
-      <artifactId>apache-mime4j</artifactId>
-      <version>0.7</version>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
+      <version>1.4.1</version>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
@@ -88,6 +78,5 @@
         </configuration>
       </plugin>
     </plugins>
-
   </build>
 </project>

@@ -2,7 +2,6 @@ package com.google.sitebricks.mail.imap;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
-import org.apache.james.mime4j.codec.DecodeMonitor;
 import org.apache.james.mime4j.codec.DecoderUtil;
 
 import javax.mail.MessagingException;
@@ -248,7 +247,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     }
 
     // Header values can be specially encoded.
-    value = DecoderUtil.decodeEncodedWords(value, DecodeMonitor.SILENT);
+    value = DecoderUtil.decodeEncodedWords(value);
     headers.put(split[0], value);
   }
 }
