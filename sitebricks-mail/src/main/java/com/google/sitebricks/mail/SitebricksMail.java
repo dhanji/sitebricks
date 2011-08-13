@@ -46,20 +46,15 @@ class SitebricksMail implements Mail, AuthBuilder {
   }
 
   @Override
-  public MailClient connect(Auth authType, String username, String password) {
+  public MailClient prepare(Auth authType, String username, String password) {
     if (null == bossPool) {
       bossPool = Executors.newCachedThreadPool();
       workerPool = Executors.newCachedThreadPool();
     }
 
-    MailClientConfig config = new MailClientConfig(host, port, authType, username,
-        password, timeout);
-    MailClientHandler mailClientHandler = new MailClientHandler();
-    MailClient client = new NettyImapClient(new MailClientPipelineFactory(mailClientHandler,
-        config), config, mailClientHandler, bossPool, workerPool);
+    MailClientConfig config = new MailClientConfig(host, port, authType, username, password,
+        timeout);
 
-    // Blocks until connected (timeout specified in config).
-    client.connect();
-    return client;
+    return new NettyImapClient(config, bossPool, workerPool);
   }
 }

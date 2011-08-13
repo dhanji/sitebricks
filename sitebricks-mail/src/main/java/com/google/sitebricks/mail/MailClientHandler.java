@@ -27,6 +27,9 @@ class MailClientHandler extends SimpleChannelHandler {
   private volatile List<String> capabilities;
   private volatile FolderObserver observer;
 
+  // Panic button.
+  private volatile boolean halt = false;
+
   private final Queue<CommandCompletion> completions = new ConcurrentLinkedQueue<CommandCompletion>();
 
   public void enqueue(CommandCompletion completion) {
@@ -37,7 +40,10 @@ class MailClientHandler extends SimpleChannelHandler {
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     String message = e.getMessage().toString();
     log.trace("Message received [{}] from {}", e.getMessage(), e.getRemoteAddress());
-
+    if (halt) {
+      log.error("This mail client is halted but continues to receive messages, ignoring!");
+      return;
+    }
     if (message.startsWith(CAPABILITY_PREFIX)) {
       this.capabilities = Arrays.asList(
           message.substring(CAPABILITY_PREFIX.length() + 1).split("[ ]+"));
@@ -105,5 +111,9 @@ class MailClientHandler extends SimpleChannelHandler {
    */
   void observe(FolderObserver observer) {
     this.observer = observer;
+  }
+
+  void halt() {
+    halt = true;
   }
 }

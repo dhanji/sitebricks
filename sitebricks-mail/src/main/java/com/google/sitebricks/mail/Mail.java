@@ -19,6 +19,6 @@ public interface Mail {
 
     AuthBuilder executors(ExecutorService bossPool, ExecutorService workerPool);
 
-    MailClient connect(Auth authType, String username, String password);
+    MailClient prepare(Auth authType, String username, String password);
   }
 }

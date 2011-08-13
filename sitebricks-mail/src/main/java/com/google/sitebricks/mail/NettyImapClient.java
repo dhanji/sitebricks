@@ -7,6 +7,7 @@ import com.google.sitebricks.mail.imap.*;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,38 +26,69 @@ class NettyImapClient implements MailClient {
   private static final Logger log = LoggerFactory.getLogger(NettyImapClient.class);
 
   private final ExecutorService workerPool;
-  private final ClientBootstrap bootstrap;
+  private final ExecutorService bossPool;
 
   private final MailClientConfig config;
-  private final MailClientHandler mailClientHandler;
 
-  private volatile Channel channel;
+  // Connection variables.
+  private volatile ClientBootstrap bootstrap;
+  private volatile MailClientHandler mailClientHandler;
+
+  // State variables:
   private final AtomicLong sequence = new AtomicLong();
-
+  private volatile Channel channel;
   private volatile Folder currentFolder = null;
+  private volatile boolean idling = false;
 
-  public NettyImapClient(MailClientPipelineFactory pipelineFactory,
-                         MailClientConfig config,
-                         MailClientHandler mailClientHandler,
+  public NettyImapClient(MailClientConfig config,
                          ExecutorService bossPool,
                          ExecutorService workerPool) {
     this.workerPool = workerPool;
-    this.bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(bossPool, workerPool));
-
+    this.bossPool = bossPool;
     this.config = config;
-    this.mailClientHandler = mailClientHandler;
-    this.bootstrap.setPipelineFactory(pipelineFactory);
   }
 
   static {
     System.setProperty("mail.mime.decodetext.strict", "false");
   }
 
+  public boolean isConnected() {
+    return channel != null && channel.isConnected() && channel.isOpen();
+  }
+
+  private void reset() {
+    Preconditions.checkState(!isConnected(),
+        "Cannot reset while mail client is still connected (call disconnect() first).");
+
+    // Just to be on the safe side.
+    if (mailClientHandler != null)
+      mailClientHandler.halt();
+
+    this.mailClientHandler = new MailClientHandler();
+    MailClientPipelineFactory pipelineFactory =
+        new MailClientPipelineFactory(mailClientHandler, config);
+
+    this.bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(bossPool, workerPool));
+    this.bootstrap.setPipelineFactory(pipelineFactory);
+
+    // Reset state (helps if this is a reconnect).
+    this.currentFolder = null;
+    this.sequence.set(0L);
+    this.idling = false;
+  }
+
+  @Override
+  public void connect() {
+    connect(null);
+  }
+
   /**
    * Connects to the IMAP server logs in with the given credentials.
    */
   @Override
-  public void connect() {
+  public void connect(final DisconnectListener listener) {
+    reset();
+
     ChannelFuture future = bootstrap.connect(new InetSocketAddress(config.getHost(),
         config.getPort()));
 
@@ -67,6 +99,14 @@ class NettyImapClient implements MailClient {
     }
 
     this.channel = channel;
+    if (null != listener) {
+      // https://issues.jboss.org/browse/NETTY-47?page=com.atlassian.jirafisheyeplugin%3Afisheye-issuepanel#issue-tabs
+      channel.getCloseFuture().addListener(new ChannelFutureListener() {
+        @Override public void operationComplete(ChannelFuture future) throws Exception {
+          listener.disconnected();
+        }
+      });
+    }
     login();
   }
 
@@ -191,8 +231,6 @@ class NettyImapClient implements MailClient {
 
     return valueFuture;
   }
-
-  private volatile boolean idling = false;
 
   @Override
   public void watch(Folder folder, FolderObserver observer) {

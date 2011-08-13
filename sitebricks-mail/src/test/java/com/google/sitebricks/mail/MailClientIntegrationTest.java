@@ -32,7 +32,8 @@ public class MailClientIntegrationTest {
     Mail mail = Guice.createInjector().getInstance(Mail.class);
 
     final MailClient client = mail.clientOf("imap.gmail.com", 993)
-        .connect(Auth.SSL, "telnet.imap@gmail.com", System.getProperty("sitebricks-mail.password"));
+        .prepare(Auth.SSL, "telnet.imap@gmail.com", System.getProperty("sitebricks-mail.password"));
+    client.connect();
 
     List<String> capabilities = client.capabilities();
     System.out.println("CAPS: " + capabilities);

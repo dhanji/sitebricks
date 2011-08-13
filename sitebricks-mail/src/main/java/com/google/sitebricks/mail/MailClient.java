@@ -9,19 +9,36 @@ import com.google.sitebricks.mail.imap.MessageStatus;
 import java.util.List;
 
 /**
+ * An IMAP mail client based on JBoss Netty and Event-driven IO.
+ *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public interface MailClient {
   /**
-   * Connects to the IMAP server logs in with the given credentials.
+   * Connects to the IMAP server logs in with the given credentials. Waits until the
+   * connection is established before returning.
    */
   void connect();
+
+  /**
+   * Identical to {@link #connect()}.
+   *
+   * @param listener A listener to be notified when this client is disconnected due
+   *   to any IO error or closed normally. Can be null.
+   */
+  void connect(DisconnectListener listener);
 
   /**
    * Logs out of the current IMAP session and releases all resources, including
    * executor services.
    */
   void disconnect();
+
+  /**
+   * Returns true if the underlying channels are connected to the remote server and
+   * open for business.
+   */
+  boolean isConnected();
 
   List<String> capabilities();
 
@@ -85,4 +102,8 @@ public interface MailClient {
    * even before IDLEing ceases on the server.
    */
   void unwatch();
+
+  static interface DisconnectListener {
+    void disconnected();
+  }
 }
