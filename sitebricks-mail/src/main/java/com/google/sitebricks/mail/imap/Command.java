@@ -13,6 +13,7 @@ public enum Command {
   FETCH_BODY("fetch"),
   FOLDER_STATUS("status"),
   FOLDER_OPEN("select"),
+  FOLDER_EXAMINE("examine"),
   FETCH_HEADERS("fetch"),
   IDLE("idle"); // IMAP4 IDLE command: http://www.ietf.org/rfc/rfc2177.txt
 
@@ -33,6 +34,7 @@ public enum Command {
     dataExtractors.put(LIST_FOLDERS, new ListFoldersExtractor());
     dataExtractors.put(FOLDER_STATUS, new FolderStatusExtractor());
     dataExtractors.put(FOLDER_OPEN, new FolderExtractor());
+    dataExtractors.put(FOLDER_EXAMINE, new FolderExtractor());
     dataExtractors.put(FETCH_HEADERS, new MessageStatusExtractor());
     dataExtractors.put(FETCH_BODY, new MessageBodyExtractor());
   }

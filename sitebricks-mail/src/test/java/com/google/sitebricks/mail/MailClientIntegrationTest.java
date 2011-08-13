@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Guice;
 import com.google.sitebricks.mail.Mail.Auth;
 import com.google.sitebricks.mail.imap.Folder;
+import com.google.sitebricks.mail.imap.FolderStatus;
 import com.google.sitebricks.mail.imap.Message;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
@@ -38,10 +39,14 @@ public class MailClientIntegrationTest {
     List<String> capabilities = client.capabilities();
     System.out.println("CAPS: " + capabilities);
 
-    client.statusOf("[Gmail]/All Mail");
+    final ListenableFuture<FolderStatus> fStatus =
+        client.statusOf("[Gmail]/All Mail");
     ListenableFuture<Folder> future = client.open("[Gmail]/All Mail");
     final Folder allMail = future.get();
-    System.out.println("Folder opened: " + allMail.getName() + " with count " + allMail.getCount());
+    FolderStatus folderStatus = fStatus.get();
+    System.out.println("Folder opened: " + allMail.getName() + " with count " + folderStatus.getMessages());
+
+//    client.disconnect();
 
     future.addListener(new Runnable() {
       @Override

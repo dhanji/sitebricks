@@ -16,12 +16,12 @@ class FolderExtractor implements Extractor<Folder> {
     String folderName = null;
     int count = 0;
     for (String message : messages) {
-      String[] pieces = message.split("[ ]+", 3);
+      String[] pieces = message.split("[ ]+", 4);
       if (pieces.length > 1 && "EXISTS".equalsIgnoreCase(pieces[1])) {
         count = Integer.valueOf(pieces[0]);
       } else if (message.contains(SELECTED)) {
         // Extract folder name as given by the server.
-        int left = message.indexOf(pieces[1]) + pieces[1].length();
+        int left = message.indexOf(pieces[2]) + pieces[2].length();
         folderName = message.substring(left, message.indexOf(SELECTED)).trim();
       }
     }
@@ -29,8 +29,6 @@ class FolderExtractor implements Extractor<Folder> {
     Preconditions.checkState(null != folderName, "Error in IMAP protocol, " +
         "could not detect folder name");
 
-    Folder folder = new Folder(folderName);
-    folder.setCount(count);
-    return folder;
+    return new Folder(folderName);
   }
 }

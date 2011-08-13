@@ -48,9 +48,21 @@ public interface MailClient {
 
   /**
    * Opens a logical 'session' to the given folder name. This method must be called
-   * prior to using many of the in-folder methods on this API.
+   * prior to using many of the in-folder methods on this API. Opens folder in
+   * READ-ONLY mode.
+   * <p>
+   * Equivalent of calling {@link #open(String, boolean)} with readWrite as false.
    */
   ListenableFuture<Folder> open(String folder);
+
+  /**
+   * Opens a logical 'session' to the given folder name. This method must be called
+   * prior to using many of the in-folder methods on this API.
+   * @param folder The canonical name of the folder on the IMAP server.
+   * @param readWrite If true, will open the folder in READ-WRITE mode. Otherwise,
+   *   in READ-ONLY mode.
+   */
+  ListenableFuture<Folder> open(String folder, boolean readWrite);
 
   /**
    * Returns a list of message headers in the given folder, between {@code start}

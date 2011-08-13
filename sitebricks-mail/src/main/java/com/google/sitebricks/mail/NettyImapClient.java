@@ -178,6 +178,11 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<Folder> open(String folder) {
+    return open(folder, false);
+  }
+
+  @Override
+  public ListenableFuture<Folder> open(String folder, boolean readWrite) {
     Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
 
     final SettableFuture<Folder> valueFuture = SettableFuture.create();
@@ -195,7 +200,7 @@ class NettyImapClient implements MailClient {
     }, workerPool);
 
     String args = '"' + folder + "\"";
-    send(Command.FOLDER_OPEN, args, valueFuture);
+    send(readWrite ? Command.FOLDER_OPEN : Command.FOLDER_EXAMINE, args, valueFuture);
 
     return valueFuture;
   }
