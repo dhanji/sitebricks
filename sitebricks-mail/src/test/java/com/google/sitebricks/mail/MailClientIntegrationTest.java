@@ -34,6 +34,7 @@ public class MailClientIntegrationTest {
 
     final MailClient client = mail.clientOf("imap.gmail.com", 993)
         .prepare(Auth.SSL, "telnet.imap@gmail.com", System.getProperty("sitebricks-mail.password"));
+
     client.connect();
 
     List<String> capabilities = client.capabilities();

@@ -20,9 +20,14 @@ class CommandCompletion {
   private final List<String> value = Lists.newArrayList();
   private final Long sequence;
   private final Command command;
+  private final String commandString;
 
   @SuppressWarnings("unchecked") // Ugly gunk needed to prevent generics from spewing everywhere
-  public CommandCompletion(Command command, Long sequence, SettableFuture<?> valueFuture) {
+  public CommandCompletion(Command command,
+                           Long sequence,
+                           SettableFuture<?> valueFuture,
+                           String commandString) {
+    this.commandString = commandString;
     this.valueFuture = (SettableFuture<Object>) valueFuture;
     this.sequence = sequence;
     this.command = command;

@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A command/response handler for a single mail connection/user.
@@ -21,6 +24,8 @@ import java.util.concurrent.CountDownLatch;
 class MailClientHandler extends SimpleChannelHandler {
   private static final Logger log = LoggerFactory.getLogger(MailClientHandler.class);
   public static final String CAPABILITY_PREFIX = "* CAPABILITY";
+  static final Pattern COMMAND_FAILED_REGEX =
+      Pattern.compile("[.] (NO|BAD) (.*)", Pattern.CASE_INSENSITIVE);
 
   private final CountDownLatch loginComplete = new CountDownLatch(2);
   private volatile boolean isLoggedIn = false;
@@ -30,6 +35,7 @@ class MailClientHandler extends SimpleChannelHandler {
   // Panic button.
   private volatile boolean halt = false;
 
+  private final LinkedBlockingDeque<Error> errorStack = new LinkedBlockingDeque<Error>();
   private final Queue<CommandCompletion> completions = new ConcurrentLinkedQueue<CommandCompletion>();
 
   public void enqueue(CommandCompletion completion) {
@@ -39,7 +45,7 @@ class MailClientHandler extends SimpleChannelHandler {
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     String message = e.getMessage().toString();
-    log.trace("Message received [{}] from {}", e.getMessage(), e.getRemoteAddress());
+    log.debug("Message received [{}] from {}", e.getMessage(), e.getRemoteAddress());
     if (halt) {
       log.error("This mail client is halted but continues to receive messages, ignoring!");
       return;
@@ -52,10 +58,17 @@ class MailClientHandler extends SimpleChannelHandler {
     }
 
     if (!isLoggedIn) {
-      if (message.matches("[.] OK .*@.* \\(Success\\)")) {
+      if (message.matches("[.] OK .*@.* \\(Success\\)")) { // TODO make case-insensitive
         log.trace("Authentication success.");
         isLoggedIn = true;
         loginComplete.countDown();
+      } else {
+        Matcher matcher = COMMAND_FAILED_REGEX.matcher(message);
+        if (matcher.find()) {
+          log.trace("Authentication failed");
+          loginComplete.countDown();
+          errorStack.push(new Error(null /* logins have no completion */, extractError(matcher)));
+        }
       }
       // TODO handle auth failed
       return;
@@ -75,11 +88,23 @@ class MailClientHandler extends SimpleChannelHandler {
     complete(message);
   }
 
+  private String extractError(Matcher matcher) {
+    return (matcher.groupCount()) > 1 ? matcher.group(2) : matcher.group();
+  }
+
   private void complete(String message) {
     CommandCompletion completion = completions.peek();
     if (completion == null) {
       log.error("Could not find the completion for message {} (Was it ever issued?)", message);
       return;
+    }
+
+    Matcher matcher = COMMAND_FAILED_REGEX.matcher(message);
+    if (matcher.find()) {
+      // Get rid of this completion, it failed and the command needs to be reissued.
+      String reason = extractError(matcher);
+      CommandCompletion failed = completions.poll();
+      errorStack.push(new Error(failed, reason));
     }
 
     if (completion.complete(message)) {
@@ -96,12 +121,18 @@ class MailClientHandler extends SimpleChannelHandler {
     return capabilities;
   }
 
-  void awaitLogin() {
+  boolean awaitLogin() {
     try {
       loginComplete.await();
+
+      return errorStack.isEmpty(); // No error == success!
     } catch (InterruptedException e) {
       throw new RuntimeException("Interruption while awaiting server login", e);
     }
+  }
+
+  Error lastError() {
+    return errorStack.pop();
   }
 
   /**
@@ -115,5 +146,15 @@ class MailClientHandler extends SimpleChannelHandler {
 
   void halt() {
     halt = true;
+  }
+
+  static class Error {
+    final CommandCompletion completion;
+    final String error;
+
+    Error(CommandCompletion completion, String error) {
+      this.completion = completion;
+      this.error = error;
+    }
   }
 }

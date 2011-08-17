@@ -16,9 +16,11 @@ import java.util.List;
 public interface MailClient {
   /**
    * Connects to the IMAP server logs in with the given credentials. Waits until the
-   * connection is established before returning.
+   * connection is established before returning. Returns true if the connection auth
+   * was successful. If not, the login error message can be obtained by calling
+   * {@link #lastError()}
    */
-  void connect();
+  boolean connect();
 
   /**
    * Identical to {@link #connect()}.
@@ -26,7 +28,7 @@ public interface MailClient {
    * @param listener A listener to be notified when this client is disconnected due
    *   to any IO error or closed normally. Can be null.
    */
-  void connect(DisconnectListener listener);
+  boolean connect(DisconnectListener listener);
 
   /**
    * Logs out of the current IMAP session and releases all resources, including
@@ -114,6 +116,12 @@ public interface MailClient {
    * even before IDLEing ceases on the server.
    */
   void unwatch();
+
+  /**
+   * Returns a string containing the last error message from the server or
+   * null if no errors occurred recently.
+   */
+  String lastError();
 
   static interface DisconnectListener {
     void disconnected();

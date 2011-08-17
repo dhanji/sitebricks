@@ -39,6 +39,7 @@ class NettyImapClient implements MailClient {
   private volatile Channel channel;
   private volatile Folder currentFolder = null;
   private volatile boolean idling = false;
+  private volatile boolean loggedIn = false;
 
   public NettyImapClient(MailClientConfig config,
                          ExecutorService bossPool,
@@ -78,15 +79,15 @@ class NettyImapClient implements MailClient {
   }
 
   @Override
-  public void connect() {
-    connect(null);
+  public boolean connect() {
+    return connect(null);
   }
 
   /**
    * Connects to the IMAP server logs in with the given credentials.
    */
   @Override
-  public void connect(final DisconnectListener listener) {
+  public boolean connect(final DisconnectListener listener) {
     reset();
 
     ChannelFuture future = bootstrap.connect(new InetSocketAddress(config.getHost(),
@@ -107,13 +108,17 @@ class NettyImapClient implements MailClient {
         }
       });
     }
-    login();
+    return login();
   }
 
-  private void login() {
+  private boolean login() {
     channel.write(". CAPABILITY\r\n");
     channel.write(". login " + config.getUsername() + " " + config.getPassword() + "\r\n");
-    mailClientHandler.awaitLogin();
+    return loggedIn = mailClientHandler.awaitLogin();
+  }
+
+  @Override public String lastError() {
+    return mailClientHandler.lastError().error;
   }
 
   /**
@@ -145,7 +150,7 @@ class NettyImapClient implements MailClient {
     log.debug("Sending {} to server...", commandString.substring(0, commandString.length() - 2));
 
     // Enqueue command.
-    mailClientHandler.enqueue(new CommandCompletion(command, seq, valueFuture));
+    mailClientHandler.enqueue(new CommandCompletion(command, seq, valueFuture, commandString));
 
     return channel.write(commandString);
   }
@@ -157,6 +162,7 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<List<String>> listFolders() {
+    Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
 
     SettableFuture<List<String>> valueFuture = SettableFuture.create();
@@ -168,6 +174,7 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<FolderStatus> statusOf(String folder) {
+    Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     SettableFuture<FolderStatus> valueFuture = SettableFuture.create();
 
     String args = '"' + folder + "\" (UIDNEXT RECENT MESSAGES UNSEEN)";
@@ -183,6 +190,7 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<Folder> open(String folder, boolean readWrite) {
+    Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
 
     final SettableFuture<Folder> valueFuture = SettableFuture.create();
@@ -207,6 +215,7 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<List<MessageStatus>> list(Folder folder, int start, int end) {
+    Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
 
     checkCurrentFolder(folder);
@@ -223,6 +232,7 @@ class NettyImapClient implements MailClient {
 
   @Override
   public ListenableFuture<List<Message>> fetch(Folder folder, int start, int end) {
+    Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
 
     checkCurrentFolder(folder);
@@ -239,6 +249,7 @@ class NettyImapClient implements MailClient {
 
   @Override
   public void watch(Folder folder, FolderObserver observer) {
+    Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     checkCurrentFolder(folder);
     Preconditions.checkState(!idling, "Already idling...");
     idling = true;
