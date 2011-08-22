@@ -3,8 +3,8 @@ package com.google.sitebricks.compiler.template;
 import com.google.common.collect.ImmutableSet;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
+import com.google.sitebricks.compiler.TemplateCompiler;
 import org.mvel2.templates.CompiledTemplate;
-import org.mvel2.templates.TemplateCompiler;
 import org.mvel2.templates.TemplateRuntime;
 
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * Creates renderables, given an MVEL template page.
  */
-public class MvelTemplateCompiler {
+public class MvelTemplateCompiler implements TemplateCompiler {
   private final Class<?> page;
 
   public MvelTemplateCompiler(Class<?> page) {
@@ -22,7 +22,7 @@ public class MvelTemplateCompiler {
 
   public Renderable compile(String template) {
     // Compile template immediately.
-    final CompiledTemplate compiledTemplate = TemplateCompiler.compileTemplate(template);
+    final CompiledTemplate compiledTemplate = org.mvel2.templates.TemplateCompiler.compileTemplate(template);
 
     return new Renderable() {
       @Override

@@ -1,11 +1,11 @@
 package com.google.sitebricks;
 
 import com.google.inject.Provider;
+import com.google.sitebricks.compiler.PluggableCompilers;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.servlet.ServletContext;
-
 
 import static org.easymock.EasyMock.*;
 
@@ -27,7 +27,7 @@ public class TemplateLoaderTest {
 
     @Test(dataProvider = CLASSES_AND_TEMPLATES)
     public final void loadExplicitXmlTemplate(final Class<MyXmlPage> pageClass) {
-        String template = new TemplateLoader(null)
+        String template = new TemplateLoader(createMock(PluggableCompilers.class), null)
                     .load(pageClass).getText();
 
         assert null != template : "no template found!";
@@ -50,7 +50,7 @@ public class TemplateLoaderTest {
         expect(ctx.getRealPath("/WEB-INF/MetaInfPage.html")).andReturn(realPath);
 
         replay(ctx);
-        String template = new TemplateLoader(new MockServletContextProvider(ctx)).load(MyMetaInfPage.class).getText();
+        String template = new TemplateLoader(createMock(PluggableCompilers.class), new MockServletContextProvider(ctx)).load(MyMetaInfPage.class).getText();
         verify(ctx);
         
         assert  null != template : "no template found!";

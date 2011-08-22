@@ -14,7 +14,7 @@ import java.util.List;
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  * @see XmlTemplateCompiler
  */
-class FlatTemplateCompiler {
+class FlatTemplateCompiler implements TemplateCompiler {
     private final Class<?> page;
     private final MvelEvaluatorCompiler compiler;
     private final SystemMetrics metrics;

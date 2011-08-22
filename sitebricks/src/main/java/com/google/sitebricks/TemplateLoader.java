@@ -2,11 +2,14 @@ package com.google.sitebricks;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.sitebricks.compiler.Compilers;
 import net.jcip.annotations.Immutable;
 
 import javax.servlet.ServletContext;
 import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -14,12 +17,11 @@ import java.net.URL;
 @Immutable
 public class TemplateLoader {
   private final Provider<ServletContext> context;
+    private Compilers compilers;
 
-  private final String[] fileNameTemplates = new String[] { "%s.html", "%s.xhtml", "%s.xml",
-      "%s.txt", "%s.fml", "%s.mvel" };
-
-  @Inject
-  public TemplateLoader(Provider<ServletContext> context) {
+    @Inject
+  public TemplateLoader(Compilers compilers, Provider<ServletContext> context) {
+    this.compilers = compilers;
     this.context = context;
   }
 
@@ -63,11 +65,15 @@ public class TemplateLoader {
 
         //if there's still no template, then error out
         if (null == stream) {
-          throw new MissingTemplateException(String.format("Could not find a suitable template for %s, " +
-              "did you remember to place an @Show? None of [" +
-              fileNameTemplates[0] +
-              "] could be found in either package [%s], in the root of the resource dir OR in WEB-INF/.",
-              pageClass.getName(), pageClass.getSimpleName(),
+          List<String> templateNames = new ArrayList<String>(compilers.getRegisteredExtensions().size());
+            for (String fileNameTemplate : compilers.getRegisteredExtensions()) {
+                templateNames.add(String.format(fileNameTemplate, pageClass.getSimpleName()));
+            }
+
+          throw new MissingTemplateException(String.format("Could not find a suitable template for %s. " +
+              "did you remember to place an @Show?\n" +
+              "None of %s could be found in package [%s], OR in the root of the resource dir OR in WEB-INF/.",
+              pageClass.getName(), templateNames,
               pageClass.getPackage().getName()));
         }
       }
@@ -77,12 +83,13 @@ public class TemplateLoader {
       throw new TemplateLoadingException("Could not load template for (i/o error): " + pageClass, e);
     }
 
-    return new Template(Template.Kind.kindOf(template), text);
+    return new Template(template, text);
   }
 
   private ResolvedTemplate resolve(Class<?> pageClass, ServletContext context, String template) {
     //first resolve using url conversion
-    for (String nameTemplate : fileNameTemplates) {
+    for (String extension : compilers.getRegisteredExtensions()) {
+      String nameTemplate = "%s." + extension;
       String templateName = String.format(nameTemplate, pageClass.getSimpleName());
       InputStream resource = open(templateName, context);
 
@@ -109,8 +116,8 @@ public class TemplateLoader {
     }
 
     //resolve again using servlet context if that fails
-    for (String nameTemplate : fileNameTemplates) {
-      String templateName = String.format(nameTemplate, pageClass.getSimpleName());
+    for (String nameTemplate : compilers.getRegisteredExtensions()) {
+      String templateName = String.format("%s." + nameTemplate, pageClass.getSimpleName());
       InputStream resource = context.getResourceAsStream(templateName);
 
       if (null != resource) {
@@ -146,8 +153,8 @@ public class TemplateLoader {
 
   //resolves a location for this page class's template (assuming @Show is not present)
   private String resolve(Class<?> pageClass) {
-    for (String nameTemplate : fileNameTemplates) {
-      String name = String.format(nameTemplate, pageClass.getSimpleName());
+    for (String nameTemplate : compilers.getRegisteredExtensions()) {
+      String name = String.format("%s." + nameTemplate, pageClass.getSimpleName());
       URL resource = pageClass.getResource(name);
 
       if (null != resource) {

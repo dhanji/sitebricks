@@ -1,27 +1,25 @@
 package com.google.sitebricks.compiler.template.freemarker;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
-
+import com.google.sitebricks.compiler.TemplateCompiler;
 import freemarker.core.Environment;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Set;
+
 /**
  * Creates renderables, given a Freemarker template page.
  */
-public class FreemarkerTemplateCompiler {
+public class FreemarkerTemplateCompiler implements TemplateCompiler {
   private final Class<?> page;
 
   public FreemarkerTemplateCompiler(Class<?> page) {

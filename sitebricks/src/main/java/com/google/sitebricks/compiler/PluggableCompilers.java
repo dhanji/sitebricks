@@ -2,14 +2,7 @@ package com.google.sitebricks.compiler;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.sitebricks.Bricks;
-import com.google.sitebricks.MissingTemplateException;
-import com.google.sitebricks.Renderable;
-import com.google.sitebricks.Show;
-import com.google.sitebricks.Template;
-import com.google.sitebricks.TemplateLoader;
-import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
-import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
+import com.google.sitebricks.*;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.rendering.Decorated;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
@@ -18,55 +11,53 @@ import com.google.sitebricks.routing.SystemMetrics;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-/**
- * A factory for internal template compilers.
- *
- * @author Dhanji R. Prasanna (dhanji@gmail com)
- */
 @Singleton
-class StandardCompilers implements Compilers {
-  private final WidgetRegistry registry;
-  private final PageBook pageBook;
-  private final SystemMetrics metrics;
-  private final Map<String, Class<? extends Annotation>> httpMethods;
-  private final TemplateLoader loader;
+public class PluggableCompilers implements Compilers {
+    private final WidgetRegistry registry;
+    private final PageBook pageBook;
+    private final SystemMetrics metrics;
+    private final Map<String, Class<? extends Annotation>> httpMethods;
+    private final TemplateLoader loader;
+    private final Map<String, CompilerFactory> compilers = new HashMap<String, CompilerFactory>();
 
-  @Inject
-  public StandardCompilers(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics,
-                           @Bricks Map<String, Class<? extends Annotation>> httpMethods, TemplateLoader loader) {
-    this.registry = registry;
-    this.pageBook = pageBook;
-    this.metrics = metrics;
-    this.httpMethods = httpMethods;
-    this.loader = loader;
-  }
+    @Inject
+    public PluggableCompilers(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics,
+                           @Bricks Map<String, Class<? extends Annotation>> httpMethods, TemplateLoader loader,
+                           HtmlTemplateCompilerFactory htmlTemplateCompilerFactory,
+                           XmlTemplateCompilerFactory xmlTemplateCompilerFactory,
+                           FlatTemplateCompilerFactory flatTemplateCompilerFactory,
+                           MvelTemplateCompilerFactory mvelTemplateCompilerFactory,
+                           FreemarkerTemplateCompilerFactory freemarkerTemplateCompilerFactory) {
+        this.registry = registry;
+        this.pageBook = pageBook;
+        this.metrics = metrics;
+        this.httpMethods = httpMethods;
+        this.loader = loader;
 
-  public Renderable compileXml(Class<?> page, String template) {
-    return new XmlTemplateCompiler(page, new MvelEvaluatorCompiler(page), registry, pageBook,
-        metrics)
-        .compile(template);
-  }
+        // Add the standard compilers
+        register(htmlTemplateCompilerFactory, "default", "html", "xhtml");
+        register(xmlTemplateCompilerFactory, "xml");
+        register(flatTemplateCompilerFactory, "flat");
+        register(mvelTemplateCompilerFactory, "mvel");
+        register(freemarkerTemplateCompilerFactory, "fml");
+    }
 
-  public Renderable compileHtml(Class<?> page, String template) {
-    return new HtmlTemplateCompiler(page, new MvelEvaluatorCompiler(page), registry, pageBook,
-        metrics)
-        .compile(template);
-  }
+    @Override
+    public void register(CompilerFactory compilerFactory, String... extensions) {
+        for (String extension : extensions) {
+            compilers.put(extension, compilerFactory);
+            //compilerFactory.registered(extension);
+        }
+    }
 
-  public Renderable compileFlat(Class<?> page, String template) {
-    return new FlatTemplateCompiler(page, new MvelEvaluatorCompiler(page), metrics, registry)
-        .compile(template);
-  }
-
-  public Renderable compileMvel(Class<?> page, String template) {
-    return new MvelTemplateCompiler(page).compile(template);
-  }
-
-  public Renderable compileFreemarker( Class<?> page, String template ) {
-    return new FreemarkerTemplateCompiler(page).compile(template);
-  }
+    @Override
+    public Set<String> getRegisteredExtensions() {
+        return compilers.keySet();
+    }
 
   // TODO(dhanji): Feedback errors as return rather than throwing.
   public void analyze(Class<?> page) {
@@ -103,11 +94,11 @@ class StandardCompilers implements Compilers {
       }
     }
   }
-  
+
   public void compilePage(PageBook.Page page) {
     // find the template page class
     Class<?> templateClass = page.pageClass();
-    
+
     // root page uses the last template, extension uses its own embedded template
     if (!page.isDecorated() && templateClass.isAnnotationPresent(Decorated.class)) {
       // the first superclass with a @Show and no @Extension is the template
@@ -133,26 +124,12 @@ class StandardCompilers implements Compilers {
 
     Renderable widget;
 
-    //is this an HTML, XML, or a flat-file template?
-    switch(template.getKind()) {
-      default:
-      case HTML:
-        widget = compileHtml(templateClass, template.getText());
-        break;
-      case XML:
-        widget = compileXml(templateClass, template.getText());
-        break;
-      case FLAT:
-        widget = compileFlat(templateClass, template.getText());
-        break;
-      case MVEL:
-        widget = compileMvel(templateClass, template.getText());
-        break;
-      case FREEMARKER:
-        widget = compileFreemarker(templateClass, template.getText());
-        break;
+    if (compilers.containsKey(template.getExtension())) {
+        widget = compilers.get(template.getExtension()).get(templateClass, template, registry, pageBook, metrics).compile(template.getText());
+    } else {
+        widget = compilers.get("default").get(templateClass, template, registry, pageBook, metrics).compile(template.getText());
     }
+
     return widget;
   }
-
 }

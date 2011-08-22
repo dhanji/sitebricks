@@ -4,25 +4,17 @@ import com.google.inject.ImplementedBy;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.routing.PageBook;
 
+import java.util.Set;
+
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
-@ImplementedBy(StandardCompilers.class)
+@ImplementedBy(PluggableCompilers.class)
 public interface Compilers {
-  Renderable compileHtml(Class<?> page, String template);
 
-  Renderable compileXml(Class<?> page, String template);
+  public void register(CompilerFactory compilerFactory, String ... extension);
 
-  Renderable compileFlat(Class<?> page, String template);
-
-  /**
-   * Creates a Renderable that can process MVEL templates.
-   * These are not to be confused with Sitebricks templates
-   * that *use* MVEL. Rather, this is MVEL's template technology.
-   */
-  Renderable compileMvel(Class<?> page, String template);
-
-  Renderable compileFreemarker( Class<?> page, String text );
+  public Set<String> getRegisteredExtensions();
 
   /**
    * Performs static analysis of the given page class to
