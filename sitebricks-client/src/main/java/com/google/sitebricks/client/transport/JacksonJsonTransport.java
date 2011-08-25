@@ -1,12 +1,16 @@
 package com.google.sitebricks.client.transport;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Set;
-
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
+import com.google.common.primitives.Primitives;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.sitebricks.conversion.Converter;
+import com.google.sitebricks.conversion.ConverterRegistry;
+import com.google.sitebricks.conversion.StandardTypeConverter;
+import com.google.sitebricks.conversion.generics.Generics;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonProcessingException;
@@ -17,16 +21,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.deser.CustomDeserializerFactory;
 import org.codehaus.jackson.map.deser.StdDeserializerProvider;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
-import com.google.common.primitives.Primitives;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import com.google.sitebricks.conversion.Converter;
-import com.google.sitebricks.conversion.ConverterRegistry;
-import com.google.sitebricks.conversion.StandardTypeConverter;
-import com.google.sitebricks.conversion.generics.Generics;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -40,8 +40,8 @@ public class JacksonJsonTransport extends Json {
   private Collection<Class<?>> exceptions = Sets.newHashSet();
   
   @Inject
-  public JacksonJsonTransport(ConverterRegistry registry) {
-    this.objectMapper = new ObjectMapper();
+  public JacksonJsonTransport(ConverterRegistry registry, Provider<ObjectMapper> objectMapperProvider) {
+    this.objectMapper = objectMapperProvider.get();
     CustomDeserializerFactory deserializerFactory = new CustomDeserializerFactory();
     
     // leave these for Jackson to handle
