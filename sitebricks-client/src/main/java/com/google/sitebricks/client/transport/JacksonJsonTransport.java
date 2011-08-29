@@ -40,8 +40,8 @@ public class JacksonJsonTransport extends Json {
   private Collection<Class<?>> exceptions = Sets.newHashSet();
   
   @Inject
-  public JacksonJsonTransport(ConverterRegistry registry, Provider<ObjectMapper> objectMapperProvider) {
-    this.objectMapper = objectMapperProvider.get();
+  public JacksonJsonTransport(ConverterRegistry registry, ObjectMapper objectMapper) {
+    this.objectMapper = objectMapper;
     CustomDeserializerFactory deserializerFactory = new CustomDeserializerFactory();
     
     // leave these for Jackson to handle
