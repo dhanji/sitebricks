@@ -10,6 +10,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
+import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -21,10 +22,12 @@ import java.util.Set;
  */
 public class FreemarkerTemplateCompiler implements TemplateCompiler {
   private final Class<?> page;
+    private ServletContext servletContext;
 
-  public FreemarkerTemplateCompiler(Class<?> page) {
+    public FreemarkerTemplateCompiler(Class<?> page, ServletContext servletContext) {
     this.page = page;
-  }
+        this.servletContext = servletContext;
+    }
 
   public Renderable compile(String templateContent) {
           
@@ -58,6 +61,7 @@ public class FreemarkerTemplateCompiler implements TemplateCompiler {
   {
     Configuration configuration = new Configuration();
     configuration.setTemplateExceptionHandler( new SitebricksTemplateExceptionHandler() );
+    configuration.setServletContextForTemplateLoading(content, "/");
       
     try {
       return new Template(page.getName(), new StringReader(content), configuration);
