@@ -61,7 +61,7 @@ public class FreemarkerTemplateCompiler implements TemplateCompiler {
   {
     Configuration configuration = new Configuration();
     configuration.setTemplateExceptionHandler( new SitebricksTemplateExceptionHandler() );
-    configuration.setServletContextForTemplateLoading(content, "/");
+    configuration.setServletContextForTemplateLoading(servletContext, "/");
       
     try {
       return new Template(page.getName(), new StringReader(content), configuration);
