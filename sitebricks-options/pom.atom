@@ -10,7 +10,3 @@ project "Sitebricks :: Options Module" @ "null"
                cglib:cglib-full:2.0.2
                org.testng:testng:5.8(jdk15) ]
 
-  plugins: [ org.apache.maven.plugins:maven-compiler-plugin:null
-               properties:[ source: 1.6
-                            target: 1.6 ] ]
-

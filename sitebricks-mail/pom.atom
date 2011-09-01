@@ -13,7 +13,3 @@ project "Sitebricks :: Mail Client" @ "null"
                javax.mail:mail:1.4.1
                org.testng:testng:5.8(jdk15) ]
 
-  plugins: [ org.apache.maven.plugins:maven-compiler-plugin:null
-               properties:[ source: 1.6
-                            target: 1.6 ] ]
-

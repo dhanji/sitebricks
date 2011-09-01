@@ -19,7 +19,3 @@ project "Sitebricks :: Acceptance Tests" @ "null"
                com.google.sitebricks:sitebricks-stat:${project.version}
                org.testng:testng(jdk15) ]
 
-  plugins: [ org.apache.maven.plugins:maven-compiler-plugin:null
-               properties:[ source: 1.6
-                            target: 1.6 ] ]
-

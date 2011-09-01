@@ -14,7 +14,3 @@ project "Sitebricks :: Statistics" @ "null"
                commons-io:commons-io
                javax.servlet:servlet-api ]
 
-  plugins: [ org.apache.maven.plugins:maven-compiler-plugin:null
-               properties:[ source: 1.6
-                            target: 1.6 ] ]
-
