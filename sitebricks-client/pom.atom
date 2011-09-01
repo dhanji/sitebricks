@@ -1,0 +1,17 @@
+project "Sitebricks :: Client" @ "null"
+  id: com.google.sitebricks:sitebricks-client:0.8.6-SNAPSHOT
+  inherit: com.google.sitebricks:sitebricks-parent:0.8.6-SNAPSHOT:../pom.atom
+  packaging: jar
+
+  deps: [ org.testng:testng:${org.testng.version}(jdk15)
+               com.google.sitebricks:sitebricks-converter
+               net.jcip:jcip-annotations
+               com.google.inject:guice
+               com.google.inject.extensions:guice-servlet
+               com.ning:async-http-client
+               commons-io:commons-io
+               javax.servlet:servlet-api
+               com.thoughtworks.xstream:xstream
+               org.codehaus.jackson:jackson-core-asl
+               org.codehaus.jackson:jackson-mapper-asl ]
+
