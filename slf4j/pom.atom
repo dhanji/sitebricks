@@ -7,7 +7,3 @@ project "Sitebricks :: SLF4J Module" @ "null"
                com.google.inject:guice
                ch.qos.logback:logback-classic:${ch.qos.logback.version} ]
 
-  plugins: [ org.apache.maven.plugins:maven-compiler-plugin:null
-               properties:[ source: 1.6
-                            target: 1.6 ] ]
-
