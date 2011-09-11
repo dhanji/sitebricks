@@ -27,9 +27,20 @@ public class SpiRestfuWebServiceWithCRUDAcceptanceTest {
         .over(Json.class)
         .get();
 
-    assert "READ".equals(response.toString());
+    assert "READ_COLLECTION".equals(response.toString());
   }
 
+  public void shouldServiceCreate() {
+    WebResponse response = createInjector()
+        .getInstance(Web.class)
+        .clientOf(AcceptanceTest.BASE_URL + "/issue")
+        .transports(String.class)
+        .over(Json.class)
+        .post("");
+
+    assert "CREATE".equals(response.toString()) : response.toString();
+  }  
+  
   public void shouldServiceRead() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
@@ -41,17 +52,6 @@ public class SpiRestfuWebServiceWithCRUDAcceptanceTest {
     assert "READ".equals(response.toString());
   }
   
-  public void shouldServiceCreate() {
-    WebResponse response = createInjector()
-        .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/issue")
-        .transports(String.class)
-        .over(Json.class)
-        .post("");
-
-    assert "CREATE".equals(response.toString()) : response.toString();
-  }
-
   public void shouldServiceUpdate() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
@@ -73,8 +73,6 @@ public class SpiRestfuWebServiceWithCRUDAcceptanceTest {
 
     assert "DELETE".equals(response.toString()) : response.toString();
   }
-  
-  
   
 	private Injector createInjector() {
 		return Guice.createInjector(new AbstractModule() {
