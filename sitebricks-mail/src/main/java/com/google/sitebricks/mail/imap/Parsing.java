@@ -6,11 +6,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Pattern;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class Parsing {
+  private static final Pattern ENDS_IN_PARENTHETICAL = Pattern.compile("[ ]*\\(.+\\)$");
+
   static List<String> readAddresses(Queue<String> tokens) {
     if (isValid(tokens.peek())) {
       eat(tokens, "(");
@@ -82,6 +85,10 @@ class Parsing {
 
   static boolean isValid(String token) {
     return !"NIL".equalsIgnoreCase(token);
+  }
+
+  static String normalizeDateToken(String token) {
+    return token.replaceAll(" \\(.+\\)$", "").trim();
   }
 
   static Queue<String> tokenize(String message) {
