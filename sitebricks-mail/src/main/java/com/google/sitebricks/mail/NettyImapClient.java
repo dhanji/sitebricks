@@ -87,7 +87,7 @@ class NettyImapClient implements MailClient {
    * Connects to the IMAP server logs in with the given credentials.
    */
   @Override
-  public boolean connect(final DisconnectListener listener) {
+  public synchronized boolean connect(final DisconnectListener listener) {
     reset();
 
     ChannelFuture future = bootstrap.connect(new InetSocketAddress(config.getHost(),
@@ -95,7 +95,7 @@ class NettyImapClient implements MailClient {
 
     Channel channel = future.awaitUninterruptibly().getChannel();
     if (!future.isSuccess()) {
-      bootstrap.releaseExternalResources();
+//      bootstrap.releaseExternalResources();
       throw new RuntimeException("Could not connect channel", future.getCause());
     }
 
@@ -126,7 +126,7 @@ class NettyImapClient implements MailClient {
    * executor services.
    */
   @Override
-  public void disconnect() {
+  public synchronized void disconnect() {
     Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
 
     currentFolder = null;
@@ -136,7 +136,7 @@ class NettyImapClient implements MailClient {
 
     // Shut down all thread pools and exit.
     channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
-    bootstrap.releaseExternalResources();
+//    bootstrap.releaseExternalResources();
   }
 
   <D> ChannelFuture send(Command command, String args, SettableFuture<D> valueFuture) {
