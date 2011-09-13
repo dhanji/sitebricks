@@ -50,7 +50,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     MessageStatus status = new MessageStatus();
     String receivedDate = tokens.peek();
     if (Parsing.isValid(receivedDate)) {
-      receivedDate = Parsing.match(tokens, String.class);
+      receivedDate = Parsing.normalizeDateToken(Parsing.match(tokens, String.class));
       status.setReceivedDate(RECEIVED_DATE.parseDateTime(receivedDate).toDate());
     }
 
@@ -77,7 +77,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
 
     String internalDate = tokens.peek();
     if (Parsing.isValid(internalDate)) {
-      internalDate = Parsing.match(tokens, String.class);
+      internalDate = Parsing.normalizeDateToken(Parsing.match(tokens, String.class));
       status.setInternalDate(INTERNAL_DATE.parseDateTime(internalDate).toDate());
     }
 

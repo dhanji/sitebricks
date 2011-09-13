@@ -167,6 +167,7 @@ class NettyImapClient implements MailClient {
 
     SettableFuture<List<String>> valueFuture = SettableFuture.create();
 
+    // TODO Should we use LIST "[Gmail]" % here instead? That will only fetch top-level folders.
     send(Command.LIST_FOLDERS, "\"[Gmail]\" \"*\"", valueFuture);
 
     return valueFuture;
