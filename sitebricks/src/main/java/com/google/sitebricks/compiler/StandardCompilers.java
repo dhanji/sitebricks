@@ -9,12 +9,15 @@ import com.google.sitebricks.Show;
 import com.google.sitebricks.Template;
 import com.google.sitebricks.TemplateLoader;
 import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
+import com.google.sitebricks.compiler.template.freemarker.FreemarkerConfiguration;
 import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.rendering.Decorated;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
+
+import freemarker.template.Configuration;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -32,15 +35,18 @@ class StandardCompilers implements Compilers {
   private final SystemMetrics metrics;
   private final Map<String, Class<? extends Annotation>> httpMethods;
   private final TemplateLoader loader;
+  private final FreemarkerConfiguration freemarkerConfiguration;
 
   @Inject
   public StandardCompilers(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics,
-                           @Bricks Map<String, Class<? extends Annotation>> httpMethods, TemplateLoader loader) {
+                           @Bricks Map<String, Class<? extends Annotation>> httpMethods, 
+                           TemplateLoader loader, FreemarkerConfiguration freemarkerConfiguration) {
     this.registry = registry;
     this.pageBook = pageBook;
     this.metrics = metrics;
     this.httpMethods = httpMethods;
     this.loader = loader;
+    this.freemarkerConfiguration = freemarkerConfiguration;
   }
 
   public Renderable compileXml(Class<?> page, String template) {
@@ -65,7 +71,7 @@ class StandardCompilers implements Compilers {
   }
 
   public Renderable compileFreemarker( Class<?> page, String template ) {
-    return new FreemarkerTemplateCompiler(page).compile(template);
+    return new FreemarkerTemplateCompiler(page, freemarkerConfiguration.getConfiguration()).compile(template);
   }
 
   // TODO(dhanji): Feedback errors as return rather than throwing.

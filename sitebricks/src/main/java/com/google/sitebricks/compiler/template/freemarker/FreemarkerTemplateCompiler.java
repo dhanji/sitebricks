@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
@@ -24,8 +22,11 @@ import freemarker.template.TemplateExceptionHandler;
 public class FreemarkerTemplateCompiler {
   private final Class<?> page;
 
-  public FreemarkerTemplateCompiler(Class<?> page) {
+  private final Configuration configuration;
+  
+  public FreemarkerTemplateCompiler(Class<?> page, Configuration configuration) {
     this.page = page;
+    this.configuration = configuration;
   }
 
   public Renderable compile(String templateContent) {
@@ -58,9 +59,7 @@ public class FreemarkerTemplateCompiler {
   
   private Template getTemplate(Class<?> page, String content)
   {
-    Configuration configuration = new Configuration();
     configuration.setTemplateExceptionHandler( new SitebricksTemplateExceptionHandler() );
-      
     try {
       return new Template(page.getName(), new StringReader(content), configuration);
     }
