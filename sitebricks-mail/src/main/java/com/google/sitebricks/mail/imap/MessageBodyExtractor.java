@@ -27,7 +27,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   static final Pattern MESSAGE_START_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(BODY\\[\\]",
       Pattern.CASE_INSENSITIVE);
   static final Pattern EOS_REGEX =
-      Pattern.compile("\\)|^\\d+ ok success\\)?", Pattern.CASE_INSENSITIVE);
+      Pattern.compile("(^\\)\\s*)|(^\\d+ ok success\\)?)", Pattern.CASE_INSENSITIVE);
   private static final Pattern WHITESPACE_PREFIX_REGEX = Pattern.compile("^\\s+");
 
 
@@ -69,9 +69,13 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     parseBodyParts(iterator, email, mimeType, boundary(mimeType));
 
     // Try to chew up the end of sequence marker if it exists.
-    if (iterator.hasNext()) {
-      if (!EOS_REGEX.matcher(iterator.next()).find())
+    while (iterator.hasNext()) {
+      // Chew up all the end of sequence markers, until we see something else.
+      //noinspection StatementWithEmptyBody
+      if (!EOS_REGEX.matcher(iterator.next()).matches()) {
         iterator.previous();
+        break;
+      }
     }
 
     return email;
@@ -213,7 +217,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     if (")".equals(line)) {
       if (iterator.hasNext()) {
         String next = iterator.next();
-        if (EOS_REGEX.matcher(next).find())
+        if (EOS_REGEX.matcher(next).matches())
           return true;
         if (MESSAGE_START_REGEX.matcher(next).find()) {
           iterator.previous();

@@ -73,7 +73,7 @@ public class MessageBodyExtractorTest {
 
 
   @Test
-  public final void testRegex() {
+  public final void testStartRegex() {
     Pattern pattern = MessageBodyExtractor.MESSAGE_START_REGEX;
 
     assertTrue(pattern.matcher("* 5 FETCH (BODY[] {2346}").find());
@@ -89,5 +89,19 @@ public class MessageBodyExtractorTest {
     assertFalse(pattern.matcher("* 1 FETCH (BODY [] {2345}").find());
     assertFalse(pattern.matcher(" * 1 FETCH (BODY [] {2345}").find());
     assertFalse(pattern.matcher("T * 1 FETCH (BODY [] {2345}").find());
+  }
+
+  @Test
+  public final void testEosRegex() {
+    Pattern pattern = MessageBodyExtractor.EOS_REGEX;
+
+    assertTrue(pattern.matcher("4 OK SUCCESS").matches());
+    assertTrue(pattern.matcher("5 OK SUCCESS").matches());
+    assertTrue(pattern.matcher("22 ok success").matches());
+    assertTrue(pattern.matcher(")").matches());
+
+    assertTrue(pattern.matcher(") ").matches());
+    assertFalse(pattern.matcher(") (").matches());
+    assertFalse(pattern.matcher("(").matches());
   }
 }
