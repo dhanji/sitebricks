@@ -1,6 +1,7 @@
 package com.google.sitebricks.mail.imap;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.apache.commons.io.IOUtils;
 import org.apache.james.mime4j.codec.DecoderUtil;
 
@@ -25,7 +26,10 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   private static final String BOUNDARY_PREFIX = "boundary=";
   static final Pattern MESSAGE_START_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(BODY\\[\\]",
       Pattern.CASE_INSENSITIVE);
-  static final Pattern EOS_REGEX = Pattern.compile("^\\d+ ok success", Pattern.CASE_INSENSITIVE);
+  static final Pattern EOS_REGEX =
+      Pattern.compile("\\)|^\\d+ ok success\\)?", Pattern.CASE_INSENSITIVE);
+  private static final Pattern WHITESPACE_PREFIX_REGEX = Pattern.compile("^\\s+");
+
 
   @Override
   public List<Message> extract(List<String> messages) {
@@ -65,33 +69,41 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     parseBodyParts(iterator, email, mimeType, boundary(mimeType));
 
     // Try to chew up the end of sequence marker if it exists.
-    if (iterator.hasNext() && !EOS_REGEX.matcher(iterator.next()).find())
-      iterator.previous();
+    if (iterator.hasNext()) {
+      if (!EOS_REGEX.matcher(iterator.next()).find())
+        iterator.previous();
+    }
 
     return email;
   }
 
-  private static String mimeType(Map<String, String> headers) {
-    String mimeType = headers.get("Content-Type");
-    if (mimeType == null)
-      mimeType = "text/plain";    // Default to text plain mimetype.
-    return mimeType;
+  private static String mimeType(Multimap<String, String> headers) {
+    Collection<String> mimeType = headers.get("Content-Type");
+    if (mimeType.isEmpty())
+      return "text/plain";    // Default to text plain mimetype.
+    return mimeType.iterator().next();
   }
 
   private static void parseBodyParts(ListIterator<String> iterator, HasBodyParts entity,
                                      String mimeType, String boundary) {
     if (mimeType.startsWith("text/plain") || mimeType.startsWith("text/html")) {
       String body = readBodyAsString(iterator, boundary);
-      String encoding = entity.getHeaders().get("Content-Transfer-Encoding");
-      if (null == encoding)
+
+      // There should only be one of these.
+      Collection<String> encodingHeaders = entity.getHeaders().get("Content-Transfer-Encoding");
+      String encoding;
+      if (encodingHeaders.isEmpty())
         encoding = "7bit"; // default to 7-bit as per the MIME RFC.
+      else
+        encoding = encodingHeaders.iterator().next();
+
       entity.setBody(decode(body, encoding, charset(mimeType)));
     } else if (mimeType.startsWith("multipart/") /* mixed|alternative */) {
       String boundaryToken = boundary(mimeType);
 
       // Skip everything upto the first occurrence of boundary (called the "Preamble")
       //noinspection StatementWithEmptyBody
-      while (iterator.hasNext() && !boundaryToken.equals(iterator.next()));
+      while (iterator.hasNext() && !boundaryToken.equals(iterator.next())) ;
 
       // Now parse the multipart body in sequence, recursing down as needed...
       while (iterator.hasNext()) {
@@ -146,7 +158,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
   private static String decode(String body, String encoding, String charset) {
     try {
-      return IOUtils.toString(MimeUtility.decode(new ByteArrayInputStream(body.getBytes()), encoding), charset);
+      return IOUtils.toString(
+          MimeUtility.decode(new ByteArrayInputStream(body.getBytes()), encoding), charset);
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (MessagingException e) {
@@ -168,7 +181,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       if (boundary != null && line.startsWith(boundary)) {
         // end of section.
         break;
-      } else  {
+      } else {
         if (isEndOfMessage(iterator, line))
           break;
       }
@@ -205,8 +218,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         if (MESSAGE_START_REGEX.matcher(next).find()) {
           iterator.previous();
           return true;
-        }
-        else  // oops, go back.
+        } else  // oops, go back.
           iterator.previous();
       }
     }
@@ -214,7 +226,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   }
 
   private static void parseHeaderSection(ListIterator<String> iterator,
-                                         Map<String, String> headers) {
+                                         Multimap<String, String> headers) {
     while (iterator.hasNext()) {
       String message = iterator.next();
       // Watch for the end of sequence marker. If we see it, the mime-stream is ended.
@@ -229,22 +241,28 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   }
 
   private static void parseHeaderPair(String message, ListIterator<String> iterator,
-                                      Map<String, String> headers) {
+                                      Multimap<String, String> headers) {
     String[] split = message.split(": ", 2);
     String value = split[1];
 
     // Check if the next line begins with a LWSP. If it does, then it is a continuation of this
     // line.
     // This is called "Unfolding" as per RFC 822. http://www.faqs.org/rfcs/rfc822.html
+    StringBuilder folded = new StringBuilder(value);
+
+    // First read up to the next header.
     while (iterator.hasNext()) {
       String next = iterator.next();
-      if (next.startsWith(" "))
-        value += ' ' + next.trim();
+      if (WHITESPACE_PREFIX_REGEX.matcher(next).find())
+        folded.append(next);
       else {
         iterator.previous();
         break;
       }
     }
+
+    // Now unfold using javamail's algorithm.
+    value = MimeUtility.unfold(folded.toString());
 
     // Header values can be specially encoded.
     value = DecoderUtil.decodeEncodedWords(value);

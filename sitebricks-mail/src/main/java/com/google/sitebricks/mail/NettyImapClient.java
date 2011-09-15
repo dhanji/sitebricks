@@ -95,7 +95,6 @@ class NettyImapClient implements MailClient {
 
     Channel channel = future.awaitUninterruptibly().getChannel();
     if (!future.isSuccess()) {
-//      bootstrap.releaseExternalResources();
       throw new RuntimeException("Could not connect channel", future.getCause());
     }
 
@@ -136,7 +135,6 @@ class NettyImapClient implements MailClient {
 
     // Shut down all thread pools and exit.
     channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
-//    bootstrap.releaseExternalResources();
   }
 
   <D> ChannelFuture send(Command command, String args, SettableFuture<D> valueFuture) {
@@ -225,10 +223,17 @@ class NettyImapClient implements MailClient {
         "indexing)");
     SettableFuture<List<MessageStatus>> valueFuture = SettableFuture.create();
 
-    String args = start + ":" + end + " all";
+    // -ve end range means get everything (*).
+    String args = start + ":" + toUpperBound(end) + " all";
     send(Command.FETCH_HEADERS, args, valueFuture);
 
     return valueFuture;
+  }
+
+  private static String toUpperBound(int end) {
+    return (end > 0)
+        ? Integer.toString(end)
+        : "*";
   }
 
   @Override
@@ -242,7 +247,7 @@ class NettyImapClient implements MailClient {
         "indexing)");
     SettableFuture<List<Message>> valueFuture = SettableFuture.create();
 
-    String args = start + ":" + end + " body[]";
+    String args = start + ":" + toUpperBound(end) + " body[]";
     send(Command.FETCH_BODY, args, valueFuture);
 
     return valueFuture;

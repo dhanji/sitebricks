@@ -6,10 +6,14 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.net.URL;
 import java.text.ParseException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -27,9 +31,6 @@ public class MessageBodyExtractorTest {
     List<String> data =
         Resources.readLines(MessageBodyExtractorTest.class.getResource("fetch_body_data1.txt"),
             Charsets.UTF_8);
-//    List<String> assertions =
-//        Resources.readLines(MessageBodyExtractorTest.class.getResource("fetch_all_data_assertion.txt"),
-//            Charsets.UTF_8);
 
     List<Message> statuses = new MessageBodyExtractor().extract(data);
 
@@ -42,6 +43,34 @@ public class MessageBodyExtractorTest {
       }
     }
   }
+
+  @Test
+  public final void testReadUnfoldedHeaders() throws IOException {
+    URL assertions = MessageBodyExtractorTest.class.getResource("split_headers_assertion_1.txt");
+    List<String> data =
+        Resources.readLines(
+            MessageBodyExtractorTest.class.getResource("split_headers_fetch_data_1.txt"),
+            Charsets.UTF_8);
+
+    List<Message> messages = new MessageBodyExtractor().extract(data);
+    assertEquals(1, messages.size());
+    Message message = messages.get(0);
+
+    // Emit what we've just read back out in a similar format to the file.
+    StringBuilder out = new StringBuilder();
+    for (Map.Entry<String, Collection<String>> entry : message.getHeaders().asMap().entrySet()) {
+      for (String value : entry.getValue()) {
+        out.append(entry.getKey())
+            .append(": ")
+            .append(value)
+            .append('\n');
+      }
+    }
+
+    // Compare the parsed headers with what we slurped in.
+    assertEquals(out.toString(), Resources.toString(assertions, Charsets.UTF_8));
+  }
+
 
   @Test
   public final void testRegex() {
