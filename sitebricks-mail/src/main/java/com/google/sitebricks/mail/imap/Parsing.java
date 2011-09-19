@@ -34,6 +34,9 @@ class Parsing {
     StringBuilder address = new StringBuilder();
     eat(tokens, "(");
     String namePiece = match(tokens, String.class);
+    if (namePiece != null)
+      namePiece = namePiece.replace("\\", "");
+
     String sourceRoute = match(tokens, String.class);
     String mailboxName = match(tokens, String.class);  // mail username
     String hostname = match(tokens, String.class);     // domain
@@ -100,7 +103,8 @@ class Parsing {
     for (int i = 0, charArrayLength = charArray.length; i < charArrayLength; i++) {
       char c = charArray[i];
 
-      if (c == '"') {
+      // String checks, but only if we're not an escaped quote character.
+      if (c == '"' && (i > 0 && charArray[i - 1] != '\\')) {
         if (inString) {
           inString = false;
 
@@ -132,13 +136,13 @@ class Parsing {
           currentToken = new StringBuilder();
           continue;
 
-          // Otherwise whitespace is a delimiter for non-strings.
-        } else if (c == ' ') {
+          // Otherwise whitespace is a delimiter for non-strings. EXCEPT when
+          // preceeded by '\', which is an escape character.
+        } else if (c == ' ' && (i > 0 && charArray[i - 1] != '\\')) {
           bakeToken(tokens, currentToken);
           currentToken = new StringBuilder();
           continue;
         }
-
       currentToken.append(c);
     }
 
