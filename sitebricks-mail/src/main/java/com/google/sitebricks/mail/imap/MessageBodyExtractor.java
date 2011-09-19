@@ -46,6 +46,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     Message email = new Message();
     // Read the leading message (command response).
     String firstLine = iterator.next();
+
+    // It is possible that the requested message stream is completely empty.
+    if (EOS_REGEX.matcher(firstLine).matches())
+      return null;
+
     firstLine = firstLine.replaceFirst("[*]? \\d+[ ]* ", "");
     Queue<String> tokens = Parsing.tokenize(firstLine);
     Parsing.eat(tokens, "FETCH", "(", "BODY[]");

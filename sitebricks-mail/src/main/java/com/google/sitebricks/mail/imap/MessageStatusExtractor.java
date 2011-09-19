@@ -6,6 +6,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import java.util.List;
 import java.util.Queue;
+import java.util.regex.Pattern;
 
 /**
  * Extracts a MessageStatus from a partial IMAP fetch. Specifically
@@ -18,7 +19,13 @@ import java.util.Queue;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
+  // 10 Sep 2011 14:19:55 -0700
+  static final Pattern ALTERNATE_RECEIVED_DATE_PATTERN = Pattern.compile(
+      "\\d?\\d \\w\\w\\w [0-9]{4} \\d?\\d:\\d?\\d:\\d?\\d [-+]?[0-9]{4}");
 
+  // A shorter form of the received date
+  static final DateTimeFormatter ALT_RECEIVED_DATE = DateTimeFormat.forPattern(
+      "dd MMM yyyy HH:mm:ss Z");
   static final DateTimeFormatter RECEIVED_DATE = DateTimeFormat.forPattern(
       "EEE, dd MMM yyyy HH:mm:ss Z");
   static final DateTimeFormatter INTERNAL_DATE = DateTimeFormat.forPattern(
@@ -51,7 +58,10 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     String receivedDate = tokens.peek();
     if (Parsing.isValid(receivedDate)) {
       receivedDate = Parsing.normalizeDateToken(Parsing.match(tokens, String.class));
-      status.setReceivedDate(RECEIVED_DATE.parseDateTime(receivedDate).toDate());
+      if (ALTERNATE_RECEIVED_DATE_PATTERN.matcher(receivedDate).matches())
+        status.setReceivedDate(ALT_RECEIVED_DATE.parseDateTime(receivedDate).toDate());
+      else
+        status.setReceivedDate(RECEIVED_DATE.parseDateTime(receivedDate).toDate());
     }
 
     status.setSubject(Parsing.match(tokens, String.class));

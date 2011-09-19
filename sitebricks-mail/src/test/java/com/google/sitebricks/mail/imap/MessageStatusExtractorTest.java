@@ -9,6 +9,8 @@ import java.text.ParseException;
 import java.util.*;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -62,5 +64,26 @@ public class MessageStatusExtractorTest {
       MessageStatus st = statuses.get(i);
       assertEquals(st.toString(), assertions.get(i));
     }
+  }
+
+  @Test
+  public final void alternateDateFormatRegex() throws IOException, ParseException {
+    assertTrue(MessageStatusExtractor.ALTERNATE_RECEIVED_DATE_PATTERN
+        .matcher("10 Sep 2011 14:19:55 -0700").matches());
+    assertTrue(MessageStatusExtractor.ALTERNATE_RECEIVED_DATE_PATTERN
+        .matcher("1 Sep 2011 14:19:55 -0700").matches());
+    assertTrue(MessageStatusExtractor.ALTERNATE_RECEIVED_DATE_PATTERN
+        .matcher("1 Sep 2011 04:19:55 +0700").matches());
+    assertTrue(MessageStatusExtractor.ALTERNATE_RECEIVED_DATE_PATTERN
+        .matcher("1 Jan 1994 04:19:55 0700").matches());
+
+    assertFalse(MessageStatusExtractor.ALTERNATE_RECEIVED_DATE_PATTERN
+        .matcher("1st Jan 1994 04:19:55 0700").matches());
+    assertFalse(MessageStatusExtractor.ALTERNATE_RECEIVED_DATE_PATTERN
+        .matcher("1 Jan 1994 04:19:55 *0700").matches());
+    assertFalse(MessageStatusExtractor.ALTERNATE_RECEIVED_DATE_PATTERN
+        .matcher("1 Jan 1994 04:19:55").matches());
+    assertFalse(MessageStatusExtractor.ALTERNATE_RECEIVED_DATE_PATTERN
+        .matcher("1994-Jan-01 04:19:55 0700").matches());
   }
 }
