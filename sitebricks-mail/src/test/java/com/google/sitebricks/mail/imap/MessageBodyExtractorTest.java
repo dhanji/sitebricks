@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.testng.annotations.Test;
+import org.testng.v6.Lists;
 
 import java.io.IOException;
 import java.net.URL;
@@ -11,6 +12,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.testng.Assert.assertEquals;
@@ -21,10 +23,42 @@ import static org.testng.Assert.assertTrue;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class MessageBodyExtractorTest {
+  private static final Pattern MESSAGE_LOG_REGEX = Pattern.compile("^.* DEBUG c\\.g\\.s\\.mail\\.MailClientHandler: Message received \\[");
+
+  @Test
+  public final void messageLogRegex() throws IOException, ParseException {
+    assertTrue(MESSAGE_LOG_REGEX.matcher(
+        "14:25:57.682 DEBUG c.g.s.mail.MailClientHandler: Message received [] from imap.gmail" +
+            ".com/74.125.93.109:993")
+        .find());
+  }
+
 
   /**
    * WARNING: THIS TEST IS DATA-DEPENDENT!
    */
+  @Test
+  public final void testAwkwardGmailEmailStream() throws IOException, ParseException {
+    final List<String> lines =
+        Resources.readLines(MessageBodyExtractorTest.class.getResource("malformed_fetch.log"),
+            Charsets.UTF_8);
+
+    List<String> redacted = Lists.newArrayList();
+    for (String line : lines) {
+      Matcher matcher = MESSAGE_LOG_REGEX.matcher(line);
+      if (matcher.find()) {
+        line = matcher.replaceAll("");
+        line = line.substring(0, line.lastIndexOf("]"));
+        redacted.add(line);
+      }
+    }
+
+    List<Message> extract = new MessageBodyExtractor().extract(redacted);
+    System.out.println(extract);
+    System.out.println(extract.get(4).getBodyParts());
+    System.out.println(extract.size());
+  }
+
   @Test
   public final void testTypicalGmailEmail() throws IOException, ParseException {
 
@@ -98,9 +132,7 @@ public class MessageBodyExtractorTest {
     assertTrue(pattern.matcher("4 OK SUCCESS").matches());
     assertTrue(pattern.matcher("5 OK SUCCESS").matches());
     assertTrue(pattern.matcher("22 ok success").matches());
-    assertTrue(pattern.matcher(")").matches());
 
-    assertTrue(pattern.matcher(") ").matches());
     assertFalse(pattern.matcher(") (").matches());
     assertFalse(pattern.matcher("(").matches());
   }

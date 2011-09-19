@@ -159,4 +159,17 @@ class Parsing {
     if (trim.length() > 0)
       tokens.add(trim);
   }
+
+  public static boolean startsWithIgnoreCase(String toTest, String prefix) {
+    if (null == toTest)
+      return (null == prefix);
+
+    return toTest.toLowerCase().startsWith(prefix.toLowerCase());
+  }
+
+  public static String stripQuotes(String var) {
+    if (var.startsWith("\"") && var.endsWith("\""))
+      return var.substring(1, var.length() - 1);
+    return var;
+  }
 }

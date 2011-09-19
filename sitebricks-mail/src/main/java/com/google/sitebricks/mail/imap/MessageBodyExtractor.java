@@ -27,7 +27,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   static final Pattern MESSAGE_START_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(BODY\\[\\]",
       Pattern.CASE_INSENSITIVE);
   static final Pattern EOS_REGEX =
-      Pattern.compile("(^\\)\\s*)|(^\\d+ ok success\\)?)", Pattern.CASE_INSENSITIVE);
+      Pattern.compile("^\\d+ ok success\\)?", Pattern.CASE_INSENSITIVE);
   private static final Pattern WHITESPACE_PREFIX_REGEX = Pattern.compile("^\\s+");
 
 
@@ -75,9 +75,13 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
     // Try to chew up the end of sequence marker if it exists.
     while (iterator.hasNext()) {
-      // Chew up all the end of sequence markers, until we see something else.
-      //noinspection StatementWithEmptyBody
-      if (!EOS_REGEX.matcher(iterator.next()).matches()) {
+      // Chew up all the end of sequence markers, whitespace and garbage at the end of a message,
+      // Until we see the start of a new message or the end of the entire sequence.
+      String next = iterator.next();
+      if (EOS_REGEX.matcher(next).matches()) {
+        iterator.previous();
+        break;
+      } else if (MESSAGE_START_REGEX.matcher(next).find()) {
         iterator.previous();
         break;
       }
@@ -90,7 +94,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     Collection<String> mimeType = headers.get("Content-Type");
     if (mimeType.isEmpty())
       return "text/plain";    // Default to text plain mimetype.
-    return mimeType.iterator().next();
+    return Parsing.stripQuotes(mimeType.iterator().next().toLowerCase());
   }
 
   private static void parseBodyParts(ListIterator<String> iterator, HasBodyParts entity,
@@ -112,7 +116,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
       // Skip everything upto the first occurrence of boundary (called the "Preamble")
       //noinspection StatementWithEmptyBody
-      while (iterator.hasNext() && !boundaryToken.equals(iterator.next())) ;
+      while (iterator.hasNext() && !boundaryToken.equalsIgnoreCase(iterator.next()));
 
       // Now parse the multipart body in sequence, recursing down as needed...
       while (iterator.hasNext()) {
@@ -140,9 +144,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
         // we're only done if the last line has a terminal suffix of '--'
         String lastLineRead = iterator.previous();
-        if (lastLineRead.startsWith(boundary + "--")) {
-          // Yes this is the end. Otherwise continue!
+        // Yes this is the end. Otherwise continue!
+        if (Parsing.startsWithIgnoreCase(lastLineRead, boundary + "--")) {
           iterator.next();
+          break;
+        } else if (isEndOfMessage(iterator, iterator.next(), boundary)) {
           break;
         } else
           iterator.next();
@@ -161,8 +167,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     int end = mimeType.indexOf(";", i);
     if (end == -1)
       end = mimeType.length();
+    mimeType = mimeType.substring(i + "charset=".length(), end);
 
-    return mimeType.substring(i + "charset=".length(), end);
+    return Parsing.stripQuotes(mimeType);
   }
 
   private static String decode(String body, String encoding, String charset) {
@@ -180,23 +187,16 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     int boundaryIndex = mimeType.indexOf(BOUNDARY_PREFIX);
     if (boundaryIndex == -1)
       return null;
-    return "--" + mimeType.substring(boundaryIndex + BOUNDARY_PREFIX.length());
+    String boundary = mimeType.substring(boundaryIndex + BOUNDARY_PREFIX.length());
+
+    // Strip quotes. Apparently the quotes that the header comes in with are not necessarily part
+    // of the boundary token. Sigh.
+    boundary = Parsing.stripQuotes(boundary);
+    return "--" + boundary;
   }
 
   private static byte[] readBodyAsBytes(ListIterator<String> iterator, String boundary) {
-    StringBuilder builder = new StringBuilder();
-    while (iterator.hasNext()) {
-      String line = iterator.next();
-      if (boundary != null && line.startsWith(boundary)) {
-        // end of section.
-        break;
-      } else {
-        if (isEndOfMessage(iterator, line))
-          break;
-      }
-      builder.append(line).append("\r\n");
-    }
-    return builder.toString().getBytes();
+    return readBodyAsString(iterator, boundary).getBytes();
   }
 
   private static String readBodyAsString(ListIterator<String> iterator, String boundary) {
@@ -209,7 +209,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         return textBody.toString();
       } else {
         // Check for IMAP command stream delimiter.
-        if (isEndOfMessage(iterator, line))
+        if (isEndOfMessage(iterator, line, boundary))
           return textBody.toString();
       }
       textBody.append(line).append("\r\n");
@@ -218,8 +218,10 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   }
 
   private static boolean isEndOfMessage(ListIterator<String> iterator,
-                                        String line) {
-    if (")".equals(line)) {
+                                        String line, String boundary) {
+    // It's possible for the ) to occur on its own line, or on the same line as the boundary marker.
+    if (")".equals(line) || (boundary != null && ")".equals(
+        line.replace(boundary + "--", "").trim()))) {
       if (iterator.hasNext()) {
         String next = iterator.next();
         if (EOS_REGEX.matcher(next).matches())
