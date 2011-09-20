@@ -166,7 +166,7 @@ This is a preamble. It is a useless piece of junk, part of the RFC though.
 
 --_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
 Content-Type: multipart/alternative;
-    boundary="----NextPart_1293809.9123_LLas"
+    boundary="----nextParT_1293809.9123_llas"
 
 This is a preamble after the preamble. Sigh, yes, this is how crazy this spec is.
 

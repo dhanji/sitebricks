@@ -119,6 +119,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       while (iterator.hasNext() && !boundaryToken.equalsIgnoreCase(iterator.next()));
 
       // Now parse the multipart body in sequence, recursing down as needed...
+      boolean endOfMessage = false;
       while (iterator.hasNext()) {
         Message.BodyPart bodyPart = new Message.BodyPart();
         entity.getBodyParts().add(bodyPart);
@@ -149,8 +150,18 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
           iterator.next();
           break;
         } else if (isEndOfMessage(iterator, iterator.next(), boundary)) {
+          endOfMessage = true;
           break;
         }
+      }
+
+      // Ignore "mid-epilogue", i.e. content between end of inner multipart section and beginning
+      // of the next parent multipart body.
+      if (!endOfMessage) {
+//        iterator.previous();
+        // Chew up epilogue until the beginning of the next boundary.
+        //noinspection StatementWithEmptyBody
+//        while (iterator.hasNext() && !boundaryToken.equalsIgnoreCase(iterator.next()));
       }
 
     } else {
