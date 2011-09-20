@@ -219,13 +219,55 @@ public class MessageBodyExtractorTest {
   private void assertComplexNestedStructure(Message message) {
     Message.BodyPart part1;
     Message.BodyPart part2;
+    Message.BodyPart part3;
+
+    Message.BodyPart innerPart1;
+    Message.BodyPart innertPart2;
+    Message.BodyPart innertPart3;
     assertEquals(message.getHeaders().toString(),
         "{Delivered-To=[dhanji@gmail.com], Message-ID=[<id> id]," +
         " Subject=[Re: Slow to Respond], Content-Type=[multipart/alternative;" +
             " boundary=__BOUNDARY__]," +
         " X-Sitebricks-Test=[multipart-alternatives;quoted-headers;nested-parts;preamble]}");
 
-    System.out.println(message.getBodyParts().get(0).getBody());
+    assertEquals(3, message.getBodyParts().size());
+    part1 = message.getBodyParts().get(0);
+    part2 = message.getBodyParts().get(1);
+    part3 = message.getBodyParts().get(2);
+
+    assertEquals(1, part1.getBodyParts().size());
+
+    innerPart1 = part1.getBodyParts().get(0);
+    assertEquals(2, innerPart1.getBodyParts().size());
+
+    Message.BodyPart innerInnerPart1 = innerPart1.getBodyParts().get(0);
+    assertEquals(3, innerInnerPart1.getBodyParts().size());
+
+    Message.BodyPart innerInnerPart2 = innerPart1.getBodyParts().get(1);
+    assertEquals("Hi this is a body.\r\n\r\n", innerInnerPart2.getBody());
+
+    // Back to TOP level.
+    assertEquals("This is a signature.\r\n", part2.getBody());
+
+    // Last top-level part.
+    assertEquals(3, part3.getBodyParts().size());
+
+    assertEquals("This is a signature.\r\n" +
+        "--__BOUNDARY-2__\r\n" +
+        "--__BOUNDARY-2__--\r\n" +
+        "--__BOUNDARY-1__--\r\n" +
+        "fooled you--this is all textbody.\r\n\r\n", part3.getBodyParts().get(0).getBody());
+
+    assertEquals("Beric is dead.\r\n", part3.getBodyParts().get(1).getBody());
+
+    Message.BodyPart peric = part3.getBodyParts().get(2);
+    assertEquals(2, peric.getBodyParts().size());
+
+    assertEquals(peric.getBodyParts().get(0).getBody(), "HI!\r\n\r\n");
+    assertHeaderEquals(peric.getBodyParts().get(0).getHeaders(), "Content-Type", "text/plain");
+
+    assertEquals(peric.getBodyParts().get(1).getBody(), "<body>yo</body>\r\n\r\n");
+    assertHeaderEquals(peric.getBodyParts().get(1).getHeaders(), "Content-Type", "text/html");
   }
 
   private void assertNestedMultipart2LevelDeep(Message message,
