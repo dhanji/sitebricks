@@ -2,9 +2,9 @@ package com.google.sitebricks.mail.imap;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.testng.annotations.Test;
-import org.testng.v6.Lists;
 
 import java.io.IOException;
 import java.net.URL;
@@ -12,11 +12,11 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -25,38 +25,66 @@ import static org.testng.Assert.assertTrue;
 public class MessageBodyExtractorTest {
   private static final Pattern MESSAGE_LOG_REGEX = Pattern.compile("^.* DEBUG c\\.g\\.s\\.mail\\.MailClientHandler: Message received \\[");
 
-  @Test
-  public final void messageLogRegex() throws IOException, ParseException {
-    assertTrue(MESSAGE_LOG_REGEX.matcher(
-        "14:25:57.682 DEBUG c.g.s.mail.MailClientHandler: Message received [] from imap.gmail" +
-            ".com/74.125.93.109:993")
-        .find());
-  }
-
-
   /**
    * WARNING: THIS TEST IS DATA-DEPENDENT!
    */
   @Test
   public final void testAwkwardGmailEmailStream() throws IOException, ParseException {
     final List<String> lines =
-        Resources.readLines(MessageBodyExtractorTest.class.getResource("malformed_fetch.log"),
+        Resources.readLines(MessageBodyExtractorTest.class.getResource("fetch_bodies.txt"),
             Charsets.UTF_8);
 
-    List<String> redacted = Lists.newArrayList();
-    for (String line : lines) {
-      Matcher matcher = MESSAGE_LOG_REGEX.matcher(line);
-      if (matcher.find()) {
-        line = matcher.replaceAll("");
-        line = line.substring(0, line.lastIndexOf("]"));
-        redacted.add(line);
-      }
-    }
+    List<Message> extract = new MessageBodyExtractor().extract(lines);
 
-    List<Message> extract = new MessageBodyExtractor().extract(redacted);
-    System.out.println(extract);
-    System.out.println(extract.get(4).getBodyParts());
-    System.out.println(extract.size());
+    // ------------------------------------------------------------
+    // First message.
+    // Folded headers with tabs + spaces, repeat headers, one body.
+    Message message = extract.get(0);
+    String expectedHeaders =
+        IOUtils.toString(MessageBodyExtractorTest.class.getResourceAsStream("fetch_headers_1.txt"));
+    assertEquals(message.getHeaders().toString(), expectedHeaders);
+
+    assertEquals(1, message.getBodyParts().size());
+    Message.BodyPart part1 = message.getBodyParts().get(0);
+    assertNull(part1.getBinBody());
+    assertTrue(part1.getHeaders().isEmpty());
+
+    // We have to compare the raw bytes because the encoded string comes in as ISO-8859-1
+    // And Java literals are encoded as UTF-8.
+    assertEquals(part1.getBody().getBytes(), IOUtils.toByteArray(
+        MessageBodyExtractorTest.class.getResourceAsStream("fetch_body_1_raw.dat")));
+
+
+    // ------------------------------------------------------------
+    // Second message.
+    // missing content-transfer-encoding and mimetype.
+    // Should parse it as a UTF-8 text/plain message even though no mimetype is specified,
+    // and 7bit CTE.
+    message = extract.get(1);
+    assertTrue(message.getHeaders().get("Content-Transfer-Encoding").isEmpty());
+    assertTrue(message.getHeaders().get("Content-Type").isEmpty());
+    assertEquals(message.getHeaders().get("Subject").iterator().next(), "Re: Slow to Respond");
+
+    assertEquals(1, message.getBodyParts().size());
+    part1 = message.getBodyParts().get(0);
+    assertTrue(part1.getHeaders().isEmpty());
+    assertNull(part1.getBinBody());
+    assertEquals(part1.getBody(), IOUtils.toString(
+        MessageBodyExtractorTest.class.getResourceAsStream("fetch_body_2.txt")));
+
+    // ------------------------------------------------------------
+    // Third message.
+    // multipart 2 parts, 1-level deep only.
+    message = extract.get(2);
+    assertEquals(message.getHeaders().toString(),
+        "{Message-ID=[<askdopaksdNq6o3M+veqCfc+x3m1PxeLn-raisdj" +
+        "@mail.gmail.com>], Subject=[Re: Slow to Respond], Content-Type=[multipart/alternative; " +
+        "boundary=\"_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_\"], " +
+        "X-Sitebricks-Test=[multipart-alternatives;quoted-headers]}");
+
+    assertEquals(2, message.getBodyParts().size());
+    part1 = message.getBodyParts().get(0);
+
   }
 
   @Test

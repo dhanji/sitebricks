@@ -204,7 +204,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     // Parse as plain text.
     while (iterator.hasNext()) {
       String line = iterator.next();
-      if (boundary != null && line.startsWith(boundary)) {
+      if (boundary != null && Parsing.startsWithIgnoreCase(line, boundary)) {
         // end of section.
         return textBody.toString();
       } else {

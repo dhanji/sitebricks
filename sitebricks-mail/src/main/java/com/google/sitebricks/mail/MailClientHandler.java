@@ -25,7 +25,7 @@ class MailClientHandler extends SimpleChannelHandler {
   private static final Logger log = LoggerFactory.getLogger(MailClientHandler.class);
   public static final String CAPABILITY_PREFIX = "* CAPABILITY";
   static final Pattern COMMAND_FAILED_REGEX =
-      Pattern.compile("[.] (NO|BAD) (.*)", Pattern.CASE_INSENSITIVE);
+      Pattern.compile("^[.] (NO|BAD) (.*)", Pattern.CASE_INSENSITIVE);
 
   private final CountDownLatch loginComplete = new CountDownLatch(2);
   private volatile boolean isLoggedIn = false;
@@ -99,12 +99,13 @@ class MailClientHandler extends SimpleChannelHandler {
       return;
     }
 
+    // TODO Error detection needs to be WAY more robust than this.
     Matcher matcher = COMMAND_FAILED_REGEX.matcher(message);
     if (matcher.find()) {
-      // Get rid of this completion, it failed and the command needs to be reissued.
-      String reason = extractError(matcher);
-      CommandCompletion failed = completions.poll();
-      errorStack.push(new Error(failed, reason));
+//      // Get rid of this completion, it failed and the command needs to be reissued.
+//      String reason = extractError(matcher);
+//      CommandCompletion failed = completions.poll();
+//      errorStack.push(new Error(failed, reason));
     }
 
     if (completion.complete(message)) {
