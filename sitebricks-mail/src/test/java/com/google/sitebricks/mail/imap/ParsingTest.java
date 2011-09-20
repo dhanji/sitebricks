@@ -12,6 +12,9 @@ public class ParsingTest {
   public final void normalizeDate() {
     assertEquals("Thu, 07 Apr 2011 04:41:42 -0700",
         Parsing.normalizeDateToken("Thu, 07 Apr 2011 04:41:42 -0700 (PDT)"));
+
+    assertEquals("Thu, 07 Apr 2011 04:41:42 -0700",
+        Parsing.normalizeDateToken("Thu,  07 Apr 2011 04:41:42 -0700 (PDT)"));
   }
 
   @Test

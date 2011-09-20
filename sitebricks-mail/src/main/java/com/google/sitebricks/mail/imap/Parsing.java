@@ -91,7 +91,7 @@ class Parsing {
   }
 
   static String normalizeDateToken(String token) {
-    return token.replaceAll(" \\(.+\\)$", "").trim();
+    return token.replaceAll(" \\(.+\\)$", "").replaceAll("[ ]+", " ").trim();
   }
 
   static Queue<String> tokenize(String message) {
