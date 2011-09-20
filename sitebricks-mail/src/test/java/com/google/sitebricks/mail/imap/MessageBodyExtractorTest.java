@@ -183,37 +183,97 @@ public class MessageBodyExtractorTest {
     // Sixth message.
     // multipart 2 parts each, 2-level deep, preambles/epilogues.
     message = extract.get(5);
+    assertNestedMultipart2LevelDeep(message, "<CAEEYBPNq6o3M+aisjd+x3m1PxeLn-raisdj@mail.gmail.co" +
+
+        "m>",
+        "_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_");
+
+    // ------------------------------------------------------------
+    // Seventh message.
+    // same as sixth but with wide spacing and different ID.
+    message = extract.get(6);
+    assertNestedMultipart2LevelDeep(message, "<CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>",
+        "_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_");
+
+    // ------------------------------------------------------------
+    // Eigth message.
+    // same as sixth but with compact spacing and different ID.
+    message = extract.get(7);
+    assertNestedMultipart2LevelDeep(message, "<SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>",
+        "_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_");
+
+    // ------------------------------------------------------------
+    // Ninth message.
+    // same as eigth but re-using the SAME boundary for inner and outer parts.
+    message = extract.get(8);
+    assertNestedMultipart2LevelDeep(message, "<SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>",
+        "----NextPart_1293809.9123_LLas");
+
+    // ------------------------------------------------------------
+    // Tenth message.
+    // multipart 3 parts each, 3-level deep, preambles/epilogues.
+    message = extract.get(9);
+    assertComplexNestedStructure(message);
+  }
+
+  private void assertComplexNestedStructure(Message message) {
+    Message.BodyPart part1;
+    Message.BodyPart part2;
     assertEquals(message.getHeaders().toString(),
-        "{Delivered-To=[dhanji@gmail.com], Message-ID=[<CAEEYBPNq6o3M+aisjd+x3m1PxeLn-raisdj@mail.gmail.com>]," +
+        "{Delivered-To=[dhanji@gmail.com], Message-ID=[<id> id]," +
         " Subject=[Re: Slow to Respond], Content-Type=[multipart/alternative;" +
-        " boundary=_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_]," +
+            " boundary=__BOUNDARY__]," +
+        " X-Sitebricks-Test=[multipart-alternatives;quoted-headers;nested-parts;preamble]}");
+
+    System.out.println(message.getBodyParts().get(0).getBody());
+  }
+
+  private void assertNestedMultipart2LevelDeep(Message message,
+                                               String id, String boundary) {
+    Message.BodyPart part1;
+    Message.BodyPart part2;
+    assertEquals(message.getHeaders().toString(),
+        "{Delivered-To=[dhanji@gmail.com], Message-ID=[" + id + "]," +
+        " Subject=[Re: Slow to Respond], Content-Type=[multipart/alternative;" +
+            " boundary=" + boundary + "]," +
         " X-Sitebricks-Test=[multipart-alternatives;quoted-headers;nested-parts;preamble]}");
 
     assertEquals(2, message.getBodyParts().size());
     part1 = message.getBodyParts().get(0);
     part2 = message.getBodyParts().get(1);
 
+    // The first part should itself have two parts.
+    assertEquals(2, part1.getBodyParts().size());
+    Message.BodyPart innerPart1 = part1.getBodyParts().get(0);
+    Message.BodyPart innerPart2 = part1.getBodyParts().get(1);
+
     assertEquals(1, part1.getHeaders().size());
-    assertTrue(Parsing.startsWithIgnoreCase(part1.getHeaders().get("Content-Type").iterator().next(),
-        "text/plain"));
+    assertTrue(
+        Parsing.startsWithIgnoreCase(part1.getHeaders().get("Content-Type").iterator().next(),
+            "multipart/alternative"));
 
-    assertEquals(part1.getBody(), "I am OOO and may have sporadic access to email.\r\n\r\n" +
-        "--\r\n");
+    // Inner parts should be as exepcted.
+    assertTrue(Parsing.startsWithIgnoreCase(innerPart1.getHeaders().get("Content-Type").iterator().next(),
+            "text/plain"));
+    assertTrue(Parsing.startsWithIgnoreCase(innerPart2.getHeaders().get("Content-Type").iterator().next(),
+            "text/html"));
+    assertEquals(innerPart1.getBody(), "I am OOO and may have sporadic access to email.\r\n\r\n");
+    assertEquals(innerPart2.getBody(), "<body>\r\n" +
+        "I am OOO and may have sporadic access to email.\r\n" +
+        "</body>\r\n\r\n");
 
-    assertEquals(3, part2.getHeaders().size());
+
+    // The multipart body part itself has no body, instead has subparts.
+    assertNull(part1.getBody());
+
+    assertEquals(2, part2.getHeaders().size());
     assertTrue(Parsing.startsWithIgnoreCase(part2.getHeaders()
         .get("Content-Type")
         .iterator()
         .next(),
-        "text/html"));
-    assertEquals(0, part2.getHeaders().get("MIME-Version").size());
-    assertHeaderEquals(part2.getHeaders(), "Content-Disposition", "something");
-    assertHeaderEquals(part2.getHeaders(), "Content-Doodle", "somethingelse");
-
-    assertEquals(part2.getBody(), "<body>\r\n" +
-        "I am OOO and may have sporadic access to email.\r\n" +
-        "</body>\r\n");
-
+        "text/plain"));
+    assertHeaderEquals(part2.getHeaders(), "MIME-Version", "1.0");
+    assertEquals(part2.getBody(), "This is a signature.\r\n\r\n");
   }
 
   private static void assertHeaderEquals(Multimap<String, String> headers, String header, String value) {

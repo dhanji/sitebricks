@@ -185,14 +185,231 @@ I am OOO and may have sporadic access to email.
 
 ------NextPart_1293809.9123_LLas--
 
+MID-EPILOGUE--IGNORE ME FOOLS!
+
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+Content-Type: text/plain; charset=us-ascii
+MIME-Version: 1.0
+
+This is a signature.
+
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--
+trueeee epilogue. also ignored.
+)
+* 45976 FETCH (BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Message-ID: <CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
+Subject: Re: Slow to Respond
+Content-Type: multipart/alternative;
+ boundary=_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+X-Sitebricks-Test: multipart-alternatives;quoted-headers;nested-parts;preamble
+
+This is a preamble. It is a useless piece of junk, part of the RFC though.
+
+
 
 
 --_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
-Content-Type: text-plain; charset=us-ascii
+Content-Type: multipart/alternative;
+    boundary="----nextParT_1293809.9123_llas"
+
+This is a preamble after the preamble.
+
+
+  Sigh, yes, this is how crazy this spec is.
+
+   asopkdoaksdok
+   MORE IGNORED JUNK
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+I am OOO and may have sporadic access to email.
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/html; charset="us-ascii"
+
+<body>
+I am OOO and may have sporadic access to email.
+</body>
+
+------NextPart_1293809.9123_LLas--
+
+
+
+MID-EPILOGUE--IGNORE ME FOOLS!
+
+
+
+
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+Content-Type: text/plain; charset=us-ascii
+MIME-Version: 1.0
 
 This is a signature.
 
 --_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--
 
+
+
+   trueeee epilogue. also ignored.
+
+    weeee
+
+)
+* 45976 FETCH (BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
+Subject: Re: Slow to Respond
+Content-Type: multipart/alternative;
+ boundary=_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+X-Sitebricks-Test: multipart-alternatives;quoted-headers;nested-parts;preamble
+
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+Content-Type: multipart/alternative;
+    boundary="----nextParT_1293809.9123_llas"
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+I am OOO and may have sporadic access to email.
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/html; charset="us-ascii"
+
+<body>
+I am OOO and may have sporadic access to email.
+</body>
+
+------NextPart_1293809.9123_LLas--
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+Content-Type: text/plain; charset=us-ascii
+MIME-Version: 1.0
+
+This is a signature.
+
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--
+)
+* 45976 FETCH (BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
+Subject: Re: Slow to Respond
+Content-Type: multipart/alternative;
+ boundary=----NextPart_1293809.9123_LLas
+X-Sitebricks-Test: multipart-alternatives;quoted-headers;nested-parts;preamble
+
+------NextPart_1293809.9123_LLas
+Content-Type: multipart/alternative;
+    boundary="----nextParT_1293809.9123_llas"
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+I am OOO and may have sporadic access to email.
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/html; charset="us-ascii"
+
+<body>
+I am OOO and may have sporadic access to email.
+</body>
+
+------NextPart_1293809.9123_LLas--
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset=us-ascii
+MIME-Version: 1.0
+
+This is a signature.
+
+------NextPart_1293809.9123_LLas--)
+* 45976 FETCH (BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Message-ID: <id> id
+Subject: Re: Slow to Respond
+Content-Type: multipart/alternative;
+ boundary=__BOUNDARY__
+X-Sitebricks-Test: multipart-alternatives;quoted-headers;nested-parts;preamble
+
+--__BOUNDARY__
+Content-Type: multipart/alternative;
+    boundary="__BOUNDARY-1__"
+
+--__BOUNDARY-1__
+Content-Type: multipart/mixed;
+    boundary="__BOUNDARY-2__"
+
+--__BOUNDARY-2__
+Content-Type: multipart/poop]];
+    boundary="__BOUNDARY-3__"
+
+--__BOUNDARY-3__
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+I am OOO and may have sporadic access to email.
+
+--__BOUNDARY-3__
+Content-Type: text/html; charset="us-ascii"
+
+<body>
+I am OOO and may have sporadic access to email.
+</body>
+--__BOUNDARY-3__
+Content-Type: text/plain; charset="us-ascii"
+
+I am OOO and may have sporadic access to email.
+
+--__BOUNDARY-3__--
+--__BOUNDARY-2__
+
+Hi this is a body.
+
+--__BOUNDARY-2__--
+--__BOUNDARY-1__--
+--__BOUNDARY__
+Content-Type: text/plain; charset=us-ascii
+MIME-Version: 1.0
+
+This is a signature.
+--__BOUNDARY__
+Content-Type: multipart/mixed;
+    boundary=__BERIC-BOUNDARRION__
+
+--__BERIC-BOUNDARRION__
+Content-Type: text/plain; charset=us-ascii
+MIME-Version: 1.0
+
+This is a signature.
+--__BOUNDARY-2__
+--__BOUNDARY-2__--
+--__BOUNDARY-1__--
+fooled you--this is all textbody.
+
+--__BERIC-BOUNDARRION__
+Content-Type: text/plain
+
+Beric is dead.
+--__BERIC-BOUNDARRION__
+Content-Type: multipart/mixed;
+    boundary=__PERIC-POUNDARRION__
+
+--__PERIC-POUNDARRION_
+--__PERIC-POUNDARRION__
+Content-Type: text/plain
+
+HI!
+
+--__PERIC-POUNDARRION__
+Content-Type: text/html
+
+<body>yo</body>
+
+--__PERIC-POUNDARRION__--
+
+--__BERIC-BOUNDARRION__--
+--__BOUNDARY__--
 )
 4 OK Success

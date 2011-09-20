@@ -97,8 +97,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     return Parsing.stripQuotes(mimeType.iterator().next().toLowerCase());
   }
 
-  private static void parseBodyParts(ListIterator<String> iterator, HasBodyParts entity,
-                                     String mimeType, String boundary) {
+  private static boolean parseBodyParts(ListIterator<String> iterator, HasBodyParts entity,
+                                        String mimeType, String boundary) {
     if (mimeType.startsWith("text/plain") || mimeType.startsWith("text/html")) {
       String body = readBodyAsString(iterator, boundary);
 
@@ -119,7 +119,6 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       while (iterator.hasNext() && !boundaryToken.equalsIgnoreCase(iterator.next()));
 
       // Now parse the multipart body in sequence, recursing down as needed...
-      boolean endOfMessage = false;
       while (iterator.hasNext()) {
         Message.BodyPart bodyPart = new Message.BodyPart();
         entity.getBodyParts().add(bodyPart);
@@ -141,32 +140,26 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         if (partMimeType.startsWith("multipart/"))
           bodyPart.setBodyParts(new ArrayList<Message.BodyPart>());
 
-        parseBodyParts(iterator, bodyPart, partMimeType, innerBoundary);
+        // If the inner body was parsed up until we reached boundary end marker, ending with "--"
+        // then skip everything until we see a start boundary marker.
+        if (parseBodyParts(iterator, bodyPart, partMimeType, innerBoundary)) {
+          while (iterator.hasNext() && !Parsing.startsWithIgnoreCase(iterator.next(), boundaryToken));
+        }
 
         // we're only done if the last line has a terminal suffix of '--'
         String lastLineRead = iterator.previous();
         // Yes this is the end. Otherwise continue!
         if (Parsing.startsWithIgnoreCase(lastLineRead, boundary + "--")) {
           iterator.next();
-          break;
+          return true;
         } else if (isEndOfMessage(iterator, iterator.next(), boundary)) {
-          endOfMessage = true;
           break;
         }
       }
-
-      // Ignore "mid-epilogue", i.e. content between end of inner multipart section and beginning
-      // of the next parent multipart body.
-      if (!endOfMessage) {
-//        iterator.previous();
-        // Chew up epilogue until the beginning of the next boundary.
-        //noinspection StatementWithEmptyBody
-//        while (iterator.hasNext() && !boundaryToken.equalsIgnoreCase(iterator.next()));
-      }
-
     } else {
       entity.setBody(readBodyAsBytes(iterator, boundary));
     }
+    return false;
   }
 
   private static String charset(String mimeType) {
@@ -263,6 +256,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
   private static void parseHeaderPair(String message, ListIterator<String> iterator,
                                       Multimap<String, String> headers) {
+    // Totally empty header line (i.e. stray whitespace).
+    if (message.isEmpty())
+      return;
     String[] split = message.split(": ", 2);
     String value = split[1];
 
