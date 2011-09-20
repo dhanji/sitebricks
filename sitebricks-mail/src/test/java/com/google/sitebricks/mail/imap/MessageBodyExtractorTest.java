@@ -1,6 +1,7 @@
 package com.google.sitebricks.mail.imap;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Multimap;
 import com.google.common.io.Resources;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -63,7 +64,7 @@ public class MessageBodyExtractorTest {
     message = extract.get(1);
     assertTrue(message.getHeaders().get("Content-Transfer-Encoding").isEmpty());
     assertTrue(message.getHeaders().get("Content-Type").isEmpty());
-    assertEquals(message.getHeaders().get("Subject").iterator().next(), "Re: Slow to Respond");
+    assertHeaderEquals(message.getHeaders(), "Subject", "Re: Slow to Respond");
 
     assertEquals(1, message.getBodyParts().size());
     part1 = message.getBodyParts().get(0);
@@ -79,22 +80,144 @@ public class MessageBodyExtractorTest {
     assertEquals(message.getHeaders().toString(),
         "{Message-ID=[<askdopaksdNq6o3M+veqCfc+x3m1PxeLn-raisdj" +
         "@mail.gmail.com>], Subject=[Re: Slow to Respond], Content-Type=[multipart/alternative; " +
-        "boundary=\"_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_\"], " +
+        "boundary=\"_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01:morg_\"], " +
         "X-Sitebricks-Test=[multipart-alternatives;quoted-headers]}");
 
     assertEquals(2, message.getBodyParts().size());
     part1 = message.getBodyParts().get(0);
     Message.BodyPart part2 = message.getBodyParts().get(1);
 
+    assertEquals(1, part1.getHeaders().size());
     assertTrue(Parsing.startsWithIgnoreCase(part1.getHeaders().get("Content-Type").iterator().next(),
         "text/plain"));
-    System.out.println(part2.getHeaders());
-//    assertTrue(Parsing.startsWithIgnoreCase(part2.getHeaders().get("Content-Type").iterator().next(),
-//        "text/html"));
+
+    assertEquals(2, part2.getHeaders().size());
+    assertTrue(Parsing.startsWithIgnoreCase(part2.getHeaders()
+        .get("Content-Type")
+        .iterator()
+        .next(),
+        "text/html"));
+    assertEquals(1, part2.getHeaders().get("MIME-Version").size());
+    assertHeaderEquals(part2.getHeaders(), "MIME-Version", "1.0");
 
     assertEquals(part2.getBody(), "<body>\r\n" +
         "I am OOO and may have sporadic access to email.\r\n" +
         "</body>\r\n");
+
+    // ------------------------------------------------------------
+    // Fourth message.
+    // multipart 2 parts, 1-level deep only, sameline-rparen, preamble, epilogue.
+    message = extract.get(3);
+    assertEquals(message.getHeaders().toString(),
+        "{Delivered-To=[dhanji@gmail.com], Date=[Thu, 8 Sep 2011 17:07:44 -0700]," +
+        " Message-ID=[CAEEYBPaoksdpoak+veqCfc+x3m1PxeLn-raisdj@mail.gmail.com]," +
+        " Subject=[Re: Slow to Respond], MIME-Version=[1.0], Content-Disposition=[inline]," +
+        " Content-Type=[multipart/alternative;" +
+        " boundary=_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_]," +
+        " X-Sitebricks-Test=[multipart-alternatives;quoted-headers;sameline-rparen;preamble]}");
+
+    assertEquals(2, message.getBodyParts().size());
+    part1 = message.getBodyParts().get(0);
+    part2 = message.getBodyParts().get(1);
+
+    assertEquals(1, part1.getHeaders().size());
+    assertTrue(Parsing.startsWithIgnoreCase(part1.getHeaders().get("Content-Type").iterator().next(),
+        "text/plain"));
+
+    assertEquals(part1.getBody(), "I am OOO and may have sporadic access to email.\r\n\r\n" +
+        "--\r\n\r\n");
+
+    assertEquals(3, part2.getHeaders().size());
+    assertTrue(Parsing.startsWithIgnoreCase(part2.getHeaders()
+        .get("Content-Type")
+        .iterator()
+        .next(),
+        "text/html"));
+    assertEquals(0, part2.getHeaders().get("MIME-Version").size());
+    assertHeaderEquals(part2.getHeaders(), "Content-Disposition", "something");
+    assertHeaderEquals(part2.getHeaders(), "Content-Doodle", "somethingelse");
+
+    assertEquals(part2.getBody(), "<body>\r\n" +
+        "I am OOO and may have sporadic access to email.\r\n" +
+        "</body>\r\n");
+
+    // ------------------------------------------------------------
+    // Fifth message.
+    // multipart 2 parts, 1-level deep only, tight-preamble/epilogue.
+    message = extract.get(4);
+    assertEquals(message.getHeaders().toString(),
+        "{Delivered-To=[dhanji@gmail.com], Date=[Thu, 8 Sep 2011 17:07:44 -0700]," +
+        " Message-ID=[CAEEYBPaoksdpoak+veqCfc+x3m1PxeLn-raisdj@mail.gmail.com]," +
+        " Subject=[Re: Slow to Respond], MIME-Version=[1.0], Content-Disposition=[inline]," +
+        " Content-Type=[multipart/alternative;" +
+        " boundary=_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_]," +
+        " X-Sitebricks-Test=[multipart-alternatives;quoted-headers;preamble;epilogue]}");
+
+    assertEquals(2, message.getBodyParts().size());
+    part1 = message.getBodyParts().get(0);
+    part2 = message.getBodyParts().get(1);
+
+    assertEquals(1, part1.getHeaders().size());
+    assertTrue(Parsing.startsWithIgnoreCase(part1.getHeaders().get("Content-Type").iterator().next(),
+        "text/plain"));
+
+    assertEquals(part1.getBody(), "I am OOO and may have sporadic access to email.\r\n\r\n" +
+        "--\r\n");
+
+    assertEquals(3, part2.getHeaders().size());
+    assertTrue(Parsing.startsWithIgnoreCase(part2.getHeaders()
+        .get("Content-Type")
+        .iterator()
+        .next(),
+        "text/html"));
+    assertEquals(0, part2.getHeaders().get("MIME-Version").size());
+    assertHeaderEquals(part2.getHeaders(), "Content-Disposition", "something");
+    assertHeaderEquals(part2.getHeaders(), "Content-Doodle", "somethingelse");
+
+    assertEquals(part2.getBody(), "<body>\r\n" +
+        "I am OOO and may have sporadic access to email.\r\n" +
+        "</body>\r\n");
+
+
+    // ------------------------------------------------------------
+    // Sixth message.
+    // multipart 2 parts each, 2-level deep, preambles/epilogues.
+    message = extract.get(5);
+    assertEquals(message.getHeaders().toString(),
+        "{Delivered-To=[dhanji@gmail.com], Message-ID=[<CAEEYBPNq6o3M+aisjd+x3m1PxeLn-raisdj@mail.gmail.com>]," +
+        " Subject=[Re: Slow to Respond], Content-Type=[multipart/alternative;" +
+        " boundary=_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_]," +
+        " X-Sitebricks-Test=[multipart-alternatives;quoted-headers;nested-parts;preamble]}");
+
+    assertEquals(2, message.getBodyParts().size());
+    part1 = message.getBodyParts().get(0);
+    part2 = message.getBodyParts().get(1);
+
+    assertEquals(1, part1.getHeaders().size());
+    assertTrue(Parsing.startsWithIgnoreCase(part1.getHeaders().get("Content-Type").iterator().next(),
+        "text/plain"));
+
+    assertEquals(part1.getBody(), "I am OOO and may have sporadic access to email.\r\n\r\n" +
+        "--\r\n");
+
+    assertEquals(3, part2.getHeaders().size());
+    assertTrue(Parsing.startsWithIgnoreCase(part2.getHeaders()
+        .get("Content-Type")
+        .iterator()
+        .next(),
+        "text/html"));
+    assertEquals(0, part2.getHeaders().get("MIME-Version").size());
+    assertHeaderEquals(part2.getHeaders(), "Content-Disposition", "something");
+    assertHeaderEquals(part2.getHeaders(), "Content-Doodle", "somethingelse");
+
+    assertEquals(part2.getBody(), "<body>\r\n" +
+        "I am OOO and may have sporadic access to email.\r\n" +
+        "</body>\r\n");
+
+  }
+
+  private static void assertHeaderEquals(Multimap<String, String> headers, String header, String value) {
+    assertEquals(headers.get(header).iterator().next(), value);
   }
 
   @Test

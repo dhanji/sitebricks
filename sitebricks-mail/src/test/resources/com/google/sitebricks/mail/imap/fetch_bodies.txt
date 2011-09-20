@@ -62,10 +62,10 @@ p: 555.555.5555
 Message-ID: <askdopaksdNq6o3M+veqCfc+x3m1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
 Content-Type: multipart/alternative;
- boundary="_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_"
+ boundary="_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01:morg_"
 X-Sitebricks-Test: multipart-alternatives;quoted-headers
 
---_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01:morg_
 Content-Type: text/plain; charset=utf-8
 
 I am OOO and may have sporadic access to email.
@@ -84,12 +84,115 @@ and may contain CONFIDENTIAL, PRIVILEGED COMMUNICATIONS,
 and/or PRODUCT INFORMATION. If you are not the intended
 recipient, please contact the sender by reply email and delete the email.
 
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01:morg_
+Content-Type: text/html; charset="us-ascii"
+MIME-Version: 1.0
+
+<body>
+I am OOO and may have sporadic access to email.
+</body>
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01:morg_--
+
+This is called the epilogue. This is ignored.
+
+)
+* 45973 FETCH (BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Date: Thu, 8 Sep 2011 17:07:44 -0700
+Message-ID: CAEEYBPaoksdpoak+veqCfc+x3m1PxeLn-raisdj@mail.gmail.com
+Subject: Re: Slow to Respond
+MIME-Version: 1.0
+Content-Disposition: inline
+Content-Type: multipart/alternative;
+ boundary=_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+X-Sitebricks-Test: multipart-alternatives;quoted-headers;sameline-rparen;preamble
+
+This is a preamble. It is a useless piece of junk, part of the RFC though.
+
+--_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+Content-Type: text/plain; charset=utf-8
+
+I am OOO and may have sporadic access to email.
+
+--
+
+--_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+Content-Type: text/html; charset="us-ascii"
+Content-Disposition: something
+Content-Doodle: somethingelse
+
+<body>
+I am OOO and may have sporadic access to email.
+</body>
+--_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--)
+* 45974 FETCH (BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Date: Thu, 8 Sep 2011 17:07:44 -0700
+Message-ID: CAEEYBPaoksdpoak+veqCfc+x3m1PxeLn-raisdj@mail.gmail.com
+Subject: Re: Slow to Respond
+MIME-Version: 1.0
+Content-Disposition: inline
+Content-Type: multipart/alternative;
+ boundary=_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+X-Sitebricks-Test: multipart-alternatives;quoted-headers;preamble;epilogue
+
+This is a tight preamble, it is invalid but we need to be tolerant.
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+Content-Type: text/plain; charset=utf-8
+
+I am OOO and may have sporadic access to email.
+
+--
 --_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
 Content-Type: text/html; charset="us-ascii"
+Content-Disposition: something
+Content-Doodle: somethingelse
 
 <body>
 I am OOO and may have sporadic access to email.
 </body>
 --_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--
+Tight epilogue. Invalid, but let's see how it's handled.
+)
+* 45975 FETCH (BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Message-ID: <CAEEYBPNq6o3M+aisjd+x3m1PxeLn-raisdj@mail.gmail.com>
+Subject: Re: Slow to Respond
+Content-Type: multipart/alternative;
+ boundary=_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+X-Sitebricks-Test: multipart-alternatives;quoted-headers;nested-parts;preamble
+
+This is a preamble. It is a useless piece of junk, part of the RFC though.
+
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+Content-Type: multipart/alternative;
+    boundary="----NextPart_1293809.9123_LLas"
+
+This is a preamble after the preamble. Sigh, yes, this is how crazy this spec is.
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+I am OOO and may have sporadic access to email.
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/html; charset="us-ascii"
+
+<body>
+I am OOO and may have sporadic access to email.
+</body>
+
+------NextPart_1293809.9123_LLas--
+
+
+
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_
+Content-Type: text-plain; charset=us-ascii
+
+This is a signature.
+
+--_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--
+
 )
 4 OK Success

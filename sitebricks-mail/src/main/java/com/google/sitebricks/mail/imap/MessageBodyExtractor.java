@@ -150,8 +150,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
           break;
         } else if (isEndOfMessage(iterator, iterator.next(), boundary)) {
           break;
-        } else
-          iterator.next();
+        }
       }
 
     } else {
