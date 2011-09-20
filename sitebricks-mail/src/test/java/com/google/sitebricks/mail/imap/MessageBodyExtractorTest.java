@@ -84,7 +84,17 @@ public class MessageBodyExtractorTest {
 
     assertEquals(2, message.getBodyParts().size());
     part1 = message.getBodyParts().get(0);
+    Message.BodyPart part2 = message.getBodyParts().get(1);
 
+    assertTrue(Parsing.startsWithIgnoreCase(part1.getHeaders().get("Content-Type").iterator().next(),
+        "text/plain"));
+    System.out.println(part2.getHeaders());
+//    assertTrue(Parsing.startsWithIgnoreCase(part2.getHeaders().get("Content-Type").iterator().next(),
+//        "text/html"));
+
+    assertEquals(part2.getBody(), "<body>\r\n" +
+        "I am OOO and may have sporadic access to email.\r\n" +
+        "</body>\r\n");
   }
 
   @Test
