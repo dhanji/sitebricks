@@ -2,15 +2,24 @@ package com.google.sitebricks.mail.imap;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.apache.commons.io.IOUtils;
 import org.apache.james.mime4j.codec.DecoderUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Queue;
 import java.util.regex.Pattern;
 
 /**
@@ -24,6 +33,7 @@ import java.util.regex.Pattern;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class MessageBodyExtractor implements Extractor<List<Message>> {
+  private static final Logger log = LoggerFactory.getLogger(MessageBodyExtractor.class);
   private static final String BOUNDARY_PREFIX = "boundary=";
   static final Pattern MESSAGE_START_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(BODY\\[\\]",
       Pattern.CASE_INSENSITIVE);
@@ -31,14 +41,31 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       Pattern.compile("^\\d+ ok success\\)?", Pattern.CASE_INSENSITIVE);
   private static final Pattern WHITESPACE_PREFIX_REGEX = Pattern.compile("^\\s+");
 
+  private static final Map<String, String> CONVERTIBLE_CHARSETS = Maps.newHashMap();
+
+  static {
+    CONVERTIBLE_CHARSETS.put("cp932", "cp942");
+    CONVERTIBLE_CHARSETS.put("5035", "cp939");
+    CONVERTIBLE_CHARSETS.put("5033", "cp937");
+    CONVERTIBLE_CHARSETS.put("5031", "cp935");
+    CONVERTIBLE_CHARSETS.put("5026", "cp930");
+    CONVERTIBLE_CHARSETS.put("5029", "cp933");
+    CONVERTIBLE_CHARSETS.put("938", "cp948");
+    CONVERTIBLE_CHARSETS.put("5050", "cp33722");
+  }
 
   @Override
   public List<Message> extract(List<String> messages) {
     List<Message> emails = Lists.newArrayList();
     ListIterator<String> iterator = messages.listIterator();
 
-    while (iterator.hasNext())
-      emails.add(parseMessage(iterator));
+    while (iterator.hasNext()) {
+      Message message = parseMessage(iterator);
+
+      // Messages may be null if there are gaps in the returned body. These should be safe.
+      if (null != message)
+        emails.add(message);
+    }
 
     return emails;
   }
@@ -174,13 +201,22 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       end = mimeType.length();
     mimeType = mimeType.substring(i + "charset=".length(), end);
 
-    return Parsing.stripQuotes(mimeType);
+    String charset = Parsing.stripQuotes(mimeType);
+
+    // The Java platform only supports a limited set of encodings, use ones that it supports
+    // if we encounter unknown ones.
+    String alternate = CONVERTIBLE_CHARSETS.get(charset.toLowerCase());
+    return (alternate != null) ? alternate : charset;
   }
 
   private static String decode(String body, String encoding, String charset) {
     try {
       return IOUtils.toString(
           MimeUtility.decode(new ByteArrayInputStream(body.getBytes()), encoding), charset);
+    } catch (UnsupportedEncodingException e) {
+      // In this case, just return it as is and look it up later.
+      log.warn("Encountered unknown encoding '{}'. Treating it as a raw string.", charset, e);
+      return body;
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (MessagingException e) {
@@ -214,8 +250,15 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         return textBody.toString();
       } else {
         // Check for IMAP command stream delimiter.
-        if (isEndOfMessage(iterator, line, boundary))
+        if (isEndOfMessage(iterator, line, boundary)) {
+
+          // If this is actually a boundary with the closing ) token, ignore it. Otherwise add it
+          // to the body, it's possible for misbehaving clients to generate this kind of body.
+          if (!")".equals(line.replace(boundary + "--", "").trim())) {
+            textBody.append(line.substring(0, line.lastIndexOf(")")));
+          }
           return textBody.toString();
+        }
       }
       textBody.append(line).append("\r\n");
     }
@@ -225,8 +268,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   private static boolean isEndOfMessage(ListIterator<String> iterator,
                                         String line, String boundary) {
     // It's possible for the ) to occur on its own line, or on the same line as the boundary marker.
-    if (")".equals(line) || (boundary != null && ")".equals(
-        line.replace(boundary + "--", "").trim()))) {
+    // It's also possible for misbehaving clients (Google Groups) to generate a ) on the same line
+    // as body text. FUCK.
+    if (line.trim().endsWith(")")) {
       if (iterator.hasNext()) {
         String next = iterator.next();
         if (EOS_REGEX.matcher(next).matches())

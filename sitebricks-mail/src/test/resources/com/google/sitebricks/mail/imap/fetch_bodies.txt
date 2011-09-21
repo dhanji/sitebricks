@@ -44,7 +44,8 @@ Delivered-To: dhanji@gmail.com
 Message-ID: <CAEEYBPNq6o3Maos__x3m1PxeLn-Ghjn3k3ztE_ftburkvUg@mail.gmail.com>
 Subject: Re: Slow to Respond
 MIME-Version: 1.0
-X-Sitebricks-Test: folded-headers;repeating-headers;one-body;missing-CTE;missing-mimetype
+X-Sitebricks-Test: folded-headers;repeating-headers;one-body;missing-CTE;missing-mimetype;
+  missing-end-crlf
 
 I am OOO and may have sporadic access to email.
 
@@ -56,8 +57,7 @@ Sitebricks, Inc.
 dude@sitebricks.org
 p: 555.555.5555
 
---------------------
-)
+--------------------)
 * 45972 FETCH (BODY[] {4299}
 Message-ID: <askdopaksdNq6o3M+veqCfc+x3m1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
