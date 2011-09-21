@@ -92,7 +92,11 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
 
     // Check if there are flags to set.
     while (!")".equals(tokens.peek())) {
-      status.getFlags().add(Flag.parse(tokens.poll()));
+      String token = tokens.poll();
+      Flag flag = Flag.parse(token);
+      if (flag != null)
+        status.getFlags().add(flag);
+      else log.warn("Unknown flag type encountered {}, ignoring.", token);
     }
     Parsing.eat(tokens, ")", "INTERNALDATE");
 

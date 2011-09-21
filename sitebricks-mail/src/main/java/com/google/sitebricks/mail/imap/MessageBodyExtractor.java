@@ -228,7 +228,13 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     int boundaryIndex = mimeType.indexOf(BOUNDARY_PREFIX);
     if (boundaryIndex == -1)
       return null;
-    String boundary = mimeType.substring(boundaryIndex + BOUNDARY_PREFIX.length());
+
+    // boundaries can have a dangling ; at the end.
+    int end = mimeType.indexOf(";", boundaryIndex);
+    if (end == -1)
+      end = mimeType.length();
+
+    String boundary = mimeType.substring(boundaryIndex + BOUNDARY_PREFIX.length(), end);
 
     // Strip quotes. Apparently the quotes that the header comes in with are not necessarily part
     // of the boundary token. Sigh.

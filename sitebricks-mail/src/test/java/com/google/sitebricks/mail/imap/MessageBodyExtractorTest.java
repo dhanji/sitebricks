@@ -1,6 +1,7 @@
 package com.google.sitebricks.mail.imap;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Resources;
 import org.apache.commons.io.IOUtils;
@@ -13,6 +14,7 @@ import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.testng.Assert.assertEquals;
@@ -25,6 +27,30 @@ import static org.testng.Assert.assertTrue;
  */
 public class MessageBodyExtractorTest {
   private static final Pattern MESSAGE_LOG_REGEX = Pattern.compile("^.* DEBUG c\\.g\\.s\\.mail\\.MailClientHandler: Message received \\[");
+
+  @Test
+  public final void testAgainstFewerMessagesParsedThanExistError() throws IOException {
+    List<String> data = Resources.readLines(MessageBodyExtractorTest.class.getResource(
+        "a.log"), Charsets.UTF_8);
+
+    List<String> redacted = Lists.newArrayList();
+    for (String line : data) {
+      Matcher matcher = MESSAGE_LOG_REGEX.matcher(line);
+      if (matcher.find()) {
+        line = matcher.replaceAll("");
+        redacted.add(line.substring(0, line.lastIndexOf("]")));
+      }
+    }
+
+    List<Message> extract = new MessageBodyExtractor().extract(redacted);
+
+    for (Message message : extract) {
+      System.out.println(message.getHeaders().get("Message-ID") + " "
+          + message.getHeaders().get("Subject"));
+    }
+
+    System.out.println("Total: " + extract.size());
+  }
 
   /**
    * WARNING: THIS TEST IS DATA-DEPENDENT!
@@ -80,7 +106,7 @@ public class MessageBodyExtractorTest {
     assertEquals(message.getHeaders().toString(),
         "{Message-ID=[<askdopaksdNq6o3M+veqCfc+x3m1PxeLn-raisdj" +
         "@mail.gmail.com>], Subject=[Re: Slow to Respond], Content-Type=[multipart/alternative; " +
-        "boundary=\"_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01:morg_\"], " +
+        "boundary=\"_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01:morg_\";], " +
         "X-Sitebricks-Test=[multipart-alternatives;quoted-headers]}");
 
     assertEquals(2, message.getBodyParts().size());

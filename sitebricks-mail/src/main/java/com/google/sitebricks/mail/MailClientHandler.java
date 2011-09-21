@@ -38,6 +38,7 @@ class MailClientHandler extends SimpleChannelHandler {
   private final LinkedBlockingDeque<Error> errorStack = new LinkedBlockingDeque<Error>();
   private final Queue<CommandCompletion> completions = new ConcurrentLinkedQueue<CommandCompletion>();
 
+  // DO NOT synchronize!
   public void enqueue(CommandCompletion completion) {
     completions.add(completion);
   }
@@ -74,6 +75,8 @@ class MailClientHandler extends SimpleChannelHandler {
       return;
     }
 
+    // Copy to local var as the value can change underneath us.
+    FolderObserver observer = this.observer;
     if (null != observer) {
       message = message.toLowerCase();
       if (message.endsWith("exists")) {
@@ -92,7 +95,10 @@ class MailClientHandler extends SimpleChannelHandler {
     return (matcher.groupCount()) > 1 ? matcher.group(2) : matcher.group();
   }
 
-  private void complete(String message) {
+  /**
+   * This is synchronized to ensure that we process the queue serially.
+   */
+  private synchronized void complete(String message) {
     CommandCompletion completion = completions.peek();
     if (completion == null) {
       log.error("Could not find the completion for message {} (Was it ever issued?)", message);

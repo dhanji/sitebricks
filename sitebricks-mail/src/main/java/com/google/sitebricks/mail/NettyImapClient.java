@@ -3,7 +3,11 @@ package com.google.sitebricks.mail;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import com.google.sitebricks.mail.imap.*;
+import com.google.sitebricks.mail.imap.Command;
+import com.google.sitebricks.mail.imap.Folder;
+import com.google.sitebricks.mail.imap.FolderStatus;
+import com.google.sitebricks.mail.imap.Message;
+import com.google.sitebricks.mail.imap.MessageStatus;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -159,6 +163,7 @@ class NettyImapClient implements MailClient {
   }
 
   @Override
+  // @Stateless
   public ListenableFuture<List<String>> listFolders() {
     Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
@@ -172,6 +177,7 @@ class NettyImapClient implements MailClient {
   }
 
   @Override
+  // @Stateless
   public ListenableFuture<FolderStatus> statusOf(String folder) {
     Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     SettableFuture<FolderStatus> valueFuture = SettableFuture.create();
@@ -188,16 +194,22 @@ class NettyImapClient implements MailClient {
   }
 
   @Override
+  // @Stateless
   public ListenableFuture<Folder> open(String folder, boolean readWrite) {
     Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     Preconditions.checkState(!idling, "Can't execute command while idling (are you watching a folder?)");
 
     final SettableFuture<Folder> valueFuture = SettableFuture.create();
+    final SettableFuture<Folder> externalFuture = SettableFuture.create();
     valueFuture.addListener(new Runnable() {
       @Override
       public void run() {
         try {
+          // We do this to enforce a happens-before ordering between the time a folder is
+          // saved to currentFolder and a listener registered by the user may fire in a parallel
+          // executor service.
           currentFolder = valueFuture.get();
+          externalFuture.set(currentFolder);
         } catch (InterruptedException e) {
           log.error("Interrupted while attempting to open a folder", e);
         } catch (ExecutionException e) {
@@ -209,7 +221,7 @@ class NettyImapClient implements MailClient {
     String args = '"' + folder + "\"";
     send(readWrite ? Command.FOLDER_OPEN : Command.FOLDER_EXAMINE, args, valueFuture);
 
-    return valueFuture;
+    return externalFuture;
   }
 
   @Override
@@ -254,27 +266,28 @@ class NettyImapClient implements MailClient {
   }
 
   @Override
-  public void watch(Folder folder, FolderObserver observer) {
+  public synchronized void watch(Folder folder, FolderObserver observer) {
     Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     checkCurrentFolder(folder);
     Preconditions.checkState(!idling, "Already idling...");
     idling = true;
 
-    send(Command.IDLE, null, SettableFuture.<Object>create());
-
+    // This MUST happen in the following order, otherwise send() may trigger a new mail event
+    // before we've registered the folder observer.
     mailClientHandler.observe(observer);
+    send(Command.IDLE, null, SettableFuture.<Object>create());
   }
 
   @Override
-  public void unwatch() {
+  public synchronized void unwatch() {
     if (!idling)
       return;
-
-    // Stop watching folders.
-    mailClientHandler.observe(null);
-
-    channel.write(". DONE");
     idling = false;
+
+    // Stop watching folders. It's OK to null this early, because any interleaving new mail
+    // events will just be dropped on the floor if there is no folder observer.
+    mailClientHandler.observe(null);
+    channel.write(". DONE");
   }
 
   private void checkCurrentFolder(Folder folder) {

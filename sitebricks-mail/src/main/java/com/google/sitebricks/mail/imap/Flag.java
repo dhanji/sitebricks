@@ -13,6 +13,7 @@ public enum Flag {
   DRAFT,
   FLAGGED,
   ANSWERED,
+  FORWARDED,
   ;
   private static Map<String, Flag> flagMap = new HashMap<String, Flag>();
   static {
@@ -22,6 +23,7 @@ public enum Flag {
     flagMap.put("\\draft", DRAFT);
     flagMap.put("\\flagged", FLAGGED);
     flagMap.put("\\answered", ANSWERED);
+    flagMap.put("$forwarded", FORWARDED);
   }
 
   public static Flag parse(String flag) {
