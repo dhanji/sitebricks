@@ -3,7 +3,10 @@ package com.google.sitebricks.mail.imap;
 import com.google.common.collect.Lists;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Queue;
 import java.util.regex.Pattern;
@@ -19,13 +22,20 @@ import java.util.regex.Pattern;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
+  private static final Logger log = LoggerFactory.getLogger(MessageStatusExtractor.class);
   // 10 Sep 2011 14:19:55 -0700
   static final Pattern ALTERNATE_RECEIVED_DATE_PATTERN = Pattern.compile(
       "\\d?\\d \\w\\w\\w [0-9]{4} \\d?\\d:\\d?\\d:\\d?\\d [-+]?[0-9]{4}");
 
+  // 10 Sep 11 14:19:55 -0700
+  static final Pattern ALTERNATE_RECEIVED_DATE_PATTERN_2 = Pattern.compile(
+      "\\d?\\d \\w\\w\\w [0-9]{2} \\d?\\d:\\d?\\d:\\d?\\d [-+]?[0-9]{4}");
+
   // A shorter form of the received date
   static final DateTimeFormatter ALT_RECEIVED_DATE = DateTimeFormat.forPattern(
       "dd MMM yyyy HH:mm:ss Z");
+  static final DateTimeFormatter ALT_RECEIVED_DATE_2 = DateTimeFormat.forPattern(
+      "dd MMM yy HH:mm:ss Z");
   static final DateTimeFormatter RECEIVED_DATE = DateTimeFormat.forPattern(
       "EEE, dd MMM yyyy HH:mm:ss Z");
   static final DateTimeFormatter INTERNAL_DATE = DateTimeFormat.forPattern(
@@ -58,10 +68,11 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     String receivedDate = tokens.peek();
     if (Parsing.isValid(receivedDate)) {
       receivedDate = Parsing.normalizeDateToken(Parsing.match(tokens, String.class));
-      if (ALTERNATE_RECEIVED_DATE_PATTERN.matcher(receivedDate).matches())
-        status.setReceivedDate(ALT_RECEIVED_DATE.parseDateTime(receivedDate).toDate());
-      else
-        status.setReceivedDate(RECEIVED_DATE.parseDateTime(receivedDate).toDate());
+      try {
+        status.setReceivedDate(new javax.mail.internet.MailDateFormat().parse(receivedDate));
+      } catch (ParseException e) {
+        log.error("Malformed received date format {}. Unable to parse.", receivedDate, e);
+      }
     }
 
     status.setSubject(Parsing.match(tokens, String.class));

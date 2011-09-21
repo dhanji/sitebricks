@@ -1,5 +1,6 @@
 package com.google.sitebricks.mail.imap;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.apache.commons.io.IOUtils;
@@ -143,6 +144,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         // If the inner body was parsed up until we reached boundary end marker, ending with "--"
         // then skip everything until we see a start boundary marker.
         if (parseBodyParts(iterator, bodyPart, partMimeType, innerBoundary)) {
+          //noinspection StatementWithEmptyBody
           while (iterator.hasNext() && !Parsing.startsWithIgnoreCase(iterator.next(), boundaryToken));
         }
 
@@ -259,8 +261,12 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     // Totally empty header line (i.e. stray whitespace).
     if (message.isEmpty())
       return;
+
+    Preconditions.checkState(message.contains(":"),
+        "Malformed message header encountered at %s: %s", iterator.previousIndex(), message);
+    // It is possible for the header to have no value.
     String[] split = message.split(": ", 2);
-    String value = split[1];
+    String value = split.length > 1 ? split[1] : "";
 
     // Check if the next line begins with a LWSP. If it does, then it is a continuation of this
     // line.
