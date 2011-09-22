@@ -28,7 +28,7 @@ import static org.testng.Assert.assertTrue;
 public class MessageBodyExtractorTest {
   private static final Pattern MESSAGE_LOG_REGEX = Pattern.compile("^.* DEBUG c\\.g\\.s\\.mail\\.MailClientHandler: Message received \\[");
 
-  @Test
+//  @Test DISABLED. Only use this test for debugging.
   public final void testAgainstFewerMessagesParsedThanExistError() throws IOException {
     List<String> data = Resources.readLines(MessageBodyExtractorTest.class.getResource(
         "a.log"), Charsets.UTF_8);
