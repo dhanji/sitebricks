@@ -55,13 +55,14 @@ public class MessageStatusExtractorTest {
         new MessageStatusExtractor().extract(data);
 
     MessageStatus status = statuses.get(0);
-    assertEquals(statuses.size(), 11);
+    assertEquals(statuses.size(), 15);
     assertEquals(EnumSet.noneOf(Flag.class), status.getFlags());
     assertEquals("<BANLkTi=zC_UQExUuaNqiP0dJXoswDej1Ww@mail.gmail.com>", status.getMessageUid());
     assertEquals("Get Gmail on your mobile phone", status.getSubject());
 
     for (int i = 0, statusesSize = statuses.size(); i < statusesSize; i++) {
       MessageStatus st = statuses.get(i);
+//      System.out.println(st);
       assertEquals(st.toString(), assertions.get(i));
     }
   }

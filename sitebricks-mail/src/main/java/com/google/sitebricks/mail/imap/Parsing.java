@@ -62,6 +62,8 @@ class Parsing {
         return (T)token;
     } else if (int.class == clazz) {
       return (T) Integer.valueOf(token);
+    } else if (long.class == clazz) {
+      return (T) Long.valueOf(token);
     }
     throw new IllegalArgumentException("Unsupported type: " + clazz.getName());
   }

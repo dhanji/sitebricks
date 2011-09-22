@@ -1,6 +1,7 @@
 package com.google.sitebricks.mail.imap;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -71,6 +72,9 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       match |= parseInternalDate(tokens, status);
       match |= parseRfc822Size(tokens, status);
 
+      match |= parseGmailThreadId(tokens, status);
+      match |= parseGmailLabels(tokens, status);
+
       if (!match) {
         break;
       }
@@ -85,6 +89,13 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     if (Parsing.matchAnyOf(tokens, "RFC822.SIZE") == null)
       return false;
     status.setSize(Parsing.match(tokens, int.class));
+    return true;
+  }
+
+  private static boolean parseGmailThreadId(Queue<String> tokens, MessageStatus status) {
+    if (Parsing.matchAnyOf(tokens, "X-GM-THRID") == null)
+      return false;
+    status.setThreadId(Parsing.match(tokens, long.class));
     return true;
   }
 
@@ -113,6 +124,23 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       if (flag != null)
         status.getFlags().add(flag);
       else log.warn("Unknown flag type encountered {}, ignoring.", token);
+    }
+    Parsing.eat(tokens, ")");
+    return true;
+  }
+
+  private static boolean parseGmailLabels(Queue<String> tokens, MessageStatus status) {
+    if (Parsing.matchAnyOf(tokens, "X-GM-LABELS") == null)
+      return false;
+    Parsing.eat(tokens, "(");
+
+    // Create a label set for this message status only if there are labels.
+    status.setLabels(Sets.<String>newHashSet());
+
+    // Check if there are labels to add.
+    while (!")".equals(tokens.peek())) {
+      String token = tokens.poll();
+      status.getLabels().add(token);
     }
     Parsing.eat(tokens, ")");
     return true;

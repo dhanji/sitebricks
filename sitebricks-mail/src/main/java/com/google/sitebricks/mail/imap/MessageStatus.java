@@ -3,6 +3,7 @@ package com.google.sitebricks.mail.imap;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a single email message.
@@ -26,6 +27,8 @@ public class MessageStatus {
   private Date internalDate;
 
   private int size;
+  private Long threadId;
+  private Set<String> labels;
 
 
   public int getSize() {
@@ -104,6 +107,10 @@ public class MessageStatus {
     return flags;
   }
 
+  public Long getThreadId() {
+    return threadId;
+  }
+
   public void setMessageUid(String messageUid) {
     this.messageUid = messageUid;
   }
@@ -116,12 +123,24 @@ public class MessageStatus {
     this.subject = subject;
   }
 
+  public void setThreadId(Long threadId) {
+    this.threadId = threadId;
+  }
+
   public void setInReplyTo(String inReplyTo) {
     this.inReplyTo = inReplyTo;
   }
 
   public void setFlags(EnumSet<Flag> flags) {
     this.flags = flags;
+  }
+
+  public void setLabels(Set<String> labels) {
+    this.labels = labels;
+  }
+
+  public Set<String> getLabels() {
+    return labels;
   }
 
   public void setInternalDate(Date internalDate) {
@@ -143,6 +162,11 @@ public class MessageStatus {
         ", flags=" + flags +
         ", internalDate=" + internalDate +
         ", size=" + size +
+
+        ((threadId != null) ?
+            (", threadId=" + threadId +
+            ", labels=" + labels)
+        : "") +
         '}';
   }
 }
