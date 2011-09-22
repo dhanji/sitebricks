@@ -52,19 +52,77 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       message = message.replaceFirst("[*]?[ ]*\\d+[ ]* ", "");
       if (Command.isEndOfSequence(message.toLowerCase()))
         continue;
-      statuses.add(parseEnvelope(message));
+      statuses.add(parseStatus(message));
     }
 
     return statuses;
   }
 
-  private static MessageStatus parseEnvelope(String message) {
+  private static MessageStatus parseStatus(String message) {
     Queue<String> tokens = Parsing.tokenize(message);
+    MessageStatus status = new MessageStatus();
 
     // Assert that we have an envelope.
-    Parsing.eat(tokens, "FETCH", "(", "ENVELOPE", "(");
+    Parsing.eat(tokens, "FETCH", "(");
 
-    MessageStatus status = new MessageStatus();
+    while (!tokens.isEmpty()) {
+      boolean match = parseEnvelope(tokens, status);
+      match |= parseFlags(tokens, status);
+      match |= parseInternalDate(tokens, status);
+      match |= parseRfc822Size(tokens, status);
+
+      if (!match) {
+        break;
+      }
+    }
+
+    // We don't really need to bother closing the last ')'
+
+    return status;
+  }
+
+  private static boolean parseRfc822Size(Queue<String> tokens, MessageStatus status) {
+    if (Parsing.matchAnyOf(tokens, "RFC822.SIZE") == null)
+      return false;
+    status.setSize(Parsing.match(tokens, int.class));
+    return true;
+  }
+
+  private static boolean parseInternalDate(Queue<String> tokens, MessageStatus status) {
+    if (Parsing.matchAnyOf(tokens, "INTERNALDATE") == null)
+      return false;
+
+    String internalDate = tokens.peek();
+    if (Parsing.isValid(internalDate)) {
+      internalDate = Parsing.normalizeDateToken(Parsing.match(tokens, String.class));
+      status.setInternalDate(INTERNAL_DATE.parseDateTime(internalDate).toDate());
+    }
+
+    return true;
+  }
+
+  private static boolean parseFlags(Queue<String> tokens, MessageStatus status) {
+    if (Parsing.matchAnyOf(tokens, "FLAGS") == null)
+      return false;
+    Parsing.eat(tokens, "(");
+
+    // Check if there are flags to set.
+    while (!")".equals(tokens.peek())) {
+      String token = tokens.poll();
+      Flag flag = Flag.parse(token);
+      if (flag != null)
+        status.getFlags().add(flag);
+      else log.warn("Unknown flag type encountered {}, ignoring.", token);
+    }
+    Parsing.eat(tokens, ")");
+    return true;
+  }
+
+  private static boolean parseEnvelope(Queue<String> tokens, MessageStatus status) {
+    if (Parsing.matchAnyOf(tokens, "ENVELOPE") == null)
+      return false;
+    Parsing.eat(tokens, "(");
+
     String receivedDate = tokens.peek();
     if (Parsing.isValid(receivedDate)) {
       receivedDate = Parsing.normalizeDateToken(Parsing.match(tokens, String.class));
@@ -87,30 +145,8 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     status.setInReplyTo(Parsing.match(tokens, String.class));
     status.setMessageUid(Parsing.match(tokens, String.class));
 
-    // Close envelope, and open flags...
-    Parsing.eat(tokens, ")", "FLAGS", "(");
-
-    // Check if there are flags to set.
-    while (!")".equals(tokens.peek())) {
-      String token = tokens.poll();
-      Flag flag = Flag.parse(token);
-      if (flag != null)
-        status.getFlags().add(flag);
-      else log.warn("Unknown flag type encountered {}, ignoring.", token);
-    }
-    Parsing.eat(tokens, ")", "INTERNALDATE");
-
-    String internalDate = tokens.peek();
-    if (Parsing.isValid(internalDate)) {
-      internalDate = Parsing.normalizeDateToken(Parsing.match(tokens, String.class));
-      status.setInternalDate(INTERNAL_DATE.parseDateTime(internalDate).toDate());
-    }
-
-    Parsing.eat(tokens, "RFC822.SIZE");
-    status.setSize(Parsing.match(tokens, int.class));
-
-    // We don't really need to bother closing the last ')'
-
-    return status;
+    // Close envelope.
+    Parsing.eat(tokens, ")");
+    return true;
   }
 }

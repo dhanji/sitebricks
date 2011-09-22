@@ -13,6 +13,8 @@ class MailClientConfig {
   private final String password;
   private final long timeout;
 
+  private final boolean gmail;
+
   public MailClientConfig(String host, int port, Auth authType, String username, String password,
                           long timeout) {
     this.host = host;
@@ -21,6 +23,8 @@ class MailClientConfig {
     this.username = username;
     this.password = password;
     this.timeout = timeout;
+
+    this.gmail = host.contains("imap.gmail.com");
   }
 
   public String getHost() {
@@ -45,5 +49,9 @@ class MailClientConfig {
 
   public long getTimeout() {
     return timeout;
+  }
+
+  public boolean useGmailExtensions() {
+    return gmail;
   }
 }

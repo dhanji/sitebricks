@@ -1,5 +1,6 @@
 package com.google.sitebricks.mail;
 
+import com.google.common.collect.Sets;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
@@ -7,12 +8,11 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,17 +26,38 @@ class MailClientHandler extends SimpleChannelHandler {
   public static final String CAPABILITY_PREFIX = "* CAPABILITY";
   static final Pattern COMMAND_FAILED_REGEX =
       Pattern.compile("^[.] (NO|BAD) (.*)", Pattern.CASE_INSENSITIVE);
+  static final Pattern IDLE_ENDED_REGEX = Pattern.compile(".* OK IDLE terminated \\(success\\)\\s*",
+      Pattern.CASE_INSENSITIVE);
+
+  static final Pattern IDLE_EXISTS_REGEX = Pattern.compile("\\* (\\d+) exists\\s*",
+      Pattern.CASE_INSENSITIVE);
+  static final Pattern IDLE_EXPUNGE_REGEX = Pattern.compile("\\* (\\d+) expunge\\s*",
+      Pattern.CASE_INSENSITIVE);
+
+  private final Idler idler;
 
   private final CountDownLatch loginComplete = new CountDownLatch(2);
   private volatile boolean isLoggedIn = false;
   private volatile List<String> capabilities;
   private volatile FolderObserver observer;
+  final AtomicBoolean idling = new AtomicBoolean();
 
   // Panic button.
   private volatile boolean halt = false;
 
   private final LinkedBlockingDeque<Error> errorStack = new LinkedBlockingDeque<Error>();
   private final Queue<CommandCompletion> completions = new ConcurrentLinkedQueue<CommandCompletion>();
+  private volatile PushedData pushedData;
+
+  public MailClientHandler(Idler idler) {
+    this.idler = idler;
+  }
+
+  private static class PushedData {
+    final Set<Integer> pushAdds = Collections.synchronizedSet(Sets.<Integer>newHashSet());
+    final Set<Integer> pushRemoves = Collections.synchronizedSet(Sets.<Integer>newHashSet());
+
+  }
 
   // DO NOT synchronize!
   public void enqueue(CommandCompletion completion) {
@@ -77,13 +98,40 @@ class MailClientHandler extends SimpleChannelHandler {
 
     // Copy to local var as the value can change underneath us.
     FolderObserver observer = this.observer;
-    if (null != observer) {
+    if (idling.get()) {
       message = message.toLowerCase();
-      if (message.endsWith("exists")) {
-        observer.onMailAdded();
+
+      if (IDLE_ENDED_REGEX.matcher(message).matches()) {
+        idling.compareAndSet(true, false);
+        // Now fire the events.
+        PushedData data = pushedData;
+        pushedData = null;
+        observer.changed(data.pushAdds.isEmpty() ? null : data.pushAdds,
+            data.pushRemoves.isEmpty() ? null : data.pushRemoves);
         return;
-      } else if (message.endsWith("expunge")) {
-        observer.onMailRemoved();
+      }
+
+      // Queue up any push notifications to publish to the client in a second.
+      Matcher existsMatcher = IDLE_EXISTS_REGEX.matcher(message);
+      boolean matched = false;
+      if (existsMatcher.matches()) {
+        int number = Integer.parseInt(existsMatcher.group(1));
+        pushedData.pushAdds.add(number);
+        pushedData.pushRemoves.remove(number);
+        matched = true;
+      } else {
+        Matcher expungeMatcher = IDLE_EXPUNGE_REGEX.matcher(message);
+        if (expungeMatcher.matches()) {
+          int number = Integer.parseInt(expungeMatcher.group(1));
+          pushedData.pushRemoves.add(number);
+          pushedData.pushAdds.remove(number);
+          matched = true;
+        }
+      }
+
+      // Stop idling, when we get the stopped idling message we can publish shit.
+      if (matched) {
+        idler.done();
         return;
       }
     }
@@ -101,7 +149,10 @@ class MailClientHandler extends SimpleChannelHandler {
   private synchronized void complete(String message) {
     CommandCompletion completion = completions.peek();
     if (completion == null) {
-      log.error("Could not find the completion for message {} (Was it ever issued?)", message);
+      if ("+idling".equalsIgnoreCase(message))
+        log.debug("IDLE entered.");
+      else
+        log.error("Could not find the completion for message {} (Was it ever issued?)", message);
       return;
     }
 
@@ -149,6 +200,7 @@ class MailClientHandler extends SimpleChannelHandler {
    */
   void observe(FolderObserver observer) {
     this.observer = observer;
+    pushedData = new PushedData();
   }
 
   void halt() {
