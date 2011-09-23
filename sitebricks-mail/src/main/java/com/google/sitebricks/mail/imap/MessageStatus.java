@@ -29,6 +29,7 @@ public class MessageStatus {
   private int size;
   private Long threadId;
   private Set<String> labels;
+  private Long gmailMsgId;
 
 
   public int getSize() {
@@ -147,6 +148,14 @@ public class MessageStatus {
     this.internalDate = internalDate;
   }
 
+  public void setGmailMsgId(Long gmailMsgId) {
+    this.gmailMsgId = gmailMsgId;
+  }
+
+  public Long getGmailMsgId() {
+    return gmailMsgId;
+  }
+
   @Override public String toString() {
     return "MessageStatus{" +
         "messageUid='" + messageUid + '\'' +
@@ -166,6 +175,9 @@ public class MessageStatus {
         ((threadId != null) ?
             (", threadId=" + threadId +
             ", labels=" + labels)
+        : "") +
+        ((gmailMsgId != null) ?
+            (", gmailMsgId=" + gmailMsgId)
         : "") +
         '}';
   }

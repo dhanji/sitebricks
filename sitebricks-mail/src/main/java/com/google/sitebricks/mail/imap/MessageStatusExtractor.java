@@ -72,6 +72,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       match |= parseInternalDate(tokens, status);
       match |= parseRfc822Size(tokens, status);
 
+      match |= parseGmailUid(tokens, status);
       match |= parseGmailThreadId(tokens, status);
       match |= parseGmailLabels(tokens, status);
 
@@ -96,6 +97,13 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     if (Parsing.matchAnyOf(tokens, "X-GM-THRID") == null)
       return false;
     status.setThreadId(Parsing.match(tokens, long.class));
+    return true;
+  }
+
+  private static boolean parseGmailUid(Queue<String> tokens, MessageStatus status) {
+    if (Parsing.matchAnyOf(tokens, "X-GM-MSGID") == null)
+      return false;
+    status.setGmailMsgId(Parsing.match(tokens, long.class));
     return true;
   }
 
