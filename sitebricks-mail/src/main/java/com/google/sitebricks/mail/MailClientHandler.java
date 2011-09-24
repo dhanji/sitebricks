@@ -149,7 +149,7 @@ class MailClientHandler extends SimpleChannelHandler {
   private synchronized void complete(String message) {
     CommandCompletion completion = completions.peek();
     if (completion == null) {
-      if ("+idling".equalsIgnoreCase(message))
+      if ("+ idling".equalsIgnoreCase(message))
         log.debug("IDLE entered.");
       else
         log.error("Could not find the completion for message {} (Was it ever issued?)", message);
