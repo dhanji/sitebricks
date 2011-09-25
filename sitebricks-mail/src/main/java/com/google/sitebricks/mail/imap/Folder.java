@@ -7,9 +7,15 @@ package com.google.sitebricks.mail.imap;
  */
 public class Folder {
   private final String name;
+  private final int count;
 
-  public Folder(String name) {
+  public Folder(String name, int count) {
     this.name = name;
+    this.count = count;
+  }
+
+  public int getCount() {
+    return count;
   }
 
   public String getName() {

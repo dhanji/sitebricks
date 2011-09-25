@@ -33,8 +33,8 @@ public enum Command {
 
     dataExtractors.put(LIST_FOLDERS, new ListFoldersExtractor());
     dataExtractors.put(FOLDER_STATUS, new FolderStatusExtractor());
-    dataExtractors.put(FOLDER_OPEN, new FolderExtractor());
-    dataExtractors.put(FOLDER_EXAMINE, new FolderExtractor());
+    dataExtractors.put(FOLDER_OPEN, new OpenFolderExtractor());
+    dataExtractors.put(FOLDER_EXAMINE, new OpenFolderExtractor());
     dataExtractors.put(FETCH_HEADERS, new MessageStatusExtractor());
     dataExtractors.put(FETCH_BODY, new MessageBodyExtractor());
   }
