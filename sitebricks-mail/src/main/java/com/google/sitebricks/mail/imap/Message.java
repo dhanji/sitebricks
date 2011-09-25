@@ -21,6 +21,10 @@ public class Message implements HasBodyParts {
   private Multimap<String, String> headers = newListMultimap();
   private List<BodyPart> bodyParts = new ArrayList<BodyPart>();
 
+  public void setHeaders(Multimap<String, String> headers) {
+    this.headers = headers;
+  }
+
   public MessageStatus getStatus() {
     return status;
   }
