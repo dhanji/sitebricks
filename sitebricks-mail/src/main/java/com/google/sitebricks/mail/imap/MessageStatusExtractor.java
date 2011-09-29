@@ -2,7 +2,6 @@ package com.google.sitebricks.mail.imap;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.james.mime4j.codec.DecoderUtil;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -170,7 +169,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       }
     }
 
-    status.setSubject(DecoderUtil.decodeEncodedWords(Parsing.match(tokens, String.class)));
+    status.setSubject(Parsing.decode(Parsing.match(tokens, String.class)));
 
     status.setFrom(Parsing.readAddresses(tokens));
     status.setSender(Parsing.readAddresses(tokens));

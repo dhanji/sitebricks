@@ -44,7 +44,7 @@ class Parsing {
     eat(tokens, ")");
 
     if (namePiece != null)
-      address.append('"').append(DecoderUtil.decodeEncodedWords(namePiece)).append("\" ");
+      address.append('"').append(decode(namePiece)).append("\" ");
 
     // I duno what source route is for ...
     return address.append(mailboxName).append('@').append(hostname).toString();
@@ -174,5 +174,13 @@ class Parsing {
     if (var.startsWith("\"") && var.endsWith("\""))
       return var.substring(1, var.length() - 1);
     return var;
+  }
+
+  public static String decode(String str) {
+    return str == null
+        ? null
+        : str.isEmpty()
+            ? str
+            : DecoderUtil.decodeEncodedWords(str);
   }
 }
