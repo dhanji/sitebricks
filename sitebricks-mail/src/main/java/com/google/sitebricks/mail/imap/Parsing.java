@@ -1,6 +1,7 @@
 package com.google.sitebricks.mail.imap;
 
 import com.google.common.collect.Lists;
+import org.apache.james.mime4j.codec.DecoderUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -43,7 +44,7 @@ class Parsing {
     eat(tokens, ")");
 
     if (namePiece != null)
-      address.append('"').append(namePiece).append("\" ");
+      address.append('"').append(DecoderUtil.decodeEncodedWords(namePiece)).append("\" ");
 
     // I duno what source route is for ...
     return address.append(mailboxName).append('@').append(hostname).toString();
