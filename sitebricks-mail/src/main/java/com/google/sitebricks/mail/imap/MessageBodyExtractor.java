@@ -1,6 +1,5 @@
 package com.google.sitebricks.mail.imap;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -14,12 +13,7 @@ import javax.mail.internet.MimeUtility;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -312,8 +306,13 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     if (message.isEmpty())
       return;
 
-    Preconditions.checkState(message.contains(":"),
-        "Malformed message header encountered at %s: %s", iterator.previousIndex(), message);
+    // Some header blocks are malformed, and contain lines that have no ':'
+    if (!message.contains(":")) {
+        log.warn("Malformed message header encountered at {}: {}. Skipping...",
+            iterator.previousIndex(),
+            message);
+      return;
+    }
     // It is possible for the header to have no value.
     String[] split = message.split(": ", 2);
     String value = split.length > 1 ? split[1] : "";

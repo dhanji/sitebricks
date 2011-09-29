@@ -120,6 +120,7 @@ I am OOO and may have sporadic access to email.
 Content-Type: text/html; charset="us-ascii"
 Content-Disposition: something
 Content-Doodle: somethingelse
+MALFORMED_HEADER_MISSING_COLON
 
 <body>
 I am OOO and may have sporadic access to email.
