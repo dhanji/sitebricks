@@ -85,7 +85,8 @@ class Parsing {
       if (piece.equals(tokens.peek())) {
         tokens.poll();
       } else
-        throw new IllegalArgumentException("Expected token " + piece + " but found " + tokens.peek());
+        throw new IllegalArgumentException("Expected token " + piece + " but found "
+            + tokens.peek() +" in [" + tokens + "]");
     }
   }
 

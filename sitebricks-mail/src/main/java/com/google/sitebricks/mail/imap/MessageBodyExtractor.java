@@ -205,6 +205,10 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
   private static String decode(String body, String encoding, String charset) {
     try {
+
+      // Second time around. Apparently some are slipping through.
+      charset = Parsing.stripQuotes(charset);
+
       return IOUtils.toString(
           MimeUtility.decode(new ByteArrayInputStream(body.getBytes()), encoding), charset);
     } catch (UnsupportedEncodingException e) {
