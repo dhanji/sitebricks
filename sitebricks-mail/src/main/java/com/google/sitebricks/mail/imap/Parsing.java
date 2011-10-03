@@ -1,5 +1,6 @@
 package com.google.sitebricks.mail.imap;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.james.mime4j.codec.DecoderUtil;
 
@@ -16,6 +17,9 @@ class Parsing {
   private static final Pattern ENDS_IN_PARENTHETICAL = Pattern.compile("[ ]*\\(.+\\)$");
 
   static List<String> readAddresses(Queue<String> tokens) {
+    // Weird base case where we don't get nil, but instead get an empty address set.
+    if (tokens.isEmpty())
+      return ImmutableList.of();
     if (isValid(tokens.peek())) {
       eat(tokens, "(");
       List<String> addresses = Lists.newArrayList();

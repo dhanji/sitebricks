@@ -116,7 +116,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     Collection<String> mimeType = headers.get("Content-Type");
     if (mimeType.isEmpty())
       return "text/plain";    // Default to text plain mimetype.
-    return Parsing.stripQuotes(mimeType.iterator().next().toLowerCase());
+    return Parsing.stripQuotes(mimeType.iterator().next().toLowerCase().trim()).trim();
   }
 
   private static boolean parseBodyParts(ListIterator<String> iterator, HasBodyParts entity,
@@ -232,7 +232,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     if (end == -1)
       end = mimeType.length();
 
-    String boundary = mimeType.substring(boundaryIndex + BOUNDARY_PREFIX.length(), end);
+    String boundary = mimeType.substring(boundaryIndex + BOUNDARY_PREFIX.length(), end).trim();
 
     // Strip quotes. Apparently the quotes that the header comes in with are not necessarily part
     // of the boundary token. Sigh.
