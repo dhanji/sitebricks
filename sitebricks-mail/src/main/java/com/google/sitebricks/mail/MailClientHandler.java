@@ -46,7 +46,8 @@ class MailClientHandler extends SimpleChannelHandler {
   private volatile boolean halt = false;
 
   private final LinkedBlockingDeque<Error> errorStack = new LinkedBlockingDeque<Error>();
-  private final Queue<CommandCompletion> completions = new ConcurrentLinkedQueue<CommandCompletion>();
+  private final Queue<CommandCompletion> completions =
+      new ConcurrentLinkedQueue<CommandCompletion>();
   private volatile PushedData pushedData;
 
   public MailClientHandler(Idler idler) {
@@ -67,76 +68,86 @@ class MailClientHandler extends SimpleChannelHandler {
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     String message = e.getMessage().toString();
-    log.debug("Message received [{}] from {}", e.getMessage(), e.getRemoteAddress());
-    if (halt) {
-      log.error("This mail client is halted but continues to receive messages, ignoring!");
-      return;
-    }
-    if (message.startsWith(CAPABILITY_PREFIX)) {
-      this.capabilities = Arrays.asList(
-          message.substring(CAPABILITY_PREFIX.length() + 1).split("[ ]+"));
-      loginComplete.countDown();
-      return;
-    }
-
-    if (!isLoggedIn) {
-      if (message.matches("[.] OK .*@.* \\(Success\\)")) { // TODO make case-insensitive
-        log.trace("Authentication success.");
-        isLoggedIn = true;
+    try {
+      log.debug("Message received [{}] from {}", e.getMessage(), e.getRemoteAddress());
+      if (halt) {
+        log.error("This mail client is halted but continues to receive messages, ignoring!");
+        return;
+      }
+      if (message.startsWith(CAPABILITY_PREFIX)) {
+        this.capabilities = Arrays.asList(
+            message.substring(CAPABILITY_PREFIX.length() + 1).split("[ ]+"));
         loginComplete.countDown();
-      } else {
-        Matcher matcher = COMMAND_FAILED_REGEX.matcher(message);
-        if (matcher.find()) {
-          log.trace("Authentication failed");
+        return;
+      }
+
+      if (!isLoggedIn) {
+        if (message.matches("[.] OK .*@.* \\(Success\\)")) { // TODO make case-insensitive
+          log.trace("Authentication success.");
+          isLoggedIn = true;
           loginComplete.countDown();
-          errorStack.push(new Error(null /* logins have no completion */, extractError(matcher)));
+        } else {
+          Matcher matcher = COMMAND_FAILED_REGEX.matcher(message);
+          if (matcher.find()) {
+            log.trace("Authentication failed");
+            loginComplete.countDown();
+            errorStack.push(new Error(null /* logins have no completion */, extractError(matcher)));
+          }
         }
-      }
-      // TODO handle auth failed
-      return;
-    }
-
-    // Copy to local var as the value can change underneath us.
-    FolderObserver observer = this.observer;
-    if (idling.get()) {
-      message = message.toLowerCase();
-
-      if (IDLE_ENDED_REGEX.matcher(message).matches()) {
-        idling.compareAndSet(true, false);
-        // Now fire the events.
-        PushedData data = pushedData;
-        pushedData = null;
-        observer.changed(data.pushAdds.isEmpty() ? null : data.pushAdds,
-            data.pushRemoves.isEmpty() ? null : data.pushRemoves);
+        // TODO handle auth failed
         return;
       }
 
-      // Queue up any push notifications to publish to the client in a second.
-      Matcher existsMatcher = IDLE_EXISTS_REGEX.matcher(message);
-      boolean matched = false;
-      if (existsMatcher.matches()) {
-        int number = Integer.parseInt(existsMatcher.group(1));
-        pushedData.pushAdds.add(number);
-        pushedData.pushRemoves.remove(number);
-        matched = true;
-      } else {
-        Matcher expungeMatcher = IDLE_EXPUNGE_REGEX.matcher(message);
-        if (expungeMatcher.matches()) {
-          int number = Integer.parseInt(expungeMatcher.group(1));
-          pushedData.pushRemoves.add(number);
-          pushedData.pushAdds.remove(number);
+      // Copy to local var as the value can change underneath us.
+      FolderObserver observer = this.observer;
+      if (idling.get()) {
+        message = message.toLowerCase();
+
+        if (IDLE_ENDED_REGEX.matcher(message).matches()) {
+          idling.compareAndSet(true, false);
+          // Now fire the events.
+          PushedData data = pushedData;
+          pushedData = null;
+          observer.changed(data.pushAdds.isEmpty() ? null : data.pushAdds,
+              data.pushRemoves.isEmpty() ? null : data.pushRemoves);
+          return;
+        }
+
+        // Queue up any push notifications to publish to the client in a second.
+        Matcher existsMatcher = IDLE_EXISTS_REGEX.matcher(message);
+        boolean matched = false;
+        if (existsMatcher.matches()) {
+          int number = Integer.parseInt(existsMatcher.group(1));
+          pushedData.pushAdds.add(number);
+          pushedData.pushRemoves.remove(number);
           matched = true;
+        } else {
+          Matcher expungeMatcher = IDLE_EXPUNGE_REGEX.matcher(message);
+          if (expungeMatcher.matches()) {
+            int number = Integer.parseInt(expungeMatcher.group(1));
+            pushedData.pushRemoves.add(number);
+            pushedData.pushAdds.remove(number);
+            matched = true;
+          }
+        }
+
+        // Stop idling, when we get the stopped idling message we can publish shit.
+        if (matched) {
+          idler.done();
+          return;
         }
       }
 
-      // Stop idling, when we get the stopped idling message we can publish shit.
-      if (matched) {
-        idler.done();
-        return;
-      }
+      complete(message);
+    } catch (Exception ex) {
+      CommandCompletion completion = completions.poll();
+      if (completion != null)
+        completion.error(message, ex);
+      else
+        log.error("Strange exception during mail processing (no completions available!): {}",
+            message, ex);
+      throw ex;
     }
-
-    complete(message);
   }
 
   private String extractError(Matcher matcher) {

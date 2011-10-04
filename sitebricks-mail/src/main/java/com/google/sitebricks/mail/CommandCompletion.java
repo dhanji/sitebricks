@@ -33,6 +33,19 @@ class CommandCompletion {
     this.command = command;
   }
 
+  public void error(String message, Exception e) {
+    StringBuilder builder = new StringBuilder();
+    for (String piece : value) {
+      builder.append(piece).append('\n');
+    }
+    log.error("Exception while processing response:\n Command: {} (seq: {})\n\n--message follows--" +
+        "\n{}\n--message end--\n--context follows--\n{}\n--context end--\n\n",
+        new Object[] { commandString, sequence, message, builder.toString(), e });
+
+    // TODO Send this back to the client as an exception so it can be handled correctly.
+//    valueFuture.setException(new MailHandlingException(value, message, e));
+  }
+
   public boolean complete(String message) {
     // Base case (empty/newline message).
     if (message.isEmpty()) {

@@ -95,7 +95,7 @@ class Parsing {
   }
 
   static boolean isValid(String token) {
-    return !"NIL".equalsIgnoreCase(token);
+    return null != token && !"NIL".equalsIgnoreCase(token);
   }
 
   static String normalizeDateToken(String token) {

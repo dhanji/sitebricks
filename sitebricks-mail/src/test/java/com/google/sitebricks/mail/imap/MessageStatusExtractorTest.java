@@ -1,12 +1,17 @@
 package com.google.sitebricks.mail.imap;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Queue;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -60,11 +65,32 @@ public class MessageStatusExtractorTest {
     assertEquals("<BANLkTi=zC_UQExUuaNqiP0dJXoswDej1Ww@mail.gmail.com>", status.getMessageUid());
     assertEquals("Get Gmail on your mobile phone", status.getSubject());
 
+    // Unfold assertions.
+    assertions = unfoldAssertionLines(assertions);
+
     for (int i = 0, statusesSize = statuses.size(); i < statusesSize; i++) {
       MessageStatus st = statuses.get(i);
 //      System.out.println(st);
       assertEquals(st.toString(), assertions.get(i));
     }
+  }
+
+  private static List<String> unfoldAssertionLines(List<String> assertions) {
+    List<String> unfoldedAssertions = Lists.newArrayListWithCapacity(assertions.size());
+    for (int i = 0; i < assertions.size(); i++) {
+      String assertion = assertions.get(i);
+      if (!assertion.endsWith("}")) {
+        String next = assertions.get(i + 1);
+        if (!next.startsWith("MessageStatus{")) {
+          assertion += '\n' + next;
+          assertions.remove(i + 1);
+        }
+      }
+
+      unfoldedAssertions.add(assertion);
+    }
+    assertions = unfoldedAssertions;
+    return assertions;
   }
 
   @Test

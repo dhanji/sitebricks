@@ -28,31 +28,31 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
   static final Pattern ALTERNATE_RECEIVED_DATE_PATTERN = Pattern.compile(
       "\\d?\\d \\w\\w\\w [0-9]{4} \\d?\\d:\\d?\\d:\\d?\\d [-+]?[0-9]{4}");
 
-  // 10 Sep 11 14:19:55 -0700
-  static final Pattern ALTERNATE_RECEIVED_DATE_PATTERN_2 = Pattern.compile(
-      "\\d?\\d \\w\\w\\w [0-9]{2} \\d?\\d:\\d?\\d:\\d?\\d [-+]?[0-9]{4}");
-
-  // A shorter form of the received date
-  static final DateTimeFormatter ALT_RECEIVED_DATE = DateTimeFormat.forPattern(
-      "dd MMM yyyy HH:mm:ss Z");
-  static final DateTimeFormatter ALT_RECEIVED_DATE_2 = DateTimeFormat.forPattern(
-      "dd MMM yy HH:mm:ss Z");
-  static final DateTimeFormatter RECEIVED_DATE = DateTimeFormat.forPattern(
-      "EEE, dd MMM yyyy HH:mm:ss Z");
   static final DateTimeFormatter INTERNAL_DATE = DateTimeFormat.forPattern(
       "dd-MMM-yyyy HH:mm:ss Z");
 
   @Override
   public List<MessageStatus> extract(List<String> messages) {
     List<MessageStatus> statuses = Lists.newArrayList();
-    for (String message : messages) {
+    for (int i = 0, messagesSize = messages.size(); i < messagesSize; i++) {
+      String message = messages.get(i);
       if (null == message || message.isEmpty())
         continue;
 
       // Discard the fetch token.
-      message = message.replaceFirst("[*]?[ ]*\\d+[ ]* ", "");
+      message = message.replaceFirst("[*]?[ ]*\\d+ ", "");
       if (Command.isEndOfSequence(message.toLowerCase()))
         continue;
+
+      // Appears that this message got split between lines. So unfold.
+      if (!message.endsWith(")")) {
+        String next = messages.get(i + 1);
+        message = message + '\n' + next;
+
+        // Skip next.
+        i++;
+      }
+
       statuses.add(parseStatus(message));
     }
 
