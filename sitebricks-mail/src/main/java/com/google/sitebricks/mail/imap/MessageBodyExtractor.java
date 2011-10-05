@@ -180,9 +180,27 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         }
       }
     } else {
-      entity.setBody(readBodyAsBytes(iterator, boundary));
+      entity.setBody(readBodyAsBytes(transferEncoding(entity), iterator, boundary));
     }
     return false;
+  }
+
+  private static String transferEncoding(HasBodyParts entity) {
+    if (null == entity.getHeaders())
+      return null;
+    Collection<String> values = entity.getHeaders().get("Content-Transfer-Encoding");
+    if (values.isEmpty())
+      return null;
+
+    String transferEncoding = values.iterator().next().trim();
+
+    // Seek upto ; in case this is split.
+    int end = transferEncoding.indexOf(";");
+    if (end > -1)
+      transferEncoding = transferEncoding.substring(0, end);
+    transferEncoding = Parsing.stripQuotes(transferEncoding);
+
+    return transferEncoding.toLowerCase();
   }
 
   private static String charset(String mimeType) {
@@ -240,8 +258,20 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     return "--" + boundary;
   }
 
-  private static byte[] readBodyAsBytes(ListIterator<String> iterator, String boundary) {
-    return readBodyAsString(iterator, boundary).getBytes();
+  private static byte[] readBodyAsBytes(String transferEncoding, ListIterator<String> iterator, String boundary) {
+    byte[] bytes = readBodyAsString(iterator, boundary).getBytes();
+
+    // Decode if this is encoded as binary-to-text.
+    if (null != transferEncoding)
+      try {
+        bytes = IOUtils.toByteArray(MimeUtility.decode(new ByteArrayInputStream(bytes),
+            transferEncoding));
+      } catch (MessagingException e) {
+        log.error("Unable to decode message body, proceeding with raw bytes.", e);
+      } catch (IOException e) {
+        log.error("Unable to decode message body, proceeding with raw bytes.", e);
+      }
+    return bytes;
   }
 
   private static String readBodyAsString(ListIterator<String> iterator, String boundary) {
