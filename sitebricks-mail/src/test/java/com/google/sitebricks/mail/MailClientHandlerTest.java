@@ -30,4 +30,15 @@ public class MailClientHandlerTest {
     Matcher matcher = MailClientHandler.IDLE_ENDED_REGEX.matcher("3 OK IDLE terminated (Success)");
     assertTrue(matcher.matches());
   }
+
+  @Test
+  public final void testSystemErrorRegex() {
+    assertTrue(MailClientHandler.SYSTEM_ERROR_REGEX.matcher("* bye system error").matches());
+    assertTrue(MailClientHandler.SYSTEM_ERROR_REGEX.matcher("* BYE SYSTEM ERROR").matches());
+    assertTrue(MailClientHandler.SYSTEM_ERROR_REGEX.matcher("* BYE system error").matches());
+    assertTrue(MailClientHandler.SYSTEM_ERROR_REGEX.matcher("*  BYE  system  error").matches());
+    assertTrue(MailClientHandler.SYSTEM_ERROR_REGEX.matcher("* BYE SYSTEM error").matches());
+    assertTrue(MailClientHandler.SYSTEM_ERROR_REGEX.matcher("* BYE SYSTEM error  \n ").matches());
+    assertTrue(MailClientHandler.SYSTEM_ERROR_REGEX.matcher("* BYE SYSTEM error  \t ").matches());
+  }
 }

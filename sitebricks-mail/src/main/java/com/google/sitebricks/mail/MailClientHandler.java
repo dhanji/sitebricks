@@ -26,9 +26,11 @@ class MailClientHandler extends SimpleChannelHandler {
   public static final String CAPABILITY_PREFIX = "* CAPABILITY";
   static final Pattern COMMAND_FAILED_REGEX =
       Pattern.compile("^[.] (NO|BAD) (.*)", Pattern.CASE_INSENSITIVE);
-  static final Pattern IDLE_ENDED_REGEX = Pattern.compile(".* OK IDLE terminated \\(success\\)\\s*",
+  static final Pattern SYSTEM_ERROR_REGEX = Pattern.compile("[*]\\s*bye\\s*system\\s*error\\s*",
       Pattern.CASE_INSENSITIVE);
 
+  static final Pattern IDLE_ENDED_REGEX = Pattern.compile(".* OK IDLE terminated \\(success\\)\\s*",
+      Pattern.CASE_INSENSITIVE);
   static final Pattern IDLE_EXISTS_REGEX = Pattern.compile("\\* (\\d+) exists\\s*",
       Pattern.CASE_INSENSITIVE);
   static final Pattern IDLE_EXPUNGE_REGEX = Pattern.compile("\\* (\\d+) expunge\\s*",
@@ -68,6 +70,17 @@ class MailClientHandler extends SimpleChannelHandler {
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     String message = e.getMessage().toString();
+
+    if (SYSTEM_ERROR_REGEX.matcher(message).matches()) {
+      log.warn("Disconnected by IMAP Server due to system error: {}", message);
+      halt();
+
+      // Disconnect abnormally. The user code should reconnect using the mail client.
+      errorStack.push(new Error(completions.poll(), message));
+      idler.disconnect();
+      return;
+    }
+
     try {
       log.debug("Message received [{}] from {}", e.getMessage(), e.getRemoteAddress());
       if (halt) {
@@ -158,6 +171,13 @@ class MailClientHandler extends SimpleChannelHandler {
    * This is synchronized to ensure that we process the queue serially.
    */
   private synchronized void complete(String message) {
+    // This is a weird problem with writing stuff while idling. Need to investigate it more, but
+    // for now just ignore it.
+    if ("* BAD [CLIENTBUG] Invalid tag".equalsIgnoreCase(message)) {
+      log.warn("Invalid tag warning, ignored.");
+      return;
+    }
+
     CommandCompletion completion = completions.peek();
     if (completion == null) {
       if ("+ idling".equalsIgnoreCase(message))
@@ -165,15 +185,6 @@ class MailClientHandler extends SimpleChannelHandler {
       else
         log.error("Could not find the completion for message {} (Was it ever issued?)", message);
       return;
-    }
-
-    // TODO Error detection needs to be WAY more robust than this.
-    Matcher matcher = COMMAND_FAILED_REGEX.matcher(message);
-    if (matcher.find()) {
-//      // Get rid of this completion, it failed and the command needs to be reissued.
-//      String reason = extractError(matcher);
-//      CommandCompletion failed = completions.poll();
-//      errorStack.push(new Error(failed, reason));
     }
 
     if (completion.complete(message)) {
@@ -216,6 +227,10 @@ class MailClientHandler extends SimpleChannelHandler {
 
   void halt() {
     halt = true;
+  }
+
+  public boolean isHalted() {
+    return halt;
   }
 
   static class Error {

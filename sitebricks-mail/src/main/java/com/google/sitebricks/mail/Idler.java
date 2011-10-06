@@ -5,4 +5,6 @@ package com.google.sitebricks.mail;
 */
 interface Idler {
   void done();
+
+  void disconnect();
 }

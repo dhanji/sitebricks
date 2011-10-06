@@ -129,16 +129,23 @@ class NettyImapClient implements MailClient, Idler {
    */
   @Override
   public synchronized void disconnect() {
-    Preconditions.checkState(!mailClientHandler.idling.get(),
-        "Can't execute command while idling (are you watching a folder?)");
+    try {
+      // If there is an error with the handler, dont bother logging out.
+      if (!mailClientHandler.isHalted()) {
+        Preconditions.checkState(!mailClientHandler.idling.get(),
+            "Can't execute command while idling (are you watching a folder?)");
 
-    currentFolder = null;
+        // Log out of the IMAP Server.
+        channel.write(". logout\n");
+      }
 
-    // Log out of the IMAP Server.
-    channel.write(". logout\n");
-
-    // Shut down all thread pools and exit.
-    channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
+      currentFolder = null;
+    } finally {
+      // Shut down all channels and exit (leave threadpools as is--for reconnects).
+      // The Netty channel close listener will fire a disconnect event to our client,
+      // automatically. See connect() for details.
+      channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
+    }
   }
 
   <D> ChannelFuture send(Command command, String args, SettableFuture<D> valueFuture) {
