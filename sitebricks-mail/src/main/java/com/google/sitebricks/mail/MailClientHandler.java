@@ -73,11 +73,7 @@ class MailClientHandler extends SimpleChannelHandler {
 
     if (SYSTEM_ERROR_REGEX.matcher(message).matches()) {
       log.warn("Disconnected by IMAP Server due to system error: {}", message);
-      halt();
-
-      // Disconnect abnormally. The user code should reconnect using the mail client.
-      errorStack.push(new Error(completions.poll(), message));
-      idler.disconnect();
+      disconnectAbnormally(message);
       return;
     }
 
@@ -163,6 +159,14 @@ class MailClientHandler extends SimpleChannelHandler {
     }
   }
 
+  private void disconnectAbnormally(String message) {
+    halt();
+
+    // Disconnect abnormally. The user code should reconnect using the mail client.
+    errorStack.push(new Error(completions.poll(), message));
+    idler.disconnect();
+  }
+
   private String extractError(Matcher matcher) {
     return (matcher.groupCount()) > 1 ? matcher.group(2) : matcher.group();
   }
@@ -195,6 +199,7 @@ class MailClientHandler extends SimpleChannelHandler {
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
     log.error("Exception caught!", e.getCause());
+    disconnectAbnormally(e.getCause().getMessage());
   }
 
   public List<String> getCapabilities() {
