@@ -133,6 +133,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         encoding = "7bit"; // default to 7-bit as per the MIME RFC.
       else
         encoding = encodingHeaders.iterator().next();
+      if (encoding.isEmpty())
+        encoding = "7bit";
 
       entity.setBody(decode(body, encoding, charset(mimeType)));
     } else if (mimeType.startsWith("multipart/") /* mixed|alternative */) {
@@ -216,6 +218,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     mimeType = mimeType.substring(i + "charset=".length(), end);
 
     String charset = Parsing.stripQuotes(mimeType);
+    if (charset.isEmpty())
+      return "UTF-8";
 
     // The Java platform only supports a limited set of encodings, use ones that it supports
     // if we encounter unknown ones.
