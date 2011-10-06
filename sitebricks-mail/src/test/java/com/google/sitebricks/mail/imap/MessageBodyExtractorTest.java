@@ -1,7 +1,6 @@
 package com.google.sitebricks.mail.imap;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Resources;
 import org.apache.commons.io.IOUtils;
@@ -28,24 +27,30 @@ import static org.testng.Assert.assertTrue;
 public class MessageBodyExtractorTest {
   private static final Pattern MESSAGE_LOG_REGEX = Pattern.compile("^.* DEBUG c\\.g\\.s\\.mail\\.MailClientHandler: Message received \\[");
 
-//  @Test DISABLED. Only use this test for debugging.
+  static {
+    java.util.logging.ConsoleHandler fh = new java.util.logging.ConsoleHandler();
+    java.util.logging.Logger.getLogger("").addHandler(fh);
+    java.util.logging.Logger.getLogger("").setLevel(java.util.logging.Level.FINEST);
+  }
+
+  @Test //DISABLED. Only use this test for debugging.
   public final void testAgainstFewerMessagesParsedThanExistError() throws IOException {
     List<String> data = Resources.readLines(MessageBodyExtractorTest.class.getResource(
-        "a.log"), Charsets.UTF_8);
+        "broken_text.log"), Charsets.UTF_8);
 
-    List<String> redacted = Lists.newArrayList();
-    for (String line : data) {
-      Matcher matcher = MESSAGE_LOG_REGEX.matcher(line);
-      if (matcher.find()) {
-        line = matcher.replaceAll("");
-        redacted.add(line.substring(0, line.lastIndexOf("]")));
-      }
-    }
-
-    List<Message> extract = new MessageBodyExtractor().extract(redacted);
+//    List<String> redacted = Lists.newArrayList();
+//    for (String line : data) {
+//      Matcher matcher = MESSAGE_LOG_REGEX.matcher(line);
+//      if (matcher.find()) {
+//        line = matcher.replaceAll("");
+//        redacted.add(line.substring(0, line.lastIndexOf("]")));
+//      }
+//    }
+//
+    List<Message> extract = new MessageBodyExtractor().extract(data);
 
     for (Message message : extract) {
-      System.out.println(message.getHeaders().get("Message-ID") + " "
+      System.out.println(message.getHeaders().get("Message-Id") + " "
           + message.getHeaders().get("Subject"));
     }
 
@@ -248,12 +253,10 @@ public class MessageBodyExtractorTest {
     Message.BodyPart part3;
 
     Message.BodyPart innerPart1;
-    Message.BodyPart innertPart2;
-    Message.BodyPart innertPart3;
     assertEquals(message.getHeaders().toString(),
         "{Delivered-To=[dhanji@gmail.com], Message-ID=[<id> id]," +
         " Subject=[Re: Slow to Respond], Content-Type=[multipart/alternative;" +
-            " boundary=__BOUNDARY__]," +
+            " boundary = __BOUNDARY__]," +
         " X-Sitebricks-Test=[multipart-alternatives;quoted-headers;nested-parts;preamble]}");
 
     assertEquals(3, message.getBodyParts().size());
@@ -424,5 +427,14 @@ public class MessageBodyExtractorTest {
 
     assertFalse(pattern.matcher(") (").matches());
     assertFalse(pattern.matcher("(").matches());
+  }
+
+  @Test
+  public final void testBoundaryExtractorRegex() {
+    Matcher matcher = MessageBodyExtractor.BOUNDARY_REGEX.matcher(
+        "multipart/alternative;\n" +
+            " boundary=_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_");
+    assertTrue(matcher.find());
+    assertEquals("_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_", matcher.group(1));
   }
 }

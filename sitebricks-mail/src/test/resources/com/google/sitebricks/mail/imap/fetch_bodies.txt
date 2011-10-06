@@ -331,7 +331,7 @@ Delivered-To: dhanji@gmail.com
 Message-ID: <id> id
 Subject: Re: Slow to Respond
 Content-Type: multipart/alternative;
- boundary=__BOUNDARY__
+ boundary = __BOUNDARY__
 X-Sitebricks-Test: multipart-alternatives;quoted-headers;nested-parts;preamble
 
 --__BOUNDARY__

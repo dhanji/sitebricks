@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -28,7 +29,8 @@ import java.util.regex.Pattern;
  */
 class MessageBodyExtractor implements Extractor<List<Message>> {
   private static final Logger log = LoggerFactory.getLogger(MessageBodyExtractor.class);
-  private static final String BOUNDARY_PREFIX = "boundary=";
+  static final Pattern BOUNDARY_REGEX = Pattern.compile(";[\\s]*boundary[\\s]*=[\\s]*[\"]?([^\"]*)[\"]?",
+      Pattern.CASE_INSENSITIVE);
   static final Pattern MESSAGE_START_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(BODY\\[\\]",
       Pattern.CASE_INSENSITIVE);
   static final Pattern EOS_REGEX =
@@ -241,16 +243,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   }
 
   private static String boundary(String mimeType) {
-    int boundaryIndex = mimeType.indexOf(BOUNDARY_PREFIX);
-    if (boundaryIndex == -1)
+    Matcher matcher = BOUNDARY_REGEX.matcher(mimeType);
+    if (!matcher.find())
       return null;
 
-    // boundaries can have a dangling ; at the end.
-    int end = mimeType.indexOf(";", boundaryIndex);
-    if (end == -1)
-      end = mimeType.length();
-
-    String boundary = mimeType.substring(boundaryIndex + BOUNDARY_PREFIX.length(), end).trim();
+    String boundary = matcher.group(1).trim();
 
     // Strip quotes. Apparently the quotes that the header comes in with are not necessarily part
     // of the boundary token. Sigh.
