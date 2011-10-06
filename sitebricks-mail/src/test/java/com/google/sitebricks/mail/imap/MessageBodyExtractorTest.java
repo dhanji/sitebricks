@@ -33,10 +33,10 @@ public class MessageBodyExtractorTest {
     java.util.logging.Logger.getLogger("").setLevel(java.util.logging.Level.FINEST);
   }
 
-  @Test //DISABLED. Only use this test for debugging.
+//  @Test //DISABLED. Only use this test for debugging.
   public final void testAgainstFewerMessagesParsedThanExistError() throws IOException {
     List<String> data = Resources.readLines(MessageBodyExtractorTest.class.getResource(
-        "broken_text.log"), Charsets.UTF_8);
+        "a.log"), Charsets.UTF_8);
 
 //    List<String> redacted = Lists.newArrayList();
 //    for (String line : data) {
