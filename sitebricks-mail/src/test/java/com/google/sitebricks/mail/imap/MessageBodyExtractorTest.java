@@ -436,5 +436,79 @@ public class MessageBodyExtractorTest {
             " boundary=_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_");
     assertTrue(matcher.find());
     assertEquals("_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_", matcher.group(1));
+
+    matcher = MessageBodyExtractor.BOUNDARY_REGEX.matcher(
+        "multipart/alternative;\n" +
+            " boundary=\"_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_\"");
+    assertTrue(matcher.find());
+    assertEquals("_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_", matcher.group(1));
+
+    matcher = MessageBodyExtractor.BOUNDARY_REGEX.matcher(
+        "multipart/alternative;\n" +
+            " boundary =\"_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_\"");
+    assertTrue(matcher.find());
+    assertEquals("_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_", matcher.group(1));
+
+    matcher = MessageBodyExtractor.BOUNDARY_REGEX.matcher(
+        "multipart/alternative;\n" +
+            " boundary = \"_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_\";");
+    assertTrue(matcher.find());
+    assertEquals("_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_", matcher.group(1));
+
+    matcher = MessageBodyExtractor.BOUNDARY_REGEX.matcher(
+        "multipart/alternative;\n" +
+            " boundary =     \"_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_");
+    assertTrue(matcher.find());
+    assertEquals("_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_", matcher.group(1));
+
+    matcher = MessageBodyExtractor.BOUNDARY_REGEX.matcher(
+        "multipart/alternative;" +
+            "boundary =     \"_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_");
+    assertTrue(matcher.find());
+    assertEquals("_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_", matcher.group(1));
+
+
+    // Boundary function
+    assertEquals("--_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_",
+        MessageBodyExtractor.boundary("multipart/alternative;" +
+            "boundary =     _000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_  "));
+    assertEquals("--_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_",
+        MessageBodyExtractor.boundary("multipart/alternative;" +
+            "BOUNDARY =     _000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_  "));
+
+    // Invalid values... (spam?)
+    assertNull(MessageBodyExtractor.boundary("multipart/alternative;" +
+            "boundary ="));
+    assertNull(MessageBodyExtractor.boundary("multipart/alternative;"));
+    assertNull(MessageBodyExtractor.boundary("multipart/alternative;;;"));
+  }
+
+  @Test
+  public final void testCharsetExtractorRegex() {
+    // Charset function
+    assertEquals("us-ascii", MessageBodyExtractor.charset("text/html;\n" +
+        " charset=us-ascii"));
+    assertEquals("us-ascii", MessageBodyExtractor.charset("text/html;\n" +
+            " charset=us-ascii  "));
+    assertEquals("us-ascii", MessageBodyExtractor.charset("text/html;\n" +
+            " charset=\"us-ascii\""));
+    assertEquals("us-ascii", MessageBodyExtractor.charset("text/html;\n" +
+            " charset = \"us-ascii\""));
+    assertEquals("us-ascii", MessageBodyExtractor.charset("text/html;\n" +
+            " charset=\"us-ascii  \""));
+    assertEquals("us-ascii", MessageBodyExtractor.charset("text/html;\n" +
+            " CHARSET =\"us-ascii  \""));
+    assertEquals("US-ASCII", MessageBodyExtractor.charset("text/html;\n" +
+            " CHARSET =\"US-ASCII  \""));
+
+    assertEquals("UTF-8", MessageBodyExtractor.charset("text/html;\n" +
+            " charset="));
+    assertEquals("UTF-8", MessageBodyExtractor.charset("text/html;\n" +
+            " CHARSET="));
+    assertEquals("UTF-8", MessageBodyExtractor.charset("text/html"));
+    assertEquals("UTF-8", MessageBodyExtractor.charset("text/html;;;"));
+    assertEquals("UTF-8", MessageBodyExtractor.charset("text/html;charset=;;"));
+    assertEquals("UTF-8", MessageBodyExtractor.charset(""));
+    assertEquals("UTF-8", MessageBodyExtractor.charset(null));
   }
 }

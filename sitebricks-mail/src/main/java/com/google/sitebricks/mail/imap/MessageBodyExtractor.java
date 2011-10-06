@@ -29,7 +29,11 @@ import java.util.regex.Pattern;
  */
 class MessageBodyExtractor implements Extractor<List<Message>> {
   private static final Logger log = LoggerFactory.getLogger(MessageBodyExtractor.class);
-  static final Pattern BOUNDARY_REGEX = Pattern.compile(";[\\s]*boundary[\\s]*=[\\s]*[\"]?([^\"]*)[\"]?",
+  static final Pattern BOUNDARY_REGEX = Pattern.compile(
+      ";[\\s]*boundary[\\s]*=[\\s]*[\"]?([^\"^;]*)[\"]?",
+      Pattern.CASE_INSENSITIVE);
+  static final Pattern CHARSET_REGEX =
+      Pattern.compile(";[\\s]*charset[\\s]*=[\\s]*[\"]?([^\"^;]*)[\"]?",
       Pattern.CASE_INSENSITIVE);
   static final Pattern MESSAGE_START_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(BODY\\[\\]",
       Pattern.CASE_INSENSITIVE);
@@ -38,6 +42,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   private static final Pattern WHITESPACE_PREFIX_REGEX = Pattern.compile("^\\s+");
 
   private static final Map<String, String> CONVERTIBLE_CHARSETS = Maps.newHashMap();
+  private static final String SEVEN_BIT = "7bit";
+  private static final String UTF_8 = "UTF-8";
 
   static {
     CONVERTIBLE_CHARSETS.put("cp932", "cp942");
@@ -114,11 +120,32 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     return email;
   }
 
-  private static String mimeType(Multimap<String, String> headers) {
+  static String mimeType(Multimap<String, String> headers) {
     Collection<String> mimeType = headers.get("Content-Type");
     if (mimeType.isEmpty())
       return "text/plain";    // Default to text plain mimetype.
     return Parsing.stripQuotes(mimeType.iterator().next().toLowerCase().trim()).trim();
+  }
+
+  private static String transferEncoding(HasBodyParts entity) {
+    if (null == entity.getHeaders())
+      return SEVEN_BIT;
+    Collection<String> values = entity.getHeaders().get("Content-Transfer-Encoding");
+    if (values.isEmpty())
+      return SEVEN_BIT;
+
+    String transferEncoding = values.iterator().next().trim();
+
+    // Seek upto ; in case this is split.
+    int end = transferEncoding.indexOf(";");
+    if (end > -1)
+      transferEncoding = transferEncoding.substring(0, end);
+    transferEncoding = Parsing.stripQuotes(transferEncoding);
+
+    if (transferEncoding.isEmpty())
+      return SEVEN_BIT;
+
+    return transferEncoding.toLowerCase();
   }
 
   private static boolean parseBodyParts(ListIterator<String> iterator, HasBodyParts entity,
@@ -126,18 +153,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     if (mimeType.startsWith("text/plain") || mimeType.startsWith("text/html")) {
       String body = readBodyAsString(iterator, boundary);
 
-      // There should only be one of these.
-      Collection<String> encodingHeaders = entity.getHeaders().get("Content-Transfer-Encoding");
-      String encoding;
-      if (encodingHeaders.isEmpty())
-        encoding = "7bit"; // default to 7-bit as per the MIME RFC.
-      else
-        encoding = encodingHeaders.iterator().next();
-      if (encoding.isEmpty())
-        encoding = "7bit";
-
-      entity.setBody(decode(body, encoding, charset(mimeType)));
-    } else if (mimeType.startsWith("multipart/") /* mixed|alternative */) {
+      entity.setBody(decode(body, transferEncoding(entity), charset(mimeType)));
+    } else if (mimeType.startsWith("multipart/") /* mixed|alternative|digest */) {
       String boundaryToken = boundary(mimeType);
 
       // Skip everything upto the first occurrence of boundary (called the "Preamble")
@@ -189,37 +206,18 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     return false;
   }
 
-  private static String transferEncoding(HasBodyParts entity) {
-    if (null == entity.getHeaders())
-      return null;
-    Collection<String> values = entity.getHeaders().get("Content-Transfer-Encoding");
-    if (values.isEmpty())
-      return null;
+  static String charset(String mimeType) {
+    if (null == mimeType)
+      return UTF_8;
+    Matcher matcher = CHARSET_REGEX.matcher(mimeType);
+    if (!matcher.find())
+      return UTF_8;
 
-    String transferEncoding = values.iterator().next().trim();
+    String charset = matcher.group(1);
+    if (null == charset || charset.isEmpty())
+      return UTF_8;
 
-    // Seek upto ; in case this is split.
-    int end = transferEncoding.indexOf(";");
-    if (end > -1)
-      transferEncoding = transferEncoding.substring(0, end);
-    transferEncoding = Parsing.stripQuotes(transferEncoding);
-
-    return transferEncoding.toLowerCase();
-  }
-
-  private static String charset(String mimeType) {
-    int i = mimeType.indexOf("charset=");
-    if (i == -1)
-      return "UTF-8";
-
-    int end = mimeType.indexOf(";", i);
-    if (end == -1)
-      end = mimeType.length();
-    mimeType = mimeType.substring(i + "charset=".length(), end);
-
-    String charset = Parsing.stripQuotes(mimeType);
-    if (charset.isEmpty())
-      return "UTF-8";
+    charset = charset.trim();
 
     // The Java platform only supports a limited set of encodings, use ones that it supports
     // if we encounter unknown ones.
@@ -246,17 +244,15 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     }
   }
 
-  private static String boundary(String mimeType) {
+  static String boundary(String mimeType) {
     Matcher matcher = BOUNDARY_REGEX.matcher(mimeType);
     if (!matcher.find())
       return null;
 
-    String boundary = matcher.group(1).trim();
-
-    // Strip quotes. Apparently the quotes that the header comes in with are not necessarily part
-    // of the boundary token. Sigh.
-    boundary = Parsing.stripQuotes(boundary);
-    return "--" + boundary;
+    String boundary = matcher.group(1);
+    if (boundary.isEmpty())
+      return null;
+    return "--" + boundary.trim();
   }
 
   private static byte[] readBodyAsBytes(String transferEncoding, ListIterator<String> iterator, String boundary) {
