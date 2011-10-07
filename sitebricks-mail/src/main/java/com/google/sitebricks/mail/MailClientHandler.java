@@ -78,7 +78,8 @@ class MailClientHandler extends SimpleChannelHandler {
     }
 
     try {
-      log.debug("Message received [{}] from {}", e.getMessage(), e.getRemoteAddress());
+      System.out.println(e.getMessage());
+      log.trace("Message received [{}] from {}", e.getMessage(), e.getRemoteAddress());
       if (halt) {
         log.error("This mail client is halted but continues to receive messages, ignoring!");
         return;
@@ -198,7 +199,7 @@ class MailClientHandler extends SimpleChannelHandler {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-    log.error("Exception caught!", e.getCause());
+    log.error("Exception caught! Disconnecting...", e.getCause());
     disconnectAbnormally(e.getCause().getMessage());
   }
 

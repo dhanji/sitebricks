@@ -37,7 +37,7 @@ public class MessageBodyExtractorTest {
 //  @Test //DISABLED. Only use this test for debugging.
   public final void testAgainstFewerMessagesParsedThanExistError() throws IOException {
     List<String> data = Resources.readLines(MessageBodyExtractorTest.class.getResource(
-        "a.log"), Charsets.UTF_8);
+        "broken_rfc822.log"), Charsets.UTF_8);
 
 //    List<String> redacted = Lists.newArrayList();
 //    for (String line : data) {
@@ -51,7 +51,10 @@ public class MessageBodyExtractorTest {
     List<Message> extract = new MessageBodyExtractor().extract(data);
 
     for (Message message : extract) {
-      System.out.println(message.getHeaders().get("Message-Id") + " "
+      Collection<String> messageId = message.getHeaders().get("Message-Id");
+      if (messageId.isEmpty())
+        messageId = message.getHeaders().get("Message-ID");
+      System.out.println(messageId + " "
           + message.getHeaders().get("Subject"));
     }
 

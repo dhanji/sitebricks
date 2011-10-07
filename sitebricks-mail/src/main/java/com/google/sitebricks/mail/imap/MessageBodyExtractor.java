@@ -193,6 +193,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       // Now parse the multipart body in sequence, recursing down as needed...
       while (iterator.hasNext()) {
         Message.BodyPart bodyPart = new Message.BodyPart();
+        entity.createBodyParts();
         entity.getBodyParts().add(bodyPart);
 
         // OK now we're in the mime stream. It may have headers.
@@ -204,9 +205,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         String innerBoundary = boundary(partMimeType);
 
         // If the internal body part is not multipart alternative, then use the parent boundary.
-        if (innerBoundary == null) {
+        if (innerBoundary == null)
           innerBoundary = boundary;
-        }
 
         // Is this going to be a multi-level recursion?
         if (partMimeType.startsWith("multipart/"))
