@@ -41,6 +41,8 @@ public class Message implements HasBodyParts {
     return bodyParts;
   }
 
+  @Override public void createBodyParts() { /* Noop */ }
+
   // Short hand.
   @Override public void setBody(String body) {
     assert bodyParts.isEmpty() : "Unexpected set body call to a multipart email";
@@ -78,8 +80,9 @@ public class Message implements HasBodyParts {
       return bodyParts;
     }
 
-    public void setBodyParts(List<BodyPart> bodyParts) {
-      this.bodyParts = bodyParts;
+    @Override public void createBodyParts() {
+      if (null == bodyParts)
+        bodyParts = Lists.newArrayList();
     }
 
     public Multimap<String, String> getHeaders() {

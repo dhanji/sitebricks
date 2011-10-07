@@ -413,4 +413,37 @@ Content-Type: text/html
 --__BERIC-BOUNDARRION__--
 --__BOUNDARY__--
 )
+* 45979 FETCH (BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
+Subject: Re: Slow to Respond
+Content-Type: multipart/mixed;
+ boundary=----NextPart_1293809.9123_LLas
+X-Sitebricks-Test: multipart-alternatives;quoted-headers;nested-parts;rfc822
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+I am OOO and may have sporadic access to email.
+
+------NextPart_1293809.9123_LLas
+Content-Type: message/rfc822; charset="utf-8"
+X-Annoy: dhanji
+
+From: example@example.com
+To: example2@example.com
+Subject: As basic as it gets
+Content-Type: text/plain
+
+This is the plain text body of the message.  Note the blank line
+between the header information and the body of the message.
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset=us-ascii
+MIME-Version: 1.0
+
+This is a signature.
+
+------NextPart_1293809.9123_LLas--)
 4 OK Success

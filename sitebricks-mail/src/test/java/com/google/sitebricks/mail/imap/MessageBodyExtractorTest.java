@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -67,6 +68,7 @@ public class MessageBodyExtractorTest {
             Charsets.UTF_8);
 
     List<Message> extract = new MessageBodyExtractor().extract(lines);
+    assertEquals(11, extract.size());
 
     // ------------------------------------------------------------
     // First message.
@@ -246,6 +248,53 @@ public class MessageBodyExtractorTest {
     // multipart 3 parts each, 3-level deep, preambles/epilogues.
     message = extract.get(9);
     assertComplexNestedStructure(message);
+
+    // ------------------------------------------------------------
+    // Elevent message.
+    // multipart 3 parts, 1-level deep, message/rfc822 nested message.
+    message = extract.get(10);
+    assertRfc822(message);
+  }
+
+  private void assertRfc822(Message message) {
+    assertEquals(3, message.getBodyParts().size());
+
+    Message.BodyPart part1;
+    Message.BodyPart part2;
+    Message.BodyPart part3;
+
+    part1 = message.getBodyParts().get(0);
+    part2 = message.getBodyParts().get(1);
+    part3 = message.getBodyParts().get(2);
+
+    assertNotNull(part1);
+    assertNotNull(part2);
+    assertNotNull(part3);
+
+    assertTrue(Parsing.startsWithIgnoreCase(part1.getHeaders().get("Content-Type").iterator().next(), "text/plain"));
+    assertTrue(Parsing.startsWithIgnoreCase(part3.getHeaders().get("Content-Type").iterator().next(), "text/plain"));
+
+    // Message 2 is an encapsulated rfc822 message.
+    assertTrue(
+        Parsing.startsWithIgnoreCase(part2.getHeaders().get("Content-Type").iterator().next(),
+            "message/rfc822"));
+    assertEquals(part2.getHeaders().get("X-Annoy").iterator().next(), "dhanji");
+
+    assertNull(part2.getBody());
+    assertNull(part2.getBinBody());
+
+    // It should contain its content as a child message.
+    assertEquals(1, part2.getBodyParts().size());
+    Message.BodyPart rfc822 = part2.getBodyParts().get(0);
+    assertNotNull(rfc822);
+
+    assertEquals(4, rfc822.getHeaders().size());
+    assertEquals(rfc822.getHeaders().get("Content-Type").iterator().next(), "text/plain");
+
+    assertNull(rfc822.getBinBody());
+    assertNotNull(rfc822.getBody());
+    assertEquals("This is the plain text body of the message.  Note the blank line\r\n" +
+        "between the header information and the body of the message.\r\n\r\n", rfc822.getBody());
   }
 
   private void assertComplexNestedStructure(Message message) {

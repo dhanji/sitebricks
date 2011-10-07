@@ -210,7 +210,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
         // Is this going to be a multi-level recursion?
         if (partMimeType.startsWith("multipart/"))
-          bodyPart.setBodyParts(new ArrayList<Message.BodyPart>());
+          bodyPart.createBodyParts();
 
         // If the inner body was parsed up until we reached boundary end marker, ending with "--"
         // then skip everything until we see a start boundary marker.
@@ -229,6 +229,18 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
           break;
         }
       }
+    } else if (mimeType.startsWith("message/rfc822")) {
+      // These are encapsulated messages. I.e. a message inside a part. Go figure.
+      // We store them as a child body part, with the containing part having no body of its own,
+      // merely the headers.
+      Message.BodyPart bodyPart = new Message.BodyPart();
+      entity.createBodyParts();
+      entity.getBodyParts().add(bodyPart);
+
+      // Parse the body of this message as though it were a new message itself.
+      parseHeaderSection(iterator, bodyPart.getHeaders());
+      return parseBodyParts(iterator, bodyPart, mimeType(bodyPart.getHeaders()), boundary);
+
     } else {
       entity.setBody(readBodyAsBytes(transferEncoding(entity), iterator, boundary));
     }
@@ -379,8 +391,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     String value = split.length > 1 ? split[1] : "";
 
     // Check if the next line begins with a LWSP. If it does, then it is a continuation of this
-    // line.
-    // This is called "Unfolding" as per RFC 822. http://www.faqs.org/rfcs/rfc822.html
+    // line. This is called "Unfolding" as per RFC 822. http://www.faqs.org/rfcs/rfc822.html
     StringBuilder folded = new StringBuilder(value);
 
     // First read up to the next header.
