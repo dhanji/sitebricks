@@ -23,7 +23,6 @@ class MessageExtractor implements Extractor<List<MessageStatus>> {
   public List<MessageStatus> extract(List<String> messages) {
     List<MessageStatus> statuses = Lists.newArrayList();
     for (String message : messages) {
-      System.out.println(message);
       String[] split = message.split("[ ]+", 3);
 
       // Only parse Fetch responses.
