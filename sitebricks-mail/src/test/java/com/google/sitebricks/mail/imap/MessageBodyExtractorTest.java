@@ -85,7 +85,8 @@ public class MessageBodyExtractorTest {
     // And Java literals are encoded as UTF-8.
     assertEquals(part1.getBody().getBytes(), IOUtils.toByteArray(
         MessageBodyExtractorTest.class.getResourceAsStream("fetch_body_1_raw.dat")));
-
+    assertEquals(new String(part1.getBody().getBytes()), new String(IOUtils.toByteArray(
+        MessageBodyExtractorTest.class.getResourceAsStream("fetch_body_1_raw.dat"))));
 
     // ------------------------------------------------------------
     // Second message.
@@ -400,7 +401,7 @@ public class MessageBodyExtractorTest {
 
   @Test
   public final void testStartRegex() {
-    Pattern pattern = MessageBodyExtractor.MESSAGE_START_REGEX;
+    Pattern pattern = MessageBodyExtractor.MESSAGE_START_PREFIX_REGEX;
 
     assertTrue(pattern.matcher("* 5 FETCH (BODY[] {2346}").find());
     assertTrue(pattern.matcher("* 235 FETCH (BODY[]").find());

@@ -15,6 +15,7 @@ import java.util.List;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class Message implements HasBodyParts {
+  public static final Message ERROR = new Message();
   private MessageStatus status;
 
   // A header can have multiple, different values.

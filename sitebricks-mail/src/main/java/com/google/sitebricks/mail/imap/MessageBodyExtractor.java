@@ -35,8 +35,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   static final Pattern CHARSET_REGEX =
       Pattern.compile(";[\\s]*charset[\\s]*=[\\s]*[\"]?([^\"^;]*)[\"]?",
       Pattern.CASE_INSENSITIVE);
-  static final Pattern MESSAGE_START_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(BODY\\[\\]",
+  static final Pattern MESSAGE_START_PREFIX_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(BODY\\[\\]",
       Pattern.CASE_INSENSITIVE);
+  static final Pattern MESSAGE_START_REGEX = Pattern.compile("[*] \\d+ FETCH \\(BODY\\[\\] \\{\\d+\\}\\s*",
+      Pattern.CASE_INSENSITIVE);
+
   static final Pattern EOS_REGEX =
       Pattern.compile("^\\d+ ok success\\)?", Pattern.CASE_INSENSITIVE);
   private static final Pattern WHITESPACE_PREFIX_REGEX = Pattern.compile("^\\s+");
@@ -59,14 +62,40 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   @Override
   public List<Message> extract(List<String> messages) {
     List<Message> emails = Lists.newArrayList();
-    ListIterator<String> iterator = messages.listIterator();
 
-    while (iterator.hasNext()) {
-      Message message = parseMessage(iterator);
+    // Partition the incoming message set into individual message blocks.
+    // We do this to prevent errors in one individual message causing the entire
+    // batch to be corrupted.
+    List<List<String>> partitionedMessagesSet = Lists.newArrayList();
+    int start = 0;
+    for (int i = 0, messagesSize = messages.size(); i < messagesSize; i++) {
+      String message = messages.get(i);
+      if (MESSAGE_START_REGEX.matcher(message).matches() && i > start) {
+        // Partition.
+        partitionedMessagesSet.add(messages.subList(start, i));
+        start = i;
+      }
+    }
 
-      // Messages may be null if there are gaps in the returned body. These should be safe.
-      if (null != message)
-        emails.add(message);
+    // Pick up the trailing bit if any.
+    if (start < messages.size() - 1)
+      partitionedMessagesSet.add(messages.subList(start, messages.size()));
+
+    for (List<String> partitionedMessages : partitionedMessagesSet) {
+      ListIterator<String> iterator = partitionedMessages.listIterator();
+      while (iterator.hasNext()) {
+        try {
+        Message message = parseMessage(iterator);
+
+        // Messages may be null if there are gaps in the returned body. These should be safe.
+        if (null != message)
+          emails.add(message);
+        } catch (RuntimeException e) {
+          log.error("Unexpected error while parsing message", e);
+          // Instead add a sentinel for this message.
+          emails.add(Message.ERROR);
+        }
+      }
     }
 
     return emails;
@@ -111,7 +140,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       if (EOS_REGEX.matcher(next).matches()) {
         iterator.previous();
         break;
-      } else if (MESSAGE_START_REGEX.matcher(next).find()) {
+      } else if (MESSAGE_START_PREFIX_REGEX.matcher(next).find()) {
         iterator.previous();
         break;
       }
@@ -306,12 +335,13 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         String next = iterator.next();
         if (EOS_REGEX.matcher(next).matches())
           return true;
-        if (MESSAGE_START_REGEX.matcher(next).find()) {
+        if (MESSAGE_START_PREFIX_REGEX.matcher(next).find()) {
           iterator.previous();
           return true;
         } else  // oops, go back.
           iterator.previous();
-      }
+      } else
+        return true;    // If there are no more messages we have reached the end!
     }
     return false;
   }
