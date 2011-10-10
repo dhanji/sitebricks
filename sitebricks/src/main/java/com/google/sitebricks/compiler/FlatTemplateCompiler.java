@@ -35,7 +35,7 @@ class FlatTemplateCompiler {
         } catch (ExpressionCompileException e) {
             final List<CompileError> errors = Arrays.asList(
                     CompileError.in(template)
-                            .near(e.getError().getError().getRow())
+                            .near(e.getError().getError().getLineNumber())
                             .causedBy(e)
             );
 
