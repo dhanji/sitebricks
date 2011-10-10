@@ -45,6 +45,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   private static final Pattern WHITESPACE_PREFIX_REGEX = Pattern.compile("^\\s+");
 
   private static final Map<String, String> CONVERTIBLE_CHARSETS = Maps.newHashMap();
+  private static final Map<String, String> CONVERTIBLE_ENCODINGS = Maps.newHashMap();
   private static final String SEVEN_BIT = "7bit";
   private static final String UTF_8 = "UTF-8";
 
@@ -57,6 +58,15 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     CONVERTIBLE_CHARSETS.put("5029", "cp933");
     CONVERTIBLE_CHARSETS.put("938", "cp948");
     CONVERTIBLE_CHARSETS.put("5050", "cp33722");
+
+    CONVERTIBLE_ENCODINGS.put("7bitmime", "7bit");
+    CONVERTIBLE_ENCODINGS.put("7-bitmime", "7bit");
+    CONVERTIBLE_ENCODINGS.put("7-bit", "7bit");
+    CONVERTIBLE_ENCODINGS.put("8bitmime", "8bit");
+    CONVERTIBLE_ENCODINGS.put("8-bitmime", "8bit");
+    CONVERTIBLE_ENCODINGS.put("8-bit", "8bit");
+    CONVERTIBLE_ENCODINGS.put("base64mime", "base64");
+    CONVERTIBLE_ENCODINGS.put("quotedprintable", "quoted-printable");
   }
 
   @Override
@@ -174,7 +184,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     if (transferEncoding.isEmpty())
       return SEVEN_BIT;
 
-    return transferEncoding.toLowerCase();
+    transferEncoding = transferEncoding.toLowerCase();
+    String alternate = CONVERTIBLE_ENCODINGS.get(transferEncoding);
+    return (alternate != null) ? alternate : transferEncoding;
   }
 
   private static boolean parseBodyParts(ListIterator<String> iterator, HasBodyParts entity,
