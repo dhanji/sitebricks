@@ -182,7 +182,18 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     int end = transferEncoding.indexOf(";");
     if (end > -1)
       transferEncoding = transferEncoding.substring(0, end);
-    transferEncoding = Parsing.stripQuotes(transferEncoding);
+
+    int start = 0;
+    if (transferEncoding.startsWith("\""))
+      start = 1;
+    if (transferEncoding.endsWith("\""))
+      end = transferEncoding.length() - 1;
+    else
+      end = transferEncoding.length();
+
+    // Strip quotes.
+    if (start > 0 || end < transferEncoding.length())
+      transferEncoding = transferEncoding.substring(start, end);
 
     if (transferEncoding.isEmpty())
       return SEVEN_BIT;
