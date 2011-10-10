@@ -62,7 +62,7 @@ public abstract class CompileError {
 
     public CompileError causedBy(CompileErrors reason, String cause) {
       return new CompileErrorImpl(fragment, line,
-          new EvaluatorCompiler.CompileErrorDetail(cause, new ErrorDetail(cause, true)), reason);
+          new EvaluatorCompiler.CompileErrorDetail(cause, new ErrorDetail(fragment.toCharArray(), line, true, cause)), reason);
     }
   }
 

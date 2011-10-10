@@ -28,6 +28,6 @@ public final class ExpressionCompileException extends Throwable {
         //TODO is it enough to report just the first error?
         //ensure we wrap this in ${}
         return new EvaluatorCompiler.CompileErrorDetail(String.format("${%s}", expression),
-            new ErrorDetail(expression, true));
+            new ErrorDetail(expression.toCharArray(), 0, true, "error"));
     }
 }
