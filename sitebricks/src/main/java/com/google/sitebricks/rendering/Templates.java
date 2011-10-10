@@ -3,6 +3,7 @@ package com.google.sitebricks.rendering;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.StringBuilderRespond;
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
+@Singleton
 public class Templates {
   private final TemplateLoader loader;
   private final Compilers compilers;
