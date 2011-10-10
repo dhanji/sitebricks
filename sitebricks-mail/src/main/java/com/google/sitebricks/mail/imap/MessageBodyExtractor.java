@@ -67,6 +67,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     CONVERTIBLE_ENCODINGS.put("8-bit", "8bit");
     CONVERTIBLE_ENCODINGS.put("base64mime", "base64");
     CONVERTIBLE_ENCODINGS.put("quotedprintable", "quoted-printable");
+    CONVERTIBLE_ENCODINGS.put("quotedprintablemime", "quoted-printable");
+    CONVERTIBLE_ENCODINGS.put("quoted-printable-mime", "quoted-printable");
+    CONVERTIBLE_ENCODINGS.put("quoted-printablemime", "quoted-printable");
   }
 
   @Override
