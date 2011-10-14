@@ -78,7 +78,8 @@ class MailClientHandler extends SimpleChannelHandler {
     }
 
     try {
-      log.trace("Message received [{}] from {}", e.getMessage(), e.getRemoteAddress());
+      System.out.println(e.getMessage());
+      log.trace("Message received [{}]", e.getMessage());
       if (halt) {
         log.error("This mail client is halted but continues to receive messages, ignoring!");
         return;

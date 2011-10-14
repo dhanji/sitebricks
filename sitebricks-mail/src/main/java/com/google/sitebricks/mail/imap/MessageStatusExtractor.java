@@ -39,9 +39,8 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       if (null == message || message.isEmpty())
         continue;
 
-      // Discard the fetch token.
-      message = message.replaceFirst("[*]?[ ]*\\d+ ", "");
-      if (Command.isEndOfSequence(message.toLowerCase()))
+      // Discard the success token.
+      if (Command.isEndOfSequence(message))
         continue;
 
       // Appears that this message got split between lines. So unfold.
@@ -64,6 +63,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     MessageStatus status = new MessageStatus();
 
     // Assert that we have an envelope.
+    Parsing.match(tokens, int.class);
     Parsing.eat(tokens, "FETCH", "(");
 
     while (!tokens.isEmpty()) {

@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -15,17 +16,31 @@ public enum Command {
   FOLDER_OPEN("select"),
   FOLDER_EXAMINE("examine"),
   FETCH_HEADERS("fetch"),
-  IDLE("idle"); // IMAP4 IDLE command: http://www.ietf.org/rfc/rfc2177.txt
+  IDLE("idle");
+  private static final String OK_SUCCESS = "ok success";
 
   private final String commandString;
   private Command(String commandString) {
     this.commandString = commandString;
   }
 
+  private static final Pattern IMAP_COMMAND_SUCCESS = Pattern.compile("\\d+ ok success",
+      Pattern.CASE_INSENSITIVE);
   private static final Map<Command, Extractor<?>> dataExtractors;
 
-  public static boolean isEndOfSequence(String status) {
-    return status.startsWith("ok") && status.contains("success");
+  /**
+   * Expects message to be lower case.
+   */
+  public static boolean isEndOfSequence(Long sequence, String message) {
+    final String prefix = Long.toString(sequence) + " ";
+
+    return message.length() == (prefix.length() + OK_SUCCESS.length())
+        && prefix.equals(message.substring(0, prefix.length()))
+        && message.endsWith(OK_SUCCESS);
+  }
+
+  public static boolean isEndOfSequence(String message) {
+    return IMAP_COMMAND_SUCCESS.matcher(message).matches();
   }
 
   static {

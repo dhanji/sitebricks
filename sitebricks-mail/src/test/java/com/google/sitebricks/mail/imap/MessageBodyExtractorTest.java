@@ -199,6 +199,7 @@ public class MessageBodyExtractorTest {
         "text/plain"));
 
     assertEquals(part1.getBody(), "I am OOO and may have sporadic access to email.\r\n\r\n" +
+        "> OK Success\r\n\r\n" +
         "--\r\n");
 
     assertEquals(3, part2.getHeaders().size());
