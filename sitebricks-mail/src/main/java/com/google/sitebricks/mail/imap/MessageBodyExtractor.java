@@ -389,7 +389,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     while (iterator.hasNext()) {
       String message = iterator.next();
       // Watch for the end of sequence marker. If we see it, the mime-stream is ended.
-      if (Command.isEndOfSequence(message.replaceFirst("\\d+[ ]* ", "").toLowerCase()))
+      if (Command.isEndOfSequence(message))
         continue;
 
       // A blank line indicates end of the header section.
