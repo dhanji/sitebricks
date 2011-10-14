@@ -17,7 +17,8 @@ public enum Command {
   FOLDER_EXAMINE("examine"),
   FETCH_HEADERS("fetch"),
   IDLE("idle");
-  private static final String OK_SUCCESS = "ok success";
+  private static final Pattern OK_SUCCESS = Pattern.compile("\\d+ ok (.* )?\\(?success\\)?",
+      Pattern.CASE_INSENSITIVE);
 
   private final String commandString;
   private Command(String commandString) {
@@ -34,9 +35,9 @@ public enum Command {
   public static boolean isEndOfSequence(Long sequence, String message) {
     final String prefix = Long.toString(sequence) + " ";
 
-    return message.length() == (prefix.length() + OK_SUCCESS.length())
+    return message.length() >= (prefix.length())
         && prefix.equals(message.substring(0, prefix.length()))
-        && message.endsWith(OK_SUCCESS);
+        && OK_SUCCESS.matcher(message).matches();
   }
 
   public static boolean isEndOfSequence(String message) {

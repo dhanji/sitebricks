@@ -52,7 +52,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         i++;
       }
 
-      statuses.add(parseStatus(message));
+      statuses.add(parseStatus(message.replaceFirst("^[*] ", "")));
     }
 
     return statuses;
