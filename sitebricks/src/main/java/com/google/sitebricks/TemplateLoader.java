@@ -2,6 +2,7 @@ package com.google.sitebricks;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.rendering.Templates;
 
 import net.jcip.annotations.Immutable;
@@ -47,7 +48,7 @@ public class TemplateLoader {
           template = show.value();
         }
         
-        if (template == null || template.length() == 0) {
+        if (Strings.empty(template)) {
 	      // use the default name for the page class
 	      template = resolve(pageClass);
         }
