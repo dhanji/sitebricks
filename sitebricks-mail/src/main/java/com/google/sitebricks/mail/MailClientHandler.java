@@ -71,6 +71,7 @@ class MailClientHandler extends SimpleChannelHandler {
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     String message = e.getMessage().toString();
 
+    log.trace(message);
     if (SYSTEM_ERROR_REGEX.matcher(message).matches()) {
       log.warn("Disconnected by IMAP Server due to system error: {}", message);
       disconnectAbnormally(message);
@@ -97,7 +98,7 @@ class MailClientHandler extends SimpleChannelHandler {
         } else {
           Matcher matcher = COMMAND_FAILED_REGEX.matcher(message);
           if (matcher.find()) {
-            log.trace("Authentication failed");
+            log.trace("Authentication failed due to: {}", message);
             loginComplete.countDown();
             errorStack.push(new Error(null /* logins have no completion */, extractError(matcher)));
           }
