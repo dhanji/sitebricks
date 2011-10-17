@@ -203,9 +203,19 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     return (alternate != null) ? alternate : transferEncoding;
   }
 
+  private static boolean isAttachment(Multimap<String, String> headers) {
+    Collection<String> values = headers.get("Content-Disposition");
+    if (values.isEmpty())
+      return false;
+
+    String value = values.iterator().next().trim().toLowerCase();
+    return value.contains("attachment") || value.contains("filename");
+  }
+
   private static boolean parseBodyParts(ListIterator<String> iterator, HasBodyParts entity,
                                         String mimeType, String boundary) {
-    if (mimeType.startsWith("text/plain") || mimeType.startsWith("text/html")) {
+
+    if (mimeType.startsWith("text/") && !isAttachment(entity.getHeaders())) {
       String body = readBodyAsString(iterator, boundary);
 
       entity.setBody(decode(body, transferEncoding(entity), charset(mimeType)));
