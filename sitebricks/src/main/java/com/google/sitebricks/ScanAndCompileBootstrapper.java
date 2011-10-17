@@ -166,10 +166,7 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
   private Set<PageBook.Page> scanPagesToCompile(Set<Class<?>> set) {
     Set<Templates.Descriptor> templates = Sets.newHashSet();
     Set<PageBook.Page> pagesToCompile = Sets.newHashSet();
-    boolean customTemplatesExist = false;
-    if(!customTemplates.isEmpty()) {
-    	customTemplatesExist = true;
-    }
+    boolean customTemplatesExist = !customTemplates.isEmpty();
     for (Class<?> pageClass : set) {
     	
       EmbedAs embedAs = pageClass.getAnnotation(EmbedAs.class);
@@ -200,17 +197,14 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
       }
       //get templates for eagerly load in production mode
       if (Stage.DEVELOPMENT != currentStage) {
-	      if(customTemplatesExist) {
-	    	  if(customTemplates.containsKey(pageClass)) {
+              if(customTemplatesExist && customTemplates.containsKey(pageClass)) {
 	    		  Templates.Descriptor descriptor = customTemplates.get(pageClass);
 	    		  templates.add(descriptor);
 	    		  //customTemplate,don't care Show annotation
 	    		  continue;
-	    	  }
-	      }
+            }
 	      
 	      if (pageClass.isAnnotationPresent(Show.class)) {
-	    	  log.info("replace default template with "+ pageClass.getAnnotation(Show.class).value());
 	        // This has a template associated with it.
 	        templates.add(new Templates.Descriptor(pageClass,
 	            pageClass.getAnnotation(Show.class).value()));
