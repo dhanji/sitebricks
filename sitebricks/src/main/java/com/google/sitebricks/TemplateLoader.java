@@ -2,11 +2,14 @@ package com.google.sitebricks;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.sitebricks.rendering.Templates;
+
 import net.jcip.annotations.Immutable;
 
 import javax.servlet.ServletContext;
 import java.io.*;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -17,24 +20,37 @@ public class TemplateLoader {
 
   private final String[] fileNameTemplates = new String[] { "%s.html", "%s.xhtml", "%s.xml",
       "%s.txt", "%s.fml", "%s.mvel" };
-
+  
+  @Inject @Bricks
+  private final Map<Class<?>,Templates.Descriptor> customTemplates = null;
+  
   @Inject
   public TemplateLoader(Provider<ServletContext> context) {
     this.context = context;
   }
 
   public Template load(Class<?> pageClass) {
-	  // try to find the template name
-    Show show = pageClass.getAnnotation(Show.class);
-    String template = null;
-    if (null != show) {
-      template = show.value();
-    }
+	String template = null;
+	//first to check is there any custom template
+	if(!customTemplates.isEmpty()) {
+		if(customTemplates.containsKey(pageClass)) {
+			template = customTemplates.get(pageClass).getFileName();
+		}
+	}
     
     // an empty string means no template name was given
     if (template == null || template.length() == 0) {
-      // use the default name for the page class
-      template = resolve(pageClass);
+    	// try to find the template name
+        Show show = pageClass.getAnnotation(Show.class);
+        
+        if (null != show) {
+          template = show.value();
+        }
+        
+        if (template == null || template.length() == 0) {
+	      // use the default name for the page class
+	      template = resolve(pageClass);
+        }
     }
 
     String text;
@@ -65,9 +81,9 @@ public class TemplateLoader {
         if (null == stream) {
           throw new MissingTemplateException(String.format("Could not find a suitable template for %s, " +
               "did you remember to place an @Show? None of [" +
-              fileNameTemplates[0] +
+              template +
               "] could be found in either package [%s], in the root of the resource dir OR in WEB-INF/.",
-              pageClass.getName(), pageClass.getSimpleName(),
+              pageClass.getName(), 
               pageClass.getPackage().getName()));
         }
       }
