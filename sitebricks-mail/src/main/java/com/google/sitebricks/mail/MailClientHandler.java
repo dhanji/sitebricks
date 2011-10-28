@@ -72,7 +72,8 @@ class MailClientHandler extends SimpleChannelHandler {
     String message = e.getMessage().toString();
 
     log.trace(message);
-    if (SYSTEM_ERROR_REGEX.matcher(message).matches()) {
+    if (SYSTEM_ERROR_REGEX.matcher(message).matches()
+        || ". NO [ALERT] Account exceeded command or bandwidth limits. (Failure)".equalsIgnoreCase(message.trim())) {
       log.warn("Disconnected by IMAP Server due to system error: {}", message);
       disconnectAbnormally(message);
       return;
