@@ -57,6 +57,7 @@ class MailClientHandler extends SimpleChannelHandler {
   }
 
   private static class PushedData {
+    volatile boolean idleExitSent = false;
     final Set<Integer> pushAdds = Collections.synchronizedSet(Sets.<Integer>newHashSet());
     final Set<Integer> pushRemoves = Collections.synchronizedSet(Sets.<Integer>newHashSet());
 
@@ -143,8 +144,9 @@ class MailClientHandler extends SimpleChannelHandler {
         }
 
         // Stop idling, when we get the stopped idling message we can publish shit.
-        if (matched) {
+        if (matched && !pushedData.idleExitSent) {
           idler.done();
+          pushedData.idleExitSent = true;
           return;
         }
       }
