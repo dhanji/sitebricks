@@ -310,7 +310,10 @@ class NettyImapClient implements MailClient, Idler {
     done();
   }
 
-
+  @Override
+  public boolean isIdling() {
+    return mailClientHandler.idleAcknowledged.get();
+  }
 
   public synchronized void done() {
     log.trace("Dropping out of IDLE...");

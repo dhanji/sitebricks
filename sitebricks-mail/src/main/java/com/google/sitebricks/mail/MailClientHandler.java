@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,6 +44,7 @@ class MailClientHandler extends SimpleChannelHandler {
   private volatile List<String> capabilities;
   private volatile FolderObserver observer;
   final AtomicBoolean idling = new AtomicBoolean();
+  final AtomicBoolean idleAcknowledged = new AtomicBoolean();
 
   // Panic button.
   private volatile boolean halt = false;
@@ -100,10 +102,11 @@ class MailClientHandler extends SimpleChannelHandler {
         } else {
           Matcher matcher = COMMAND_FAILED_REGEX.matcher(message);
           if (matcher.find()) {
-            log.trace("Authentication failed due to: {}", message);
+            log.warn("Authentication failed due to: {}", message);
             loginComplete.countDown();
             errorStack.push(new Error(null /* logins have no completion */, extractError(matcher)));
-          }
+          } else
+            log.info("Prelogin message: {}", message);
         }
         // TODO handle auth failed
         return;
@@ -117,6 +120,8 @@ class MailClientHandler extends SimpleChannelHandler {
 
         if (IDLE_ENDED_REGEX.matcher(message).matches()) {
           idling.compareAndSet(true, false);
+          idleAcknowledged.set(false);
+
           // Now fire the events.
           PushedData data = pushedData;
           pushedData = null;
@@ -188,9 +193,10 @@ class MailClientHandler extends SimpleChannelHandler {
 
     CommandCompletion completion = completions.peek();
     if (completion == null) {
-      if ("+ idling".equalsIgnoreCase(message))
-        log.debug("IDLE entered.");
-      else
+      if ("+ idling".equalsIgnoreCase(message)) {
+        log.trace("IDLE entered.");
+        idleAcknowledged.set(true);
+      } else
         log.error("Could not find the completion for message {} (Was it ever issued?)", message);
       return;
     }
@@ -212,7 +218,7 @@ class MailClientHandler extends SimpleChannelHandler {
 
   boolean awaitLogin() {
     try {
-      loginComplete.await();
+      loginComplete.await(10L, TimeUnit.SECONDS);
 
       return errorStack.isEmpty(); // No error == success!
     } catch (InterruptedException e) {
@@ -232,6 +238,7 @@ class MailClientHandler extends SimpleChannelHandler {
   void observe(FolderObserver observer) {
     this.observer = observer;
     pushedData = new PushedData();
+    idleAcknowledged.set(false);
   }
 
   void halt() {
