@@ -111,6 +111,7 @@ class MailClientHandler extends SimpleChannelHandler {
       // Copy to local var as the value can change underneath us.
       FolderObserver observer = this.observer;
       if (idling.get()) {
+        log.info("Message received during idling: {}", message);
         message = message.toLowerCase();
 
         if (IDLE_ENDED_REGEX.matcher(message).matches()) {
