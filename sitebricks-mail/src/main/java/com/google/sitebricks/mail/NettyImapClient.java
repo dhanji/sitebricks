@@ -43,6 +43,7 @@ class NettyImapClient implements MailClient, Idler {
   private volatile Channel channel;
   private volatile Folder currentFolder = null;
   private volatile boolean loggedIn = false;
+  private volatile DisconnectListener disconnectListener;
 
   public NettyImapClient(MailClientConfig config,
                          ExecutorService bossPool,
@@ -102,6 +103,7 @@ class NettyImapClient implements MailClient, Idler {
     }
 
     this.channel = channel;
+    this.disconnectListener = listener;
     if (null != listener) {
       // https://issues.jboss.org/browse/NETTY-47?page=com.atlassian.jirafisheyeplugin%3Afisheye-issuepanel#issue-tabs
       channel.getCloseFuture().addListener(new ChannelFutureListener() {
@@ -145,6 +147,9 @@ class NettyImapClient implements MailClient, Idler {
       // The Netty channel close listener will fire a disconnect event to our client,
       // automatically. See connect() for details.
       channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
+
+      if (!isConnected())
+        disconnectListener.disconnected();
     }
   }
 
@@ -304,6 +309,8 @@ class NettyImapClient implements MailClient, Idler {
     mailClientHandler.observe(null);
     channel.write("done\r\n");
   }
+
+
 
   public synchronized void done() {
     log.trace("Dropping out of IDLE...");
