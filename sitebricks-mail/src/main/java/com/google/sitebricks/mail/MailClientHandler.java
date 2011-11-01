@@ -126,11 +126,8 @@ class MailClientHandler extends SimpleChannelHandler {
           PushedData data = pushedData;
           pushedData = null;
 
-          // Observer may be null if the client has explicitly called unwatch(). In
-          // which case it is not interested in events anyway.
-          if (observer != null)
-            observer.changed(data.pushAdds.isEmpty() ? null : data.pushAdds,
-                data.pushRemoves.isEmpty() ? null : data.pushRemoves);
+          observer.changed(data.pushAdds.isEmpty() ? null : data.pushAdds,
+              data.pushRemoves.isEmpty() ? null : data.pushRemoves);
           return;
         }
 

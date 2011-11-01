@@ -304,9 +304,6 @@ class NettyImapClient implements MailClient, Idler {
     if (!mailClientHandler.idling.get())
       return;
 
-    // Stop watching folders. It's OK to null this early, because any interleaving new mail
-    // events will just be dropped on the floor if there is no folder observer.
-    mailClientHandler.observe(null);
     done();
   }
 
