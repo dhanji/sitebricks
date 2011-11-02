@@ -108,6 +108,7 @@ class NettyImapClient implements MailClient, Idler {
       // https://issues.jboss.org/browse/NETTY-47?page=com.atlassian.jirafisheyeplugin%3Afisheye-issuepanel#issue-tabs
       channel.getCloseFuture().addListener(new ChannelFutureListener() {
         @Override public void operationComplete(ChannelFuture future) throws Exception {
+          mailClientHandler.idleAcknowledged.set(false);
           listener.disconnected();
         }
       });
@@ -148,6 +149,7 @@ class NettyImapClient implements MailClient, Idler {
       // automatically. See connect() for details.
       channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
 
+      mailClientHandler.idleAcknowledged.set(false);
       if (!isConnected())
         disconnectListener.disconnected();
     }
