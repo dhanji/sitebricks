@@ -8,5 +8,5 @@ import java.util.List;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 interface Extractor<D> {
-  D extract(List<String> messages);
+  D extract(List<String> messages) throws ExtractionException;
 }

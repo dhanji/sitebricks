@@ -40,7 +40,7 @@ public class MessageStatusExtractorTest {
         "NIL", "\"<BANLkTimf9tS+aJXa1QLdMiH4OgtdK7k=FQ@mail.gmail.com>\"", ")", "FLAGS", "(", "\\Flagged", "\\Seen", ")",
         "INTERNALDATE", "\"10-Apr-2011 06:38:59 +0000\"", "RFC822.SIZE", "2005", ")" } ;
 
-    assertEquals(new ArrayList<String>(tokens), Arrays.asList(expected));
+    assertEquals(new ArrayList<String>(tokens), Arrays.asList(expected), "Tokens mismatched, expected: " + expected + " got: " + tokens);
   }
 
   /**

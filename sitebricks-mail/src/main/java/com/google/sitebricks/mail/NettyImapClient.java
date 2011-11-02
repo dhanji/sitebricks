@@ -3,11 +3,7 @@ package com.google.sitebricks.mail;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import com.google.sitebricks.mail.imap.Command;
-import com.google.sitebricks.mail.imap.Folder;
-import com.google.sitebricks.mail.imap.FolderStatus;
-import com.google.sitebricks.mail.imap.Message;
-import com.google.sitebricks.mail.imap.MessageStatus;
+import com.google.sitebricks.mail.imap.*;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -17,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -269,6 +266,24 @@ class NettyImapClient implements MailClient, Idler {
     return (end > 0)
         ? Integer.toString(end)
         : "*";
+  }
+
+  @Override
+  public ListenableFuture<List<EnumSet<Flag>>> addFlags(EnumSet<Flag> flags, int imapUid) {
+    return addOrRemoveFlags(flags, imapUid, true);
+  }
+  @Override
+  public ListenableFuture<List<EnumSet<Flag>>> removeFlags(EnumSet<Flag> flags, int imapUid) {
+    return addOrRemoveFlags(flags, imapUid, false);
+  }
+
+
+  private ListenableFuture<List<EnumSet<Flag>>> addOrRemoveFlags(EnumSet<Flag> flags, int imapUid, boolean add) {
+    Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
+    SettableFuture<List<EnumSet<Flag>>> valueFuture = SettableFuture.create();
+    String args = imapUid + " " + (add ? "+" : "-") + Flag.toImap(flags);
+    send(Command.STORE_FLAGS, args, valueFuture);
+    return valueFuture;
   }
 
   @Override

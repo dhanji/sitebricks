@@ -3,6 +3,7 @@ package com.google.sitebricks.mail;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.sitebricks.mail.imap.Command;
+import com.google.sitebricks.mail.imap.ExtractionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +57,12 @@ class CommandCompletion {
     if (Command.isEndOfSequence(sequence, message.toLowerCase())) {
       // Once we see the OK message, we should process the data and return.
       value.add(message);
-      valueFuture.set(command.extract(value));
+      try {
+        valueFuture.set(command.extract(value));
+      }
+      catch(ExtractionException ee) {
+        valueFuture.setException(ee);
+      }
       return true;
     }
 

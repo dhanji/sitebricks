@@ -3,11 +3,13 @@ package com.google.sitebricks.mail;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Guice;
 import com.google.sitebricks.mail.Mail.Auth;
+import com.google.sitebricks.mail.imap.Flag;
 import com.google.sitebricks.mail.imap.Folder;
 import com.google.sitebricks.mail.imap.FolderStatus;
 import com.google.sitebricks.mail.imap.Message;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -34,7 +36,7 @@ public class MailClientIntegrationTest {
   public static void main(String...args) throws InterruptedException, ExecutionException {
     Mail mail = Guice.createInjector().getInstance(Mail.class);
     final MailClient client = mail.clientOf("imap.gmail.com", 993)
-        .prepare(Auth.SSL, "dhanji@gmail.com", System.getProperty("sitebricks-mail.password"));
+         .prepare(Auth.SSL, "dhanji@gmail.com", System.getProperty("sitebricks-mail.password"));
 
     client.connect();
 
@@ -43,7 +45,7 @@ public class MailClientIntegrationTest {
 
     final ListenableFuture<FolderStatus> fStatus =
         client.statusOf("[Gmail]/All Mail");
-    ListenableFuture<Folder> future = client.open("[Gmail]/All Mail");
+    ListenableFuture<Folder> future = client.open("[Gmail]/All Mail", true);
     final Folder allMail = future.get();
     final FolderStatus folderStatus = fStatus.get();
     System.out.println("Folder opened: " + allMail.getName() + " with count " + folderStatus.getMessages());
@@ -69,6 +71,9 @@ public class MailClientIntegrationTest {
 //          for (MessageStatus status : messages.get()) {
 //            System.out.println(ToStringBuilder.reflectionToString(status));
 //          }
+//
+
+          client.addFlags(EnumSet.of(Flag.SEEN), messages.get().get(2).getImapUid());
 
           System.out.println("Fetched: " + messages.get().size());
         } catch (InterruptedException e) {

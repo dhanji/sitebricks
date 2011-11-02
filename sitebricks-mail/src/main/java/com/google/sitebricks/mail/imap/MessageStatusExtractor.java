@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.regex.Pattern;
@@ -122,19 +123,10 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
   }
 
   private static boolean parseFlags(Queue<String> tokens, MessageStatus status) {
-    if (Parsing.matchAnyOf(tokens, "FLAGS") == null)
+    EnumSet<Flag> flags = Flag.parseFlagList(tokens);
+    if (flags == null)
       return false;
-    Parsing.eat(tokens, "(");
-
-    // Check if there are flags to set.
-    while (!")".equals(tokens.peek())) {
-      String token = tokens.poll();
-      Flag flag = Flag.parse(token);
-      if (flag != null)
-        status.getFlags().add(flag);
-      else log.warn("Unknown flag type encountered {}, ignoring.", token);
-    }
-    Parsing.eat(tokens, ")");
+    status.getFlags().addAll(flags);
     return true;
   }
 
