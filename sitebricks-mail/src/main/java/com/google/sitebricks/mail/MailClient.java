@@ -130,5 +130,15 @@ public interface MailClient {
 
   static interface DisconnectListener {
     void disconnected();
+
+    /**
+     * Called when the server acknowledges IDLE.
+     */
+    void idled();
+
+    /**
+     * Called when the server acknowledges exit from IDLE.
+     */
+    void unidled();
   }
 }

@@ -317,6 +317,14 @@ class NettyImapClient implements MailClient, Idler {
     channel.write("done\r\n");
   }
 
+  @Override public void idleStart() {
+    disconnectListener.idled();
+  }
+
+  @Override public void idleEnd() {
+    disconnectListener.unidled();
+  }
+
   private void checkCurrentFolder(Folder folder) {
     Preconditions.checkState(folder.equals(currentFolder), "You must have opened folder %s" +
         " before attempting to read from it (%s is currently open).", folder.getName(),

@@ -126,6 +126,7 @@ class MailClientHandler extends SimpleChannelHandler {
           PushedData data = pushedData;
           pushedData = null;
 
+          idler.idleEnd();
           observer.changed(data.pushAdds.isEmpty() ? null : data.pushAdds,
               data.pushRemoves.isEmpty() ? null : data.pushRemoves);
           return;
@@ -195,6 +196,7 @@ class MailClientHandler extends SimpleChannelHandler {
     CommandCompletion completion = completions.peek();
     if (completion == null) {
       if ("+ idling".equalsIgnoreCase(message)) {
+        idler.idleStart();
         log.trace("IDLE entered.");
         idleAcknowledged.set(true);
       } else

@@ -7,4 +7,8 @@ interface Idler {
   void done();
 
   void disconnect();
+
+  void idleEnd();
+
+  void idleStart();
 }
