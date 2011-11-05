@@ -34,11 +34,12 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       Pattern.CASE_INSENSITIVE);
   static final Pattern CHARSET_REGEX =
       Pattern.compile(";[\\s]*charset[\\s]*=[\\s]*[\"]?([^\"^;]*)[\"]?",
-      Pattern.CASE_INSENSITIVE);
+          Pattern.CASE_INSENSITIVE);
   static final Pattern MESSAGE_START_PREFIX_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(BODY\\[\\]",
       Pattern.CASE_INSENSITIVE);
-  static final Pattern MESSAGE_START_REGEX = Pattern.compile("[*] \\d+ FETCH \\(BODY\\[\\] \\{\\d+\\}\\s*",
-      Pattern.CASE_INSENSITIVE);
+  static final Pattern MESSAGE_START_REGEX =
+      Pattern.compile("[*] \\d+ FETCH \\(BODY\\[\\] \\{\\d+\\}\\s*",
+          Pattern.CASE_INSENSITIVE);
 
   static final Pattern EOS_REGEX =
       Pattern.compile("^\\d+ ok success\\)?", Pattern.CASE_INSENSITIVE);
@@ -96,18 +97,17 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
     for (List<String> partitionedMessages : partitionedMessagesSet) {
       ListIterator<String> iterator = partitionedMessages.listIterator();
-      while (iterator.hasNext()) {
-        try {
-        Message message = parseMessage(iterator);
-
-        // Messages may be null if there are gaps in the returned body. These should be safe.
-        if (null != message)
-          emails.add(message);
-        } catch (RuntimeException e) {
-          log.error("Unexpected error while parsing message", e);
-          // Instead add a sentinel for this message.
-          emails.add(Message.ERROR);
+      try {
+        while (iterator.hasNext()) {
+          Message message = parseMessage(iterator);
+          // Messages may be null if there are gaps in the returned body. These should be safe.
+          if (null != message)
+            emails.add(message);
         }
+      } catch (RuntimeException e) {
+        log.error("Unexpected error while parsing message", e);
+        // Instead add a sentinel for this message.
+        emails.add(Message.ERROR);
       }
     }
 
@@ -224,7 +224,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
       // Skip everything upto the first occurrence of boundary (called the "Preamble")
       //noinspection StatementWithEmptyBody
-      while (iterator.hasNext() && !boundaryToken.equalsIgnoreCase(iterator.next()));
+      while (iterator.hasNext() && !boundaryToken.equalsIgnoreCase(iterator.next())) ;
 
       // Now parse the multipart body in sequence, recursing down as needed...
       while (iterator.hasNext()) {
@@ -252,7 +252,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         // then skip everything until we see a start boundary marker.
         if (parseBodyParts(iterator, bodyPart, partMimeType, innerBoundary)) {
           //noinspection StatementWithEmptyBody
-          while (iterator.hasNext() && !Parsing.startsWithIgnoreCase(iterator.next(), boundaryToken));
+          while (iterator.hasNext() && !Parsing.startsWithIgnoreCase(iterator.next(),
+              boundaryToken)) ;
         }
 
         // we're only done if the last line has a terminal suffix of '--'
@@ -332,7 +333,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     return "--" + boundary.trim();
   }
 
-  private static byte[] readBodyAsBytes(String transferEncoding, ListIterator<String> iterator, String boundary) {
+  private static byte[] readBodyAsBytes(String transferEncoding,
+                                        ListIterator<String> iterator,
+                                        String boundary) {
     byte[] bytes = readBodyAsString(iterator, boundary).getBytes();
 
     // Decode if this is encoded as binary-to-text.
@@ -417,9 +420,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
     // Some header blocks are malformed, and contain lines that have no ':'
     if (!message.contains(":")) {
-        log.warn("Malformed message header encountered at {}: {}. Skipping...",
-            iterator.previousIndex(),
-            message);
+      log.warn("Malformed message header encountered at {}: {}. Skipping...",
+          iterator.previousIndex(),
+          message);
       return;
     }
     // It is possible for the header to have no value.
