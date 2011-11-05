@@ -140,7 +140,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     }
 
     // OK now parse the header stream.
-    parseHeaderSection(iterator, email.getHeaders());
+    parseHeaderSection(iterator, email.getHeaders(), null);
 
     // OK now parse the body/mime stream...
     // First determine the mimetype.
@@ -238,7 +238,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         entity.getBodyParts().add(bodyPart);
 
         // OK now we're in the mime stream. It may have headers.
-        parseHeaderSection(iterator, bodyPart.getHeaders());
+        parseHeaderSection(iterator, bodyPart.getHeaders(), null);
 
         // And parse the body itself (seek up to the next occurrence of boundary token).
         // Recurse down this method to slurp up different content types.
@@ -279,8 +279,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       entity.createBodyParts();
       entity.getBodyParts().add(bodyPart);
 
+      Collection<String> encoding = entity.getHeaders().get("Content-Transfer-Encoding");
+      String headerEncoding = encoding.isEmpty() ? null : encoding.iterator().next();
+
       // Parse the body of this message as though it were a new message itself.
-      parseHeaderSection(iterator, bodyPart.getHeaders());
+      parseHeaderSection(iterator, bodyPart.getHeaders(), headerEncoding);
       return parseBodyParts(iterator, bodyPart, mimeType(bodyPart.getHeaders()), boundary);
 
     } else {
@@ -403,7 +406,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   }
 
   private static void parseHeaderSection(ListIterator<String> iterator,
-                                         Multimap<String, String> headers) {
+                                         Multimap<String, String> headers,
+                                         String headerEncoding) {
     while (iterator.hasNext()) {
       String message = iterator.next();
       // Watch for the end of sequence marker. If we see it, the mime-stream is ended.
@@ -413,12 +417,15 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       // A blank line indicates end of the header section.
       if (message.isEmpty())
         break;
-      parseHeaderPair(message, iterator, headers);
+      parseHeaderPair(message, iterator, headers, headerEncoding);
     }
   }
 
-  private static void parseHeaderPair(String message, ListIterator<String> iterator,
-                                      Multimap<String, String> headers) {
+  private static void parseHeaderPair(String message,
+                                      ListIterator<String> iterator,
+                                      Multimap<String,
+                                      String> headers,
+                                      String headerEncoding) {
     // Totally empty header line (i.e. stray whitespace).
     if (message.isEmpty())
       return;
@@ -456,6 +463,10 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
     // Now unfold using javamail's algorithm.
     value = MimeUtility.unfold(folded.toString());
+
+    // Decode content-transfer-encoding if necessary
+    if (headerEncoding != null)
+      value = decode(value, headerEncoding, "utf-8");
 
     // Header values can be specially encoded.
     value = DecoderUtil.decodeEncodedWords(value);
