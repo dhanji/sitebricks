@@ -16,11 +16,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -72,7 +68,6 @@ public class MessageBodyExtractorTest {
 
     List<Message> extract = new MessageBodyExtractor().extract(lines);
     assertEquals(11, extract.size());
-
     // ------------------------------------------------------------
     // First message.
     // Folded headers with tabs + spaces, repeat headers, one body.
@@ -456,19 +451,22 @@ public class MessageBodyExtractorTest {
   public final void testStartRegex() {
     Pattern pattern = MessageBodyExtractor.MESSAGE_START_PREFIX_REGEX;
 
-    assertTrue(pattern.matcher("* 5 FETCH (BODY[] {2346}").find());
-    assertTrue(pattern.matcher("* 235 FETCH (BODY[]").find());
-    assertTrue(pattern.matcher("* 1 FETCH (BODY[] AOKSDOAKSD").find());
+    assertTrue(pattern.matcher("* 5 FETCH (UID 1001 BODY[] {2346}").find());
+    assertTrue(pattern.matcher("* 235 FETCH (UID 1001 BODY[]").find());
+    assertTrue(pattern.matcher("* 1 FETCH (UID 1001 BODY[] AOKSDOAKSD").find());
 
-    assertFalse(pattern.matcher(" * 1 FETCH (BODY[] AOKSDOAKSD").find());
-    assertFalse(pattern.matcher("X * 1 FETCH (BODY[] AOKSDOAKSD").find());
+    assertFalse(pattern.matcher(" * 1 FETCH (UID 1001 BODY[] AOKSDOAKSD").find());
+    assertFalse(pattern.matcher("X * 1 FETCH (UID 1001 BODY[] AOKSDOAKSD").find());
 
-    assertFalse(pattern.matcher(" 1 FETCH (BODY[] AOKSDOAKSD").find());
-    assertFalse(pattern.matcher("* 1 FETCH(BODY[] AOKSDOAKSD").find());
-    assertFalse(pattern.matcher("* 1 FETCH (BODY [ ] AOKSDOAKSD").find());
-    assertFalse(pattern.matcher("* 1 FETCH (BODY [] {2345}").find());
-    assertFalse(pattern.matcher(" * 1 FETCH (BODY [] {2345}").find());
-    assertFalse(pattern.matcher("T * 1 FETCH (BODY [] {2345}").find());
+    assertFalse(pattern.matcher(" 1 FETCH (UID1001 BODY[] AOKSDOAKSD").find());
+    assertFalse(pattern.matcher("* 1 FETCH(UID 1001  BODY [] AOKSDOAKSD").find());
+    assertFalse(pattern.matcher("* 1 FETCH(UID 1001BODY [] AOKSDOAKSD").find());
+    assertFalse(pattern.matcher(" 1 FETCH (UID 1001 BODY[] AOKSDOAKSD").find());
+    assertFalse(pattern.matcher("* 1 FETCH(UID 1001 BODY[] AOKSDOAKSD").find());
+    assertFalse(pattern.matcher("* 1 FETCH (UID 1001 BODY [ ] AOKSDOAKSD").find());
+    assertFalse(pattern.matcher("* 1 FETCH (UID 1001 BODY [] {2345}").find());
+    assertFalse(pattern.matcher(" * 1 FETCH (UID 1001 BODY [] {2345}").find());
+    assertFalse(pattern.matcher("T * 1 FETCH (UID 1001 BODY [] {2345}").find());
   }
 
   @Test

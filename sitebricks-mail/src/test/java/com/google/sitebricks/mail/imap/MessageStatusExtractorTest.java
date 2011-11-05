@@ -25,19 +25,19 @@ public class MessageStatusExtractorTest {
   @Test
   public final void testTokenizer() throws IOException, ParseException {
     Queue<String> tokens =
-        Parsing.tokenize("7 FETCH (ENVELOPE (\"Sun, 10 Apr 2011 16:38:38 +1000\" " +
+        Parsing.tokenize("7 FETCH (UID 99 ENVELOPE (\"Sun, 10 Apr 2011 16:38:38 +1000\" " +
             "\"test\" ((\"Scott Bakula\" NIL \"test.account\" \" gmail.  om\")) ((\"Scott " +
             "Bakula\" " +
             "NIL \"agent.bain\" \"gmail.com\")) ((\"Scott Bakula\" NIL \"test.account\" \"gmail" +
             ".com\")) ((NIL NIL \"telnet.imap\" \"gmail.com\")) NIL NIL NIL " +
-            "\"<BANLkTimf9tS+aJXa1QLdMiH4OgtdK7k=FQ@mail.gmail.com>\") FLAGS () INTERNALDATE " +
+            "\"<BANLkTimf9tS+aJXa1QLdMiH4OgtdK7k=FQ@mail.gmail.com>\") FLAGS (\\Flagged \\Seen) INTERNALDATE " +
             "\"10-Apr-2011 06:38:59 +0000\" RFC822.SIZE 2005)");
 
-    String[] expected = new String[] { "7", "FETCH", "(", "ENVELOPE", "(", "\"Sun, 10 Apr 2011 16:38:38 +1000\"", "\"test\"", "(", "(",
+    String[] expected = new String[] { "7", "FETCH", "(", "UID", "99", "ENVELOPE", "(", "\"Sun, 10 Apr 2011 16:38:38 +1000\"", "\"test\"", "(", "(",
         "\"Scott Bakula\"", "NIL", "\"test.account\"", "\" gmail.  om\"", ")", ")", "(", "(", "\"Scott Bakula\"",
         "NIL", "\"agent.bain\"", "\"gmail.com\"", ")", ")", "(", "(", "\"Scott Bakula\"", "NIL", "\"test.account\"",
         "\"gmail.com\"", ")", ")", "(", "(", "NIL", "NIL", "\"telnet.imap\"", "\"gmail.com\"", ")", ")", "NIL", "NIL",
-        "NIL", "\"<BANLkTimf9tS+aJXa1QLdMiH4OgtdK7k=FQ@mail.gmail.com>\"", ")", "FLAGS", "(", ")",
+        "NIL", "\"<BANLkTimf9tS+aJXa1QLdMiH4OgtdK7k=FQ@mail.gmail.com>\"", ")", "FLAGS", "(", "\\Flagged", "\\Seen", ")",
         "INTERNALDATE", "\"10-Apr-2011 06:38:59 +0000\"", "RFC822.SIZE", "2005", ")" } ;
 
     assertEquals(new ArrayList<String>(tokens), Arrays.asList(expected));

@@ -17,10 +17,19 @@ import java.util.List;
 public class Message implements HasBodyParts {
   public static final Message ERROR = new Message();
   private MessageStatus status;
+  private int imapUid;
 
   // A header can have multiple, different values.
   private Multimap<String, String> headers = newListMultimap();
   private List<BodyPart> bodyParts = new ArrayList<BodyPart>();
+
+  public void setImapUid(int imapUid) {
+    this.imapUid = imapUid;
+  }
+
+  public int getImapUid() {
+    return imapUid;
+  }
 
   public void setHeaders(Multimap<String, String> headers) {
     this.headers = headers;

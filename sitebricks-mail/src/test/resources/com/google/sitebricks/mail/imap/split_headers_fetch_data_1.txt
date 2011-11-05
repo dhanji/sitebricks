@@ -1,4 +1,4 @@
-* 1553 FETCH (BODY[] {13469}
+* 1553 FETCH (UID 1013 BODY[] {13469}
 Delivered-To: visibletweets@gmail.com
 Received: by 10.216.51.81 with SMTP id a59cs18680wec;
         Sun, 3 Apr 2011 17:38:16 -0700 (PDT)

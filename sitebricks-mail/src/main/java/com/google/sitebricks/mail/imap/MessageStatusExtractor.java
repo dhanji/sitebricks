@@ -67,7 +67,8 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     Parsing.eat(tokens, "FETCH", "(");
 
     while (!tokens.isEmpty()) {
-      boolean match = parseEnvelope(tokens, status);
+      boolean match = parseUid(tokens, status);
+      match |= parseEnvelope(tokens, status);
       match |= parseFlags(tokens, status);
       match |= parseInternalDate(tokens, status);
       match |= parseRfc822Size(tokens, status);
@@ -134,6 +135,13 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       else log.warn("Unknown flag type encountered {}, ignoring.", token);
     }
     Parsing.eat(tokens, ")");
+    return true;
+  }
+
+  private static boolean parseUid(Queue<String> tokens, MessageStatus status) {
+    if (Parsing.matchAnyOf(tokens, "UID") == null)
+      return false;
+    status.setImapUid(Parsing.match(tokens, int.class));
     return true;
   }
 

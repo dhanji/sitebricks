@@ -11,6 +11,7 @@ import java.util.Set;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class MessageStatus {
+  private int imapUid;
   private String messageUid;
   private Date receivedDate;
   private String subject;
@@ -31,6 +32,13 @@ public class MessageStatus {
   private Set<String> labels;
   private Long gmailMsgId;
 
+  public int getImapUid() {
+    return imapUid;
+  }
+
+  public void setImapUid(int imapUid) {
+    this.imapUid = imapUid;
+  }
 
   public int getSize() {
     return size;
@@ -158,7 +166,8 @@ public class MessageStatus {
 
   @Override public String toString() {
     return "MessageStatus{" +
-        "messageUid='" + messageUid + '\'' +
+        "imapUid=" + imapUid +
+        ", messageUid='" + messageUid + '\'' +
         ", receivedDate=" + receivedDate +
         ", subject='" + subject + '\'' +
         ", inReplyTo='" + inReplyTo + '\'' +
