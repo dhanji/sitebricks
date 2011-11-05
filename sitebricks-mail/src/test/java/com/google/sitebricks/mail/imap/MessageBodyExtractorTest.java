@@ -282,6 +282,8 @@ public class MessageBodyExtractorTest {
     assertTrue(
         Parsing.startsWithIgnoreCase(part2.getHeaders().get("Content-Type").iterator().next(),
             "message/rfc822"));
+    assertEquals(part2.getHeaders().get("Message-ID").iterator().next(), "<9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie15>");
+    assertEquals(part2.getHeaders().get("In-Reply-To").iterator().next(), "<AANLkTikNOzOVjj=3DmS8nFXoiuW=3DLPufKKsK_SOPEXdCby@mail.gmail.com>");
     assertEquals(part2.getHeaders().get("X-Annoy").iterator().next(), "dhanji");
 
     assertNull(part2.getBody());

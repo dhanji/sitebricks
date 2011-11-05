@@ -108,6 +108,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         log.error("Unexpected error while parsing message", e);
         // Instead add a sentinel for this message.
         emails.add(Message.ERROR);
+        System.out.println("---");
+        for (String piece : partitionedMessages) {
+          System.out.println(piece);
+        }
+        System.out.println("---");
       }
     }
 
@@ -438,7 +443,12 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       String next = iterator.next();
       if (WHITESPACE_PREFIX_REGEX.matcher(next).find())
         folded.append(next);
-      else {
+      else if (message.endsWith("=") && !next.contains(":")) {
+        // HACK!!! To account for nested quoted-printable headers. We unfold header lines that
+        // *appear* to be quoted printable. This should really be handled separately.
+        folded.deleteCharAt(folded.length() - 1);
+        folded.append(next);
+      } else {
         iterator.previous();
         break;
       }

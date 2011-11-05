@@ -150,7 +150,7 @@ class NettyImapClient implements MailClient, Idler {
       channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
 
       mailClientHandler.idleAcknowledged.set(false);
-      if (!isConnected())
+      if (!isConnected() && disconnectListener != null)
         disconnectListener.disconnected();
     }
   }

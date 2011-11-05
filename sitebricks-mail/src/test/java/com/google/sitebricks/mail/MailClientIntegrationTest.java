@@ -57,7 +57,7 @@ public class MailClientIntegrationTest {
 //        client.listFolders();
 
 //        ListenableFuture<List<MessageStatus>> messages = client.list(allMail, folderStatus.getMessages() -1, -1);
-        ListenableFuture<List<Message>> messages = client.fetch(allMail, 71872, 71873);
+        ListenableFuture<List<Message>> messages = client.fetch(allMail, 80034, 80084);
         try {
           for (Message message : messages.get()) {
 //            System.out.println(ToStringBuilder.reflectionToString(message));
