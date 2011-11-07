@@ -6,7 +6,7 @@ import com.google.sitebricks.mail.Mail.Auth;
 import com.google.sitebricks.mail.imap.Folder;
 import com.google.sitebricks.mail.imap.FolderStatus;
 import com.google.sitebricks.mail.imap.Message;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import com.google.sitebricks.mail.imap.MessageStatus;
 
 import java.util.List;
 import java.util.Set;
@@ -31,7 +31,7 @@ public class MailClientIntegrationTest {
     }
   };
 
-  public static void main(String...args) throws InterruptedException, ExecutionException {
+  public static void main(String... args) throws InterruptedException, ExecutionException {
     Mail mail = Guice.createInjector().getInstance(Mail.class);
     final MailClient client = mail.clientOf("imap.gmail.com", 993)
         .prepare(Auth.SSL, "dhanji@gmail.com", System.getProperty("sitebricks-mail.password"));
@@ -46,7 +46,8 @@ public class MailClientIntegrationTest {
     ListenableFuture<Folder> future = client.open("[Gmail]/All Mail");
     final Folder allMail = future.get();
     final FolderStatus folderStatus = fStatus.get();
-    System.out.println("Folder opened: " + allMail.getName() + " with count " + folderStatus.getMessages());
+    System.out
+        .println("Folder opened: " + allMail.getName() + " with count " + folderStatus.getMessages());
 
     future.addListener(new Runnable() {
       @Override
@@ -56,14 +57,26 @@ public class MailClientIntegrationTest {
         // Can't send other commands over the channel while idling.
 //        client.listFolders();
 
-//        ListenableFuture<List<MessageStatus>> messages = client.list(allMail, folderStatus.getMessages() -1, -1);
-        ListenableFuture<List<Message>> messages = client.fetch(allMail, 80000, 80001);
+        ListenableFuture<List<MessageStatus>> messageStatuses =
+            client.list(allMail, folderStatus.getMessages() - 1, -1);
+
+        ListenableFuture<List<Message>> messages = client.fetch(allMail, folderStatus.getMessages() - 1, -1);
         try {
+          for (MessageStatus messageStatus : messageStatuses.get()) {
+            System.out.println(messageStatus);
+          }
+
           for (Message message : messages.get()) {
-            System.out.println(ToStringBuilder.reflectionToString(message));
+//            System.out.println(ToStringBuilder.reflectionToString(message));
             for (Message.BodyPart bodyPart : message.getBodyParts()) {
-              System.out.println(ToStringBuilder.reflectionToString(bodyPart));
+//              System.out.println(ToStringBuilder.reflectionToString(bodyPart));
             }
+
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>");
+            System.out.println(message.getImapUid());
+            System.out.println(message.getHeaders().get("Message-ID"));
+            System.out.println(message.getHeaders());
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
           }
 
 //          for (MessageStatus status : messages.get()) {
