@@ -9,6 +9,7 @@ import com.google.sitebricks.mail.imap.FolderStatus;
 import com.google.sitebricks.mail.imap.Message;
 import com.google.sitebricks.mail.imap.MessageStatus;
 import com.google.sitebricks.mail.oauth.OAuthConfig;
+import com.google.sitebricks.mail.oauth.Protocol;
 import com.google.sitebricks.mail.oauth.XoauthSasl;
 import net.oauth.OAuthException;
 import org.jboss.netty.bootstrap.ClientBootstrap;
@@ -137,7 +138,7 @@ class NettyImapClient implements MailClient, Idler {
             oauth.clientId,
             oauth.clientSecret)
 
-            .build(oauth.accessToken, oauth.tokenSecret);
+            .build(Protocol.IMAP, oauth.accessToken, oauth.tokenSecret);
 
         channel.write(". AUTHENTICATE XOAUTH " + oauthString + "\r\n");
 
