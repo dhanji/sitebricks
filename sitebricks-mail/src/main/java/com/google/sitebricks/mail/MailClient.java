@@ -144,6 +144,17 @@ public interface MailClient {
    */
   boolean isIdling();
 
+  /**
+   * Allows you to dynamically update the value of access token and tokenSecret if using
+   * XOAuth to access an imap server. This is useful if a user logs in from multiple locations
+   * and you always want the last authorized token to be used when reconnecting existing mail
+   * clients.
+   *
+   * @param accessToken A string containing the access token as retrieved from the oauth server.
+   * @param tokenSecret A string contianing the token secret pair of the accessToken.
+   */
+  void updateOAuthAccessToken(String accessToken, String tokenSecret);
+
   static interface DisconnectListener {
     void disconnected();
 

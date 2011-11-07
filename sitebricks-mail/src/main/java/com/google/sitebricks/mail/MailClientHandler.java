@@ -8,7 +8,11 @@ import org.jboss.netty.channel.SimpleChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -96,7 +100,7 @@ class MailClientHandler extends SimpleChannelHandler {
 
       if (!isLoggedIn) {
         if (message.matches("[.] OK .*@.* \\(Success\\)")) { // TODO make case-insensitive
-          log.trace("Authentication success.");
+          log.info("Authentication success.");
           isLoggedIn = true;
           loginComplete.countDown();
         } else {
@@ -105,8 +109,7 @@ class MailClientHandler extends SimpleChannelHandler {
             log.warn("Authentication failed due to: {}", message);
             loginComplete.countDown();
             errorStack.push(new Error(null /* logins have no completion */, extractError(matcher)));
-          } else
-            log.info("Prelogin message: {}", message);
+          }
         }
         // TODO handle auth failed
         return;
@@ -221,7 +224,8 @@ class MailClientHandler extends SimpleChannelHandler {
 
   boolean awaitLogin() {
     try {
-      loginComplete.await(10L, TimeUnit.SECONDS);
+      if (!loginComplete.await(10L, TimeUnit.SECONDS))
+        throw new RuntimeException("Timed out waiting for login response");
 
       return errorStack.isEmpty(); // No error == success!
     } catch (InterruptedException e) {

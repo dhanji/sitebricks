@@ -4,6 +4,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.sitebricks.mail.imap.*;
+import com.google.sitebricks.mail.oauth.OAuthConfig;
+import com.google.sitebricks.mail.oauth.XoauthSasl;
+import net.oauth.OAuthException;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -12,8 +15,10 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.EnumSet;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -115,7 +120,32 @@ class NettyImapClient implements MailClient, Idler {
 
   private boolean login() {
     channel.write(". CAPABILITY\r\n");
-    channel.write(". login " + config.getUsername() + " " + config.getPassword() + "\r\n");
+    if (config.getPassword() != null)
+      channel.write(". login " + config.getUsername() + " " + config.getPassword() + "\r\n");
+    else {
+      // Use xoauth login instead.
+      OAuthConfig oauth = config.getOAuthConfig();
+      Preconditions.checkArgument(oauth != null,
+          "Must specify a valid oauth config if not using password auth");
+
+      //noinspection ConstantConditions
+      try {
+        String oauthString = new XoauthSasl(config.getUsername(),
+            oauth.clientId,
+            oauth.clientSecret)
+
+            .build(oauth.accessToken, oauth.tokenSecret);
+
+        channel.write(". AUTHENTICATE XOAUTH " + oauthString + "\r\n");
+
+      } catch (IOException e) {
+        throw new RuntimeException("Login failure", e);
+      } catch (OAuthException e) {
+        throw new RuntimeException("Login failure", e);
+      } catch (URISyntaxException e) {
+        throw new RuntimeException("Login failure", e);
+      }
+    }
     return loggedIn = mailClientHandler.awaitLogin();
   }
 
@@ -250,7 +280,7 @@ class NettyImapClient implements MailClient, Idler {
     SettableFuture<List<MessageStatus>> valueFuture = SettableFuture.create();
 
     // -ve end range means get everything (*).
-    String extensions = config.useGmailExtensions() ? " X-GM-MSGID X-GM-THRID X-GM-LABELS" : "";
+    String extensions = config.useGmailExtensions() ? " X-GM-MSGID X-GM-THRID X-GM-LABELS UID" : "";
     String args = start + ":" + toUpperBound(end) + " (RFC822.SIZE INTERNALDATE FLAGS ENVELOPE"
         + extensions + ")";
     send(Command.FETCH_HEADERS, args, valueFuture);
@@ -298,7 +328,7 @@ class NettyImapClient implements MailClient, Idler {
         "indexing)");
     SettableFuture<List<Message>> valueFuture = SettableFuture.create();
 
-    String args = start + ":" + toUpperBound(end) + " body[]";
+    String args = start + ":" + toUpperBound(end) + " (uid body[])";
     send(Command.FETCH_BODY, args, valueFuture);
 
     return valueFuture;
@@ -327,6 +357,12 @@ class NettyImapClient implements MailClient, Idler {
   @Override
   public boolean isIdling() {
     return mailClientHandler.idleAcknowledged.get();
+  }
+
+  @Override
+  public synchronized void updateOAuthAccessToken(String accessToken, String tokenSecret) {
+    config.getOAuthConfig().accessToken = accessToken;
+    config.getOAuthConfig().tokenSecret = accessToken;
   }
 
   public synchronized void done() {

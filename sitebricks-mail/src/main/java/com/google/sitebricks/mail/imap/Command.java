@@ -11,14 +11,13 @@ import java.util.regex.Pattern;
  */
 public enum Command {
   LIST_FOLDERS("list"),
-  FETCH_BODY("uid fetch"),
+  FETCH_BODY("fetch"),
   FOLDER_STATUS("status"),
   FOLDER_OPEN("select"),
   FOLDER_EXAMINE("examine"),
-  FETCH_HEADERS("uid fetch"),
+  FETCH_HEADERS("fetch"),
   IDLE("idle"),
   STORE_FLAGS("uid store");
-
   private static final Pattern OK_SUCCESS = Pattern.compile("\\d+ ok (.* )?\\(?success\\)?",
       Pattern.CASE_INSENSITIVE);
 

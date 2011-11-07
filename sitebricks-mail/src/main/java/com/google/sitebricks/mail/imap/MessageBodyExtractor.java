@@ -106,6 +106,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         }
       } catch (RuntimeException e) {
         log.error("Unexpected error while parsing message", e);
+        e.printStackTrace();
         // Instead add a sentinel for this message.
         emails.add(Message.ERROR);
         System.out.println("---");
