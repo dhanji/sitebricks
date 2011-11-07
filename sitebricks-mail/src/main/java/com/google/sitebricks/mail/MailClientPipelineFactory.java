@@ -29,7 +29,7 @@ class MailClientPipelineFactory implements ChannelPipelineFactory {
     // Create a default pipeline implementation.
     ChannelPipeline pipeline = Channels.pipeline();
 
-    if (config.getAuthType() == Auth.SSL) {
+    if (config.getAuthType() != Auth.PLAIN) {
       SSLEngine sslEngine = SSLContext.getDefault().createSSLEngine();
       sslEngine.setUseClientMode(true);
       SslHandler sslHandler = new SslHandler(sslEngine);
