@@ -6,6 +6,7 @@ import com.google.sitebricks.mail.Mail.Auth;
 import com.google.sitebricks.mail.imap.Folder;
 import com.google.sitebricks.mail.imap.FolderStatus;
 import com.google.sitebricks.mail.imap.Message;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.List;
 import java.util.Set;
@@ -32,7 +33,6 @@ public class MailClientIntegrationTest {
 
   public static void main(String...args) throws InterruptedException, ExecutionException {
     Mail mail = Guice.createInjector().getInstance(Mail.class);
-
     final MailClient client = mail.clientOf("imap.gmail.com", 993)
         .prepare(Auth.SSL, "dhanji@gmail.com", System.getProperty("sitebricks-mail.password"));
 
@@ -60,9 +60,9 @@ public class MailClientIntegrationTest {
         ListenableFuture<List<Message>> messages = client.fetch(allMail, 80000, 80001);
         try {
           for (Message message : messages.get()) {
-//            System.out.println(ToStringBuilder.reflectionToString(message));
+            System.out.println(ToStringBuilder.reflectionToString(message));
             for (Message.BodyPart bodyPart : message.getBodyParts()) {
-//              System.out.println(ToStringBuilder.reflectionToString(bodyPart));
+              System.out.println(ToStringBuilder.reflectionToString(bodyPart));
             }
           }
 

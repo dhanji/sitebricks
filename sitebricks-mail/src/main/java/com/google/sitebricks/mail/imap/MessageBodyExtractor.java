@@ -34,12 +34,12 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       Pattern.CASE_INSENSITIVE);
   static final Pattern CHARSET_REGEX =
       Pattern.compile(";[\\s]*charset[\\s]*=[\\s]*[\"]?([^\"^;]*)[\"]?",
-          Pattern.CASE_INSENSITIVE);
-  static final Pattern MESSAGE_START_PREFIX_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(BODY\\[\\]",
       Pattern.CASE_INSENSITIVE);
-  static final Pattern MESSAGE_START_REGEX =
-      Pattern.compile("[*] \\d+ FETCH \\(BODY\\[\\] \\{\\d+\\}\\s*",
-          Pattern.CASE_INSENSITIVE);
+  static final Pattern MESSAGE_START_PREFIX_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(UID \\d+ BODY\\[\\]",
+      Pattern.CASE_INSENSITIVE);
+  static final Pattern MESSAGE_START_REGEX = Pattern.compile("[*] \\d+ FETCH \\(UID \\d+ BODY\\[\\] " +
+      "\\{\\d+\\}\\s*",
+      Pattern.CASE_INSENSITIVE);
 
   static final Pattern EOS_REGEX =
       Pattern.compile("^\\d+ ok success\\)?", Pattern.CASE_INSENSITIVE);
@@ -130,7 +130,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
     firstLine = firstLine.replaceFirst("[*]? \\d+[ ]* ", "");
     Queue<String> tokens = Parsing.tokenize(firstLine);
-    Parsing.eat(tokens, "FETCH", "(", "BODY[]");
+    Parsing.eat(tokens, "FETCH", "(", "UID");
+    email.setImapUid(Parsing.match(tokens, int.class));
+    Parsing.eat(tokens, "BODY[]");
     String sizeString = Parsing.match(tokens, String.class);
     int size = 0;
 

@@ -1,4 +1,4 @@
-* 45970 FETCH (BODY[] {4299}
+* 45970 FETCH (UID 1001 BODY[] {4299}
 Received: by 10.231.31.195 with SMTP id z3fc89823ibc;
         Thu, 8 Sep 2011 17:07:49 -0700 (PDT)
 Received: from ww7 (ww7.sitebricks.org [10.241.242.135])
@@ -39,7 +39,7 @@ and may contain CONFIDENTIAL, PRIVILEGED COMMUNICATIONS,
 and/or PRODUCT INFORMATION. If you are not the intended
 recipient, please contact the sender by reply email and delete the email.
 )
-* 45971 FETCH (BODY[] {4299}
+* 45971 FETCH (UID 1002 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <CAEEYBPNq6o3Maos__x3m1PxeLn-Ghjn3k3ztE_ftburkvUg@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -58,7 +58,7 @@ dude@sitebricks.org
 p: 555.555.5555
 
 --------------------)
-* 45972 FETCH (BODY[] {4299}
+* 45972 FETCH (UID 1003 BODY[] {4299}
 Message-ID: <askdopaksdNq6o3M+veqCfc+x3m1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
 Content-Type: multipart/alternative;
@@ -96,7 +96,7 @@ I am OOO and may have sporadic access to email.
 This is called the epilogue. This is ignored.
 
 )
-* 45973 FETCH (BODY[] {4299}
+* 45973 FETCH (UID 1004 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Date: Thu, 8 Sep 2011 17:07:44 -0700
 Message-ID: CAEEYBPaoksdpoak+veqCfc+x3m1PxeLn-raisdj@mail.gmail.com
@@ -126,7 +126,7 @@ MALFORMED_HEADER_MISSING_COLON
 I am OOO and may have sporadic access to email.
 </body>
 --_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--)
-* 45974 FETCH (BODY[] {4299}
+* 45974 FETCH (UID 1005 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Date: Thu, 8 Sep 2011 17:07:44 -0700
 Message-ID: CAEEYBPaoksdpoak+veqCfc+x3m1PxeLn-raisdj@mail.gmail.com
@@ -157,7 +157,7 @@ I am OOO and may have sporadic access to email.
 --_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--
 Tight epilogue. Invalid, but let's see how it's handled.
 )
-* 45975 FETCH (BODY[] {4299}
+* 45975 FETCH (UID 1006 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <CAEEYBPNq6o3M+aisjd+x3m1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -199,7 +199,7 @@ This is a signature.
 --_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--
 trueeee epilogue. also ignored.
 )
-* 45976 FETCH (BODY[] {4299}
+* 45976 FETCH (UID 1007 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -261,7 +261,7 @@ This is a signature.
     weeee
 
 )
-* 45976 FETCH (BODY[] {4299}
+* 45976 FETCH (UID 1008 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -295,7 +295,7 @@ This is a signature.
 
 --_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--
 )
-* 45976 FETCH (BODY[] {4299}
+* 45976 FETCH (UID 1009 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -328,7 +328,7 @@ MIME-Version: 1.0
 This is a signature.
 
 ------NextPart_1293809.9123_LLas--)
-* 45976 FETCH (BODY[] {4299}
+* 45976 FETCH (UID 1010 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <id> id
 Subject: Re: Slow to Respond
@@ -415,7 +415,7 @@ Content-Type: text/html
 --__BERIC-BOUNDARRION__--
 --__BOUNDARY__--
 )
-* 45979 FETCH (BODY[] {4299}
+* 45979 FETCH (UID 1011 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond

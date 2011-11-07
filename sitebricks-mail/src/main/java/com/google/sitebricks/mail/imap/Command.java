@@ -11,11 +11,11 @@ import java.util.regex.Pattern;
  */
 public enum Command {
   LIST_FOLDERS("list"),
-  FETCH_BODY("fetch"),
+  FETCH_BODY("uid fetch"),
   FOLDER_STATUS("status"),
   FOLDER_OPEN("select"),
   FOLDER_EXAMINE("examine"),
-  FETCH_HEADERS("fetch"),
+  FETCH_HEADERS("uid fetch"),
   IDLE("idle");
   private static final Pattern OK_SUCCESS = Pattern.compile("\\d+ ok (.* )?\\(?success\\)?",
       Pattern.CASE_INSENSITIVE);
