@@ -100,7 +100,7 @@ class MailClientHandler extends SimpleChannelHandler {
 
       if (!isLoggedIn) {
         if (message.matches("[.] OK .*@.* \\(Success\\)")) { // TODO make case-insensitive
-          log.trace("Authentication success.");
+          log.info("Authentication success.");
           isLoggedIn = true;
           loginComplete.countDown();
         } else {
@@ -109,8 +109,7 @@ class MailClientHandler extends SimpleChannelHandler {
             log.warn("Authentication failed due to: {}", message);
             loginComplete.countDown();
             errorStack.push(new Error(null /* logins have no completion */, extractError(matcher)));
-          } else
-            log.info("Prelogin message: {}", message);
+          }
         }
         // TODO handle auth failed
         return;

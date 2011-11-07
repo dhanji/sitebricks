@@ -61,7 +61,6 @@ public class XoauthSasl {
       authString.append("\"");
     }
 
-    System.out.println(authString);
     return Base64.encode(authString.toString().getBytes());
   }
 }
