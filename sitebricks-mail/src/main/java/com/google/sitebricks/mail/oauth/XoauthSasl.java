@@ -29,7 +29,7 @@ public class XoauthSasl {
    *
    * @return A base-64 encoded containing the auth string suitable for login via xoauth.
    */
-  public String build(String oauthToken, String oauthTokenSecret)
+  public String build(Protocol protocol, String oauthToken, String oauthTokenSecret)
       throws IOException, OAuthException, URISyntaxException {
     OAuthAccessor accessor = new OAuthAccessor(consumer);
     accessor.tokenSecret = oauthTokenSecret;
@@ -38,7 +38,8 @@ public class XoauthSasl {
     parameters.put(OAuth.OAUTH_SIGNATURE_METHOD, "HMAC-SHA1");
     parameters.put(OAuth.OAUTH_TOKEN, oauthToken);
 
-    String url = String.format("https://mail.google.com/mail/b/%s/%s/", email, "imap");
+    String url = String.format("https://mail.google.com/mail/b/%s/%s/", email,
+        (Protocol.IMAP == protocol) ? "imap" : "smtp");
 
     OAuthMessage message = new OAuthMessage(
         "GET",
