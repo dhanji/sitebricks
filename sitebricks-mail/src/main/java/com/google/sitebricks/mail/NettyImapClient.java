@@ -163,8 +163,10 @@ class NettyImapClient implements MailClient, Idler {
     try {
       // If there is an error with the handler, dont bother logging out.
       if (!mailClientHandler.isHalted()) {
-        Preconditions.checkState(!mailClientHandler.idling.get(),
-            "Can't execute command while idling (are you watching a folder?)");
+        if(mailClientHandler.idling.get()) {
+          log.warn("Disconnect called while IDLE, leaving idle and logging out.");
+          done();
+        }
 
         // Log out of the IMAP Server.
         channel.write(". logout\n");
