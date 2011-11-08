@@ -36,7 +36,8 @@ public class MailClientIntegrationTest {
   public static void main(String... args) throws InterruptedException, ExecutionException {
     Mail mail = Guice.createInjector().getInstance(Mail.class);
     final MailClient client = mail.clientOf("imap.gmail.com", 993)
-         .prepare(Auth.SSL, "dhanji@gmail.com", System.getProperty("sitebricks-mail.password"));
+         .prepare(Auth.SSL, System.getProperty("sitebricks-mail.username"),
+             System.getProperty("sitebricks-mail.password"));
 
     client.connect();
 
