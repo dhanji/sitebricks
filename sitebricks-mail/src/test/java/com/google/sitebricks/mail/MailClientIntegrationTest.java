@@ -91,7 +91,7 @@ public class MailClientIntegrationTest {
               client.addFlags(allMail, ImmutableSet.of(Flag.SEEN), messages.get().get(0).getImapUid
                   ()).get());
           System.out.println("Gmail labels set: " +
-              client.removeGmailLabels(allMail, ImmutableSet.of("\\Important"),
+              client.setGmailLabels(allMail, ImmutableSet.of("\\Important", "\\Inbox"),
                   messages.get().get(0).getImapUid()).get());
 
           System.out.println("Fetched: " + messages.get().size());
