@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -44,8 +45,8 @@ public enum Flag {
     return flagMap.inverse().get(f);
   }
 
-  public static String toImap(EnumSet<Flag> flags) {
-    StringBuffer imap = new StringBuffer("FLAGS (");
+  public static String toImap(Set<Flag> flags) {
+    StringBuilder imap = new StringBuilder("FLAGS (");
     Iterator<Flag> it = flags.iterator();
     while (it.hasNext()) {
       imap.append(Flag.toImap(it.next()));
@@ -59,7 +60,7 @@ public enum Flag {
   /**
    * @return set of flags, null on failure.
    */
-  public static EnumSet<Flag> parseFlagList(Queue<String> tokens) {
+  public static Set<Flag> parseFlagList(Queue<String> tokens) {
     EnumSet<Flag> result = EnumSet.noneOf(Flag.class);
     if (Parsing.matchAnyOf(tokens, "FLAGS") == null)
       return null;

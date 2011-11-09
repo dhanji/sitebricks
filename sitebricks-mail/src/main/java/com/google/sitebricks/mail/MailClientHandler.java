@@ -77,7 +77,6 @@ class MailClientHandler extends SimpleChannelHandler {
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     String message = e.getMessage().toString();
-
     log.trace(message);
     if (SYSTEM_ERROR_REGEX.matcher(message).matches()
         || ". NO [ALERT] Account exceeded command or bandwidth limits. (Failure)".equalsIgnoreCase(message.trim())) {

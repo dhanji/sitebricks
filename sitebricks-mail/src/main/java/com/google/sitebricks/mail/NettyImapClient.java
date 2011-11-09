@@ -18,9 +18,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.EnumSet;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -302,22 +303,51 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public ListenableFuture<List<EnumSet<Flag>>> addFlags(EnumSet<Flag> flags, int imapUid) {
+  public ListenableFuture<Set<Flag>> addFlags(Set<Flag> flags, int imapUid) {
     return addOrRemoveFlags(flags, imapUid, true);
   }
   @Override
-  public ListenableFuture<List<EnumSet<Flag>>> removeFlags(EnumSet<Flag> flags, int imapUid) {
+  public ListenableFuture<Set<Flag>> removeFlags(Set<Flag> flags, int imapUid) {
     return addOrRemoveFlags(flags, imapUid, false);
   }
 
-
-  private ListenableFuture<List<EnumSet<Flag>>> addOrRemoveFlags(EnumSet<Flag> flags, int imapUid, boolean add) {
+  private ListenableFuture<Set<Flag>> addOrRemoveFlags(Set<Flag> flags, int imapUid, boolean add) {
     Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
-    SettableFuture<List<EnumSet<Flag>>> valueFuture = SettableFuture.create();
+    SettableFuture<Set<Flag>> valueFuture = SettableFuture.create();
     String args = imapUid + " " + (add ? "+" : "-") + Flag.toImap(flags);
     send(Command.STORE_FLAGS, args, valueFuture);
     return valueFuture;
   }
+
+  @Override
+  public ListenableFuture<Set<String>> addGmailLabels(Set<String> labels, int imapUid) {
+    return addOrRemoveGmailLabels(labels, imapUid, true);
+  }
+
+  @Override
+  public ListenableFuture<Set<String>> removeGmailLabels(Set<String> labels, int imapUid) {
+    return addOrRemoveGmailLabels(labels, imapUid, false);
+  }
+
+  private ListenableFuture<Set<String>> addOrRemoveGmailLabels(Set<String> labels, int imapUid,
+                                                         boolean add) {
+    Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
+    SettableFuture<Set<String>> valueFuture = SettableFuture.create();
+    StringBuilder args = new StringBuilder();
+    args.append(imapUid);
+    args.append(add ? " +X-GM-LABELS (" : " -X-GM-LABELS (");
+    Iterator<String> it = labels.iterator();
+    while (it.hasNext()) {
+      args.append(it.next());
+      if (it.hasNext())
+        args.append(" ");
+      else
+        args.append(")");
+    }
+    send(Command.STORE_LABELS, args.toString(), valueFuture);
+    return valueFuture;
+  }
+
 
   @Override
   public ListenableFuture<List<Message>> fetch(Folder folder, int start, int end) {

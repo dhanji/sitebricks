@@ -17,7 +17,8 @@ public enum Command {
   FOLDER_EXAMINE("examine"),
   FETCH_HEADERS("fetch"),
   IDLE("idle"),
-  STORE_FLAGS("uid store");
+  STORE_FLAGS("uid store"),
+  STORE_LABELS("uid store");
   private static final Pattern OK_SUCCESS = Pattern.compile("\\d+ ok (.* )?\\(?success\\)?",
       Pattern.CASE_INSENSITIVE);
 
@@ -54,7 +55,8 @@ public enum Command {
     dataExtractors.put(FOLDER_EXAMINE, new OpenFolderExtractor());
     dataExtractors.put(FETCH_HEADERS, new MessageStatusExtractor());
     dataExtractors.put(FETCH_BODY, new MessageBodyExtractor());
-    dataExtractors.put(STORE_FLAGS, new StoreResponseExtractor());
+    dataExtractors.put(STORE_FLAGS, new StoreFlagsResponseExtractor());
+    dataExtractors.put(STORE_LABELS, new StoreLabelsResponseExtractor());
   }
 
   @SuppressWarnings("unchecked") // Heterogenous collections are a pita in Java.

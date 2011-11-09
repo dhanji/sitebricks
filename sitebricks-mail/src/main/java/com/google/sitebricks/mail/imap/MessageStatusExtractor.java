@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -123,7 +124,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
   }
 
   private static boolean parseFlags(Queue<String> tokens, MessageStatus status) {
-    EnumSet<Flag> flags = Flag.parseFlagList(tokens);
+    Set<Flag> flags = Flag.parseFlagList(tokens);
     if (flags == null)
       return false;
     status.getFlags().addAll(flags);
