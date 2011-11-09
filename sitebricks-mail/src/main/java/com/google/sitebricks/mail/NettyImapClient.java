@@ -303,11 +303,13 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public ListenableFuture<Set<Flag>> addFlags(Set<Flag> flags, int imapUid) {
+  public ListenableFuture<Set<Flag>> addFlags(Folder folder, Set<Flag> flags, int imapUid) {
+    checkCurrentFolder(folder);
     return addOrRemoveFlags(flags, imapUid, true);
   }
   @Override
-  public ListenableFuture<Set<Flag>> removeFlags(Set<Flag> flags, int imapUid) {
+  public ListenableFuture<Set<Flag>> removeFlags(Folder folder, Set<Flag> flags, int imapUid) {
+    checkCurrentFolder(folder);
     return addOrRemoveFlags(flags, imapUid, false);
   }
 
@@ -320,12 +322,14 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public ListenableFuture<Set<String>> addGmailLabels(Set<String> labels, int imapUid) {
+  public ListenableFuture<Set<String>> addGmailLabels(Folder folder, Set<String> labels, int imapUid) {
+    checkCurrentFolder(folder);
     return addOrRemoveGmailLabels(labels, imapUid, true);
   }
 
   @Override
-  public ListenableFuture<Set<String>> removeGmailLabels(Set<String> labels, int imapUid) {
+  public ListenableFuture<Set<String>> removeGmailLabels(Folder folder, Set<String> labels, int imapUid) {
+    checkCurrentFolder(folder);
     return addOrRemoveGmailLabels(labels, imapUid, false);
   }
 

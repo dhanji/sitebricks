@@ -92,7 +92,7 @@ public interface MailClient {
    * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
    * <b>NOTE: you must call {@link #connect()} first.</b>
    */
-  ListenableFuture<Set<Flag>> addFlags(Set<Flag> flags, int imapUid);
+  ListenableFuture<Set<Flag>> addFlags(Folder folder, Set<Flag> flags, int imapUid);
 
   /**
    * Removes flags from a range of messages.
@@ -101,7 +101,7 @@ public interface MailClient {
    * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
    * <b>NOTE: you must call {@link #connect()} first.</b>
    */
-  ListenableFuture<Set<Flag>> removeFlags(Set<Flag> flags, int imapUid);
+  ListenableFuture<Set<Flag>> removeFlags(Folder folder, Set<Flag> flags, int imapUid);
 
   /**
    * Adds Gmail labels to a range of messages.
@@ -110,7 +110,7 @@ public interface MailClient {
    * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
    * <b>NOTE: you must call {@link #connect()} first.</b>
    */
-  ListenableFuture<Set<String>> addGmailLabels(Set<String> labels, int imapUid);
+  ListenableFuture<Set<String>> addGmailLabels(Folder folder, Set<String> labels, int imapUid);
 
   /**
    * Removes Gmail labels from a range of messages.
@@ -119,7 +119,7 @@ public interface MailClient {
    * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
    * <b>NOTE: you must call {@link #connect()} first.</b>
    */
-  ListenableFuture<Set<String>> removeGmailLabels(Set<String> labels, int imapUid);
+  ListenableFuture<Set<String>> removeGmailLabels(Folder folder, Set<String> labels, int imapUid);
 
   /**
    * Similar to {@link #list(Folder, int, int)} but fetches the entire message
