@@ -88,11 +88,11 @@ public class MailClientIntegrationTest {
 //
 
           System.out.println("Gmail flags set: " +
-              client.addFlags(allMail, ImmutableSet.of(Flag.SEEN), messages.get().get(0).getImapUid
-                  ()).get());
+              client.addFlags(allMail, messages.get().get(0).getImapUid
+                  (), ImmutableSet.of(Flag.SEEN)).get());
           System.out.println("Gmail labels set: " +
-              client.setGmailLabels(allMail, ImmutableSet.of("\\Important", "\\Inbox"),
-                  messages.get().get(0).getImapUid()).get());
+              client.setGmailLabels(allMail, messages.get().get(0).getImapUid(),
+                  ImmutableSet.of("\\Important", "\\Inbox")).get());
 
           System.out.println("Fetched: " + messages.get().size());
         } catch (InterruptedException e) {

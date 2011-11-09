@@ -303,16 +303,16 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public ListenableFuture<Set<Flag>> addFlags(Folder folder, Set<Flag> flags, int imapUid) {
-    return addOrRemoveFlags(folder, flags, imapUid, true);
+  public ListenableFuture<Set<Flag>> addFlags(Folder folder, int imapUid, Set<Flag> flags) {
+    return addOrRemoveFlags(folder, imapUid, flags, true);
   }
   @Override
-  public ListenableFuture<Set<Flag>> removeFlags(Folder folder, Set<Flag> flags, int imapUid) {
-    return addOrRemoveFlags(folder, flags, imapUid, false);
+  public ListenableFuture<Set<Flag>> removeFlags(Folder folder, int imapUid, Set<Flag> flags) {
+    return addOrRemoveFlags(folder, imapUid, flags, false);
   }
 
   @Override
-  public ListenableFuture<Set<Flag>> addOrRemoveFlags(Folder folder, Set<Flag> flags, int imapUid,
+  public ListenableFuture<Set<Flag>> addOrRemoveFlags(Folder folder, int imapUid, Set<Flag> flags,
                                                       boolean add) {
     Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     Preconditions.checkState(!mailClientHandler.idling.get(),
@@ -325,8 +325,7 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public ListenableFuture<Set<String>> setGmailLabels(Folder folder, Set<String> labels,
-                                                      int imapUid) {
+  public ListenableFuture<Set<String>> setGmailLabels(Folder folder, int imapUid, Set<String> labels) {
     Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     Preconditions.checkState(!mailClientHandler.idling.get(),
         "Can't execute command while idling (are you watching a folder?)");
