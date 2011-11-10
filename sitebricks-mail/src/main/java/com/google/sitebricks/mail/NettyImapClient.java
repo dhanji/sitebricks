@@ -303,16 +303,21 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public ListenableFuture<Set<Flag>> addFlags(Set<Flag> flags, int imapUid) {
-    return addOrRemoveFlags(flags, imapUid, true);
+  public ListenableFuture<Set<Flag>> addFlags(Folder folder, int imapUid, Set<Flag> flags) {
+    return addOrRemoveFlags(folder, imapUid, flags, true);
   }
   @Override
-  public ListenableFuture<Set<Flag>> removeFlags(Set<Flag> flags, int imapUid) {
-    return addOrRemoveFlags(flags, imapUid, false);
+  public ListenableFuture<Set<Flag>> removeFlags(Folder folder, int imapUid, Set<Flag> flags) {
+    return addOrRemoveFlags(folder, imapUid, flags, false);
   }
 
-  private ListenableFuture<Set<Flag>> addOrRemoveFlags(Set<Flag> flags, int imapUid, boolean add) {
+  @Override
+  public ListenableFuture<Set<Flag>> addOrRemoveFlags(Folder folder, int imapUid, Set<Flag> flags,
+                                                      boolean add) {
     Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idling.get(),
+        "Can't execute command while idling (are you watching a folder?)");
+    checkCurrentFolder(folder);
     SettableFuture<Set<Flag>> valueFuture = SettableFuture.create();
     String args = imapUid + " " + (add ? "+" : "-") + Flag.toImap(flags);
     send(Command.STORE_FLAGS, args, valueFuture);
@@ -320,22 +325,15 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public ListenableFuture<Set<String>> addGmailLabels(Set<String> labels, int imapUid) {
-    return addOrRemoveGmailLabels(labels, imapUid, true);
-  }
-
-  @Override
-  public ListenableFuture<Set<String>> removeGmailLabels(Set<String> labels, int imapUid) {
-    return addOrRemoveGmailLabels(labels, imapUid, false);
-  }
-
-  private ListenableFuture<Set<String>> addOrRemoveGmailLabels(Set<String> labels, int imapUid,
-                                                         boolean add) {
+  public ListenableFuture<Set<String>> setGmailLabels(Folder folder, int imapUid, Set<String> labels) {
     Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idling.get(),
+        "Can't execute command while idling (are you watching a folder?)");
+    checkCurrentFolder(folder);
     SettableFuture<Set<String>> valueFuture = SettableFuture.create();
     StringBuilder args = new StringBuilder();
     args.append(imapUid);
-    args.append(add ? " +X-GM-LABELS (" : " -X-GM-LABELS (");
+    args.append(" X-GM-LABELS (");
     Iterator<String> it = labels.iterator();
     while (it.hasNext()) {
       args.append(it.next());
@@ -347,7 +345,6 @@ class NettyImapClient implements MailClient, Idler {
     send(Command.STORE_LABELS, args.toString(), valueFuture);
     return valueFuture;
   }
-
 
   @Override
   public ListenableFuture<List<Message>> fetch(Folder folder, int start, int end) {

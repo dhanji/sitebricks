@@ -90,36 +90,39 @@ public interface MailClient {
    *
    * @return the new flags on the message, null on failure.
    * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
-   * <b>NOTE: you must call {@link #connect()} first.</b>
+   * <b>NOTE: you must call {@link #open(String)} first.</b>
    */
-  ListenableFuture<Set<Flag>> addFlags(Set<Flag> flags, int imapUid);
+  ListenableFuture<Set<Flag>> addFlags(Folder folder, int imapUid, Set<Flag> flags);
 
   /**
    * Removes flags from a range of messages.
    *
    * @return the new flags on the message, null on failure.
    * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
-   * <b>NOTE: you must call {@link #connect()} first.</b>
+   * <b>NOTE: you must call {@link #open(String)} first.</b>
    */
-  ListenableFuture<Set<Flag>> removeFlags(Set<Flag> flags, int imapUid);
+  ListenableFuture<Set<Flag>> removeFlags(Folder folder, int imapUid, Set<Flag> flags);
 
   /**
-   * Adds Gmail labels to a range of messages.
+   * Adds or Removes flags from a range of messages.
+   *
+   *
+   * @param add if true, flags are added, otherwise they're removed.
+   * @return the new flags on the message, null on failure.
+   * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
+   * <b>NOTE: you must call {@link #open(String)} first.</b>
+   */
+  ListenableFuture<Set<Flag>> addOrRemoveFlags(Folder folder, int imapUid, Set<Flag> flags,
+                                               boolean add);
+
+  /**
+   * Sets Gmail labels from a range of messages.
    *
    * @return the new labels on the message, null on failure.
    * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
-   * <b>NOTE: you must call {@link #connect()} first.</b>
+   * <b>NOTE: you must call {@link #open(String)} first.</b>
    */
-  ListenableFuture<Set<String>> addGmailLabels(Set<String> labels, int imapUid);
-
-  /**
-   * Removes Gmail labels from a range of messages.
-   *
-   * @return the new labels on the message, null on failure.
-   * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
-   * <b>NOTE: you must call {@link #connect()} first.</b>
-   */
-  ListenableFuture<Set<String>> removeGmailLabels(Set<String> labels, int imapUid);
+  ListenableFuture<Set<String>> setGmailLabels(Folder folder, int imapUid, Set<String> labels);
 
   /**
    * Similar to {@link #list(Folder, int, int)} but fetches the entire message

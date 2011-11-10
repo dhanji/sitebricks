@@ -9,10 +9,7 @@ import com.google.sitebricks.mail.imap.Folder;
 import com.google.sitebricks.mail.imap.FolderStatus;
 import com.google.sitebricks.mail.imap.Message;
 import com.google.sitebricks.mail.imap.MessageStatus;
-import net.jcip.annotations.Immutable;
 
-import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -91,10 +88,11 @@ public class MailClientIntegrationTest {
 //
 
           System.out.println("Gmail flags set: " +
-              client.addFlags(ImmutableSet.of(Flag.SEEN), messages.get().get(0).getImapUid()).get());
+              client.addFlags(allMail, messages.get().get(0).getImapUid
+                  (), ImmutableSet.of(Flag.SEEN)).get());
           System.out.println("Gmail labels set: " +
-              client.removeGmailLabels(ImmutableSet.of("\\Important"),
-                  messages.get().get(0).getImapUid()).get());
+              client.setGmailLabels(allMail, messages.get().get(0).getImapUid(),
+                  ImmutableSet.of("\\Important", "\\Inbox")).get());
 
           System.out.println("Fetched: " + messages.get().size());
         } catch (InterruptedException e) {
