@@ -61,9 +61,10 @@ public class MailClientIntegrationTest {
 //        client.listFolders();
 
         ListenableFuture<List<MessageStatus>> messageStatuses =
-            client.list(allMail, folderStatus.getMessages() - 1, -1);
+            client.list(allMail, folderStatus.getMessages() - 3, -1);
 
-        ListenableFuture<List<Message>> messages = client.fetch(allMail, folderStatus.getMessages() - 1, -1);
+        ListenableFuture<List<Message>> messages = client.fetch(allMail,
+            folderStatus.getMessages() - 1, -1);
         try {
           for (MessageStatus messageStatus : messageStatuses.get()) {
             System.out.println(messageStatus);
@@ -90,9 +91,6 @@ public class MailClientIntegrationTest {
           System.out.println("Gmail flags set: " +
               client.addFlags(allMail, messages.get().get(0).getImapUid
                   (), ImmutableSet.of(Flag.SEEN)).get());
-          System.out.println("Gmail labels set: " +
-              client.setGmailLabels(allMail, messages.get().get(0).getImapUid(),
-                  ImmutableSet.of("\\Important", "\\Inbox")).get());
 
           System.out.println("Fetched: " + messages.get().size());
         } catch (InterruptedException e) {

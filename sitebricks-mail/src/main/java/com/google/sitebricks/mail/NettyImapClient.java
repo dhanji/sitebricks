@@ -198,7 +198,6 @@ class NettyImapClient implements MailClient, Idler {
 
     // Enqueue command.
     mailClientHandler.enqueue(new CommandCompletion(command, seq, valueFuture, commandString));
-
     return channel.write(commandString);
   }
 
@@ -325,7 +324,8 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public ListenableFuture<Set<String>> setGmailLabels(Folder folder, int imapUid, Set<String> labels) {
+  public ListenableFuture<Set<String>> addOrRemoveGmailLabels(Folder folder, int imapUid,
+                                                    Set<String> labels, boolean add) {
     Preconditions.checkState(loggedIn, "Can't execute command because client is not logged in");
     Preconditions.checkState(!mailClientHandler.idling.get(),
         "Can't execute command while idling (are you watching a folder?)");
@@ -333,7 +333,7 @@ class NettyImapClient implements MailClient, Idler {
     SettableFuture<Set<String>> valueFuture = SettableFuture.create();
     StringBuilder args = new StringBuilder();
     args.append(imapUid);
-    args.append(" X-GM-LABELS (");
+    args.append(add ? " +X-GM-LABELS (" : " -X-GM-LABELS (");
     Iterator<String> it = labels.iterator();
     while (it.hasNext()) {
       args.append(it.next());
