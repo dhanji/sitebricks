@@ -108,9 +108,9 @@ class MailClientHandler extends SimpleChannelHandler {
             log.warn("Authentication failed due to: {}", message);
             loginComplete.countDown();
             errorStack.push(new Error(null /* logins have no completion */, extractError(matcher)));
+            disconnectAbnormally(message);
           }
         }
-        // TODO handle auth failed
         return;
       }
 
