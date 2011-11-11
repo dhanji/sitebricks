@@ -62,6 +62,10 @@ class MailClientHandler extends SimpleChannelHandler {
     this.idler = idler;
   }
 
+  public boolean isLoggedIn() {
+    return isLoggedIn;
+  }
+
   private static class PushedData {
     volatile boolean idleExitSent = false;
     final Set<Integer> pushAdds = Collections.synchronizedSet(Sets.<Integer>newHashSet());

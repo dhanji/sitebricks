@@ -62,7 +62,10 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   public boolean isConnected() {
-    return channel != null && channel.isConnected() && channel.isOpen();
+    return channel != null
+        && channel.isConnected()
+        && channel.isOpen()
+        && mailClientHandler.isLoggedIn();
   }
 
   private void reset() {
@@ -178,11 +181,13 @@ class NettyImapClient implements MailClient, Idler {
       // Shut down all channels and exit (leave threadpools as is--for reconnects).
       // The Netty channel close listener will fire a disconnect event to our client,
       // automatically. See connect() for details.
-      channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
-
-      mailClientHandler.idleAcknowledged.set(false);
-      if (disconnectListener != null)
-        disconnectListener.disconnected();
+      try {
+        channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
+      } finally {
+        mailClientHandler.idleAcknowledged.set(false);
+        if (disconnectListener != null)
+          disconnectListener.disconnected();
+      }
     }
   }
 

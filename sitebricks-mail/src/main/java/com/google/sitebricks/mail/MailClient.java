@@ -3,7 +3,6 @@ package com.google.sitebricks.mail;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.sitebricks.mail.imap.*;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +35,7 @@ public interface MailClient {
   void disconnect();
 
   /**
-   * Returns true if the underlying channels are connected to the remote server and
+   * Returns true if the underlying channels are connected to the remote server, logged in and
    * open for business.
    */
   boolean isConnected();
