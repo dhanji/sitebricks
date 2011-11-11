@@ -7,7 +7,6 @@ import com.google.sitebricks.mail.imap.*;
 import com.google.sitebricks.mail.oauth.OAuthConfig;
 import com.google.sitebricks.mail.oauth.Protocol;
 import com.google.sitebricks.mail.oauth.XoauthSasl;
-import net.oauth.OAuthException;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -16,9 +15,7 @@ import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -143,19 +140,15 @@ class NettyImapClient implements MailClient, Idler {
 
         channel.write(". AUTHENTICATE XOAUTH " + oauthString + "\r\n");
 
-      } catch (IOException e) {
-        throw new RuntimeException("Login failure", e);
-      } catch (OAuthException e) {
-        throw new RuntimeException("Login failure", e);
-      } catch (URISyntaxException e) {
+      } catch (Exception e) {
         throw new RuntimeException("Login failure", e);
       }
     }
     return loggedIn = mailClientHandler.awaitLogin();
   }
 
-  @Override public String lastError() {
-    return mailClientHandler.lastError().error;
+  @Override public WireError lastError() {
+    return mailClientHandler.lastError();
   }
 
   /**

@@ -159,7 +159,7 @@ public interface MailClient {
    * Returns a string containing the last error message from the server or
    * null if no errors occurred recently.
    */
-  String lastError();
+  WireError lastError();
 
   /**
    * Returns true if this client has successfully entered and is currently in IMAP IDLE.
@@ -189,5 +189,11 @@ public interface MailClient {
      * Called when the server acknowledges exit from IDLE.
      */
     void unidled();
+  }
+
+  public static interface WireError {
+    String message();
+    List<String> trace();
+    String expected();
   }
 }
