@@ -73,7 +73,7 @@ class NettyImapClient implements MailClient, Idler {
     if (mailClientHandler != null)
       mailClientHandler.halt();
 
-    this.mailClientHandler = new MailClientHandler(this);
+    this.mailClientHandler = new MailClientHandler(this, config);
     MailClientPipelineFactory pipelineFactory =
         new MailClientPipelineFactory(mailClientHandler, config);
 

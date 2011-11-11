@@ -43,6 +43,7 @@ class MailClientHandler extends SimpleChannelHandler {
       Pattern.CASE_INSENSITIVE);
 
   private final Idler idler;
+  private final MailClientConfig config;
 
   private final CountDownLatch loginComplete = new CountDownLatch(2);
   private volatile boolean isLoggedIn = false;
@@ -61,8 +62,9 @@ class MailClientHandler extends SimpleChannelHandler {
 
   private final Queue<String> wireTrace = new ConcurrentLinkedQueue<String>();
 
-  public MailClientHandler(Idler idler) {
+  public MailClientHandler(Idler idler, MailClientConfig config) {
     this.idler = idler;
+    this.config = config;
   }
 
   public boolean isLoggedIn() {
@@ -93,14 +95,15 @@ class MailClientHandler extends SimpleChannelHandler {
     log.trace(message);
     if (SYSTEM_ERROR_REGEX.matcher(message).matches()
         || ". NO [ALERT] Account exceeded command or bandwidth limits. (Failure)".equalsIgnoreCase(message.trim())) {
-      log.warn("Disconnected by IMAP Server due to system error: {}", message);
+      log.warn("{} disconnected by IMAP Server due to system error: {}", config.getUsername(), message);
       disconnectAbnormally(message);
       return;
     }
 
     try {
       if (halt) {
-        log.error("This mail client is halted but continues to receive messages, ignoring!");
+        log.error("Mail client for {} is halted but continues to receive messages, ignoring!",
+            config.getUsername());
         return;
       }
       if (message.startsWith(CAPABILITY_PREFIX)) {
@@ -112,13 +115,13 @@ class MailClientHandler extends SimpleChannelHandler {
 
       if (!isLoggedIn) {
         if (message.matches("[.] OK .*@.* \\(Success\\)")) { // TODO make case-insensitive
-          log.info("Authentication success.");
+          log.info("Authentication success for user {}", config.getUsername());
           isLoggedIn = true;
           loginComplete.countDown();
         } else {
           Matcher matcher = COMMAND_FAILED_REGEX.matcher(message);
           if (matcher.find()) {
-            log.warn("Authentication failed due to: {}", message);
+            log.warn("Authentication failed for {} due to: {}", config.getUsername(), message);
             loginComplete.countDown();
             errorStack.push(new Error(null /* logins have no completion */, extractError(matcher),
                 wireTrace));
@@ -131,7 +134,7 @@ class MailClientHandler extends SimpleChannelHandler {
       // Copy to local var as the value can change underneath us.
       FolderObserver observer = this.observer;
       if (idling.get()) {
-        log.info("Message received during idling: {}", message);
+        log.info("Message received for {} during idling: {}", config.getUsername(), message);
         message = message.toLowerCase();
 
         if (IDLE_ENDED_REGEX.matcher(message).matches()) {
