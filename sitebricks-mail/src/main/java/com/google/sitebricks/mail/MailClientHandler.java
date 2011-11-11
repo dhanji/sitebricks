@@ -45,8 +45,7 @@ class MailClientHandler extends SimpleChannelHandler {
   private final Idler idler;
   private final MailClientConfig config;
 
-  private final CountDownLatch loginComplete = new CountDownLatch(2);
-  private volatile boolean isLoggedIn = false;
+  private final CountDownLatch loginSuccess = new CountDownLatch(2);
   private volatile List<String> capabilities;
   private volatile FolderObserver observer;
   final AtomicBoolean idling = new AtomicBoolean();
@@ -68,7 +67,7 @@ class MailClientHandler extends SimpleChannelHandler {
   }
 
   public boolean isLoggedIn() {
-    return isLoggedIn;
+    return loginSuccess.getCount() == 0;
   }
 
   private static class PushedData {
@@ -109,20 +108,20 @@ class MailClientHandler extends SimpleChannelHandler {
       if (message.startsWith(CAPABILITY_PREFIX)) {
         this.capabilities = Arrays.asList(
             message.substring(CAPABILITY_PREFIX.length() + 1).split("[ ]+"));
-        loginComplete.countDown();
+        loginSuccess.countDown();
         return;
       }
 
-      if (!isLoggedIn) {
+      if (loginSuccess.getCount() > 0) {
         if (message.matches("[.] OK .*@.* \\(Success\\)")) { // TODO make case-insensitive
           log.info("Authentication success for user {}", config.getUsername());
-          isLoggedIn = true;
-          loginComplete.countDown();
+          loginSuccess.countDown();
         } else {
           Matcher matcher = COMMAND_FAILED_REGEX.matcher(message);
           if (matcher.find()) {
+            // WARNING: DO NOT COUNTDOWN THE LOGIN LATCH ON FAILURE!!!
+
             log.warn("Authentication failed for {} due to: {}", config.getUsername(), message);
-            loginComplete.countDown();
             errorStack.push(new Error(null /* logins have no completion */, extractError(matcher),
                 wireTrace));
             disconnectAbnormally(message);
@@ -245,12 +244,12 @@ class MailClientHandler extends SimpleChannelHandler {
 
   boolean awaitLogin() {
     try {
-      if (!loginComplete.await(10L, TimeUnit.SECONDS)) {
-        errorStack.push(new Error(null, "Timed out waiting for login response", wireTrace));
+      if (!loginSuccess.await(10L, TimeUnit.SECONDS)) {
+        disconnectAbnormally("Timed out waiting for login response");
         throw new RuntimeException("Timed out waiting for login response");
       }
 
-      return isLoggedIn; // No error == success!
+      return isLoggedIn();
     } catch (InterruptedException e) {
       errorStack.push(new Error(null, e.getMessage(), wireTrace));
       throw new RuntimeException("Interruption while awaiting server login", e);
