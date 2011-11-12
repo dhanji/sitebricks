@@ -534,7 +534,7 @@ public class DefaultPageBook implements PageBook {
             for (Action action : tuples) {
               if (action.shouldCall(request)) {
                 matched = true;
-                redirect = action.call(page, map);
+                redirect = action.call(request, page, map);
                 break;
               }
             }
@@ -570,7 +570,7 @@ public class DefaultPageBook implements PageBook {
       if (null != tuple) {
         for (Action action : tuple) {
           if (action.shouldCall(request)) {
-            redirect = action.call(page, pathMap);
+            redirect = action.call(request, page, pathMap);
             break;
           }
         }
@@ -613,7 +613,7 @@ public class DefaultPageBook implements PageBook {
     private final List<Object> args;
     private final Map<String, String> negotiates;
     private final ContentNegotiator negotiator;
-	private final TypeConverter converter;
+	  private final TypeConverter converter;
 
     private MethodTuple(Method method, Injector injector) {
       this.method = method;
@@ -679,7 +679,7 @@ public class DefaultPageBook implements PageBook {
 
 	
     @Override
-    public Object call(Object page, Map<String, String> map) {
+    public Object call(Request request, Object page, Map<String, String> map) {
       List<Object> arguments = new ArrayList<Object>();
       for (Object arg : args) {
     	  if (arg instanceof NamedParameter) {

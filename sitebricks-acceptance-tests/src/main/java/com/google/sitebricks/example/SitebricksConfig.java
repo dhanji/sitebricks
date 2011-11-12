@@ -134,7 +134,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         //
         // Handle subpaths for verbs that have parameters
         //
-        at("/issue:/id")
+        at("/issue/:id")
             .perform(action("READ"))
             .on(Get.class)
             .perform(action("UPDATE"))
@@ -153,7 +153,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
       }
 
       @Override
-      public Object call(Object page, Map<String, String> map) {
+      public Object call(Request request, Object page, Map<String, String> map) {
         return Reply.with(reply);
       }
     };
