@@ -14,6 +14,12 @@ import static org.testng.Assert.assertTrue;
  */
 public class MailClientHandlerTest {
   @Test
+  public final void testAuthenticationSuccessRegex() {
+    assertTrue(". OK cameron@themaninblue.com Cameron Adams authenticated (Success)"
+        .matches("[.] OK .*@.* \\(Success\\)"));
+  }
+
+  @Test
   public final void testIdleExistsRegexes() {
     Matcher matcher = MailClientHandler.IDLE_EXISTS_REGEX.matcher("* 46243 EXISTS");
     assertTrue(matcher.matches());

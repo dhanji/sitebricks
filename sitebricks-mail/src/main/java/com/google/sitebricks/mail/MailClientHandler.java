@@ -30,6 +30,9 @@ import java.util.regex.Pattern;
 class MailClientHandler extends SimpleChannelHandler {
   private static final Logger log = LoggerFactory.getLogger(MailClientHandler.class);
   public static final String CAPABILITY_PREFIX = "* CAPABILITY";
+  static final Pattern AUTH_SUCCESS_REGEX =
+      Pattern.compile("[.] OK .*@.* \\(Success\\)", Pattern.CASE_INSENSITIVE);
+
   static final Pattern COMMAND_FAILED_REGEX =
       Pattern.compile("^[.] (NO|BAD) (.*)", Pattern.CASE_INSENSITIVE);
   static final Pattern SYSTEM_ERROR_REGEX = Pattern.compile("[*]\\s*bye\\s*system\\s*error\\s*",
@@ -45,7 +48,7 @@ class MailClientHandler extends SimpleChannelHandler {
   private final Idler idler;
   private final MailClientConfig config;
 
-  private final CountDownLatch loginSuccess = new CountDownLatch(2);
+  private final CountDownLatch loginSuccess = new CountDownLatch(1);
   private volatile List<String> capabilities;
   private volatile FolderObserver observer;
   final AtomicBoolean idling = new AtomicBoolean();
@@ -93,8 +96,10 @@ class MailClientHandler extends SimpleChannelHandler {
 
     log.trace(message);
     if (SYSTEM_ERROR_REGEX.matcher(message).matches()
-        || ". NO [ALERT] Account exceeded command or bandwidth limits. (Failure)".equalsIgnoreCase(message.trim())) {
-      log.warn("{} disconnected by IMAP Server due to system error: {}", config.getUsername(), message);
+        || ". NO [ALERT] Account exceeded command or bandwidth limits. (Failure)".equalsIgnoreCase(
+        message.trim())) {
+      log.warn("{} disconnected by IMAP Server due to system error: {}", config.getUsername(),
+          message);
       disconnectAbnormally(message);
       return;
     }
@@ -105,15 +110,12 @@ class MailClientHandler extends SimpleChannelHandler {
             config.getUsername());
         return;
       }
-      if (message.startsWith(CAPABILITY_PREFIX)) {
-        this.capabilities = Arrays.asList(
-            message.substring(CAPABILITY_PREFIX.length() + 1).split("[ ]+"));
-        loginSuccess.countDown();
-        return;
-      }
-
       if (loginSuccess.getCount() > 0) {
-        if (message.matches("[.] OK .*@.* \\(Success\\)")) { // TODO make case-insensitive
+        if (message.startsWith(CAPABILITY_PREFIX)) {
+          this.capabilities = Arrays.asList(
+              message.substring(CAPABILITY_PREFIX.length() + 1).split("[ ]+"));
+          return;
+        } else if (AUTH_SUCCESS_REGEX.matcher(message).matches()) {
           log.info("Authentication success for user {}", config.getUsername());
           loginSuccess.countDown();
         } else {
