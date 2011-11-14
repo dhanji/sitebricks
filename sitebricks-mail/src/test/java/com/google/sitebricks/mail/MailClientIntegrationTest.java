@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Guice;
 import com.google.sitebricks.mail.Mail.Auth;
+import com.google.sitebricks.mail.MailClient.WireError;
 import com.google.sitebricks.mail.imap.Flag;
 import com.google.sitebricks.mail.imap.Folder;
 import com.google.sitebricks.mail.imap.FolderStatus;
@@ -39,7 +40,16 @@ public class MailClientIntegrationTest {
          .prepare(Auth.SSL, System.getProperty("sitebricks-mail.username"),
              System.getProperty("sitebricks-mail.password"));
 
-    client.connect();
+    try {
+      client.connect();
+    } catch (Exception e) {
+      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
+      WireError lastError = client.lastError();
+      System.out.println(lastError.expected());
+      System.out.println(lastError.message());
+      System.out.println(lastError.trace());
+      System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    }
 
     List<String> capabilities = client.capabilities();
     System.out.println("CAPS: " + capabilities);
@@ -55,11 +65,6 @@ public class MailClientIntegrationTest {
     future.addListener(new Runnable() {
       @Override
       public void run() {
-//        client.watch(allMail, PRINTING_OBSERVER);
-
-        // Can't send other commands over the channel while idling.
-//        client.listFolders();
-
         ListenableFuture<List<MessageStatus>> messageStatuses =
             client.list(allMail, folderStatus.getMessages() - 3, -1);
 
@@ -82,11 +87,6 @@ public class MailClientIntegrationTest {
             System.out.println(message.getHeaders());
             System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
           }
-
-//          for (MessageStatus status : messages.get()) {
-//            System.out.println(ToStringBuilder.reflectionToString(status));
-//          }
-//
 
           System.out.println("Gmail flags set: " +
               client.addFlags(allMail, messages.get().get(0).getImapUid

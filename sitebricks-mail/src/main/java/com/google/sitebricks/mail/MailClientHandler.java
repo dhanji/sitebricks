@@ -301,7 +301,7 @@ class MailClientHandler extends SimpleChannelHandler {
     }
 
     @Override public String expected() {
-      return completion.toString();
+      return completion == null ? null : completion.toString();
     }
   }
 }
