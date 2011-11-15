@@ -9,6 +9,7 @@ import com.google.sitebricks.Show;
 import com.google.sitebricks.Template;
 import com.google.sitebricks.TemplateLoader;
 import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
+import com.google.sitebricks.compiler.template.freemarker.FreemarkerDecoratorTemplateCompiler;
 import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.rendering.Decorated;
@@ -68,6 +69,10 @@ class StandardCompilers implements Compilers {
     return new FreemarkerTemplateCompiler(page).compile(template);
   }
 
+  public Renderable compileFreemarkerDecorator( Class<?> page, String template ) {
+    return new FreemarkerDecoratorTemplateCompiler(page).compile(template);
+  }
+  
   // TODO(dhanji): Feedback errors as return rather than throwing.
   public void analyze(Class<?> page) {
     // May move this into a separate class if it starts getting too big.
@@ -150,6 +155,9 @@ class StandardCompilers implements Compilers {
         break;
       case FREEMARKER:
         widget = compileFreemarker(templateClass, template.getText());
+        break;
+      case FREEMARKER_DECORATOR:
+        widget = compileFreemarkerDecorator(templateClass, template.getText());
         break;
     }
     return widget;

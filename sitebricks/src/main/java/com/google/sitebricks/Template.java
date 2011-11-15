@@ -21,7 +21,7 @@ public class Template {
   }
 
   public static enum Kind {
-    HTML, XML, FLAT, MVEL, FREEMARKER;
+    HTML, XML, FLAT, MVEL, FREEMARKER, FREEMARKER_DECORATOR;
 
     /**
      * Returns whether a given template should be treated as html, xml or flat
@@ -36,6 +36,8 @@ public class Template {
         return MVEL;
       else if (template.endsWith(".fml"))
         return FREEMARKER;
+      else if (template.endsWith(".dml"))
+        return FREEMARKER_DECORATOR;
       else
         return FLAT;
     }

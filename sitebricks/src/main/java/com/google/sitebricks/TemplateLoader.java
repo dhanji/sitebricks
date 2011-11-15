@@ -16,7 +16,7 @@ public class TemplateLoader {
   private final Provider<ServletContext> context;
 
   private final String[] fileNameTemplates = new String[] { "%s.html", "%s.xhtml", "%s.xml",
-      "%s.txt", "%s.fml", "%s.mvel" };
+      "%s.txt", "%s.fml", "%s.dml", "%s.mvel" };
 
   @Inject
   public TemplateLoader(Provider<ServletContext> context) {
@@ -80,6 +80,14 @@ public class TemplateLoader {
     return new Template(Template.Kind.kindOf(template), text);
   }
 
+  private String fileNameTemplates() {
+    StringBuffer sb = new StringBuffer();
+    for(String s : fileNameTemplates) {
+      sb.append(s).append(",");
+    }
+    return sb.toString();
+  }
+  
   private ResolvedTemplate resolve(Class<?> pageClass, ServletContext context, String template) {
     //first resolve using url conversion
     for (String nameTemplate : fileNameTemplates) {

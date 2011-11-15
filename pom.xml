@@ -27,6 +27,7 @@
     <module>sitebricks-async</module>
     <module>sitebricks-client</module>
     <module>sitebricks-acceptance-tests</module>
+    <module>sitebricks-decorator</module>
     <!--
     We'll move the examples to their own repo shortly
     <module>sitebricks-web</module>
@@ -58,6 +59,11 @@
       <dependency>
         <groupId>com.google.sitebricks</groupId>
         <artifactId>sitebricks-client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.sitebricks</groupId>
+        <artifactId>sitebricks-decorator</artifactId>
         <version>${project.version}</version>
       </dependency>
 
