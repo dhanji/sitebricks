@@ -389,7 +389,7 @@ class NettyImapClient implements MailClient, Idler {
   @Override
   public synchronized void updateOAuthAccessToken(String accessToken, String tokenSecret) {
     config.getOAuthConfig().accessToken = accessToken;
-    config.getOAuthConfig().tokenSecret = accessToken;
+    config.getOAuthConfig().tokenSecret = tokenSecret;
   }
 
   public synchronized void done() {
