@@ -1,5 +1,9 @@
 package com.google.sitebricks.routing;
 
+import java.io.IOException;
+
+import net.jcip.annotations.Immutable;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -8,12 +12,10 @@ import com.google.sitebricks.StringBuilderRespond;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.headless.HeadlessRenderer;
+import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.resource.ResourcesService;
 import com.google.sitebricks.routing.PageBook.Page;
-import net.jcip.annotations.Immutable;
-
-import java.io.IOException;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -69,14 +71,12 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     final Object instance = page.instantiate();
     if (page.isHeadless()) {
       return bindAndReply(request, page, instance);
-    } else {
-      respond = new StringBuilderRespond(instance);
-
-      //fire events and render reponders
-      bindAndRespond(request, page, respond, instance);
     }
+    
+    //fire events and render reponders
+    return bindAndRespond(request, page, instance);
+    
 
-    return respond;
   }
 
   private Object bindAndReply(Request request, Page page, Object instance) throws IOException {
@@ -87,8 +87,9 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     return fireEvent(request, page, instance);
   }
 
-  private void bindAndRespond(Request request, PageBook.Page page, Respond respond,
-                              Object instance) {
+  private Object bindAndRespond(Request request, PageBook.Page page,
+                              Object instance) throws IOException {
+    Respond respond = new StringBuilderRespond(instance);
     //bind request
     binder.bind(request, instance);
 
@@ -105,6 +106,9 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
 
         // should never be null coz it is validated on compile.
         respond.redirect(contextualize(request, targetPage.getUri()));
+      } else if (redirect instanceof Reply) {
+        //page wants to be headless
+        return bindAndReply(request, page, instance);
       } else {
         // Handle page-chaining driven redirection.
         PageBook.Page targetPage = book.forInstance(redirect);
@@ -116,8 +120,10 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
         // verified at compile, not be a variablized matcher.
         respond.redirect(contextualize(request, targetPage.getUri()));
       }
-    } else
+    } else {
       page.widget().render(instance, respond);
+    }
+    return respond;
   }
 
   // We're sure the request parameter map is a Map<String, String[]>
