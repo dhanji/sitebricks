@@ -303,5 +303,17 @@ class MailClientHandler extends SimpleChannelHandler {
     @Override public String expected() {
       return completion == null ? null : completion.toString();
     }
+
+    @Override public String toString() {
+      StringBuilder sout = new StringBuilder();
+      sout.append("WireError: ");
+      sout.append("Completion=").append(completion);
+      sout.append(", Error: ").append(error);
+      sout.append(", Trace:\n");
+      for (String s : wireTrace) {
+        sout.append("  ").append(s).append("\n");
+      }
+      return sout.toString();
+    }
   }
 }

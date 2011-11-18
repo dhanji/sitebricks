@@ -195,5 +195,6 @@ public interface MailClient {
     String message();
     List<String> trace();
     String expected();
+    String toString();
   }
 }
