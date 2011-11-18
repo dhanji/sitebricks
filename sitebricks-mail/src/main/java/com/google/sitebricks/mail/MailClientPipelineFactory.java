@@ -38,7 +38,7 @@ class MailClientPipelineFactory implements ChannelPipelineFactory {
     }
 
     // Add the text line codec combination first,
-    pipeline.addLast("framer", new DelimiterBasedFrameDecoder(96192, Delimiters.lineDelimiter()));
+    pipeline.addLast("framer", new DelimiterBasedFrameDecoder(160192, Delimiters.lineDelimiter()));
     pipeline.addLast("decoder", new StringDecoder());
     pipeline.addLast("encoder", new StringEncoder());
 
