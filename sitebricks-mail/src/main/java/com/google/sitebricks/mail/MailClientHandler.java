@@ -2,23 +2,26 @@ package com.google.sitebricks.mail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import com.google.sitebricks.util.JmxUtil;
+import com.google.sitebricks.util.BoundedDiscardingList;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.softee.management.annotation.MBean;
+import org.softee.management.annotation.ManagedAttribute;
+import org.softee.management.annotation.ManagedOperation;
+import org.softee.management.helper.MBeanRegistration;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +30,7 @@ import java.util.regex.Pattern;
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
+@MBean
 class MailClientHandler extends SimpleChannelHandler {
   private static final Logger log = LoggerFactory.getLogger(MailClientHandler.class);
   public static final String CAPABILITY_PREFIX = "* CAPABILITY";
@@ -62,13 +66,35 @@ class MailClientHandler extends SimpleChannelHandler {
       new ConcurrentLinkedQueue<CommandCompletion>();
   private volatile PushedData pushedData;
 
+  private final BoundedDiscardingList<String> commandDebugHistory = new BoundedDiscardingList<String>(10);
   private final Queue<String> wireTrace = new ConcurrentLinkedQueue<String>();
+  private volatile boolean logAllMessages = false;
+  private final MBeanRegistration mBeanRegistration;
 
   public MailClientHandler(Idler idler, MailClientConfig config) {
     this.idler = idler;
     this.config = config;
+    mBeanRegistration = JmxUtil.registerMBean(this, "com.google.sitebricks", "MailClientHandler",
+        config.getUsername());
   }
 
+  @ManagedOperation
+  public void logAllMessages(boolean b) {
+    logAllMessages = b;
+    log.info("logAllMessages[" + config.getUsername() + "]=" + b);
+  }
+
+  @ManagedAttribute
+  public boolean getLogAllMessages() {
+    return logAllMessages;
+  }
+
+  @ManagedAttribute
+  public List<String> getCommandDebugHistory() {
+    return commandDebugHistory.list();
+  }
+
+  @ManagedAttribute
   public boolean isLoggedIn() {
     return loginSuccess.getCount() == 0;
   }
@@ -83,11 +109,16 @@ class MailClientHandler extends SimpleChannelHandler {
   // DO NOT synchronize!
   public void enqueue(CommandCompletion completion) {
     completions.add(completion);
+    commandDebugHistory.add(new Date().toString() + " " + completion.toString());
   }
 
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     String message = e.getMessage().toString();
+
+    if (logAllMessages) {
+      log.info("IMAP[" + config.getUsername() + "]: " + message);
+    }
 
     wireTrace.add(message);
     if (wireTrace.size() > 25) {
@@ -279,6 +310,10 @@ class MailClientHandler extends SimpleChannelHandler {
 
   public boolean isHalted() {
     return halt;
+  }
+
+  public void disconnected() {
+    JmxUtil.unregister(mBeanRegistration);
   }
 
   static class Error implements MailClient.WireError {
