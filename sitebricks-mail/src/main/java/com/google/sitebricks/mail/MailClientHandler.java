@@ -16,10 +16,7 @@ import org.softee.management.annotation.ManagedOperation;
 import org.softee.management.helper.MBeanRegistration;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
@@ -33,6 +30,10 @@ import java.util.regex.Pattern;
 @MBean
 class MailClientHandler extends SimpleChannelHandler {
   private static final Logger log = LoggerFactory.getLogger(MailClientHandler.class);
+
+  private static final Set<String> logAllMessagesForUsers =
+      Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+
   public static final String CAPABILITY_PREFIX = "* CAPABILITY";
   static final Pattern AUTH_SUCCESS_REGEX =
       Pattern.compile("[.] OK .*@.* \\(Success\\)", Pattern.CASE_INSENSITIVE);
@@ -68,7 +69,6 @@ class MailClientHandler extends SimpleChannelHandler {
 
   private final BoundedDiscardingList<String> commandDebugHistory = new BoundedDiscardingList<String>(10);
   private final Queue<String> wireTrace = new ConcurrentLinkedQueue<String>();
-  private volatile boolean logAllMessages = false;
   private final MBeanRegistration mBeanRegistration;
 
   public MailClientHandler(Idler idler, MailClientConfig config) {
@@ -80,13 +80,16 @@ class MailClientHandler extends SimpleChannelHandler {
 
   @ManagedOperation
   public void logAllMessages(boolean b) {
-    logAllMessages = b;
-    log.info("logAllMessages[" + config.getUsername() + "]=" + b);
+    log.info("logAllMessagesForUsers[" + config.getUsername() + "] = " + b);
+    if (b)
+      logAllMessagesForUsers.add(config.getUsername());
+    else
+      logAllMessagesForUsers.remove(config.getUsername());
   }
 
   @ManagedAttribute
-  public boolean getLogAllMessages() {
-    return logAllMessages;
+  public Set<String> getLogAllMessagesFor() {
+    return logAllMessagesForUsers;
   }
 
   @ManagedAttribute
@@ -116,7 +119,7 @@ class MailClientHandler extends SimpleChannelHandler {
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     String message = e.getMessage().toString();
 
-    if (logAllMessages) {
+    if (logAllMessagesForUsers.contains(config.getUsername())) {
       log.info("IMAP[" + config.getUsername() + "]: " + message);
     }
 
