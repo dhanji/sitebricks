@@ -177,6 +177,11 @@ public interface MailClient {
    */
   void updateOAuthAccessToken(String accessToken, String tokenSecret);
 
+  /**
+   * Fetches a single message by its uid.
+   */
+  ListenableFuture<Message> fetchUid(Folder folder, int uid);
+
   static interface DisconnectListener {
     void disconnected();
 

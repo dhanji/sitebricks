@@ -362,6 +362,22 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
+  public ListenableFuture<Message> fetchUid(Folder folder, int uid) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idling.get(),
+        "Can't execute command while idling (are you watching a folder?)");
+
+    checkCurrentFolder(folder);
+    Preconditions.checkArgument(uid > 0, "UID must be greater than zero");
+    SettableFuture<Message> valueFuture = SettableFuture.create();
+
+    String args = uid + " (uid body[])";
+    send(Command.FETCH_BODY_UID, args, valueFuture);
+
+    return valueFuture;
+  }
+
+  @Override
   public synchronized void watch(Folder folder, FolderObserver observer) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
     checkCurrentFolder(folder);
