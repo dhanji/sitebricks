@@ -1,13 +1,12 @@
 package com.google.sitebricks.mail;
 
 import com.google.sitebricks.mail.imap.Command;
+import com.google.sitebricks.mail.imap.ExtractionException;
 import org.testng.annotations.Test;
 
 import java.util.regex.Matcher;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -51,7 +50,13 @@ public class MailClientHandlerTest {
   }
 
   @Test
-  public final void testOKSuccessRegex() {
+  public final void testOKSuccessRegex() throws ExtractionException {
+    try {
+      Command.isEndOfSequence(1L, "1 NO something bad");
+      fail("Expected an exception on 'NO' response");
+    } catch(ExtractionException ee) {
+      // expected;
+    }
     assertTrue(Command.isEndOfSequence(1L, "1 OK Success"));
     assertTrue(Command.isEndOfSequence(2L, "2 OK [READ-ONLY] [Gmail]/All Mail selected. (Success)"));
     assertFalse(Command.isEndOfSequence("> OK [READ-ONLY] [Gmail]/All Mail selected. (Success)"));

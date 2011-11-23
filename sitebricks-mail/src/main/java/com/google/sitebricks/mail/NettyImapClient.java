@@ -257,6 +257,7 @@ class NettyImapClient implements MailClient, Idler {
           log.error("Interrupted while attempting to open a folder", e);
         } catch (ExecutionException e) {
           log.error("Execution exception while attempting to open a folder", e);
+          externalFuture.setException(e);
         }
       }
     }, workerPool);

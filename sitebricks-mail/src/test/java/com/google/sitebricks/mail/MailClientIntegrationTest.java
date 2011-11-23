@@ -43,6 +43,7 @@ public class MailClientIntegrationTest {
     try {
       client.connect();
     } catch (Exception e) {
+      e.printStackTrace();
       System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
       WireError lastError = client.lastError();
       System.out.println(lastError.expected());
@@ -53,6 +54,14 @@ public class MailClientIntegrationTest {
 
     List<String> capabilities = client.capabilities();
     System.out.println("CAPS: " + capabilities);
+
+    System.out.println("FOLDERS: " + client.listFolders().get());
+    try {
+      Folder f = client.open("Thumping through the brush.", false).get();
+      System.out.println("Expected failure attempting to open invalid folder.");
+    } catch (ExecutionException ee) {
+      // expected.
+    }
 
     final ListenableFuture<FolderStatus> fStatus =
         client.statusOf("[Gmail]/All Mail");
@@ -66,7 +75,7 @@ public class MailClientIntegrationTest {
       @Override
       public void run() {
         ListenableFuture<List<MessageStatus>> messageStatuses =
-            client.list(allMail, folderStatus.getMessages() - 3, -1);
+            client.list(allMail, folderStatus.getMessages() - 1, -1);
 
         ListenableFuture<List<Message>> messages = client.fetch(allMail,
             folderStatus.getMessages() - 1, -1);

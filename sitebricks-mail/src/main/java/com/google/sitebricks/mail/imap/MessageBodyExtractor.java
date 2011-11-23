@@ -414,9 +414,13 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     while (iterator.hasNext()) {
       String message = iterator.next();
       // Watch for the end of sequence marker. If we see it, the mime-stream is ended.
-      if (Command.isEndOfSequence(message))
+      try {
+        if (Command.isEndOfSequence(message))
+          continue;
+      } catch (ExtractionException ee) {
+        log.error("Warning: error parsing email message body! {}", iterator, ee);
         continue;
-
+      }
       // A blank line indicates end of the header section.
       if (message.isEmpty())
         break;

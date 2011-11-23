@@ -42,8 +42,14 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         continue;
 
       // Discard the success token.
-      if (Command.isEndOfSequence(message))
+
+      try {
+        if (Command.isEndOfSequence(message))
+          continue;
+      } catch (ExtractionException ee) {
+        log.error("Warning: error parsing email message status! {}", messages, ee);
         continue;
+      }
 
       // Appears that this message got split between lines. So unfold.
       if (!message.endsWith(")")) {
