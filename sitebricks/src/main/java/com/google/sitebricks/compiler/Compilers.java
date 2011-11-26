@@ -2,6 +2,7 @@ package com.google.sitebricks.compiler;
 
 import com.google.inject.ImplementedBy;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Template;
 import com.google.sitebricks.routing.PageBook;
 
 /**
@@ -23,7 +24,7 @@ public interface Compilers {
   Renderable compileMvel(Class<?> page, String template);
 
   Renderable compileFreemarker( Class<?> page, String text );
-  Renderable compileFreemarkerDecorator( Class<?> page, String text );
+  Renderable compileFreemarkerDecorator( Class<?> page, Template text );
 
   /**
    * Performs static analysis of the given page class to

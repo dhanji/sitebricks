@@ -45,7 +45,7 @@ public class FreemarkerDecoratorTemplateCompiler {
   // For a purely javascript based application the decorator being able to do this is probably the only thing that really matters, but for page based apps it's important
   // for the individual pages to be injectable.
   
-  public Renderable compile(final String pageContent) {
+  public Renderable compile(final com.google.sitebricks.Template sitebricksTemplate) {
             
     return new Renderable() {
       @Override
@@ -54,7 +54,7 @@ public class FreemarkerDecoratorTemplateCompiler {
         //
         // Process the page with Freemarker
         //
-        Template template = getTemplate(page, pageContent);
+        Template template = getTemplate(page, sitebricksTemplate.getText());
         Writer pageWriter = new StringWriter();
         try {
           template.process(bound, pageWriter);
@@ -78,7 +78,7 @@ public class FreemarkerDecoratorTemplateCompiler {
         //
         // Find the proper decorator based on the templates location in the tree of pages
         //
-        File decoratorSource = new File("/Users/jvanzyl/js/insight-bootstrap/src/main/webapp/template.html");
+        File decoratorSource = new File(new File(sitebricksTemplate.getTemplateSource().getLocation()).getParentFile(), "template.html");
         decorator.decorate(decoratorSource, context, writer);
         respond.write(writer.toString());
       }

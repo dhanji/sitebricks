@@ -6,10 +6,12 @@ package com.google.sitebricks;
 public class Template {
   private final Kind templateKind;
   private final String text;
+  private final TemplateSource source;
 
-  public Template(Kind templateKind, String text) {
+  public Template(Kind templateKind, String text, TemplateSource source) {
     this.templateKind = templateKind;
     this.text = text;
+    this.source = source;
   }
 
   public Kind getKind() {
@@ -20,6 +22,10 @@ public class Template {
     return text;
   }
 
+  public TemplateSource getTemplateSource() {
+    return source;
+  }
+  
   public static enum Kind {
     HTML, XML, FLAT, MVEL, FREEMARKER, FREEMARKER_DECORATOR;
 

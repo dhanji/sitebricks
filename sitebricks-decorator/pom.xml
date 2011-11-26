@@ -28,6 +28,11 @@
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <version>1.5.1</version>
+    </dependency>
     <!-- Testing -->
     <dependency>
       <groupId>junit</groupId>

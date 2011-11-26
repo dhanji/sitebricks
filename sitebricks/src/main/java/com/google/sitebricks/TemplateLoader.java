@@ -37,6 +37,7 @@ public class TemplateLoader {
       template = resolve(pageClass);
     }
 
+    TemplateSource templateSource = null;
     String text;
     try {
       InputStream stream = null;
@@ -49,8 +50,9 @@ public class TemplateLoader {
       if (null == stream) {
 
         final ServletContext servletContext = context.get();
-        if (null != template)
-          stream = open(template, servletContext);
+        if (null != template) {
+          stream = open(template, servletContext).resource;
+        }
 
         //resolve again, but this time on the webapp resource path
         if (null == stream) {
@@ -58,6 +60,7 @@ public class TemplateLoader {
           if (null != resolvedTemplate) {
             template = resolvedTemplate.templateName;
             stream = resolvedTemplate.resource;
+            templateSource = new FileTemplateSource(resolvedTemplate.templateFile);
           }
         }
 
@@ -77,42 +80,33 @@ public class TemplateLoader {
       throw new TemplateLoadingException("Could not load template for (i/o error): " + pageClass, e);
     }
 
-    return new Template(Template.Kind.kindOf(template), text);
-  }
-
-  private String fileNameTemplates() {
-    StringBuffer sb = new StringBuffer();
-    for(String s : fileNameTemplates) {
-      sb.append(s).append(",");
-    }
-    return sb.toString();
+    return new Template(Template.Kind.kindOf(template), text, templateSource);
   }
   
   private ResolvedTemplate resolve(Class<?> pageClass, ServletContext context, String template) {
     //first resolve using url conversion
     for (String nameTemplate : fileNameTemplates) {
       String templateName = String.format(nameTemplate, pageClass.getSimpleName());
-      InputStream resource = open(templateName, context);
+      ResolvedTemplate resolvedTemplate = open(templateName, context);
 
-      if (null != resource) {
-        return new ResolvedTemplate(templateName, resource);
+      if (null != resolvedTemplate.resource) {
+        return resolvedTemplate;
       }
 
-      resource = openWebInf(templateName, context);
+      resolvedTemplate = openWebInf(templateName, context);
 
-      if (null != resource) {
-        return new ResolvedTemplate(templateName, resource);
+      if (null != resolvedTemplate.resource) {
+        return resolvedTemplate;
       }
-
 
       if (null == template) {
           continue;
       }
-      //try to resolve @Show template from web-inf folder    
-      resource = openWebInf(template, context);
+      //try to resolve @Show template from web-inf folder  
+      resolvedTemplate = openWebInf(template, context);
 
-      if (null != resource) {
-          return new ResolvedTemplate(template, resource);
+      if (null != resolvedTemplate.resource) {
+          return resolvedTemplate;
       }
     }
 
@@ -122,7 +116,7 @@ public class TemplateLoader {
       InputStream resource = context.getResourceAsStream(templateName);
 
       if (null != resource) {
-        return new ResolvedTemplate(templateName, resource);
+        return new ResolvedTemplate(templateName, resource, null);
       }
     }
 
@@ -132,24 +126,26 @@ public class TemplateLoader {
   private static class ResolvedTemplate {
     private final InputStream resource;
     private final String templateName;
+    private final File templateFile;
 
-    private ResolvedTemplate(String templateName, InputStream resource) {
+    private ResolvedTemplate(String templateName, InputStream resource, File templateFile) {
       this.templateName = templateName;
       this.resource = resource;
+      this.templateFile = templateFile;
     }
   }
 
-  private static InputStream open(String file, ServletContext context) {
-    try {
-      String path = context.getRealPath(file);
-      return path == null ? null : new FileInputStream(new File(path));
+  private static ResolvedTemplate open(String templateName, ServletContext context) {
+    try {      
+      String path = context.getRealPath(templateName);
+      return path == null ? null : new ResolvedTemplate(templateName, new FileInputStream(path), new File(path));
     } catch (FileNotFoundException e) {
-      return null;
+      return new ResolvedTemplate(templateName, null, null);
     }
   }
   
-  private static InputStream openWebInf(String file, ServletContext context) {
-    return open("/WEB-INF/" + file, context);
+  private static ResolvedTemplate openWebInf(String templateName, ServletContext context) {
+    return open("/WEB-INF/" + templateName, context);
   }
 
   //resolves a location for this page class's template (assuming @Show is not present)

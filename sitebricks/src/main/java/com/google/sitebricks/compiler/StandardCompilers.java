@@ -69,7 +69,7 @@ class StandardCompilers implements Compilers {
     return new FreemarkerTemplateCompiler(page).compile(template);
   }
 
-  public Renderable compileFreemarkerDecorator( Class<?> page, String template ) {
+  public Renderable compileFreemarkerDecorator( Class<?> page, Template template ) {
     return new FreemarkerDecoratorTemplateCompiler(page).compile(template);
   }
   
@@ -157,7 +157,7 @@ class StandardCompilers implements Compilers {
         widget = compileFreemarker(templateClass, template.getText());
         break;
       case FREEMARKER_DECORATOR:
-        widget = compileFreemarkerDecorator(templateClass, template.getText());
+        widget = compileFreemarkerDecorator(templateClass, template);
         break;
     }
     return widget;
