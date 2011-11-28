@@ -1,9 +1,15 @@
 package com.google.sitebricks.mail;
 
+import com.google.common.collect.ImmutableList;
 import com.google.sitebricks.mail.imap.Command;
 import com.google.sitebricks.mail.imap.ExtractionException;
+import com.sun.tools.javac.util.Pair;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 
 import static org.testng.Assert.*;
@@ -12,6 +18,22 @@ import static org.testng.Assert.*;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class MailClientHandlerTest {
+  private void assertProcess(MailClientHandler.InputBuffer ib, String s, List<String> l) {
+    assertEquals(ib.processMessage(s), l);
+  }
+
+  @Test
+  public final void testProcessMessage() {
+    // ib is stateful.
+    MailClientHandler.InputBuffer ib = new MailClientHandler.InputBuffer();
+    assertProcess(ib, "hi ", ImmutableList.<String>of());
+    assertProcess(ib, "bob\r\nhow\n", ImmutableList.of("hi bob", "how"));
+    assertProcess(ib, "\nis\n\r\n", ImmutableList.of("", "is", ""));
+    assertProcess(ib, "your snake\nfeeling ", ImmutableList.of("your snake"));
+    assertProcess(ib, "after\neating\nthat", ImmutableList.of("feeling after", "eating"));
+    assertProcess(ib, " mushroom?\r\n", ImmutableList.of("that mushroom?"));
+  }
+
   @Test
   public final void testAuthenticationSuccessRegex() {
     assertTrue(". OK cameron@themaninblue.com Cameron Adams authenticated (Success)"

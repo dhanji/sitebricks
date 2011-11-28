@@ -1,9 +1,13 @@
 package com.google.sitebricks.mail;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.sitebricks.util.JmxUtil;
 import com.google.sitebricks.util.BoundedDiscardingList;
+import com.sun.tools.javac.util.Pair;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
@@ -15,10 +19,10 @@ import org.softee.management.annotation.ManagedAttribute;
 import org.softee.management.annotation.ManagedOperation;
 import org.softee.management.helper.MBeanRegistration;
 
+import javax.xml.transform.Result;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -70,6 +74,8 @@ class MailClientHandler extends SimpleChannelHandler {
   private final BoundedDiscardingList<String> commandDebugHistory = new BoundedDiscardingList<String>(10);
   private final Queue<String> wireTrace = new ConcurrentLinkedQueue<String>();
   private final MBeanRegistration mBeanRegistration;
+  private final InputBuffer inputBuffer = new InputBuffer();
+
 
   public MailClientHandler(Idler idler, MailClientConfig config) {
     this.idler = idler;
@@ -118,9 +124,14 @@ class MailClientHandler extends SimpleChannelHandler {
   @Override
   public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
     String message = e.getMessage().toString();
+    for (String input : inputBuffer.processMessage(message)) {
+      processMessage(input);
+    }
+  }
 
+  private void processMessage(String message) throws Exception {
     if (logAllMessagesForUsers.contains(config.getUsername())) {
-      log.info("IMAP[" + config.getUsername() + "]: " + message);
+      log.info("IMAP [" + config.getUsername() + "]: " + message);
     }
 
     wireTrace.add(message);
@@ -352,6 +363,27 @@ class MailClientHandler extends SimpleChannelHandler {
         sout.append("  ").append(s).append("\n");
       }
       return sout.toString();
+    }
+  }
+
+  @VisibleForTesting
+  static class InputBuffer {
+    volatile private StringBuilder buffer = new StringBuilder();
+
+    @VisibleForTesting
+    List<String> processMessage(String message) {
+      // Split leaves a trailing empty line if there's a terminating newline.
+      ArrayList<String> split = Lists.newArrayList(message.split("\r?\n", -1));
+      Preconditions.checkArgument(split.size() > 0);
+
+      synchronized (buffer) {
+        buffer.append(split.get(0));
+        if (split.size() == 1) // no newlines.
+          return ImmutableList.of();
+        split.set(0, buffer.toString());
+        buffer = new StringBuilder().append(split.remove(split.size() - 1));
+      }
+      return split;
     }
   }
 }
