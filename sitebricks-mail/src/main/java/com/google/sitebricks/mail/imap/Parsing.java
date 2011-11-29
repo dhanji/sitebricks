@@ -75,7 +75,7 @@ class Parsing {
 
   static String matchAnyOf(Queue<String> tokens, String... match) {
     for (String piece : match) {
-      if (piece.equals(tokens.peek())) {
+      if (piece.equalsIgnoreCase(tokens.peek())) {
         return tokens.poll();
       }
     }
@@ -86,7 +86,7 @@ class Parsing {
 
   static void eat(Queue<String> tokens, String... match) {
     for (String piece : match) {
-      if (piece.equals(tokens.peek())) {
+      if (piece.equalsIgnoreCase(tokens.peek())) {
         tokens.poll();
       } else
         throw new IllegalArgumentException("Expected token " + piece + " but found "
