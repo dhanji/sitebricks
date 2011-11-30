@@ -231,11 +231,14 @@ class MailClientHandler extends SimpleChannelHandler {
   }
 
   private void disconnectAbnormally(String message) {
-    halt();
-    disconnected();
-    // Disconnect abnormally. The user code should reconnect using the mail client.
-    errorStack.push(new Error(completions.poll(), message, wireTrace.list()));
-    idler.disconnect();
+    try {
+      halt();
+      // Disconnect abnormally. The user code should reconnect using the mail client.
+      errorStack.push(new Error(completions.poll(), message, wireTrace.list()));
+      idler.disconnect();
+    } finally {
+      disconnected();
+    }
   }
 
   private String extractError(Matcher matcher) {
@@ -334,19 +337,23 @@ class MailClientHandler extends SimpleChannelHandler {
       this.wireTrace = wireTrace;
     }
 
-    @Override public String message() {
+    @Override
+    public String message() {
       return error;
     }
 
-    @Override public List<String> trace() {
+    @Override
+    public List<String> trace() {
       return wireTrace;
     }
 
-    @Override public String expected() {
+    @Override
+    public String expected() {
       return completion == null ? null : completion.toString();
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
       StringBuilder sout = new StringBuilder();
       sout.append("WireError: ");
       sout.append("Completion=").append(completion);

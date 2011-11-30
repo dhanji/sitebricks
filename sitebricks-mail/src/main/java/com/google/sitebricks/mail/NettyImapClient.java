@@ -112,7 +112,8 @@ class NettyImapClient implements MailClient, Idler {
     if (null != listener) {
       // https://issues.jboss.org/browse/NETTY-47?page=com.atlassian.jirafisheyeplugin%3Afisheye-issuepanel#issue-tabs
       channel.getCloseFuture().addListener(new ChannelFutureListener() {
-        @Override public void operationComplete(ChannelFuture future) throws Exception {
+        @Override
+        public void operationComplete(ChannelFuture future) throws Exception {
           mailClientHandler.idleAcknowledged.set(false);
           mailClientHandler.disconnected();
           listener.disconnected();
@@ -123,17 +124,16 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   private boolean login() {
-    channel.write(". CAPABILITY\r\n");
-    if (config.getPassword() != null)
-      channel.write(". login " + config.getUsername() + " " + config.getPassword() + "\r\n");
-    else {
-      // Use xoauth login instead.
-      OAuthConfig oauth = config.getOAuthConfig();
-      Preconditions.checkArgument(oauth != null,
-          "Must specify a valid oauth config if not using password auth");
+    try {
+      channel.write(". CAPABILITY\r\n");
+      if (config.getPassword() != null)
+        channel.write(". login " + config.getUsername() + " " + config.getPassword() + "\r\n");
+      else {
+        // Use xoauth login instead.
+        OAuthConfig oauth = config.getOAuthConfig();
+        Preconditions.checkArgument(oauth != null,
+            "Must specify a valid oauth config if not using password auth");
 
-      //noinspection ConstantConditions
-      try {
         String oauthString = new XoauthSasl(config.getUsername(),
             oauth.clientId,
             oauth.clientSecret)
@@ -142,14 +142,17 @@ class NettyImapClient implements MailClient, Idler {
 
         channel.write(". AUTHENTICATE XOAUTH " + oauthString + "\r\n");
 
-      } catch (Exception e) {
-        throw new RuntimeException("Login failure", e);
+        //noinspection ConstantConditions
       }
+      return mailClientHandler.awaitLogin();
+    } catch (Exception e) {
+      log.error("Could not oauth or attempt login for {}", config.getUsername(), e);
     }
-    return mailClientHandler.awaitLogin();
+    return false;
   }
 
-  @Override public WireError lastError() {
+  @Override
+  public WireError lastError() {
     return mailClientHandler.lastError();
   }
 
@@ -162,7 +165,7 @@ class NettyImapClient implements MailClient, Idler {
     try {
       // If there is an error with the handler, dont bother logging out.
       if (!mailClientHandler.isHalted()) {
-        if(mailClientHandler.idling.get()) {
+        if (mailClientHandler.idling.get()) {
           log.warn("Disconnect called while IDLE, leaving idle and logging out.");
           done();
         }
@@ -307,6 +310,7 @@ class NettyImapClient implements MailClient, Idler {
   public ListenableFuture<Set<Flag>> addFlags(Folder folder, int imapUid, Set<Flag> flags) {
     return addOrRemoveFlags(folder, imapUid, flags, true);
   }
+
   @Override
   public ListenableFuture<Set<Flag>> removeFlags(Folder folder, int imapUid, Set<Flag> flags) {
     return addOrRemoveFlags(folder, imapUid, flags, false);
@@ -327,7 +331,7 @@ class NettyImapClient implements MailClient, Idler {
 
   @Override
   public ListenableFuture<Set<String>> addOrRemoveGmailLabels(Folder folder, int imapUid,
-                                                    Set<String> labels, boolean add) {
+                                                              Set<String> labels, boolean add) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
     Preconditions.checkState(!mailClientHandler.idling.get(),
         "Can't execute command while idling (are you watching a folder?)");
@@ -418,11 +422,13 @@ class NettyImapClient implements MailClient, Idler {
     channel.write("done\r\n");
   }
 
-  @Override public void idleStart() {
+  @Override
+  public void idleStart() {
     disconnectListener.idled();
   }
 
-  @Override public void idleEnd() {
+  @Override
+  public void idleEnd() {
     disconnectListener.unidled();
   }
 
