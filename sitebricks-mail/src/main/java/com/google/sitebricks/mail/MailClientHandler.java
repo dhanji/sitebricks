@@ -370,13 +370,14 @@ class MailClientHandler extends SimpleChannelHandler {
   static class InputBuffer {
     volatile private StringBuilder buffer = new StringBuilder();
 
+
     @VisibleForTesting
     List<String> processMessage(String message) {
       // Split leaves a trailing empty line if there's a terminating newline.
       ArrayList<String> split = Lists.newArrayList(message.split("\r?\n", -1));
       Preconditions.checkArgument(split.size() > 0);
 
-      synchronized (buffer) {
+      synchronized (this) {
         buffer.append(split.get(0));
         if (split.size() == 1) // no newlines.
           return ImmutableList.of();
