@@ -232,7 +232,7 @@ class MailClientHandler extends SimpleChannelHandler {
 
   private void disconnectAbnormally(String message) {
     halt();
-
+    disconnected();
     // Disconnect abnormally. The user code should reconnect using the mail client.
     errorStack.push(new Error(completions.poll(), message, wireTrace.list()));
     idler.disconnect();

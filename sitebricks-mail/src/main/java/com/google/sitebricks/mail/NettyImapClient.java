@@ -69,8 +69,10 @@ class NettyImapClient implements MailClient, Idler {
         "Cannot reset while mail client is still connected (call disconnect() first).");
 
     // Just to be on the safe side.
-    if (mailClientHandler != null)
+    if (mailClientHandler != null) {
       mailClientHandler.halt();
+      mailClientHandler.disconnected();
+    }
 
     this.mailClientHandler = new MailClientHandler(this, config);
     MailClientPipelineFactory pipelineFactory =
@@ -112,6 +114,7 @@ class NettyImapClient implements MailClient, Idler {
       channel.getCloseFuture().addListener(new ChannelFutureListener() {
         @Override public void operationComplete(ChannelFuture future) throws Exception {
           mailClientHandler.idleAcknowledged.set(false);
+          mailClientHandler.disconnected();
           listener.disconnected();
         }
       });
@@ -177,6 +180,7 @@ class NettyImapClient implements MailClient, Idler {
         channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
       } finally {
         mailClientHandler.idleAcknowledged.set(false);
+        mailClientHandler.disconnected();
         if (disconnectListener != null)
           disconnectListener.disconnected();
       }
