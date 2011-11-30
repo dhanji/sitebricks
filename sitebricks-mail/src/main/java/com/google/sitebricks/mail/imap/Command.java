@@ -59,8 +59,7 @@ public enum Command {
     if (IMAP_COMMAND_SUCCESS.matcher(message).matches())
       return true;
 
-    if (NO_FAILURE.matcher(message).matches() ||
-           (BAD_FAILURE.matcher(message).matches())) {
+    if (NO_FAILURE.matcher(message).matches() || (BAD_FAILURE.matcher(message).matches())) {
       throw new ExtractionException(message);
     }
     return false;
