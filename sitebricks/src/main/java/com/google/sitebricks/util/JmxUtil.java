@@ -4,7 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.softee.management.exception.ManagementException;
 import org.softee.management.helper.MBeanRegistration;
+
 import javax.management.*;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Random;
 
 /**
@@ -13,13 +16,15 @@ import java.util.Random;
 public class JmxUtil {
   private static final Logger log = LoggerFactory.getLogger(JmxUtil.class);
   private static final Random random = new Random();
+  private static final DateFormat MBEAN_FRIENDLY = new java.text.SimpleDateFormat("MM-dd HH.mm.ss");
 
   public static MBeanRegistration registerMBean(Object object, String packageName,
-                                   String typeName, String uniqueName) {
+                                                String typeName, String uniqueName) {
 
     try {
-      MBeanRegistration registration = new MBeanRegistration(object, new ObjectName(packageName + ":type=" +
-          typeName + ", name=" + uniqueName + "[" + random.nextInt() + "]"));
+      MBeanRegistration registration = new MBeanRegistration(object,
+          new ObjectName(packageName + ":type=" +
+              typeName + ", name=" + uniqueName + "[" + MBEAN_FRIENDLY.format(new Date()) + "]"));
       registration.register();
       return registration;
     } catch (ManagementException e) {
@@ -34,8 +39,7 @@ public class JmxUtil {
     try {
       registration.unregister();
     } catch (ManagementException e) {
-      log.error("Failed to unregister MBean.", e);
+      log.debug("Failed to unregister MBean.");
     }
   }
-
 }
