@@ -5,9 +5,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.sitebricks.util.JmxUtil;
 import com.google.sitebricks.util.BoundedDiscardingList;
-import com.sun.tools.javac.util.Pair;
+import com.google.sitebricks.util.JmxUtil;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
@@ -19,7 +18,6 @@ import org.softee.management.annotation.ManagedAttribute;
 import org.softee.management.annotation.ManagedOperation;
 import org.softee.management.helper.MBeanRegistration;
 
-import javax.xml.transform.Result;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -72,7 +70,7 @@ class MailClientHandler extends SimpleChannelHandler {
   private volatile PushedData pushedData;
 
   private final BoundedDiscardingList<String> commandDebugHistory = new BoundedDiscardingList<String>(10);
-  private final Queue<String> wireTrace = new ConcurrentLinkedQueue<String>();
+  private final BoundedDiscardingList<String> wireTrace = new BoundedDiscardingList<String>(25);
   private final MBeanRegistration mBeanRegistration;
   private final InputBuffer inputBuffer = new InputBuffer();
 
@@ -135,10 +133,6 @@ class MailClientHandler extends SimpleChannelHandler {
     }
 
     wireTrace.add(message);
-    if (wireTrace.size() > 25) {
-      wireTrace.poll();
-    }
-
     log.trace(message);
     if (SYSTEM_ERROR_REGEX.matcher(message).matches()
         || ". NO [ALERT] Account exceeded command or bandwidth limits. (Failure)".equalsIgnoreCase(
@@ -170,7 +164,7 @@ class MailClientHandler extends SimpleChannelHandler {
 
             log.warn("Authentication failed for {} due to: {}", config.getUsername(), message);
             errorStack.push(new Error(null /* logins have no completion */, extractError(matcher),
-                wireTrace));
+                wireTrace.list()));
             disconnectAbnormally(message);
           }
         }
@@ -181,7 +175,6 @@ class MailClientHandler extends SimpleChannelHandler {
       FolderObserver observer = this.observer;
       if (idling.get()) {
         log.info("Message received for {} during idling: {}", config.getUsername(), message);
-        message = message.toLowerCase();
 
         if (IDLE_ENDED_REGEX.matcher(message).matches()) {
           idling.compareAndSet(true, false);
@@ -231,7 +224,7 @@ class MailClientHandler extends SimpleChannelHandler {
       else {
         log.error("Strange exception during mail processing (no completions available!): {}",
             message, ex);
-        errorStack.push(new Error(null, "No completions available!", wireTrace));
+        errorStack.push(new Error(null, "No completions available!", wireTrace.list()));
       }
       throw ex;
     }
@@ -241,7 +234,7 @@ class MailClientHandler extends SimpleChannelHandler {
     halt();
 
     // Disconnect abnormally. The user code should reconnect using the mail client.
-    errorStack.push(new Error(completions.poll(), message, wireTrace));
+    errorStack.push(new Error(completions.poll(), message, wireTrace.list()));
     idler.disconnect();
   }
 
@@ -257,7 +250,7 @@ class MailClientHandler extends SimpleChannelHandler {
     // for now just ignore it.
     if ("* BAD [CLIENTBUG] Invalid tag".equalsIgnoreCase(message)) {
       log.warn("Invalid tag warning, ignored.");
-      errorStack.push(new Error(completions.peek(), message, wireTrace));
+      errorStack.push(new Error(completions.peek(), message, wireTrace.list()));
       return;
     }
 
@@ -269,7 +262,7 @@ class MailClientHandler extends SimpleChannelHandler {
         idleAcknowledged.set(true);
       } else {
         log.error("Could not find the completion for message {} (Was it ever issued?)", message);
-        errorStack.push(new Error(null, "No completion found!", wireTrace));
+        errorStack.push(new Error(null, "No completion found!", wireTrace.list()));
       }
       return;
     }
@@ -298,7 +291,7 @@ class MailClientHandler extends SimpleChannelHandler {
 
       return isLoggedIn();
     } catch (InterruptedException e) {
-      errorStack.push(new Error(null, e.getMessage(), wireTrace));
+      errorStack.push(new Error(null, e.getMessage(), wireTrace.list()));
       throw new RuntimeException("Interruption while awaiting server login", e);
     }
   }
@@ -335,10 +328,10 @@ class MailClientHandler extends SimpleChannelHandler {
     final String error;
     final List<String> wireTrace;
 
-    Error(CommandCompletion completion, String error, Queue<String> wireTrace) {
+    Error(CommandCompletion completion, String error, List<String> wireTrace) {
       this.completion = completion;
       this.error = error;
-      this.wireTrace = ImmutableList.copyOf(wireTrace);
+      this.wireTrace = wireTrace;
     }
 
     @Override public String message() {
