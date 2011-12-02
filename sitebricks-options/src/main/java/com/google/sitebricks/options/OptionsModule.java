@@ -142,7 +142,7 @@ public class OptionsModule extends AbstractModule {
                                        final Map<String, String> concreteOptions) {
     final InvocationHandler handler = new InvocationHandler() {
       @Inject
-      MvelTypeConverter converter;
+      OptionTypeConverter converter;
 
       @Override
       public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
@@ -158,7 +158,7 @@ public class OptionsModule extends AbstractModule {
                                     final Map<String, String> concreteOptions) {
     MethodInterceptor interceptor = new MethodInterceptor() {
       @Inject
-      MvelTypeConverter converter;
+      OptionTypeConverter converter;
 
       @Override
       public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy)
