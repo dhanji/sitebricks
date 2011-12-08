@@ -134,6 +134,7 @@ class NettyImapClient implements MailClient, Idler {
         Preconditions.checkArgument(oauth != null,
             "Must specify a valid oauth config if not using password auth");
 
+        //noinspection ConstantConditions
         String oauthString = new XoauthSasl(config.getUsername(),
             oauth.clientId,
             oauth.clientSecret)
@@ -142,11 +143,18 @@ class NettyImapClient implements MailClient, Idler {
 
         channel.write(". AUTHENTICATE XOAUTH " + oauthString + "\r\n");
 
-        //noinspection ConstantConditions
       }
       return mailClientHandler.awaitLogin();
     } catch (Exception e) {
-      log.error("Could not oauth or attempt login for {}", config.getUsername(), e);
+      // Capture the wire trace and log it for some extra context here.
+      StringBuilder trace = new StringBuilder();
+      for (String line : mailClientHandler.getWireTrace()) {
+        trace.append(line).append("\n");
+      }
+
+      log.warn("Could not oauth or login for {}. Partial trace follows:\n" +
+          "----begin wiretrace----\n{}\n----end wiretrace----",
+          new Object[]{config.getUsername(), trace.toString(), e});
     }
     return false;
   }
@@ -219,7 +227,6 @@ class NettyImapClient implements MailClient, Idler {
 
     SettableFuture<List<String>> valueFuture = SettableFuture.create();
 
-    // TODO Should we use LIST "[Gmail]" % here instead? That will only fetch top-level folders.
     send(Command.LIST_FOLDERS, "\"\" \"*\"", valueFuture);
 
     return valueFuture;

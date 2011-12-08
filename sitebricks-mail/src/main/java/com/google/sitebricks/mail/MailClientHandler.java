@@ -106,6 +106,10 @@ class MailClientHandler extends SimpleChannelHandler {
     return loginSuccess.getCount() == 0;
   }
 
+  public List<String> getWireTrace() {
+    return wireTrace.list();
+  }
+
   private static class PushedData {
     volatile boolean idleExitSent = false;
     final Set<Integer> pushAdds = Collections.synchronizedSet(Sets.<Integer>newHashSet());
@@ -129,7 +133,7 @@ class MailClientHandler extends SimpleChannelHandler {
 
   private void processMessage(String message) throws Exception {
     if (logAllMessagesForUsers.contains(config.getUsername())) {
-      log.info("IMAP [" + config.getUsername() + "]: " + message);
+      log.info("IMAP [{}]: {}", config.getUsername(), message);
     }
 
     wireTrace.add(message);
