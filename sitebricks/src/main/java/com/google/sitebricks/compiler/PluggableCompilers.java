@@ -26,12 +26,12 @@ public class PluggableCompilers implements Compilers {
 
     @Inject
     public PluggableCompilers(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics,
-                           @Bricks Map<String, Class<? extends Annotation>> httpMethods, TemplateLoader loader,
-                           HtmlTemplateCompilerFactory htmlTemplateCompilerFactory,
-                           XmlTemplateCompilerFactory xmlTemplateCompilerFactory,
-                           FlatTemplateCompilerFactory flatTemplateCompilerFactory,
-                           MvelTemplateCompilerFactory mvelTemplateCompilerFactory,
-                           FreemarkerTemplateCompilerFactory freemarkerTemplateCompilerFactory) {
+                              @Bricks Map<String, Class<? extends Annotation>> httpMethods, TemplateLoader loader,
+                              HtmlTemplateCompilerFactory htmlTemplateCompilerFactory,
+                              XmlTemplateCompilerFactory xmlTemplateCompilerFactory,
+                              FlatTemplateCompilerFactory flatTemplateCompilerFactory,
+                              MvelTemplateCompilerFactory mvelTemplateCompilerFactory,
+                              FreemarkerTemplateCompilerFactory freemarkerTemplateCompilerFactory) {
         this.registry = registry;
         this.pageBook = pageBook;
         this.metrics = metrics;
@@ -59,77 +59,77 @@ public class PluggableCompilers implements Compilers {
         return compilers.keySet();
     }
 
-  // TODO(dhanji): Feedback errors as return rather than throwing.
-  public void analyze(Class<?> page) {
-    // May move this into a separate class if it starts getting too big.
-    analyzeMethods(page.getDeclaredMethods());
-    analyzeMethods(page.getMethods());
-  }
+    // TODO(dhanji): Feedback errors as return rather than throwing.
+    public void analyze(Class<?> page) {
+        // May move this into a separate class if it starts getting too big.
+        analyzeMethods(page.getDeclaredMethods());
+        analyzeMethods(page.getMethods());
+    }
 
-  private void analyzeMethods(Method[] methods) {
-    for (Method method : methods) {
-      for (Annotation annotation : method.getDeclaredAnnotations()) {
-        // if this is a http method annotation, do some checking on the
-        // args and return types.
-        if (httpMethods.containsValue(annotation.annotationType())) {
-          Class<?> returnType = method.getReturnType();
+    private void analyzeMethods(Method[] methods) {
+        for (Method method : methods) {
+            for (Annotation annotation : method.getDeclaredAnnotations()) {
+                // if this is a http method annotation, do some checking on the
+                // args and return types.
+                if (httpMethods.containsValue(annotation.annotationType())) {
+                    Class<?> returnType = method.getReturnType();
 
-          PageBook.Page page = pageBook.forClass(returnType);
-          if (null == page) {
-            // throw an error.
-          } else {
-            // do further analysis on this sucka
-            if (page.getUri().contains(":"))
-              ; // throw an error coz we cant redir to dynamic URLs
+                    PageBook.Page page = pageBook.forClass(returnType);
+                    if (null == page) {
+                        // throw an error.
+                    } else {
+                        // do further analysis on this sucka
+                        if (page.getUri().contains(":"))
+                            ; // throw an error coz we cant redir to dynamic URLs
 
 
-            // If this is headless, it MUST return an instance of reply.
-            if (page.isHeadless()) {
-              if (!Reply.class.isAssignableFrom(method.getReturnType())) {
-                // throw error
-              }
+                        // If this is headless, it MUST return an instance of reply.
+                        if (page.isHeadless()) {
+                            if (!Reply.class.isAssignableFrom(method.getReturnType())) {
+                                // throw error
+                            }
+                        }
+                    }
+                }
             }
-          }
         }
-      }
     }
-  }
 
-  public void compilePage(PageBook.Page page) {
-    // find the template page class
-    Class<?> templateClass = page.pageClass();
+    public void compilePage(PageBook.Page page) {
+        // find the template page class
+        Class<?> templateClass = page.pageClass();
 
-    // root page uses the last template, extension uses its own embedded template
-    if (!page.isDecorated() && templateClass.isAnnotationPresent(Decorated.class)) {
-      // the first superclass with a @Show and no @Extension is the template
-      while (!templateClass.isAnnotationPresent(Show.class) ||
-          templateClass.isAnnotationPresent(Decorated.class)) {
-        templateClass = templateClass.getSuperclass();
-        if (templateClass == Object.class) {
-          throw new MissingTemplateException("Could not find tempate for " + page.pageClass() +
-              ". You must use @Show on a superclass of an @Extension page");
+        // root page uses the last template, extension uses its own embedded template
+        if (!page.isDecorated() && templateClass.isAnnotationPresent(Decorated.class)) {
+            // the first superclass with a @Show and no @Extension is the template
+            while (!templateClass.isAnnotationPresent(Show.class) ||
+                    templateClass.isAnnotationPresent(Decorated.class)) {
+                templateClass = templateClass.getSuperclass();
+                if (templateClass == Object.class) {
+                    throw new MissingTemplateException("Could not find tempate for " + page.pageClass() +
+                            ". You must use @Show on a superclass of an @Extension page");
+                }
+            }
         }
-      }
+
+        Renderable widget = compile(templateClass);
+
+        //apply the compiled widget chain to the page (completing compile step)
+        page.apply(widget);
     }
 
-    Renderable widget = compile(templateClass);
+    @Override
+    public Renderable compile(Class<?> templateClass) {
+        final Template template = loader.load(templateClass);
 
-    //apply the compiled widget chain to the page (completing compile step)
-    page.apply(widget);
-  }
+        Renderable widget;
 
-  @Override
-  public Renderable compile(Class<?> templateClass) {
-    final Template template = loader.load(templateClass);
+        if (compilers.containsKey(template.getExtension())) {
+            widget = compilers.get(template.getExtension()).get(templateClass, template, registry, pageBook, metrics).compile(template.getText());
+        } else {
+            widget = compilers.get("default").get(templateClass, template, registry, pageBook, metrics).compile(template.getText());
+        }
 
-    Renderable widget;
-
-    if (compilers.containsKey(template.getExtension())) {
-        widget = compilers.get(template.getExtension()).get(templateClass, template, registry, pageBook, metrics).compile(template.getText());
-    } else {
-        widget = compilers.get("default").get(templateClass, template, registry, pageBook, metrics).compile(template.getText());
+        return widget;
     }
-
-    return widget;
-  }
 }

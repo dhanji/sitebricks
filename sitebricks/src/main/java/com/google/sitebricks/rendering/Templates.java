@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.Stage;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.StringBuilderRespond;
-import com.google.sitebricks.TemplateLoader;
 import com.google.sitebricks.compiler.Compilers;
 
 import java.util.Set;
@@ -16,15 +15,13 @@ import java.util.concurrent.ConcurrentMap;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class Templates {
-  private final TemplateLoader loader;
   private final Compilers compilers;
   private final boolean reloadTemplates;
 
   private final ConcurrentMap<Class<?>, Renderable> templates = new MapMaker().makeMap();
 
   @Inject
-  public Templates(TemplateLoader loader, Compilers compilers, Stage stage) {
-    this.loader = loader;
+  public Templates(Compilers compilers, Stage stage) {
     this.compilers = compilers;
     this.reloadTemplates = Stage.DEVELOPMENT == stage;
   }
