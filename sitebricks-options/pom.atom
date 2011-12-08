@@ -1,0 +1,16 @@
+repositories << "http://repository.jboss.org/nexus/content/groups/public-jboss/"
+
+project "Sitebricks :: Options Module" @ "null"
+  id: com.google.sitebricks:sitebricks-options:0.8.6-SNAPSHOT
+  inherit: com.google.sitebricks:sitebricks-parent:0.8.6-SNAPSHOT:../pom.atom
+  packaging: jar
+
+  deps: [ com.google.sitebricks:sitebricks-converter
+               com.google.inject:guice:3.0
+               cglib:cglib-full:2.0.2
+               org.testng:testng:5.8(jdk15) ]
+
+  plugins: [ org.apache.maven.plugins:maven-compiler-plugin:null
+               properties:[ source: 1.6
+                            target: 1.6 ] ]
+

@@ -1,12 +1,10 @@
 package com.google.sitebricks.mail;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.sitebricks.mail.imap.Folder;
-import com.google.sitebricks.mail.imap.FolderStatus;
-import com.google.sitebricks.mail.imap.Message;
-import com.google.sitebricks.mail.imap.MessageStatus;
+import com.google.sitebricks.mail.imap.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * An IMAP mail client based on JBoss Netty and Event-driven IO.
@@ -37,7 +35,7 @@ public interface MailClient {
   void disconnect();
 
   /**
-   * Returns true if the underlying channels are connected to the remote server and
+   * Returns true if the underlying channels are connected to the remote server, logged in and
    * open for business.
    */
   boolean isConnected();
@@ -87,6 +85,46 @@ public interface MailClient {
   ListenableFuture<List<MessageStatus>> list(Folder folder, int start, int end);
 
   /**
+   * Adds flags to a range of messages.
+   *
+   * @return the new flags on the message, null on failure.
+   * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
+   * <b>NOTE: you must call {@link #open(String)} first.</b>
+   */
+  ListenableFuture<Set<Flag>> addFlags(Folder folder, int imapUid, Set<Flag> flags);
+
+  /**
+   * Removes flags from a range of messages.
+   *
+   * @return the new flags on the message, null on failure.
+   * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
+   * <b>NOTE: you must call {@link #open(String)} first.</b>
+   */
+  ListenableFuture<Set<Flag>> removeFlags(Folder folder, int imapUid, Set<Flag> flags);
+
+  /**
+   * Adds or Removes flags from a range of messages.
+   *
+   * @param add if true, flags are added, otherwise they're removed.
+   * @return the new flags on the message, null on failure.
+   * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
+   * <b>NOTE: you must call {@link #open(String)} first.</b>
+   */
+  ListenableFuture<Set<Flag>> addOrRemoveFlags(Folder folder, int imapUid, Set<Flag> flags,
+                                               boolean add);
+
+  /**
+   * Adds or removes Gmail labels from a range of messages.
+   *
+   * @param add if true, flags are added, otherwise they're removed.
+   * @return the new labels on the message, null on failure.
+   * <b>NOTE: these can be different to those set due to concurrent updates by other clients.</b>
+   * <b>NOTE: you must call {@link #open(String)} first.</b>
+   */
+  ListenableFuture<Set<String>> addOrRemoveGmailLabels(Folder folder, int imapUid,
+                                                     Set<String> labels, boolean add);
+
+  /**
    * Similar to {@link #list(Folder, int, int)} but fetches the entire message
    * instead of merely a header. Runs a bit slower as a result.
    * <p>
@@ -121,9 +159,47 @@ public interface MailClient {
    * Returns a string containing the last error message from the server or
    * null if no errors occurred recently.
    */
-  String lastError();
+  WireError lastError();
+
+  /**
+   * Returns true if this client has successfully entered and is currently in IMAP IDLE.
+   */
+  boolean isIdling();
+
+  /**
+   * Allows you to dynamically update the value of access token and tokenSecret if using
+   * XOAuth to access an imap server. This is useful if a user logs in from multiple locations
+   * and you always want the last authorized token to be used when reconnecting existing mail
+   * clients.
+   *
+   * @param accessToken A string containing the access token as retrieved from the oauth server.
+   * @param tokenSecret A string contianing the token secret pair of the accessToken.
+   */
+  void updateOAuthAccessToken(String accessToken, String tokenSecret);
+
+  /**
+   * Fetches a single message by its uid.
+   */
+  ListenableFuture<Message> fetchUid(Folder folder, int uid);
 
   static interface DisconnectListener {
     void disconnected();
+
+    /**
+     * Called when the server acknowledges IDLE.
+     */
+    void idled();
+
+    /**
+     * Called when the server acknowledges exit from IDLE.
+     */
+    void unidled();
+  }
+
+  public static interface WireError {
+    String message();
+    List<String> trace();
+    String expected();
+    String toString();
   }
 }

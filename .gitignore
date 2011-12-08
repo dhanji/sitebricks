@@ -20,5 +20,7 @@ out/
 
 # Other
 bin/
-
 sitebricks-web/sitebricks-web.dat
+
+#secret stuff
+*.log

@@ -1,0 +1,300 @@
+* 1553 FETCH (UID 1013 BODY[] {13469}
+Delivered-To: visibletweets@gmail.com
+Received: by 10.216.51.81 with SMTP id a59cs18680wec;
+        Sun, 3 Apr 2011 17:38:16 -0700 (PDT)
+Received: by 10.43.62.133 with SMTP id xa5mr4088593icb.398.1301877495298;
+        Sun, 03 Apr 2011 17:38:15 -0700 (PDT)
+Return-Path: <follow-ivfvoyrgjrrgf=tznvy.pbz-10ccf@postmaster.twitter.com>
+Received: from ham-cannon.twitter.com (ham-cannon.twitter.com [199.59.148.234])
+        by mx.google.com with ESMTP id vw17si13206603icb.4.2011.04.03.17.38.14;
+        Sun, 03 Apr 2011 17:38:15 -0700 (PDT)
+Received-SPF: pass (google.com: domain of follow-ivfvoyrgjrrgf=tznvy.pbz-10ccf@postmaster.twitter.com designates 199.59.148.234 as permitted sender) client-ip=199.59.148.234;
+Authentication-Results: mx.google.com; spf=pass (google.com: domain of follow-ivfvoyrgjrrgf=tznvy.pbz-10ccf@postmaster.twitter.com designates 199.59.148.234 as permitted sender) smtp.mail=follow-ivfvoyrgjrrgf=tznvy.pbz-10ccf@postmaster.twitter.com; dkim=pass header.i=@twitter.com
+X-DKIM: Sendmail DKIM Filter v2.8.2 3286054004.twitter.com 84C8539C8444
+DKIM-Signature: v=1; a=rsa-sha1; c=simple/simple; d=twitter.com; s=dkim;
+	t=1301877494; i=@twitter.com; bh=GSQNZ7mkP5Nt4nvwE5hS9mUzMEM=;
+	h=Date:From:Reply-To:To:Subject:Mime-Version:Content-Type;
+	b=DJ25hkayw3eRkE09tfq9Pr0tdtH5Nj1jkMhm4C6pgMNCr16E0d6fHmyiMLv3BCUne
+	 XUUn/ARz+9jGTEI3kcZySdegBY5VRXuIh4R2uKvu1N6qlCOTe/ElFbbX4iP2Oy6TP6
+	 IRSX6KRXjYyJcfP6598Fz7WOkPUf5iHCbStIBWrE=
+X-DomainKeys: Sendmail DomainKeys Filter v1.0.2 3286054004.twitter.com 84C8539C8444
+DomainKey-Signature: a=rsa-sha1; s=default; d=twitter.com; c=simple; q=dns;
+	h=date:from:reply-to:to:subject:mime-version:content-type:
+	x-campaignid:x-twitterrecipientscreenname:
+	x-twittersenderscreenname:x-twitteremailtype:x-twitterrecipientid:
+	x-twittersenderid:errors-to:x-twittercreatedat:bounces-to:
+	x-twitterrecipientname:x-twittersendername;
+	b=skAzhDXMWNwRnmp9gffzrbxjdFJB/r15gIJTCsdVIEuvrmtoIukfRiOBazqRxlZFe
+	cev1kHVcggjXhjM3Z0joA==
+Date: Mon, 4 Apr 2011 00:38:14 +0000
+From: Twitter <follow-ivfvoyrgjrrgf=tznvy.pbz-10ccf@postmaster.twitter.com>
+Reply-To: noreply@postmaster.twitter.com
+To: visibletweets@gmail.com
+Message-Id: <4d9912f683b96_640c4449aa4540094@3286054004.twitter.com.tmail>
+Subject: Carla Greve is now following you on Twitter!
+Mime-Version: 1.0
+Content-Type: multipart/alternative; boundary=mimepart_4d9912f6840f3_640c4449aa454019e
+X-Campaignid: newfollow20100823
+X-Twitterrecipientscreenname: visibletweets
+X-Twittersenderscreenname: carlagreve
+X-Twitteremailtype: is_following
+X-Twitterrecipientid: 35458705
+X-Twittersenderid: 223312272
+Errors-To: Twitter <follow-ivfvoyrgjrrgf=tznvy.pbz-10ccf@postmaster.twitter.com>
+X-Twittercreatedat: Mon Apr 04 00:38:14 +0000 2011
+Bounces-To: Twitter <follow-ivfvoyrgjrrgf=tznvy.pbz-10ccf@postmaster.twitter.com>
+X-Twitterrecipientname: Visible Tweets
+X-Twittersendername: Carla Greve
+
+
+--mimepart_4d9912f6840f3_640c4449aa454019e
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: Quoted-printable
+Content-Disposition: inline
+
+Carla Greve (@carlagreve) is now following your tweets (@visibletweets) o=
+n Twitter.
+
+http://twitter.com/carlagreve?evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3=
+VD0BC6lv2U4Hw%3D&utm_campaign=3Dnewfollow20100823&utm_content=3Dprofile&u=
+tm_medium=3Demail&utm_source=3Dfollow
+
+Username: @carlagreve
+Name: Carla Greve
+Location: Baraboo, WI
+
+Following: 110
+Followers: 22
+Lists: 3
+
+Carla Greve is only sharing tweets with approved followers.
+You do not follow Carla Greve.
+
+What's Next?
+
+Find out more about Carla Greve on @carlagreve's profile page: http://twi=
+tter.com/carlagreve?evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3VD0BC6lv2U=
+4Hw%3D&utm_content=3Dprofile
+Send Carla Greve an @ reply: http://twitter.com/?status=3D@carlagreve&evi=
+d=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3VD0BC6lv2U4Hw%3D&utm_content=3Dac=
+tion
+Send Carla Greve a direct message: http://twitter.com/direct_messages/cre=
+ate/carlagreve?evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3VD0BC6lv2U4Hw%3=
+D&utm_content=3Daction
+On your mobile? Learn Twitter for Mobile: http://help.twitter.com/entries=
+/14014-twitter-phone-faqs
+
+If you believe Carla Greve is engaging in abusive behavior on Twitter, yo=
+u may report Carla Greve for spam: http://twitter.com/user_spam_reports/v=
+isibletweets/confirm/carlagreve?token=3DiqubpwVHI2aOQ%2B8vr7AN94yvyhrfdaG=
+VgQFIEpIYdM%2BnPvUE43l%2B%2Fko6BOh0DQOJWrhCRyZ6J%2BHk%2FJ3AempTSOpnS%2FlK=
+%2F2P%2BsTn%2FTHdPh0ckg0V0%2FcdSyw%3D%3D&evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJX=
+d15x%2Breq3VD0BC6lv2U4Hw%3D&utm_campaign=3Dnewfollow20100823&utm_content=3D=
+block&utm_medium=3Demail&utm_source=3Dfollow
+--
+If you'd rather not receive follow notification emails from Twitter, you =
+can unsubscribe immediately. To resubscribe or change other Twitter email=
+ preferences, visit your account settings to manage email notices.
+
+Unsubscribe: http://twitter.com/account/unsubscribe?code=3DZaRiNW%2FCw%2B=
+qWTzhkfrLzm2wQk%2FuhEGL5&evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3VD0BC=
+6lv2U4Hw%3D&t=3Dfollow&utm_campaign=3Dnewfollow20100823&utm_content=3Duns=
+ubscribe&utm_medium=3Demail&utm_source=3Dfollow
+
+
+--mimepart_4d9912f6840f3_640c4449aa454019e
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: Quoted-printable
+Content-Disposition: inline
+
+<html>
+<body lang=3D"en" style=3D"background-color:#fff; color: #222">
+  <div style=3D"padding:14px; margin-bottom:4px; background-color:#008eb9=
+; -moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px">
+    <a style=3D"color:#FFF" href=3D"http://twitter.com/?from=3Demailheade=
+r&evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3VD0BC6lv2U4Hw%3D&utm_campaig=
+n=3Dnewfollow20100823&utm_medium=3Demail&utm_source=3Dfollow"><img alt=3D=
+"Twitter" height=3D"24" src=3D"http://a3.twimg.com/a/1301681483/images/tw=
+ttr_bird_hd-008eb9.gif" style=3D"display:block;border: 0;" width=3D"130" =
+/></a>
+  </div>
+  <div style=3D"font-family: 'Helvetica Neue', Arial, Helvetica, sans-ser=
+if; font-size:13px; margin: 14px; position:relative">
+    <h2 style=3D"font-family: 'Helvetica Neue', Arial, Helvetica, sans-se=
+rif;margin:0 0 16px; font-size:18px; font-weight:normal">
+  Carla Greve (@<a href=3D"http://twitter.com/carlagreve?evid=3DrVQ4XJ0nF=
+%2FUI%2FB2HKcwJXd15x%2Breq3VD0BC6lv2U4Hw%3D&utm_campaign=3Dnewfollow20100=
+823&utm_content=3Dprofile&utm_medium=3Demail&utm_source=3Dfollow">carlagr=
+eve</a>) is now following your tweets (@<a href=3D"http://twitter.com/vis=
+ibletweets?evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3VD0BC6lv2U4Hw%3D&ut=
+m_campaign=3Dnewfollow20100823&utm_content=3Dprofile&utm_medium=3Demail&u=
+tm_source=3Dfollow">visibletweets</a>) on Twitter.
+</h2>
+<div style=3D"font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif=
+;float:left; margin: 0 8px 8px 0px;background: #eceff8; border: 1px solid=
+ #eceff8; padding: 5px;-moz-border-radius:9px; -webkit-border-radius:9px;=
+ border-radius:9px;" class=3D"user">
+
+<table style=3D"font-size:10px; border-spacing:0">
+  <tr>
+    <td valign=3D"top">
+      <a href=3D"http://twitter.com/carlagreve?evid=3DrVQ4XJ0nF%2FUI%2FB2=
+HKcwJXd15x%2Breq3VD0BC6lv2U4Hw%3D&utm_campaign=3Dnewfollow20100823&utm_co=
+ntent=3Dprofile&utm_medium=3Demail&utm_source=3Dfollow" style=3D"text-dec=
+oration:none;"><img alt=3D"161115_512212529_4174099_q_normal" height=3D"4=
+8" src=3D"http://a0.twimg.com/profile_images/1183545791/161115_512212529_=
+4174099_q_normal.jpg" style=3D"border: 1px solid #ccc;margin-right: 5px" =
+width=3D"48" /></a>
+    </td>
+    <td valign=3D"top">
+      <div style=3D"font-size:13px;font-weight:bold">Carla Greve</div>
+      <div style=3D"line-height:22px">
+        @<a href=3D"http://twitter.com/carlagreve?evid=3DrVQ4XJ0nF%2FUI%2=
+FB2HKcwJXd15x%2Breq3VD0BC6lv2U4Hw%3D&utm_campaign=3Dnewfollow20100823&utm=
+_content=3Dprofile&utm_medium=3Demail&utm_source=3Dfollow">carlagreve</a>=
+
+        =
+
+          <img alt=3D"Lock_icon_small" height=3D"10" src=3D"http://a1.twi=
+mg.com/a/1301681483/images/lock_icon_small.png" style=3D"vertical-align:t=
+ext-bottom" width=3D"8" />
+        =
+
+      </div>
+      =
+
+        <div>Baraboo, WI</div>
+      =
+
+    </td>
+  </tr>
+</table>
+
+
+
+
+  <table style=3D"margin:10px 0 3px 3px; font-size:10px; border-spacing:0=
+; ">
+    <tr>
+
+        <td style=3D"padding: 0 15px; border-left:1px solid #CCC; font-si=
+ze:13px; font-weight:bold; color:#333;border:0; padding-left:0;">110</td>=
+
+
+        <td style=3D"padding: 0 15px; border-left:1px solid #CCC; font-si=
+ze:13px; font-weight:bold; color:#333;">22</td>
+
+        <td style=3D"padding: 0 15px; border-left:1px solid #CCC; font-si=
+ze:13px; font-weight:bold; color:#333;">3</td>
+
+    </tr>
+    <tr>
+
+        <th style=3D"padding: 0 15px; border-left:1px solid #CCC; text-al=
+ign:left; color:#888;border:0; padding-left:0;">following</th>
+
+      <th style=3D"padding: 0 15px; border-left:1px solid #CCC; text-alig=
+n:left; color:#888;">followers</th>
+
+      <th style=3D"padding: 0 15px; border-left:1px solid #CCC; text-alig=
+n:left; color:#888;">lists</th>
+
+    </tr>
+  </table>
+
+</div>
+<br style=3D"clear:both" />
+
+
+<p style=3D"margin-top:0">
+    Carla Greve is only sharing tweets with approved followers.
+  You do not follow Carla Greve.
+</p>
+<p style=3D"margin-top:0">What's Next?</p>
+<ul style=3D"padding-left:10px; list-style: none;">
+  <li>
+    <span style=3D"float: left; width: 15px;">&bull;</span>
+    Find out more about Carla Greve on @<a href=3D"http://twitter.com/car=
+lagreve?evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3VD0BC6lv2U4Hw%3D&utm_c=
+ampaign=3Dnewfollow20100823&utm_content=3Dprofile&utm_medium=3Demail&utm_=
+source=3Dfollow">carlagreve's profile page</a>.</li>
+  <li>
+    <span style=3D"float: left; width: 15px;">&bull;</span>
+    Send Carla Greve <a href=3D"http://twitter.com/?status=3D@carlagreve&=
+evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3VD0BC6lv2U4Hw%3D&utm_campaign=3D=
+newfollow20100823&utm_content=3Daction&utm_medium=3Demail&utm_source=3Dfo=
+llow">an @ reply</a>.</li>
+  <li>
+    <span style=3D"float: left; width: 15px;">&bull;</span>
+    Send Carla Greve <a href=3D"http://twitter.com/direct_messages/create=
+/carlagreve?evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3VD0BC6lv2U4Hw%3D&u=
+tm_campaign=3Dnewfollow20100823&utm_content=3Daction&utm_medium=3Demail&u=
+tm_source=3Dfollow">a direct message</a>.</li>
+  <li style=3D"padding-top:10px;">
+    <span style=3D"vertical-align:text-top; margin-right:3px;"><img alt=3D=
+"Phone2" height=3D"10" src=3D"http://a3.twimg.com/a/1301681483/images/pho=
+ne2.gif" width=3D"8" /></span>
+    On your mobile? Learn <a href=3D"http://help.twitter.com/entries/1401=
+4-twitter-phone-faqs">Twitter for Mobile</a>.
+  </li>
+  </ul>
+<p style=3D"font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;m=
+argin-top:5px;font-size:11px;color:#666666;">
+  If you believe Carla Greve is engaging in abusive behavior on Twitter, =
+you may <a href=3D"http://twitter.com/user_spam_reports/visibletweets/con=
+firm/carlagreve?token=3DiqubpwVHI2YFcrSWguydM3kidIhciD%2Ft1BZa%2Fm%2FDh5X=
+3dpbF8twlMILsscGhjpiNsgqnGde5G6F88R7mVnaNiVfV36YCyyihvrQfiyTxZhMZWD0UiAJm=
+Ow%3D%3D&evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3VD0BC6lv2U4Hw%3D&utm_=
+campaign=3Dnewfollow20100823&utm_content=3Dblock&utm_medium=3Demail&utm_s=
+ource=3Dfollow">report Carla Greve for spam</a>.</p>
+
+<p style=3D"font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;f=
+ont-size: 13px; line-height:18px;border-bottom: 1px solid rgb(238, 238, 2=
+38); padding-bottom: 10px;">
+  =
+
+</p>
+
+
+  <p style=3D"font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif=
+;margin-top:5px;font-size:10px;color:#888888;">
+    If you received this message in error and did not sign up for a Twitt=
+er account, click <a href=3D'http://twitter.com/account/not_my_account/vi=
+sibletweets/9A76A-DG46C-130187?evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq=
+3VD0BC6lv2U4Hw%3D&utm_campaign=3Dnewfollow20100823&utm_medium=3Demail&utm=
+_source=3Dfollow'>not my account</a>.
+  </p>
+
+
+  <p style=3D"font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif=
+;margin-top:5px;font-size:10px;color:#888888;">
+    =
+
+  If you'd rather not receive follow notification emails from Twitter, yo=
+u can <a href=3D"http://twitter.com/account/unsubscribe?code=3DZaRiNW%2FC=
+w%2BqWTzhkfrLzm2wQk%2FuhEGL5&evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3V=
+D0BC6lv2U4Hw%3D&t=3Dfollow&utm_campaign=3Dnewfollow20100823&utm_content=3D=
+optout&utm_medium=3Demail&utm_source=3Dfollow">unsubscribe</a> immediatel=
+y. To resubscribe or change other Twitter email preferences, visit your a=
+ccount settings to manage <a href=3D"http://twitter.com/settings/notifica=
+tions?evid=3DrVQ4XJ0nF%2FUI%2FB2HKcwJXd15x%2Breq3VD0BC6lv2U4Hw%3D&utm_cam=
+paign=3Dnewfollow20100823&utm_content=3Dnotices&utm_medium=3Demail&utm_so=
+urce=3Dfollow">email notices</a>.
+
+
+
+    Please do not reply to this message; it was sent from an unmonitored =
+email address.  This message is a service email related to your use of Tw=
+itter.  For general inquiries or to request support with your Twitter acc=
+ount, please visit us at <a href=3D"http://support.twitter.com/">Twitter =
+Support</a>.
+  </p>
+
+
+
+  </div>
+</body>
+</html>
+
+--mimepart_4d9912f6840f3_640c4449aa454019e--
+)

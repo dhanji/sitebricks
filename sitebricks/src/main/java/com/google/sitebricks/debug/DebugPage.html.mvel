@@ -18,16 +18,18 @@
 <body>
 
   <h2>Web Pages</h2>
-  @Repeat(items=pages, var="page")
+  @foreach{page : pages}
   <div class="pages">
-    ${page.uri} : ${page.pageClass().getName()} ${page.method.empty ? "" : page.method}
+    @{page.uri} : @{page.pageClass().getName()} @{page.method.empty ? "" : page.method}
   </div>
+  @end{}
 
   <h2>Web Services</h2>
-  @Repeat(items=resources, var="page")
+  @foreach{page : resources}
   <div class="pages">
-    ${page.uri} : ${page.pageClass().getName()} ${page.method.empty ? "" : page.method}
+    @{page.uri} : @{page.pageClass().getName()} @{page.method.empty ? "" : page.method}
   </div>
+  @end{}
 
 </body>
 </html>

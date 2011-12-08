@@ -56,7 +56,7 @@ public abstract class AnalysisError {
 
     public AnalysisError causedBy(CompileErrors reason, String cause) {
       return new AnalysisErrorImpl(fragment, line,
-          new EvaluatorCompiler.CompileErrorDetail(cause, new ErrorDetail(cause, true)), reason);
+          new EvaluatorCompiler.CompileErrorDetail(cause, new ErrorDetail(fragment.toCharArray(), line, true, cause)), reason);
     }
   }
 
@@ -98,7 +98,7 @@ public abstract class AnalysisError {
     }
 
     public CompileErrors getReason() {
-      return null;  
+      return null;
     }
   }
 }

@@ -1,4 +1,4 @@
-* 2 FETCH (BODY[] {2918}
+* 2 FETCH (UID 1002 BODY[] {2918}
 MIME-Version: 1.0
 Received: by 10.68.64.100; Fri, 8 Apr 2011 23:12:09 -0700 (PDT)
 Date: Fri, 8 Apr 2011 23:12:09 -0700

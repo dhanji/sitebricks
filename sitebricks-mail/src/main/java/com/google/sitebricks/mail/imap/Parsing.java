@@ -1,17 +1,25 @@
 package com.google.sitebricks.mail.imap;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import org.apache.james.mime4j.codec.DecoderUtil;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Pattern;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class Parsing {
+  private static final Pattern ENDS_IN_PARENTHETICAL = Pattern.compile("[ ]*\\(.+\\)$");
+
   static List<String> readAddresses(Queue<String> tokens) {
+    // Weird base case where we don't get nil, but instead get an empty address set.
+    if (tokens.isEmpty())
+      return ImmutableList.of();
     if (isValid(tokens.peek())) {
       eat(tokens, "(");
       List<String> addresses = Lists.newArrayList();
@@ -31,13 +39,16 @@ class Parsing {
     StringBuilder address = new StringBuilder();
     eat(tokens, "(");
     String namePiece = match(tokens, String.class);
+    if (namePiece != null)
+      namePiece = namePiece.replace("\\", "");
+
     String sourceRoute = match(tokens, String.class);
     String mailboxName = match(tokens, String.class);  // mail username
     String hostname = match(tokens, String.class);     // domain
     eat(tokens, ")");
 
     if (namePiece != null)
-      address.append('"').append(namePiece).append("\" ");
+      address.append('"').append(decode(namePiece)).append("\" ");
 
     // I duno what source route is for ...
     return address.append(mailboxName).append('@').append(hostname).toString();
@@ -56,13 +67,15 @@ class Parsing {
         return (T)token;
     } else if (int.class == clazz) {
       return (T) Integer.valueOf(token);
+    } else if (long.class == clazz) {
+      return (T) Long.valueOf(token);
     }
     throw new IllegalArgumentException("Unsupported type: " + clazz.getName());
   }
 
   static String matchAnyOf(Queue<String> tokens, String... match) {
     for (String piece : match) {
-      if (piece.equals(tokens.peek())) {
+      if (piece.equalsIgnoreCase(tokens.peek())) {
         return tokens.poll();
       }
     }
@@ -73,15 +86,20 @@ class Parsing {
 
   static void eat(Queue<String> tokens, String... match) {
     for (String piece : match) {
-      if (piece.equals(tokens.peek())) {
+      if (piece.equalsIgnoreCase(tokens.peek())) {
         tokens.poll();
       } else
-        throw new IllegalArgumentException("Expected token " + piece + " but found " + tokens.peek());
+        throw new IllegalArgumentException("Expected token " + piece + " but found "
+            + tokens.peek() +" in [" + tokens + "]");
     }
   }
 
   static boolean isValid(String token) {
-    return !"NIL".equalsIgnoreCase(token);
+    return null != token && !"NIL".equalsIgnoreCase(token);
+  }
+
+  static String normalizeDateToken(String token) {
+    return token.replaceAll(" \\(.+\\)$", "").replaceAll("[ ]+", " ").trim();
   }
 
   static Queue<String> tokenize(String message) {
@@ -93,7 +111,8 @@ class Parsing {
     for (int i = 0, charArrayLength = charArray.length; i < charArrayLength; i++) {
       char c = charArray[i];
 
-      if (c == '"') {
+      // String checks, but only if we're not an escaped quote character.
+      if (c == '"' && (i > 0 && charArray[i - 1] != '\\')) {
         if (inString) {
           inString = false;
 
@@ -125,13 +144,13 @@ class Parsing {
           currentToken = new StringBuilder();
           continue;
 
-          // Otherwise whitespace is a delimiter for non-strings.
-        } else if (c == ' ') {
+          // Otherwise whitespace is a delimiter for non-strings. EXCEPT when
+          // preceeded by '\', which is an escape character.
+        } else if (c == ' ' && (i > 0 && charArray[i - 1] != '\\')) {
           bakeToken(tokens, currentToken);
           currentToken = new StringBuilder();
           continue;
         }
-
       currentToken.append(c);
     }
 
@@ -147,5 +166,26 @@ class Parsing {
     String trim = currentToken.toString().trim();
     if (trim.length() > 0)
       tokens.add(trim);
+  }
+
+  public static boolean startsWithIgnoreCase(String toTest, String prefix) {
+    if (null == toTest)
+      return (null == prefix);
+
+    return toTest.toLowerCase().startsWith(prefix.toLowerCase());
+  }
+
+  public static String stripQuotes(String var) {
+    if (var.startsWith("\"") && var.endsWith("\""))
+      return var.substring(1, var.length() - 1);
+    return var;
+  }
+
+  public static String decode(String str) {
+    return str == null
+        ? null
+        : str.isEmpty()
+            ? str
+            : DecoderUtil.decodeEncodedWords(str);
   }
 }

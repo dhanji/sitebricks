@@ -9,6 +9,7 @@ import org.mvel2.MVEL;
 import org.mvel2.PropertyAccessException;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -42,7 +43,7 @@ public class MvelEvaluator implements Evaluator {
 
     //lets use mvel to retrieve an expression value instead of a prop
     try {
-      return MVEL.executeExpression(compiled, bean);
+      return MVEL.executeExpression(compiled, bean, new HashMap());
     } catch (PropertyAccessException e) {
       throw new IllegalArgumentException(
           String.format("Could not read property from expression %s (missing a getter?)", expr), e);
@@ -53,7 +54,7 @@ public class MvelEvaluator implements Evaluator {
     } catch (CompileException e) {
       throw new IllegalArgumentException(
           String.format("Compile of property expression [%s] resulted in an error",
-              expr), e);    
+              expr), e);
     }
   }
 

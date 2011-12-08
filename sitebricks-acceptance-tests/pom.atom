@@ -1,0 +1,28 @@
+repositories << "http://nexus.openqa.org/content/repositories/releases,http://repository.codehaus.org"
+
+project "Sitebricks :: Acceptance Tests" @ "null"
+  id: com.google.sitebricks:sitebricks-acceptance-tests:0.8.6-SNAPSHOT
+  inherit: com.google.sitebricks:sitebricks-parent:0.8.6-SNAPSHOT:../pom.atom
+  packaging: jar
+
+  overrides: [ org.slf4j:slf4j-api:1.6.1 ]
+
+  deps: [ org.mortbay.jetty:jetty
+               org.mortbay.jetty:jetty-util
+               org.mortbay.jetty:servlet-api-2.5
+               org.seleniumhq.webdriver:webdriver-common
+               org.seleniumhq.webdriver:webdriver-support
+               org.seleniumhq.webdriver:webdriver-htmlunit
+               commons-collections:commons-collections
+               com.google.inject.extensions:guice-servlet
+               com.google.sitebricks:sitebricks
+               com.google.sitebricks:sitebricks-stat:${project.version}
+               org.testng:testng(jdk15) ]
+
+  plugins: [ org.apache.maven.plugins:maven-compiler-plugin:null
+               properties:[ source: 1.6
+                            target: 1.6 ]
+             org.apache.maven.plugins:maven-release-plugin:2.0-beta-9
+               properties:[ tagBase: https://google-sitebricks.googlecode.com/svn/tags ]
+             org.apache.maven.plugins:maven-jar-plugin:2.3.1 ]
+

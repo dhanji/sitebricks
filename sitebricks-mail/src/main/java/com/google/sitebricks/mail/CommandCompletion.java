@@ -3,6 +3,7 @@ package com.google.sitebricks.mail;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.sitebricks.mail.imap.Command;
+import com.google.sitebricks.mail.imap.ExtractionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,31 +34,42 @@ class CommandCompletion {
     this.command = command;
   }
 
+  public void error(String message, Exception e) {
+    StringBuilder builder = new StringBuilder();
+    for (String piece : value) {
+      builder.append(piece).append('\n');
+    }
+    log.error("Exception while processing response:\n Command: {} (seq: {})\n\n--message follows--" +
+        "\n{}\n--message end--\n--context follows--\n{}\n--context end--\n\n",
+        new Object[] { commandString, sequence, message, builder.toString(), e });
+
+    // TODO Send this back to the client as an exception so it can be handled correctly.
+//    valueFuture.setException(new MailHandlingException(value, message, e));
+  }
+
   public boolean complete(String message) {
+    value.add(message);
     // Base case (empty/newline message).
     if (message.isEmpty()) {
-      value.add(message);
       return false;
     }
 
-    String[] pieces = message.split("[ ]+", 2);
-
-    String content = (pieces.length > 1) ? pieces[1] : message;
-    String status = content.toLowerCase();
-    if (Command.isEndOfSequence(status)) {
-      // Ensure sequencing was correct.
-      if (!Long.valueOf(pieces[0]).equals(sequence)) {
-        log.error("Sequencing incorrect, expected {} but was {} ", sequence, pieces[0]);
+    try {
+     if (Command.isEndOfSequence(sequence, message.toLowerCase())) {
+       // Once we see the OK message, we should process the data and return.
+       valueFuture.set(command.extract(value));
+       return true;
       }
-
-      // Once we see the OK message, we should process the data and return.
-      value.add(message);
-      valueFuture.set(command.extract(value));
+    }
+    catch(ExtractionException ee) {
+      valueFuture.setException(ee);
       return true;
     }
 
-    value.add(message);
-
     return false;
+  }
+
+  @Override public String toString() {
+    return commandString;
   }
 }

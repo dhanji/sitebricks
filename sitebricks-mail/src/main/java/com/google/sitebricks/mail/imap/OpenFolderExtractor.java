@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class FolderExtractor implements Extractor<Folder> {
+class OpenFolderExtractor implements Extractor<Folder> {
 
   private static final String SELECTED = "selected";
 
@@ -17,8 +17,8 @@ class FolderExtractor implements Extractor<Folder> {
     int count = 0;
     for (String message : messages) {
       String[] pieces = message.split("[ ]+", 4);
-      if (pieces.length > 1 && "EXISTS".equalsIgnoreCase(pieces[1])) {
-        count = Integer.valueOf(pieces[0]);
+      if (pieces.length > 1 && "EXISTS".equalsIgnoreCase(pieces[2])) {
+        count = Integer.valueOf(pieces[1]);
       } else if (message.contains(SELECTED)) {
         // Extract folder name as given by the server.
         int left = message.indexOf(pieces[2]) + pieces[2].length();
@@ -29,6 +29,6 @@ class FolderExtractor implements Extractor<Folder> {
     Preconditions.checkState(null != folderName, "Error in IMAP protocol, " +
         "could not detect folder name");
 
-    return new Folder(folderName);
+    return new Folder(folderName, count);
   }
 }

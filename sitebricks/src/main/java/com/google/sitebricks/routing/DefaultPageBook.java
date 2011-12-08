@@ -99,9 +99,9 @@ public class DefaultPageBook implements PageBook {
       }
     }
 
-    return at(uri, pageClass, true); 
+    return at(uri, pageClass, true);
   }
-  
+
   public PageTuple at(String uri, Class<?> clazz) {
     return at(uri, clazz, clazz.isAnnotationPresent(Service.class));
   }
@@ -177,18 +177,18 @@ public class DefaultPageBook implements PageBook {
 
     return pageTuple;
   }
-  
+
   public Page decorate(Class<?> pageClass) {
     Preconditions.checkArgument(null == pageClass.getAnnotation(Service.class),
       "You cannot extend headless web services!");
     PageTuple pageTuple = new PageTuple("", PathMatcherChain.ignoring(), pageClass, injector, false, true);
-    
+
     // store page with a special name used by ExtendWidget
     String name = DecorateWidget.embedNameFor(pageClass);
     synchronized (lock) {
       pagesByName.put(name, pageTuple);
     }
-    
+
     return pageTuple;
   }
 
@@ -298,7 +298,7 @@ public class DefaultPageBook implements PageBook {
     public Class<?> pageClass() {
       return delegate.pageClass();
     }
-    
+
     public void apply(Renderable widget) {
       delegate.apply(widget);
     }
@@ -310,12 +310,12 @@ public class DefaultPageBook implements PageBook {
     public boolean isHeadless() {
       return delegate.isHeadless();
     }
-    
+
     @Override
     public boolean isDecorated() {
       return delegate.isDecorated();
     }
-    
+
     public Set<String> getMethod() {
       return delegate.getMethod();
     }
@@ -493,12 +493,12 @@ public class DefaultPageBook implements PageBook {
     public boolean isHeadless() {
       return headless;
     }
-    
+
     @Override
     public boolean isDecorated() {
       return extension;
     }
-    
+
     public Set<String> getMethod() {
       return methods.keySet();
     }
@@ -529,7 +529,7 @@ public class DefaultPageBook implements PageBook {
           String key = httpMethod + event;
           Collection<Action> tuples = methods.get(key);
           Object redirect = null;
-          
+
           if (null != tuples) {
             for (Action action : tuples) {
               if (action.shouldCall(request)) {
@@ -576,13 +576,12 @@ public class DefaultPageBook implements PageBook {
         }
       }
       return redirect;
-
     }
 
     public Class<?> pageClass() {
       return clazz;
     }
-    
+
     public void apply(Renderable widget) {
       this.pageWidget.set(widget);
     }
@@ -677,7 +676,7 @@ public class DefaultPageBook implements PageBook {
       return negotiator.shouldCall(negotiates, request);
     }
 
-	
+
     @Override
     public Object call(Object page, Map<String, String> map) {
       List<Object> arguments = new ArrayList<Object>();
@@ -730,7 +729,7 @@ public class DefaultPageBook implements PageBook {
 
       return negotiations;
     }
-    
+
 	public class NamedParameter {
 		private final String name;
 		private final Type type;
@@ -748,7 +747,7 @@ public class DefaultPageBook implements PageBook {
 			return type;
 		}
 	}
-	
+
   }
 
   /**

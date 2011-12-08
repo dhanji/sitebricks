@@ -10,6 +10,7 @@ public class FolderStatus {
   private int unseen;
   private int recent;
   private int nextUid;
+  private int uidValidity;
 
   void setMessages(int messages) {
     this.messages = messages;
@@ -43,6 +44,14 @@ public class FolderStatus {
     return nextUid;
   }
 
+  public int getUidValidity() {
+    return uidValidity;
+  }
+
+  public void setUidValidity(int uidValidity) {
+    this.uidValidity = uidValidity;
+  }
+  
   @Override
   public String toString() {
     return "FolderStatus{" +
@@ -52,4 +61,5 @@ public class FolderStatus {
         ", nextUid=" + nextUid +
         '}';
   }
+
 }

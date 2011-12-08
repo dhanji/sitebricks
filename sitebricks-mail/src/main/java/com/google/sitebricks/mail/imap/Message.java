@@ -1,9 +1,11 @@
 package com.google.sitebricks.mail.imap;
 
+import com.google.common.base.Supplier;
+import com.google.common.collect.*;
+
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents a complete IMAP message with all body parts materialized
@@ -13,9 +15,25 @@ import java.util.Map;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class Message implements HasBodyParts {
+  public static final Message ERROR = new Message();
   private MessageStatus status;
-  private Map<String, String> headers = new HashMap<String, String>();
+  private int imapUid;
+
+  // A header can have multiple, different values.
+  private Multimap<String, String> headers = newListMultimap();
   private List<BodyPart> bodyParts = new ArrayList<BodyPart>();
+
+  public void setImapUid(int imapUid) {
+    this.imapUid = imapUid;
+  }
+
+  public int getImapUid() {
+    return imapUid;
+  }
+
+  public void setHeaders(Multimap<String, String> headers) {
+    this.headers = headers;
+  }
 
   public MessageStatus getStatus() {
     return status;
@@ -24,13 +42,15 @@ public class Message implements HasBodyParts {
   public void setStatus(MessageStatus status) {
     this.status = status;
   }
-  public Map<String, String> getHeaders() {
+  public Multimap<String, String> getHeaders() {
     return headers;
   }
 
   public List<BodyPart> getBodyParts() {
     return bodyParts;
   }
+
+  @Override public void createBodyParts() { /* Noop */ }
 
   // Short hand.
   @Override public void setBody(String body) {
@@ -44,7 +64,7 @@ public class Message implements HasBodyParts {
   }
 
   public static class BodyPart implements HasBodyParts {
-    private Map<String, String> headers = new HashMap<String, String>();
+    private Multimap<String, String> headers = newListMultimap();
 
     // This field is set for HTML or text emails. and is mutually exclusive with binBody.
     private String body;
@@ -69,11 +89,12 @@ public class Message implements HasBodyParts {
       return bodyParts;
     }
 
-    public void setBodyParts(List<BodyPart> bodyParts) {
-      this.bodyParts = bodyParts;
+    @Override public void createBodyParts() {
+      if (null == bodyParts)
+        bodyParts = Lists.newArrayList();
     }
 
-    public Map<String, String> getHeaders() {
+    public Multimap<String, String> getHeaders() {
       return headers;
     }
 
@@ -92,5 +113,14 @@ public class Message implements HasBodyParts {
     public void setBody(byte[] binBody) {
       this.binBody = binBody;
     }
+  }
+
+  private static ListMultimap<String, String> newListMultimap() {
+    return Multimaps.newListMultimap(
+        Maps.<String, Collection<String>>newLinkedHashMap(), new Supplier<List<String>>() {
+      @Override public List<String> get() {
+        return Lists.newArrayList();
+      }
+    });
   }
 }
