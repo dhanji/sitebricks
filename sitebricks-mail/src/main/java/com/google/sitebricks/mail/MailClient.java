@@ -162,6 +162,11 @@ public interface MailClient {
   WireError lastError();
 
   /**
+   * Returns the last few items on the wire, useful for debugging.
+   */
+  List<String> getWireTrace();
+
+  /**
    * Returns true if this client has successfully entered and is currently in IMAP IDLE.
    */
   boolean isIdling();

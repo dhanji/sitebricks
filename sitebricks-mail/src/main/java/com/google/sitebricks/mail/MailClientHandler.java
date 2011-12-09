@@ -307,6 +307,10 @@ class MailClientHandler extends SimpleChannelHandler {
     return errorStack.peek() != null ? errorStack.pop() : null;
   }
 
+  List<String> getLastTrace() {
+    return wireTrace.list();
+  }
+
   /**
    * Registers a FolderObserver to receive events happening with a particular
    * folder. Typically an IMAP IDLE feature. If called multiple times, will
