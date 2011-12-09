@@ -326,7 +326,8 @@ class NettyImapClient implements MailClient, Idler {
   @Override
   public ListenableFuture<Set<Flag>> addOrRemoveFlags(Folder folder, int imapUid, Set<Flag> flags,
                                                       boolean add) {
-    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
+    Preconditions.checkState(mailClientHandler.isLoggedIn(),
+        "Can't execute command because client is not logged in");
     Preconditions.checkState(!mailClientHandler.idling.get(),
         "Can't execute command while idling (are you watching a folder?)");
     checkCurrentFolder(folder);
@@ -339,7 +340,8 @@ class NettyImapClient implements MailClient, Idler {
   @Override
   public ListenableFuture<Set<String>> addOrRemoveGmailLabels(Folder folder, int imapUid,
                                                               Set<String> labels, boolean add) {
-    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
+    Preconditions.checkState(mailClientHandler.isLoggedIn(),
+        "Can't execute command because client is not logged in");
     Preconditions.checkState(!mailClientHandler.idling.get(),
         "Can't execute command while idling (are you watching a folder?)");
     checkCurrentFolder(folder);
@@ -360,8 +362,33 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
+  public ListenableFuture<Set<String>> setGmailLabels(Folder folder, int imapUid,
+                                                      Set<String> labels) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(),
+        "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idling.get(),
+        "Can't execute command while idling (are you watching a folder?)");
+    checkCurrentFolder(folder);
+    SettableFuture<Set<String>> valueFuture = SettableFuture.create();
+    StringBuilder args = new StringBuilder();
+    args.append(imapUid);
+    args.append(" X-GM-LABELS (");
+    Iterator<String> it = labels.iterator();
+    while (it.hasNext()) {
+      args.append(it.next());
+      if (it.hasNext())
+        args.append(" ");
+      else
+        args.append(")");
+    }
+    send(Command.STORE_LABELS, args.toString(), valueFuture);
+    return valueFuture;
+  }
+
+  @Override
   public ListenableFuture<List<Message>> fetch(Folder folder, int start, int end) {
-    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
+    Preconditions.checkState(mailClientHandler.isLoggedIn(),
+        "Can't execute command because client is not logged in");
     Preconditions.checkState(!mailClientHandler.idling.get(),
         "Can't execute command while idling (are you watching a folder?)");
 

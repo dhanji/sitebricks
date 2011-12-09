@@ -182,6 +182,9 @@ public interface MailClient {
    */
   ListenableFuture<Message> fetchUid(Folder folder, int uid);
 
+  ListenableFuture<Set<String>> setGmailLabels(Folder folder, int imapUid,
+                                               Set<String> labels);
+
   static interface DisconnectListener {
     void disconnected();
 
