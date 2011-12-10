@@ -3,16 +3,15 @@ package com.google.sitebricks.mail;
 import com.google.common.collect.ImmutableList;
 import com.google.sitebricks.mail.imap.Command;
 import com.google.sitebricks.mail.imap.ExtractionException;
-import com.sun.tools.javac.util.Pair;
 import org.testng.annotations.Test;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
