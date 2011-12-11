@@ -208,7 +208,9 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
 
   private void analyseExtension(Set<PageBook.Page> pagesToCompile, Class<?> extendClass) {
     // store the page with a special page name used by ExtendWidget
-    pagesToCompile.add(pageBook.decorate(extendClass));
+    Page toCompile = pageBook.decorate(extendClass);
+    compilers.compilePage(toCompile);
+    pagesToCompile.add(toCompile);
     
     // recursively analyse super class
     while (extendClass != Object.class) {
