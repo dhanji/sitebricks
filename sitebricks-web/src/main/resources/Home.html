@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Sitebricks :: A Web platform</title>
+  <link rel="stylesheet" href="main.css">
+  <script type="text/javascript" src="js/jquery-1.4.3.min.js"></script>
+  <script type="text/javascript" src="js/json2.js"></script>
+  <script type="text/javascript" src="js/rpc.js"></script>
+  <script type="text/javascript" src="js/sitebricks.js"></script>
+</head>
+<body>
+<header>
+  <nav>
+    <ul>
+      <li>FAQ</li>
+      <li>Contribute</li>
+      <li>About</li>
+    </ul>
+  </nav>
+  <form>
+    <input class="searchbox" type="text" value="Search"/>
+  </form>
+  <h1>sitebricks<span>.info</span></h1>
+  <nav id="controls">
+    <div class="view">
+      <button id="edit">Edit</button>
+      <button id="delete">Delete</button>
+    </div>
+    <div class="edit">
+      <button id="save">Save</button>
+      <button id="discard">Discard</button>
+    </div>
+  </nav>
+  <div class="groove"></div>
+</header>
+<nav id="left">
+  <ul>
+    <li id="top" class="back"><a href="#">&uarr; Top</a></li>
+    <li id="back" class="back"><a href="#">&larr; Back</a></li>
+
+    @Repeat(items=index.list(), var="node")
+    <li><a class="wikilink" href="#" name="${node.name}">${node.topic}</a></li>
+  </ul>
+</nav>
+<section id="main">
+  ${this.renderHome()}
+</section>
+<div id="editor">
+  <article contenteditable="true"></article>
+</div>
+</body>
+</html>

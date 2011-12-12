@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html   xmlns="http://www.w3.org/1999/xhtml"
+        xml:lang="en" lang="en">
+
+  <head>
+    <title>Warp :: Counter demo</title>
+  </head>
+
+  
+  <body>
+
+    <p>
+        This page demonstrates the use of \@\Managed properties in Warp with a counter.
+        <br/>
+        <br/>
+        Counter value: <b>${counter}</b>
+        <br/>
+        @TextField(counter)
+        <input id="ctr" type="text"/>
+
+
+        A repetition over property expression "$ {movieName}"
+
+        @ShowIf(visible)
+        <span>
+            @Repeat(items=movies, var="movie", pageVar="page")
+            <p>${movie.movieName}, released on
+
+                @ShowIf(movie.name.matches("Under Siege"))
+                <b>movie.releasedOn</b>
+            </p>
+        </span>
+    </p>
+
+    <br/>
+    <a href="wiki/page/${counter}">increment</a>
+    <br/>
+                     <form action="/wiki/page/hi">
+                         <input type="text" value="blah"/>
+                         <input type="hidden" name="doh.blo"/>
+                         <input type="text" name="counter" value="blah"/>
+
+                         <input type="submit" name="counter" value="blah"/>
+                     </form>
+    <a href="#">reset ctr</a>
+    <br/>
+    <a href="#">reset ctr</a>
+  </body>
+</html>
