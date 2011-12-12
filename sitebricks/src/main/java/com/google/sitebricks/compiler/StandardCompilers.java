@@ -73,7 +73,7 @@ class StandardCompilers implements Compilers {
 
     @Override
     public Renderable compileVelocity(Class<?> page, String template) {
-        return new VelocityTemplateCompiler(page).compile(template);
+        return new VelocityTemplateCompiler().compile(template);
     }
 
     // TODO(dhanji): Feedback errors as return rather than throwing.

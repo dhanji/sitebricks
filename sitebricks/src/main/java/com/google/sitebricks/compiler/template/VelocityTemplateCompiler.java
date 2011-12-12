@@ -14,15 +14,10 @@ import com.google.sitebricks.Respond;
 
 public class VelocityTemplateCompiler {
 
-    private final Class<?> page;
-
-    public VelocityTemplateCompiler(Class<?> page) {
-        this.page = page;
-        System.out.println("****** velocity compiler");
+    static {
     }
 
     public Renderable compile(final String templateContent) {
-        //Velocity.init("velocity.properties");
         Properties properties = new Properties();
         try {
             properties.load(getClass().getResourceAsStream("/velocity.properties"));
@@ -32,13 +27,11 @@ public class VelocityTemplateCompiler {
 
         final VelocityEngine velocityEngine = new VelocityEngine(properties);
 
-        final VelocityContext context = new VelocityContext();
-
         return new Renderable() {
 
             @Override
             public void render(Object bound, Respond respond) {
-                System.out.println("********** hold your breath, velocity template being rendered.");
+                final VelocityContext context = new VelocityContext();
                 context.put("page", bound);
                 StringWriter writer = new StringWriter();
                 velocityEngine.evaluate(context, writer, "", templateContent);
