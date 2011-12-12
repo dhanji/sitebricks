@@ -69,7 +69,7 @@ class MailClientHandler extends SimpleChannelHandler {
       new ConcurrentLinkedQueue<CommandCompletion>();
   private volatile PushedData pushedData;
 
-  private final BoundedDiscardingList<String> commandDebugHistory = new BoundedDiscardingList<String>(10);
+  private final BoundedDiscardingList<String> commandTrace = new BoundedDiscardingList<String>(10);
   private final BoundedDiscardingList<String> wireTrace = new BoundedDiscardingList<String>(25);
   private final MBeanRegistration mBeanRegistration;
   private final InputBuffer inputBuffer = new InputBuffer();
@@ -97,8 +97,8 @@ class MailClientHandler extends SimpleChannelHandler {
   }
 
   @ManagedAttribute
-  public List<String> getCommandDebugHistory() {
-    return commandDebugHistory.list();
+  public List<String> getCommandTrace() {
+    return commandTrace.list();
   }
 
   @ManagedAttribute
@@ -120,7 +120,7 @@ class MailClientHandler extends SimpleChannelHandler {
   // DO NOT synchronize!
   public void enqueue(CommandCompletion completion) {
     completions.add(completion);
-    commandDebugHistory.add(new Date().toString() + " " + completion.toString());
+    commandTrace.add(new Date().toString() + " " + completion.toString());
   }
 
   @Override
