@@ -63,4 +63,15 @@
     </plugins>
 
   </build>
+  <!-- This should be removed when the googlecode repositories are migrated to the standard Nexus OSS repository infrastructure -->
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ext-snapshot-local</id>
+      <url>http://cerberus.local:8080/artifactory/ext-snapshot-local</url>
+    </snapshotRepository>
+    <repository>
+      <id>ext-release-local</id>
+      <url>http://cerberus.local:8080/artifactory/ext-release-local</url>
+    </repository>
+  </distributionManagement>
 </project>

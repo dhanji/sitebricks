@@ -1,6 +1,7 @@
 package com.google.sitebricks.compiler.template;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Properties;
 import java.util.Set;
@@ -20,7 +21,9 @@ public class VelocityTemplateCompiler {
     public Renderable compile(final String templateContent) {
         Properties properties = new Properties();
         try {
-            properties.load(getClass().getResourceAsStream("/velocity.properties"));
+            InputStream propertyStream = getClass().getResourceAsStream("/velocity.properties");
+            if (propertyStream != null)
+                properties.load(propertyStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
