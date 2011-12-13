@@ -42,6 +42,9 @@ class MailClientHandler extends SimpleChannelHandler {
 
   static final Pattern COMMAND_FAILED_REGEX =
       Pattern.compile("^[.] (NO|BAD) (.*)", Pattern.CASE_INSENSITIVE);
+  static final Pattern MESSAGE_COULDNT_BE_FETCHED_REGEX =
+      Pattern.compile("^\\d+ no some messages could not be fetched \\(failure\\)\\s*",
+          Pattern.CASE_INSENSITIVE);
   static final Pattern SYSTEM_ERROR_REGEX = Pattern.compile("[*]\\s*bye\\s*system\\s*error\\s*",
       Pattern.CASE_INSENSITIVE);
 
@@ -101,13 +104,13 @@ class MailClientHandler extends SimpleChannelHandler {
     return commandTrace.list();
   }
 
+  public List<String> getWireTrace() {
+    return wireTrace.list();
+  }
+
   @ManagedAttribute
   public boolean isLoggedIn() {
     return loginSuccess.getCount() == 0;
-  }
-
-  public List<String> getWireTrace() {
-    return wireTrace.list();
   }
 
   private static class PushedData {
@@ -257,6 +260,14 @@ class MailClientHandler extends SimpleChannelHandler {
     // for now just ignore it.
     if ("* BAD [CLIENTBUG] Invalid tag".equalsIgnoreCase(message)) {
       log.warn("Invalid tag warning, ignored.");
+      errorStack.push(new Error(completions.peek(), message, wireTrace.list()));
+      return;
+    } else if (MESSAGE_COULDNT_BE_FETCHED_REGEX.matcher(message).matches()) {
+      log.warn("Some messages in the batch could not be fetched\n" +
+          "---cmd---\n{}\n---wire---\n{}\n---end---\n", new Object[] {
+          getCommandTrace(),
+          getWireTrace()
+      });
       errorStack.push(new Error(completions.peek(), message, wireTrace.list()));
       return;
     }

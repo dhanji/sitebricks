@@ -170,8 +170,8 @@ public interface MailClient {
    * Returns the last few commands sent on the wire, used for debugging.
    * @return
    */
-
   public List<String> getCommandTrace();
+
   /**
    * Returns true if this client has successfully entered and is currently in IMAP IDLE.
    */
