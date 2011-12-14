@@ -110,9 +110,10 @@ class Parsing {
     StringBuilder currentToken = new StringBuilder();
     for (int i = 0, charArrayLength = charArray.length; i < charArrayLength; i++) {
       char c = charArray[i];
+      boolean escaped = (i > 0 && charArray[i - 1] == '\\' && (i < 2 || charArray[i - 2] != '\\'));
 
       // String checks, but only if we're not an escaped quote character.
-      if (c == '"' && (i > 0 && charArray[i - 1] != '\\')) {
+      if (c == '"' && !escaped) {
         if (inString) {
           inString = false;
 
@@ -146,7 +147,7 @@ class Parsing {
 
           // Otherwise whitespace is a delimiter for non-strings. EXCEPT when
           // preceeded by '\', which is an escape character.
-        } else if (c == ' ' && (i > 0 && charArray[i - 1] != '\\')) {
+        } else if (c == ' ' && !escaped) {
           bakeToken(tokens, currentToken);
           currentToken = new StringBuilder();
           continue;
