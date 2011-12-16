@@ -433,12 +433,13 @@ I am OOO and may have sporadic access to email.
 
 ------NextPart_1293809.9123_LLas
 Content-Type: message/rfc822; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
 Message-ID: <9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie1=
 5>
 In-Reply-To: <AANLkTikNOzOVjj=3DmS8nFXoiuW=3DLPufKKsK_SOPEXdCby@mail.gmail.=
 com>
 X-Annoy: dhanji
-
 From: example@example.com
 To: example2@example.com
 Subject: As basic as it gets
@@ -446,6 +447,151 @@ Content-Type: text/plain
 
 This is the plain text body of the message.  Note the blank line
 between the header information and the body of the message.
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset=us-ascii
+MIME-Version: 1.0
+
+This is a signature.
+
+------NextPart_1293809.9123_LLas--)
+4 OK Success
+* 45979 FETCH (UID 1012 BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
+Subject: Re: Slow to Respond
+Content-Type: multipart/mixed;
+ boundary=----NextPart_1293809.9123_LLas
+X-Sitebricks-Test: multipart-alternatives;simple-quoted-headers;nested-parts;rfc822
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+I am OOO and may have sporadic access to email.
+
+> OK, quoted part success
+
+------NextPart_1293809.9123_LLas
+Content-Type: message/rfc822; charset="utf-8"
+
+Message-ID: <9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie15>
+In-Reply-To: <AANLkTikNOzOVjj=mS8nFXoiuW=LPufKKsK_SOPEXdCby@mail.gmail.com>
+X-Annoy: dhanji
+From: example@example.com
+To: example2@example.com
+Subject: As basic as it gets
+Content-Type: text/plain
+
+This is the plain text body of the message.  Note the blank line
+between the header information and the body of the message.
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset=us-ascii
+MIME-Version: 1.0
+
+This is a signature.
+
+------NextPart_1293809.9123_LLas--)
+4 OK Success
+* 45979 FETCH (UID 1013 BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
+Subject: Re: Slow to Respond
+Content-Type: multipart/mixed;
+ boundary=----NextPart_1293809.9123_LLas
+X-Sitebricks-Test: multipart-alternatives;nested-headers;plaintext-nested-rfc822
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset="utf-8"
+
+I am OOO and may have sporadic access to email.
+
+> OK, quoted part success
+
+------NextPart_1293809.9123_LLas
+Content-Type: message/rfc822; charset="us-ascii"
+
+Message-ID: <9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie15>
+In-Reply-To: <AANLkTikNOzOVjj=mS8nFXoiuW=LPufKKsK_SOPEXdCby@mail.gmail.com>
+X-Annoy: dhanji
+From: example@example.com
+To: example2@example.com
+Subject: As basic as it gets
+Content-Type: multipart/mixed; boundary=e89a8ff1c384d8017504b42beb91
+
+--e89a8ff1c384d8017504b42beb91
+Content-Type: text/plain; charset=ISO-8859-1
+
+hello, world!
+
+--e89a8ff1c384d8017504b42beb91
+Content-Type: text/plain; charset=ISO-8859-1
+
+goodbye, cruel, world!
+
+--e89a8ff1c384d8017504b42beb91--
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset=us-ascii
+MIME-Version: 1.0
+
+This is a signature.
+
+------NextPart_1293809.9123_LLas--)
+4 OK Success
+* 45979 FETCH (UID 1014 BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
+Subject: Re: Slow to Respond
+Content-Type: multipart/mixed;
+ boundary=----NextPart_1293809.9123_LLas
+X-Sitebricks-Test: multipart-alternatives;quoted-headers;nested-parts-with-attachments;rfc822
+
+------NextPart_1293809.9123_LLas
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quotedprintable
+
+I am OOO and may have sporadic access to email.
+
+> OK, quoted part success
+
+------NextPart_1293809.9123_LLas
+Content-Type: message/rfc822; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+Message-ID: <9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie1=
+5>
+In-Reply-To: <AANLkTikNOzOVjj=3DmS8nFXoiuW=3DLPufKKsK_SOPEXdCby@mail.gmail.=
+com>
+X-Annoy: dhanji
+From: example@example.com
+To: example2@example.com
+Subject: As basic as it gets
+Content-Type: multipart/mixed; boundary=3De89a8ff1c384d8017504b42beb91
+
+--e89a8ff1c384d8017504b42beb91
+Content-Type: text/plain; charset=3DISO-8859-1
+
+hello, world!
+
+--e89a8ff1c384d8017504b42beb91
+Content-Type: text/csv; charset=3DUS-ASCII; name=3D"csv-demo.csv"
+Content-Disposition: attachment; filename=3D"csv-demo.csv"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gw8jre680
+
+Ik5hbWUiLCJEYXRlIiwiQW1vdW50IiwiQ2F0ZWdvcnkiLCJNZW1vIgoiU3Vuc2V0IE9mZmljZSBT
+cGFjZSIsMDQvMTAvMTAsLTExMDAsIlJlbnQiLCJBcHJpbCByZW50IgoiUGF5cGFsIiwwNC8xOC8x
+MCwxMDAwMCwiU2FsZXMgSW5jb21lIiwiZGVwb3NpdCIKIkhvbWUgRGVwb3QiLDA0LzE4LzEwLC0x
+MDAuMiwiT2ZmaWNlIEV4cGVuc2VzIiwiYmF0aHJvb20sIGtpdGNoZW4iCiJEb2UsIEpvaG4iLDA0
+LzE1LzEwLC0xNjAwLCJXYWdlcyIsCiJDb3N0Y28iLDA0LzE0LzEwLC0yMDMuMDMsIkdyb2Nlcmll
+cyIsImdyb2NlcmllcyIKIkJlc3RCdXkiLDA0LzEzLzEwLC0yMzAsIk9mZmljZSBFeHBlbnNlcyIs
+Im1vbml0b3IiCiJHb29nbGUgQWRzIiwwNC8xMy8xMCwtNjAwLCJBZHZlcnRpc2luZyIsCiJKb25l
+cyBhbmQgSm9uZXMgTExQIiwwNC8xMC8xMCwtNTAwLCJMZWdhbCIsImxlZ2FsIGNvdW5zZWwiCiJD
+aGVjayBEZXBvc2l0IiwwNC8wOC8xMCw5MDAsLCJkZXBvc2l0Igo=3D
+--e89a8ff1c384d8017504b42beb91--
+
 
 ------NextPart_1293809.9123_LLas
 Content-Type: text/plain; charset=us-ascii

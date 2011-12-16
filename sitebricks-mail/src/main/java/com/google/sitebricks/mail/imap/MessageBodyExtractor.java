@@ -1,5 +1,6 @@
 package com.google.sitebricks.mail.imap;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -124,7 +125,6 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     Message email = new Message();
     // Read the leading message (command response).
     String firstLine = iterator.next();
-
     // It is possible that the requested message stream is completely empty.
     if (EOS_REGEX.matcher(firstLine).matches())
       return null;
@@ -220,6 +220,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     return value.contains("attachment") || value.contains("filename");
   }
 
+  /**
+   * @return whether a boundary end marker was encountered.
+   */
   private static boolean parseBodyParts(ListIterator<String> iterator, HasBodyParts entity,
                                         String mimeType, String boundary) {
 
@@ -229,6 +232,15 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       entity.setBody(decode(body, transferEncoding(entity), charset(mimeType)));
     } else if (mimeType.startsWith("multipart/") /* mixed|alternative|digest */) {
       String boundaryToken = boundary(mimeType);
+
+      if (boundaryToken == null) {
+        throw new RuntimeException("Encountered multipart with no boundary token defined for " +
+            mimeType);
+      }
+
+      // For the record: http://tools.ietf.org/html/rfc2045#section-5.1
+      // specifies that boundaries are case sensitive. We, however do case-insensitive
+      // comparison....
 
       // Skip everything upto the first occurrence of boundary (called the "Preamble")
       //noinspection StatementWithEmptyBody
@@ -250,7 +262,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
         // If the internal body part is not multipart alternative, then use the parent boundary.
         if (innerBoundary == null)
-          innerBoundary = boundary;
+          innerBoundary = boundaryToken;
 
         // Is this going to be a multi-level recursion?
         if (partMimeType.startsWith("multipart/"))
@@ -267,10 +279,10 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         // we're only done if the last line has a terminal suffix of '--'
         String lastLineRead = iterator.previous();
         // Yes this is the end. Otherwise continue!
-        if (Parsing.startsWithIgnoreCase(lastLineRead, boundary + "--")) {
+        if (Parsing.startsWithIgnoreCase(lastLineRead, boundaryToken + "--")) {
           iterator.next();
           return true;
-        } else if (isEndOfMessage(iterator, iterator.next(), boundary)) {
+        } else if (hasImapTerminator(iterator, iterator.next())) {
           break;
         }
       }
@@ -282,12 +294,56 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       entity.createBodyParts();
       entity.getBodyParts().add(bodyPart);
 
-      Collection<String> encoding = entity.getHeaders().get("Content-Transfer-Encoding");
-      String headerEncoding = encoding.isEmpty() ? null : encoding.iterator().next();
+      String bodyEncoding = transferEncoding(entity);
+
+      ListIterator<String> rfc822iterator = iterator;
+      // First decode the body according to the content-transfer-encoding, then parse
+      // the embedded message.
+
+      // For quoted-printable do the efficient thing, just decode each line separately.
+      if ("quoted-printable".equals(bodyEncoding)) {
+        boolean endMarker = false;
+        List<String> rfc822msg = Lists.newArrayList();
+        StringBuilder sb = new StringBuilder();
+        while (iterator.hasNext()) {
+          final String s = iterator.next();
+          if (hasImapTerminator(iterator, s) ||
+              boundary != null && Parsing.startsWithIgnoreCase(s, boundary)) {
+            // Back up, we don't want to swallow the next boundary.
+            iterator.previous();
+            if (sb.length() > 0) // save dangly bit, though technically illegal here.
+              rfc822msg.add(sb.toString());
+            break;
+          }
+          if (s.endsWith("=")) {
+            sb.append(s);
+            sb.setLength(sb.length() - 1); // trim the trailing '='.
+          } else if (sb.length() > 0) {  // previous line(s) had a soft line break.
+            sb.append(s);
+            rfc822msg.add(sb.toString());
+            sb.setLength(0);
+          } else {
+            rfc822msg.add(s);
+          }
+          // Don't need to decode s before checking for boundary as the boundary is not part of the
+          // encoded body.
+        }
+        rfc822iterator = decode(rfc822msg, "quoted-printable", charset(mimeType)).listIterator();
+      } else if(SEVEN_BIT.equals(bodyEncoding)) {
+        // No decoding needed.
+
+      } else {
+        // Unsupported encoding, print out error context and skip to end of part/message.
+        throw new RuntimeException("Unsupported encoding for embedded rfc822 message " +
+            bodyEncoding);
+      }
 
       // Parse the body of this message as though it were a new message itself.
-      parseHeaderSection(iterator, bodyPart.getHeaders(), headerEncoding);
-      return parseBodyParts(iterator, bodyPart, mimeType(bodyPart.getHeaders()), boundary);
+      parseHeaderSection(rfc822iterator, bodyPart.getHeaders(), null);
+      String bodyBoundary = boundary(mimeType);
+      return parseBodyParts(rfc822iterator, bodyPart,
+          mimeType(bodyPart.getHeaders()),
+          bodyBoundary != null ? bodyBoundary : boundary);
 
     } else {
       entity.setBody(readBodyAsBytes(transferEncoding(entity), iterator, boundary));
@@ -314,6 +370,14 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     return (alternate != null) ? alternate : charset;
   }
 
+
+  private static List<String> decode(List<String> body, String encoding, String charset) {
+    List<String> l = Lists.newArrayList();
+    for(String s : body)
+      l.add(decode(s, encoding, charset));
+    return l;
+  }
+
   private static String decode(String body, String encoding, String charset) {
     try {
 
@@ -333,6 +397,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     }
   }
 
+  // http://tools.ietf.org/html/rfc2046#section-5.1.1
   static String boundary(String mimeType) {
     Matcher matcher = BOUNDARY_REGEX.matcher(mimeType);
     if (!matcher.find())
@@ -362,21 +427,21 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     return bytes;
   }
 
-  private static String readBodyAsString(ListIterator<String> iterator, String boundary) {
+  private static String readBodyAsString(ListIterator<String> iterator, String terminator) {
     StringBuilder textBody = new StringBuilder();
     // Parse as plain text.
     while (iterator.hasNext()) {
       String line = iterator.next();
-      if (boundary != null && Parsing.startsWithIgnoreCase(line, boundary)) {
+      if (terminator != null && Parsing.startsWithIgnoreCase(line, terminator)) {
         // end of section.
         return textBody.toString();
       } else {
         // Check for IMAP command stream delimiter.
-        if (isEndOfMessage(iterator, line, boundary)) {
-
+        if (hasImapTerminator(iterator, line)) {
+          Preconditions.checkArgument(terminator == null || !line.contains(terminator + "--"));
           // If this is actually a boundary with the closing ) token, ignore it. Otherwise add it
           // to the body, it's possible for misbehaving clients to generate this kind of body.
-          if (!")".equals(line.replace(boundary + "--", "").trim())) {
+          if (!")".equals(line.trim())) {
             textBody.append(line.substring(0, line.lastIndexOf(")")));
           }
           return textBody.toString();
@@ -387,11 +452,13 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     return textBody.toString();
   }
 
-  private static boolean isEndOfMessage(ListIterator<String> iterator,
-                                        String line, String boundary) {
+  private static boolean hasImapTerminator(ListIterator<String> iterator,
+                                           String line) {
     // It's possible for the ) to occur on its own line, or on the same line as the boundary marker.
     // It's also possible for misbehaving clients (Google Groups) to generate a ) on the same line
     // as body text. FUCK.
+    // It's also possible to have an email containing a closing bracket and "10 OK success" on
+    // the next line. We're going to ignore that possible case here.
     if (line.trim().endsWith(")")) {
       if (iterator.hasNext()) {
         String next = iterator.next();
@@ -424,6 +491,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       // A blank line indicates end of the header section.
       if (message.isEmpty())
         break;
+
       parseHeaderPair(message, iterator, headers, headerEncoding);
     }
   }
@@ -455,12 +523,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     // First read up to the next header.
     while (iterator.hasNext()) {
       String next = iterator.next();
-      if (WHITESPACE_PREFIX_REGEX.matcher(next).find())
-        folded.append(next);
-      else if (message.endsWith("=") && !next.contains(":")) {
-        // HACK!!! To account for nested quoted-printable headers. We unfold header lines that
-        // *appear* to be quoted printable. This should really be handled separately.
-        folded.deleteCharAt(folded.length() - 1);
+      if (WHITESPACE_PREFIX_REGEX.matcher(next).find()) {
         folded.append(next);
       } else {
         iterator.previous();
