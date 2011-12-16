@@ -63,6 +63,7 @@ class HiddenMethodFilter implements Filter {
       httpRequest.setAttribute(filterDoneAttributeName, Boolean.TRUE);
 
       try {
+    	HttpServletRequestWrapper originalRequest = new HttpServletRequestWrapper(httpRequest);
         String methodName = httpRequest.getParameter(this.hiddenFieldName);
 
         if ("POST".equalsIgnoreCase(httpRequest.getMethod()) && !Strings.empty(methodName)) {
@@ -72,7 +73,7 @@ class HiddenMethodFilter implements Filter {
         } else {
 
           // Filtering done, forward to another filter in chain
-          filterChain.doFilter(httpRequest, response);
+          filterChain.doFilter(originalRequest, response);
         }
       } finally {
         // Remove the filterDone attribute for this request.
