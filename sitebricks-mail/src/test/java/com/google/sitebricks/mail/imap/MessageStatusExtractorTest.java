@@ -79,7 +79,7 @@ public class MessageStatusExtractorTest {
     List<String> unfoldedAssertions = Lists.newArrayListWithCapacity(assertions.size());
     for (int i = 0; i < assertions.size(); i++) {
       String assertion = assertions.get(i);
-      if (!assertion.endsWith("}")) {
+      while (!assertion.endsWith("}")) {
         String next = assertions.get(i + 1);
         if (!next.startsWith("MessageStatus{")) {
           assertion += '\n' + next;
