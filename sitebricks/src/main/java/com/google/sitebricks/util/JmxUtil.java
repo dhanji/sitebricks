@@ -21,16 +21,16 @@ public class JmxUtil {
   public static MBeanRegistration registerMBean(Object object, String packageName,
                                                 String typeName, String uniqueName) {
 
+    final String name = packageName + ":type=" +
+        typeName + ", name=" + uniqueName + "[" + MBEAN_FRIENDLY.format(new Date()) + "]";
     try {
-      MBeanRegistration registration = new MBeanRegistration(object,
-          new ObjectName(packageName + ":type=" +
-              typeName + ", name=" + uniqueName + "[" + MBEAN_FRIENDLY.format(new Date()) + "]"));
+      MBeanRegistration registration = new MBeanRegistration(object, new ObjectName(name));
       registration.register();
       return registration;
     } catch (ManagementException e) {
-      log.error("Failed to register MBean.", e);
+      log.error("Failed to register MBean {} {}", name, e);
     } catch (MalformedObjectNameException e) {
-      log.error("Failed to register MBean.", e);
+      log.error("Failed to register MBean {} {}", name, e);
     }
     return null;
   }
