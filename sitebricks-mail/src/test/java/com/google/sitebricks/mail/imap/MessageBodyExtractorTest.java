@@ -67,7 +67,7 @@ public class MessageBodyExtractorTest {
             Charsets.UTF_8);
 
     List<Message> extract = new MessageBodyExtractor().extract(lines);
-    assertEquals(14, extract.size());
+    assertEquals(extract.size(), 14);
     // ------------------------------------------------------------
     // First message.
     // Folded headers with tabs + spaces, repeat headers, one body.

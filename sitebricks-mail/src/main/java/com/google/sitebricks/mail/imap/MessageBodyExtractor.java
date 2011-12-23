@@ -15,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -99,29 +100,44 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     for (List<String> partitionedMessages : partitionedMessagesSet) {
       ListIterator<String> iterator = partitionedMessages.listIterator();
       try {
+        // Count errors as you go, don't throw exceptions s.t. we can carry on parsing and
+        // yet give error report at high level.
+        AtomicInteger errorCount = new AtomicInteger();
         while (iterator.hasNext()) {
-          Message message = parseMessage(iterator);
+          errorCount.set(0);
+          Message message = parseMessage(iterator, errorCount);
           // Messages may be null if there are gaps in the returned body. These should be safe.
           if (null != message)
             emails.add(message);
+
+          if (errorCount.get() > 0) {
+            // Instead add a sentinel for this message.
+            dumpError(emails, partitionedMessages, errorCount.get());
+          }
         }
       } catch (RuntimeException e) {
         log.error("Unexpected error while parsing message", e);
-        e.printStackTrace();
-        // Instead add a sentinel for this message.
         emails.add(Message.ERROR);
-        System.out.println("---");
-        for (String piece : partitionedMessages) {
-          System.out.println(piece);
-        }
-        System.out.println("---");
+        e.printStackTrace();
+        dumpError(emails, partitionedMessages, 1);
       }
+
     }
 
     return emails;
   }
 
-  private Message parseMessage(ListIterator<String> iterator) {
+  private void dumpError(List<Message> emails, List<String> partitionedMessages, int errorCount) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("============\n");
+    for (String piece : partitionedMessages) {
+      sb.append(piece).append("\n");
+    }
+    sb.append("============\n");
+    log.error("{} Message parsing error(s) encountered in:\n {}", errorCount, sb.toString());
+  }
+
+  private Message parseMessage(ListIterator<String> iterator, AtomicInteger errorCount) {
     Message email = new Message();
     // Read the leading message (command response).
     String firstLine = iterator.next();
@@ -138,12 +154,13 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     int size = 0;
 
     // Parse out size in bytes from "{NNN}"
+    // TODO: find out whether we can use this value, otherwise delete the variable.
     if (sizeString != null && sizeString.length() > 2) {
       size = Integer.parseInt(sizeString.substring(1, sizeString.length() - 1));
     }
 
     // OK now parse the header stream.
-    parseHeaderSection(iterator, email.getHeaders(), null);
+    parseHeaderSection(iterator, email.getHeaders(), null, errorCount);
 
     // OK now parse the body/mime stream...
     // First determine the mimetype.
@@ -151,7 +168,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
     // Normalize mimetype case.
     mimeType = mimeType.toLowerCase();
-    parseBodyParts(iterator, email, mimeType, boundary(mimeType));
+    parseBodyParts(iterator, email, mimeType, boundary(mimeType), errorCount);
 
     // Try to chew up the end of sequence marker if it exists.
     while (iterator.hasNext()) {
@@ -224,7 +241,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
    * @return whether a boundary end marker was encountered.
    */
   private static boolean parseBodyParts(ListIterator<String> iterator, HasBodyParts entity,
-                                        String mimeType, String boundary) {
+                                        String mimeType, String boundary, AtomicInteger errorCount) {
 
     if (mimeType.startsWith("text/") && !isAttachment(entity.getHeaders())) {
       String body = readBodyAsString(iterator, boundary);
@@ -253,7 +270,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         entity.getBodyParts().add(bodyPart);
 
         // OK now we're in the mime stream. It may have headers.
-        parseHeaderSection(iterator, bodyPart.getHeaders(), null);
+        parseHeaderSection(iterator, bodyPart.getHeaders(), null, errorCount);
 
         // And parse the body itself (seek up to the next occurrence of boundary token).
         // Recurse down this method to slurp up different content types.
@@ -270,7 +287,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
         // If the inner body was parsed up until we reached boundary end marker, ending with "--"
         // then skip everything until we see a start boundary marker.
-        if (parseBodyParts(iterator, bodyPart, partMimeType, innerBoundary)) {
+        if (parseBodyParts(iterator, bodyPart, partMimeType, innerBoundary, errorCount)) {
           //noinspection StatementWithEmptyBody
           while (iterator.hasNext() && !Parsing.startsWithIgnoreCase(iterator.next(),
               boundaryToken)) ;
@@ -342,14 +359,14 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       }
 
       // Parse the body of this message as though it were a new message itself.
-      parseHeaderSection(rfc822iterator, bodyPart.getHeaders(), null);
+      parseHeaderSection(rfc822iterator, bodyPart.getHeaders(), null, errorCount);
       String bodyBoundary = boundary(mimeType);
       boolean gotEndMarker = parseBodyParts(rfc822iterator, bodyPart,
           mimeType(bodyPart.getHeaders()),
-          bodyBoundary != null ? bodyBoundary : boundary);
+          bodyBoundary != null ? bodyBoundary : boundary, errorCount);
       return quotedPrintable ? alreadyHitEndMarker : gotEndMarker;
     } else {
-      entity.setBody(readBodyAsBytes(transferEncoding(entity), iterator, boundary));
+      entity.setBody(readBodyAsBytes(transferEncoding(entity), iterator, boundary, errorCount));
     }
     return false;
   }
@@ -414,7 +431,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
   private static byte[] readBodyAsBytes(String transferEncoding,
                                         ListIterator<String> iterator,
-                                        String boundary) {
+                                        String boundary, AtomicInteger errorCount) {
     byte[] bytes = readBodyAsString(iterator, boundary).getBytes();
 
     // Decode if this is encoded as binary-to-text.
@@ -424,8 +441,10 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
             transferEncoding));
       } catch (MessagingException e) {
         log.error("Unable to decode message body, proceeding with raw bytes.", e);
+        errorCount.incrementAndGet();
       } catch (IOException e) {
         log.error("Unable to decode message body, proceeding with raw bytes.", e);
+        errorCount.incrementAndGet();
       }
     return bytes;
   }
@@ -480,7 +499,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
   private static void parseHeaderSection(ListIterator<String> iterator,
                                          Multimap<String, String> headers,
-                                         String headerEncoding) {
+                                         String headerEncoding, AtomicInteger errorCount) {
     while (iterator.hasNext()) {
       String message = iterator.next();
       // Watch for the end of sequence marker. If we see it, the mime-stream is ended.
@@ -489,21 +508,22 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
           continue;
       } catch (ExtractionException ee) {
         log.error("Warning: error parsing email message body! {}", iterator, ee);
+        errorCount.incrementAndGet();
         continue;
       }
       // A blank line indicates end of the header section.
       if (message.isEmpty())
         break;
 
-      parseHeaderPair(message, iterator, headers, headerEncoding);
+      parseHeaderPair(message, iterator, headers, headerEncoding, errorCount);
     }
   }
 
   private static void parseHeaderPair(String message,
                                       ListIterator<String> iterator,
-                                      Multimap<String,
-                                      String> headers,
-                                      String headerEncoding) {
+                                      Multimap<String, String> headers,
+                                      String headerEncoding,
+                                      AtomicInteger errorCount) {
     // Totally empty header line (i.e. stray whitespace).
     if (message.isEmpty())
       return;
@@ -513,6 +533,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       log.warn("Malformed message header encountered at {}: {}. Skipping...",
           iterator.previousIndex(),
           message);
+      errorCount.incrementAndGet();
       return;
     }
     // It is possible for the header to have no value.
