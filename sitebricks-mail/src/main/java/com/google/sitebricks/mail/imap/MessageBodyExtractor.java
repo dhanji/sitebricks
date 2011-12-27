@@ -366,7 +366,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
           bodyBoundary != null ? bodyBoundary : boundary, errorCount);
       return quotedPrintable ? alreadyHitEndMarker : gotEndMarker;
     } else {
-      entity.setBody(readBodyAsBytes(transferEncoding(entity), iterator, boundary, errorCount));
+      entity.setBody(readBodyAsBytes(transferEncoding(entity), iterator, boundary,
+          charset(mimeType), errorCount));
     }
     return false;
   }
@@ -431,8 +432,17 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
   private static byte[] readBodyAsBytes(String transferEncoding,
                                         ListIterator<String> iterator,
-                                        String boundary, AtomicInteger errorCount) {
-    byte[] bytes = readBodyAsString(iterator, boundary).getBytes();
+                                        String boundary,
+                                        String charset,
+                                        AtomicInteger errorCount) {
+    byte[] bytes = new byte[0];
+    try {
+      bytes = readBodyAsString(iterator, boundary).getBytes(charset);
+    } catch (UnsupportedEncodingException e) {
+      log.error("Could not decode body as string due to encoding, using default encoding.", e);
+      errorCount.incrementAndGet();
+      bytes = readBodyAsString(iterator, boundary).getBytes();
+    }
 
     // Decode if this is encoded as binary-to-text.
     if (null != transferEncoding)
