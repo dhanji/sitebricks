@@ -601,3 +601,43 @@ This is a signature.
 
 ------OuterBoundaryMsgUID1014--)
 4 OK Success
+* 45980 FETCH (UID 1015 BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Received: by 10.220.150.202 with SMTP id z10cs2110vcv;
+        Mon, 24 Oct 2011 06:03:12 -0700 (PDT)
+Received: by 10.236.79.231 with SMTP id i67mr34321485yhe.33.1319461391943;
+        Mon, 24 Oct 2011 06:03:11 -0700 (PDT)
+Date: Mon, 24 Oct 2011 09:02:55 -0400
+From: "Dude" <dude@dudester.com>
+Subject: hi
+To: dhanji@gmail.com
+Message-id: <52A17D4DB3DB0444A37961ADF52ECED0C6254D@usoldt-e3mb-010.PEROOT.COM>
+MIME-version: 1.0
+Content-type: multipart/alternative;
+ boundary="----_=_NextPart_001_01CC924D.3EEB0FA2"
+X-Sitebricks-Test: multipart-alternative;quoted-printable;mixed-case-mime-type
+
+This is a multi-part message in MIME format.
+
+
+------_=_NextPart_001_01CC924D.3EEB0FA2
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+hiya
+
+
+------_=_NextPart_001_01CC924D.3EEB0FA2
+Content-Type: text/html;
+	charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html>
+<body>
+hiya
+</body>
+</html>
+
+------_=_NextPart_001_01CC924D.3EEB0FA2--
+45980 OK Success

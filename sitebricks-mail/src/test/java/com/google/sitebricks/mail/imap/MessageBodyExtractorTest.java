@@ -67,7 +67,7 @@ public class MessageBodyExtractorTest {
             Charsets.UTF_8);
 
     List<Message> extract = new MessageBodyExtractor().extract(lines);
-    assertEquals(extract.size(), 14);
+    assertEquals(extract.size(), 15);
     // ------------------------------------------------------------
     // First message.
     // Folded headers with tabs + spaces, repeat headers, one body.
@@ -271,6 +271,11 @@ public class MessageBodyExtractorTest {
     message = extract.get(13);
     assertRfc822withAttachment(message);
 
+    // ------------------------------------------------------------
+    // Fourteenth message.
+    // Test mixed case in Content-Type.
+    message = extract.get(14);
+    assertEquals(2, message.getBodyParts().size());
   }
 
   private void assertRfc822(Message message, String contentTransferEncoding) {

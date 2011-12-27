@@ -1,9 +1,7 @@
 package com.google.sitebricks.mail.imap;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.james.mime4j.codec.DecoderUtil;
 import org.slf4j.Logger;
@@ -188,7 +186,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   }
 
   static String mimeType(Multimap<String, String> headers) {
-    Collection<String> mimeType = headers.get("Content-Type");
+    Collection<String> mimeType = getHeaderVariations(headers, "Content-Type", "Content-type");
     if (mimeType.isEmpty())
       return "text/plain";    // Default to text plain mimetype.
     return Parsing.stripQuotes(mimeType.iterator().next().toLowerCase().trim()).trim();
@@ -197,7 +195,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   private static String transferEncoding(HasBodyParts entity) {
     if (null == entity.getHeaders())
       return SEVEN_BIT;
-    Collection<String> values = entity.getHeaders().get("Content-Transfer-Encoding");
+    Collection<String> values = getHeaderVariations(entity.getHeaders(), "Content-Transfer-Encoding",
+        "Content-transfer-encoding", "Content-Transfer-encoding");
     if (values.isEmpty())
       return SEVEN_BIT;
 
@@ -229,12 +228,22 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   }
 
   private static boolean isAttachment(Multimap<String, String> headers) {
-    Collection<String> values = headers.get("Content-Disposition");
+    Collection<String> values = getHeaderVariations(headers, "Content-Disposition",
+        "Content-disposition");
     if (values.isEmpty())
       return false;
 
     String value = values.iterator().next().trim().toLowerCase();
     return value.contains("attachment") || value.contains("filename");
+  }
+
+  private static Collection<String> getHeaderVariations(Multimap<String,String> headers, String... keys) {
+    for (String key : keys) {
+      Collection<String> values = headers.get(key);
+      if (!values.isEmpty())
+        return values;
+    }
+    return ImmutableList.of();
   }
 
   /**
