@@ -405,7 +405,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       charset = Parsing.stripQuotes(charset);
 
       return IOUtils.toString(
-          MimeUtility.decode(new ByteArrayInputStream(body.getBytes()), encoding), charset);
+          MimeUtility.decode(new ByteArrayInputStream(body.getBytes(charset)), encoding), charset);
     } catch (UnsupportedEncodingException e) {
       // In this case, just return it as is and look it up later.
       log.warn("Encountered unknown encoding '{}'. Treating it as a raw string.", charset, e);

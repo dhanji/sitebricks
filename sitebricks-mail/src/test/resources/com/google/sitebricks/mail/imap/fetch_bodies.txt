@@ -639,5 +639,21 @@ hiya
 </body>
 </html>
 
-------_=_NextPart_001_01CC924D.3EEB0FA2--
+------_=_NextPart_001_01CC924D.3EEB0FA2--)
+45980 OK Success
+* 45981 FETCH (UID 1016 BODY[] {99999}
+Delivered-To: jochen@bekmann.com
+Received: by 10.142.240.18 with SMTP id n18cs10279wfh;
+        Mon, 26 Dec 2011 09:50:23 -0800 (PST)
+Message-ID: <4EF8B3DB.4040402@gmx.de>
+Date: Mon, 26 Dec 2011 18:50:19 +0100
+From: <thedude@theranch.com>
+MIME-Version: 1.0
+To: jochen@bekmann.com
+Subject: Umlauts
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 8bit
+
+Danke für die Weihnachtswünsche! Viele Grüße.
+)
 45980 OK Success

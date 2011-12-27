@@ -7,7 +7,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.testng.annotations.Test;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeUtility;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Collection;
@@ -67,7 +71,7 @@ public class MessageBodyExtractorTest {
             Charsets.UTF_8);
 
     List<Message> extract = new MessageBodyExtractor().extract(lines);
-    assertEquals(extract.size(), 15);
+    assertEquals(extract.size(), 16);
     // ------------------------------------------------------------
     // First message.
     // Folded headers with tabs + spaces, repeat headers, one body.
@@ -276,6 +280,14 @@ public class MessageBodyExtractorTest {
     // Test mixed case in Content-Type.
     message = extract.get(14);
     assertEquals(2, message.getBodyParts().size());
+
+    // ------------------------------------------------------------
+    // Fifteenth message.
+    // Test mixed case in Content-Type.
+    message = extract.get(15);
+    assertEquals(1, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().get(0).getBody(),
+        "Danke für die Weihnachtswünsche! Viele Grüße.\r\n");
   }
 
   private void assertRfc822(Message message, String contentTransferEncoding) {
@@ -691,5 +703,16 @@ public class MessageBodyExtractorTest {
     assertEquals("UTF-8", MessageBodyExtractor.charset("text/html;charset=;;"));
     assertEquals("UTF-8", MessageBodyExtractor.charset(""));
     assertEquals("UTF-8", MessageBodyExtractor.charset(null));
+  }
+
+  @Test
+  public final void testDecoding() throws MessagingException, IOException {
+    String body = "Grüße";
+    String encoding = "8bit";
+    String charset = "ISO-8859-1";
+    final byte[] bytes = body.getBytes(charset);
+    final InputStream decoded = MimeUtility.decode(new ByteArrayInputStream(bytes), encoding);
+    String result = IOUtils.toString(decoded, charset);
+    assertEquals(result, body);
   }
 }
