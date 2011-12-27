@@ -374,7 +374,7 @@ public class MessageBodyExtractorTest {
   private void assertRfc822withAttachment(Message message) {
     // Assume all the stuff about the non-rfc822 matches the previous case.
     // skip right down the the nested message.
-    assertEquals(3, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().size(), 3);
 
     Message.BodyPart part2;
 

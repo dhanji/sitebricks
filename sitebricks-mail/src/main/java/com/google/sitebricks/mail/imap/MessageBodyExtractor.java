@@ -287,6 +287,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         }
       }
     } else if (mimeType.startsWith("message/rfc822")) {
+
       // These are encapsulated messages. I.e. a message inside a part. Go figure.
       // We store them as a child body part, with the containing part having no body of its own,
       // merely the headers.
@@ -300,8 +301,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       // First decode the body according to the content-transfer-encoding, then parse
       // the embedded message.
 
+      boolean alreadyHitEndMarker = false;
+      final boolean quotedPrintable = "quoted-printable".equals(bodyEncoding);
+
       // For quoted-printable do the efficient thing, just decode each line separately.
-      if ("quoted-printable".equals(bodyEncoding)) {
+      if (quotedPrintable) {
         boolean endMarker = false;
         List<String> rfc822msg = Lists.newArrayList();
         StringBuilder sb = new StringBuilder();
@@ -309,8 +313,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
           final String s = iterator.next();
           if (hasImapTerminator(iterator, s) ||
               boundary != null && Parsing.startsWithIgnoreCase(s, boundary)) {
-            // Back up, we don't want to swallow the next boundary.
-            iterator.previous();
+            alreadyHitEndMarker = Parsing.startsWithIgnoreCase(s, boundary + "--");
             if (sb.length() > 0) // save dangly bit, though technically illegal here.
               rfc822msg.add(sb.toString());
             break;
@@ -341,10 +344,10 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       // Parse the body of this message as though it were a new message itself.
       parseHeaderSection(rfc822iterator, bodyPart.getHeaders(), null);
       String bodyBoundary = boundary(mimeType);
-      return parseBodyParts(rfc822iterator, bodyPart,
+      boolean gotEndMarker = parseBodyParts(rfc822iterator, bodyPart,
           mimeType(bodyPart.getHeaders()),
           bodyBoundary != null ? bodyBoundary : boundary);
-
+      return quotedPrintable ? alreadyHitEndMarker : gotEndMarker;
     } else {
       entity.setBody(readBodyAsBytes(transferEncoding(entity), iterator, boundary));
     }

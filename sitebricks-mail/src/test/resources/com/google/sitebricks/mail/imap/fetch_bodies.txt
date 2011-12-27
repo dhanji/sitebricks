@@ -420,10 +420,10 @@ Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
 Content-Type: multipart/mixed;
- boundary=----NextPart_1293809.9123_LLas
+ boundary=----OuterBoundaryMsgUID1011
 X-Sitebricks-Test: multipart-alternatives;quoted-headers;nested-parts;rfc822
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1011
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
 
@@ -431,7 +431,7 @@ I am OOO and may have sporadic access to email.
 
 > OK, quoted part success
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1011
 Content-Type: message/rfc822; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
 
@@ -448,23 +448,23 @@ Content-Type: text/plain
 This is the plain text body of the message.  Note the blank line
 between the header information and the body of the message.
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1011
 Content-Type: text/plain; charset=us-ascii
 MIME-Version: 1.0
 
 This is a signature.
 
-------NextPart_1293809.9123_LLas--)
+------OuterBoundaryMsgUID1011--)
 4 OK Success
 * 45979 FETCH (UID 1012 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
 Content-Type: multipart/mixed;
- boundary=----NextPart_1293809.9123_LLas
+ boundary=----OuterBoundaryMsgUID1012
 X-Sitebricks-Test: multipart-alternatives;simple-quoted-headers;nested-parts;rfc822
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1012
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
 
@@ -472,7 +472,7 @@ I am OOO and may have sporadic access to email.
 
 > OK, quoted part success
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1012
 Content-Type: message/rfc822; charset="utf-8"
 
 Message-ID: <9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie15>
@@ -486,30 +486,30 @@ Content-Type: text/plain
 This is the plain text body of the message.  Note the blank line
 between the header information and the body of the message.
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1012
 Content-Type: text/plain; charset=us-ascii
 MIME-Version: 1.0
 
 This is a signature.
 
-------NextPart_1293809.9123_LLas--)
+------OuterBoundaryMsgUID1012--)
 4 OK Success
 * 45979 FETCH (UID 1013 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
 Content-Type: multipart/mixed;
- boundary=----NextPart_1293809.9123_LLas
+ boundary=----OuterBoundaryMsgUID1013
 X-Sitebricks-Test: multipart-alternatives;nested-headers;plaintext-nested-rfc822
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1013
 Content-Type: text/plain; charset="utf-8"
 
 I am OOO and may have sporadic access to email.
 
 > OK, quoted part success
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1013
 Content-Type: message/rfc822; charset="us-ascii"
 
 Message-ID: <9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie15>
@@ -532,23 +532,23 @@ goodbye, cruel, world!
 
 --e89a8ff1c384d8017504b42beb91--
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1013
 Content-Type: text/plain; charset=us-ascii
 MIME-Version: 1.0
 
 This is a signature.
 
-------NextPart_1293809.9123_LLas--)
+------OuterBoundaryMsgUID1013--)
 4 OK Success
 * 45979 FETCH (UID 1014 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
 Content-Type: multipart/mixed;
- boundary=----NextPart_1293809.9123_LLas
+ boundary=----OuterBoundaryMsgUID1014
 X-Sitebricks-Test: multipart-alternatives;quoted-headers;nested-parts-with-attachments;rfc822
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1014
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: quotedprintable
 
@@ -556,7 +556,7 @@ I am OOO and may have sporadic access to email.
 
 > OK, quoted part success
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1014
 Content-Type: message/rfc822; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 
@@ -593,11 +593,11 @@ aGVjayBEZXBvc2l0IiwwNC8wOC8xMCw5MDAsLCJkZXBvc2l0Igo=3D
 --e89a8ff1c384d8017504b42beb91--
 
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1014
 Content-Type: text/plain; charset=us-ascii
 MIME-Version: 1.0
 
 This is a signature.
 
-------NextPart_1293809.9123_LLas--)
+------OuterBoundaryMsgUID1014--)
 4 OK Success
