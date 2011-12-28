@@ -2,6 +2,7 @@ package com.google.sitebricks.mail.imap;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.apache.james.mime4j.codec.DecoderUtil;
 
 import java.util.Collection;
@@ -13,7 +14,7 @@ import java.util.regex.Pattern;
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class Parsing {
+public class Parsing {
   private static final Pattern ENDS_IN_PARENTHETICAL = Pattern.compile("[ ]*\\(.+\\)$");
 
   static List<String> readAddresses(Queue<String> tokens) {
@@ -188,5 +189,14 @@ class Parsing {
         : str.isEmpty()
             ? str
             : DecoderUtil.decodeEncodedWords(str);
+  }
+
+  public static Collection<String> getKeyVariations(Multimap<String, String> headers, String... keys) {
+    for (String key : keys) {
+      Collection<String> values = headers.get(key);
+      if (!values.isEmpty())
+        return values;
+    }
+    return ImmutableList.of();
   }
 }

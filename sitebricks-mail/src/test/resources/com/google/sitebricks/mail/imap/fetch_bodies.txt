@@ -420,10 +420,10 @@ Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
 Content-Type: multipart/mixed;
- boundary=----NextPart_1293809.9123_LLas
+ boundary=----OuterBoundaryMsgUID1011
 X-Sitebricks-Test: multipart-alternatives;quoted-headers;nested-parts;rfc822
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1011
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
 
@@ -431,7 +431,7 @@ I am OOO and may have sporadic access to email.
 
 > OK, quoted part success
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1011
 Content-Type: message/rfc822; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
 
@@ -448,23 +448,23 @@ Content-Type: text/plain
 This is the plain text body of the message.  Note the blank line
 between the header information and the body of the message.
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1011
 Content-Type: text/plain; charset=us-ascii
 MIME-Version: 1.0
 
 This is a signature.
 
-------NextPart_1293809.9123_LLas--)
+------OuterBoundaryMsgUID1011--)
 4 OK Success
 * 45979 FETCH (UID 1012 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
 Content-Type: multipart/mixed;
- boundary=----NextPart_1293809.9123_LLas
+ boundary=----OuterBoundaryMsgUID1012
 X-Sitebricks-Test: multipart-alternatives;simple-quoted-headers;nested-parts;rfc822
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1012
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: quoted-printable
 
@@ -472,7 +472,7 @@ I am OOO and may have sporadic access to email.
 
 > OK, quoted part success
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1012
 Content-Type: message/rfc822; charset="utf-8"
 
 Message-ID: <9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie15>
@@ -486,30 +486,30 @@ Content-Type: text/plain
 This is the plain text body of the message.  Note the blank line
 between the header information and the body of the message.
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1012
 Content-Type: text/plain; charset=us-ascii
 MIME-Version: 1.0
 
 This is a signature.
 
-------NextPart_1293809.9123_LLas--)
+------OuterBoundaryMsgUID1012--)
 4 OK Success
 * 45979 FETCH (UID 1013 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
 Content-Type: multipart/mixed;
- boundary=----NextPart_1293809.9123_LLas
+ boundary=----OuterBoundaryMsgUID1013
 X-Sitebricks-Test: multipart-alternatives;nested-headers;plaintext-nested-rfc822
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1013
 Content-Type: text/plain; charset="utf-8"
 
 I am OOO and may have sporadic access to email.
 
 > OK, quoted part success
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1013
 Content-Type: message/rfc822; charset="us-ascii"
 
 Message-ID: <9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie15>
@@ -532,23 +532,23 @@ goodbye, cruel, world!
 
 --e89a8ff1c384d8017504b42beb91--
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1013
 Content-Type: text/plain; charset=us-ascii
 MIME-Version: 1.0
 
 This is a signature.
 
-------NextPart_1293809.9123_LLas--)
+------OuterBoundaryMsgUID1013--)
 4 OK Success
 * 45979 FETCH (UID 1014 BODY[] {4299}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
 Content-Type: multipart/mixed;
- boundary=----NextPart_1293809.9123_LLas
+ boundary=----OuterBoundaryMsgUID1014
 X-Sitebricks-Test: multipart-alternatives;quoted-headers;nested-parts-with-attachments;rfc822
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1014
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: quotedprintable
 
@@ -556,7 +556,7 @@ I am OOO and may have sporadic access to email.
 
 > OK, quoted part success
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1014
 Content-Type: message/rfc822; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 
@@ -593,11 +593,67 @@ aGVjayBEZXBvc2l0IiwwNC8wOC8xMCw5MDAsLCJkZXBvc2l0Igo=3D
 --e89a8ff1c384d8017504b42beb91--
 
 
-------NextPart_1293809.9123_LLas
+------OuterBoundaryMsgUID1014
 Content-Type: text/plain; charset=us-ascii
 MIME-Version: 1.0
 
 This is a signature.
 
-------NextPart_1293809.9123_LLas--)
+------OuterBoundaryMsgUID1014--)
 4 OK Success
+* 45980 FETCH (UID 1015 BODY[] {4299}
+Delivered-To: dhanji@gmail.com
+Received: by 10.220.150.202 with SMTP id z10cs2110vcv;
+        Mon, 24 Oct 2011 06:03:12 -0700 (PDT)
+Received: by 10.236.79.231 with SMTP id i67mr34321485yhe.33.1319461391943;
+        Mon, 24 Oct 2011 06:03:11 -0700 (PDT)
+Date: Mon, 24 Oct 2011 09:02:55 -0400
+From: "Dude" <dude@dudester.com>
+Subject: hi
+To: dhanji@gmail.com
+Message-id: <52A17D4DB3DB0444A37961ADF52ECED0C6254D@usoldt-e3mb-010.PEROOT.COM>
+MIME-version: 1.0
+Content-type: multipart/alternative;
+ boundary="----_=_NextPart_001_01CC924D.3EEB0FA2"
+X-Sitebricks-Test: multipart-alternative;quoted-printable;mixed-case-mime-type
+
+This is a multi-part message in MIME format.
+
+
+------_=_NextPart_001_01CC924D.3EEB0FA2
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+hiya
+
+
+------_=_NextPart_001_01CC924D.3EEB0FA2
+Content-Type: text/html;
+	charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+
+<html>
+<body>
+hiya
+</body>
+</html>
+
+------_=_NextPart_001_01CC924D.3EEB0FA2--)
+45980 OK Success
+* 45981 FETCH (UID 1016 BODY[] {99999}
+Delivered-To: jochen@bekmann.com
+Received: by 10.142.240.18 with SMTP id n18cs10279wfh;
+        Mon, 26 Dec 2011 09:50:23 -0800 (PST)
+Message-ID: <4EF8B3DB.4040402@gmx.de>
+Date: Mon, 26 Dec 2011 18:50:19 +0100
+From: <thedude@theranch.com>
+MIME-Version: 1.0
+To: jochen@bekmann.com
+Subject: Umlauts
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 8bit
+
+Danke für die Weihnachtswünsche! Viele Grüße.
+)
+45980 OK Success

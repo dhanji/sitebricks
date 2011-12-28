@@ -7,7 +7,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.testng.annotations.Test;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeUtility;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Collection;
@@ -67,7 +71,7 @@ public class MessageBodyExtractorTest {
             Charsets.UTF_8);
 
     List<Message> extract = new MessageBodyExtractor().extract(lines);
-    assertEquals(14, extract.size());
+    assertEquals(extract.size(), 16);
     // ------------------------------------------------------------
     // First message.
     // Folded headers with tabs + spaces, repeat headers, one body.
@@ -271,6 +275,19 @@ public class MessageBodyExtractorTest {
     message = extract.get(13);
     assertRfc822withAttachment(message);
 
+    // ------------------------------------------------------------
+    // Fourteenth message.
+    // Test mixed case in Content-Type.
+    message = extract.get(14);
+    assertEquals(2, message.getBodyParts().size());
+
+    // ------------------------------------------------------------
+    // Fifteenth message.
+    // Test mixed case in Content-Type.
+    message = extract.get(15);
+    assertEquals(1, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().get(0).getBody(),
+        "Danke für die Weihnachtswünsche! Viele Grüße.\r\n");
   }
 
   private void assertRfc822(Message message, String contentTransferEncoding) {
@@ -374,7 +391,7 @@ public class MessageBodyExtractorTest {
   private void assertRfc822withAttachment(Message message) {
     // Assume all the stuff about the non-rfc822 matches the previous case.
     // skip right down the the nested message.
-    assertEquals(3, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().size(), 3);
 
     Message.BodyPart part2;
 
@@ -686,5 +703,16 @@ public class MessageBodyExtractorTest {
     assertEquals("UTF-8", MessageBodyExtractor.charset("text/html;charset=;;"));
     assertEquals("UTF-8", MessageBodyExtractor.charset(""));
     assertEquals("UTF-8", MessageBodyExtractor.charset(null));
+  }
+
+  @Test
+  public final void testDecoding() throws MessagingException, IOException {
+    String body = "Grüße";
+    String encoding = "8bit";
+    String charset = "ISO-8859-1";
+    final byte[] bytes = body.getBytes(charset);
+    final InputStream decoded = MimeUtility.decode(new ByteArrayInputStream(bytes), encoding);
+    String result = IOUtils.toString(decoded, charset);
+    assertEquals(result, body);
   }
 }
