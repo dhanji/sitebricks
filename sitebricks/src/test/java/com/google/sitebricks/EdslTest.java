@@ -63,7 +63,7 @@ public class EdslTest {
     }
 
     @Override
-    public Object call(Object page, Map<String, String> map) {
+    public Object call(Request request, Object page, Map<String, String> map) {
       return Reply.saying().ok();
     }
   }

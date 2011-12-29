@@ -50,7 +50,7 @@ public class SpiAction implements Action {
   }
 
   @Override
-  public Object call(Object page, Map<String, String> map) {
-    return action.call(page, map);
+  public Object call(Request request, Object page, Map<String, String> map) {
+    return action.call(request, page, map);
   }
 }
