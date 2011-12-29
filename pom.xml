@@ -23,22 +23,16 @@
 
   <modules>
     <module>sitebricks</module>
-    <module>sitebricks-annotations</module>
     <module>sitebricks-converter</module>
     <module>sitebricks-async</module>
     <module>sitebricks-client</module>
     <module>sitebricks-acceptance-tests</module>
-    <!--
-    We'll move the examples to their own repo shortly
     <module>sitebricks-web</module>
-    -->
-    <!--
     <module>sitebricks-mail</module>
     <module>sitebricks-options</module>
     <module>sitebricks-jetty-archetype</module>
     <module>stat</module>
     <module>slf4j</module>
-    -->
   </modules>
 
   <dependencyManagement>
