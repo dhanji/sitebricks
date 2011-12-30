@@ -16,6 +16,8 @@ import java.util.List;
  */
 public class Message implements HasBodyParts {
   public static final Message ERROR = new Message();
+  public static final Message EMPTIED = new Message();
+
   private MessageStatus status;
   private int imapUid;
 
