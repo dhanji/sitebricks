@@ -60,7 +60,8 @@ public class Message implements HasBodyParts {
     bodyParts.add(new BodyPart(body));
   }
 
-  @Override public void setBody(byte[] body) {
+  // http://jira.codehaus.org/browse/JACKSON-739, can't have methods of same name.
+  @Override public void setBodyBytes(byte[] body) {
     assert bodyParts.isEmpty() : "Unexpected set body call to a multipart email";
     bodyParts.add(new BodyPart(body));
   }
@@ -112,7 +113,7 @@ public class Message implements HasBodyParts {
       return binBody;
     }
 
-    public void setBody(byte[] binBody) {
+    public void setBodyBytes(byte[] binBody) {
       this.binBody = binBody;
     }
   }

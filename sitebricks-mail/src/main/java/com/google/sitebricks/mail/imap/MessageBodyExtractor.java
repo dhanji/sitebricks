@@ -366,7 +366,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
           bodyBoundary != null ? bodyBoundary : boundary, errorCount);
       return quotedPrintable ? alreadyHitEndMarker : gotEndMarker;
     } else {
-      entity.setBody(readBodyAsBytes(transferEncoding(entity), iterator, boundary,
+      entity.setBodyBytes(readBodyAsBytes(transferEncoding(entity), iterator, boundary,
           charset(mimeType), errorCount));
     }
     return false;
