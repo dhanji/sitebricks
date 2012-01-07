@@ -42,6 +42,9 @@ class MailClientHandler extends SimpleChannelHandler {
 
   static final Pattern COMMAND_FAILED_REGEX =
       Pattern.compile("^[.] (NO|BAD) (.*)", Pattern.CASE_INSENSITIVE);
+  static final Pattern MESSAGE_COULDNT_BE_FETCHED_REGEX =
+      Pattern.compile("^\\d+ no some messages could not be fetched \\(failure\\)\\s*",
+          Pattern.CASE_INSENSITIVE);
   static final Pattern SYSTEM_ERROR_REGEX = Pattern.compile("[*]\\s*bye\\s*system\\s*error\\s*",
       Pattern.CASE_INSENSITIVE);
 
@@ -69,7 +72,7 @@ class MailClientHandler extends SimpleChannelHandler {
       new ConcurrentLinkedQueue<CommandCompletion>();
   private volatile PushedData pushedData;
 
-  private final BoundedDiscardingList<String> commandDebugHistory = new BoundedDiscardingList<String>(10);
+  private final BoundedDiscardingList<String> commandTrace = new BoundedDiscardingList<String>(10);
   private final BoundedDiscardingList<String> wireTrace = new BoundedDiscardingList<String>(25);
   private final MBeanRegistration mBeanRegistration;
   private final InputBuffer inputBuffer = new InputBuffer();
@@ -97,17 +100,17 @@ class MailClientHandler extends SimpleChannelHandler {
   }
 
   @ManagedAttribute
-  public List<String> getCommandDebugHistory() {
-    return commandDebugHistory.list();
+  public List<String> getCommandTrace() {
+    return commandTrace.list();
+  }
+
+  public List<String> getWireTrace() {
+    return wireTrace.list();
   }
 
   @ManagedAttribute
   public boolean isLoggedIn() {
     return loginSuccess.getCount() == 0;
-  }
-
-  public List<String> getWireTrace() {
-    return wireTrace.list();
   }
 
   private static class PushedData {
@@ -120,7 +123,7 @@ class MailClientHandler extends SimpleChannelHandler {
   // DO NOT synchronize!
   public void enqueue(CommandCompletion completion) {
     completions.add(completion);
-    commandDebugHistory.add(new Date().toString() + " " + completion.toString());
+    commandTrace.add(new Date().toString() + " " + completion.toString());
   }
 
   @Override
@@ -178,8 +181,6 @@ class MailClientHandler extends SimpleChannelHandler {
       // Copy to local var as the value can change underneath us.
       FolderObserver observer = this.observer;
       if (idling.get()) {
-        log.info("Message received for {} during idling: {}", config.getUsername(), message);
-
         if (IDLE_ENDED_REGEX.matcher(message).matches()) {
           idling.compareAndSet(true, false);
           idleAcknowledged.set(false);
@@ -257,6 +258,14 @@ class MailClientHandler extends SimpleChannelHandler {
     // for now just ignore it.
     if ("* BAD [CLIENTBUG] Invalid tag".equalsIgnoreCase(message)) {
       log.warn("Invalid tag warning, ignored.");
+      errorStack.push(new Error(completions.peek(), message, wireTrace.list()));
+      return;
+    } else if (MESSAGE_COULDNT_BE_FETCHED_REGEX.matcher(message).matches()) {
+      log.warn("Some messages in the batch could not be fetched\n" +
+          "---cmd---\n{}\n---wire---\n{}\n---end---\n", new Object[] {
+          getCommandTrace(),
+          getWireTrace()
+      });
       errorStack.push(new Error(completions.peek(), message, wireTrace.list()));
       return;
     }

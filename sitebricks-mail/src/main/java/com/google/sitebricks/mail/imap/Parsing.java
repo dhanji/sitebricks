@@ -2,6 +2,7 @@ package com.google.sitebricks.mail.imap;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.apache.james.mime4j.codec.DecoderUtil;
 
 import java.util.Collection;
@@ -13,7 +14,7 @@ import java.util.regex.Pattern;
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class Parsing {
+public class Parsing {
   private static final Pattern ENDS_IN_PARENTHETICAL = Pattern.compile("[ ]*\\(.+\\)$");
 
   static List<String> readAddresses(Queue<String> tokens) {
@@ -110,9 +111,10 @@ class Parsing {
     StringBuilder currentToken = new StringBuilder();
     for (int i = 0, charArrayLength = charArray.length; i < charArrayLength; i++) {
       char c = charArray[i];
+      boolean escaped = (i > 0 && charArray[i - 1] == '\\' && (i < 2 || charArray[i - 2] != '\\'));
 
       // String checks, but only if we're not an escaped quote character.
-      if (c == '"' && (i > 0 && charArray[i - 1] != '\\')) {
+      if (c == '"' && !escaped) {
         if (inString) {
           inString = false;
 
@@ -146,7 +148,7 @@ class Parsing {
 
           // Otherwise whitespace is a delimiter for non-strings. EXCEPT when
           // preceeded by '\', which is an escape character.
-        } else if (c == ' ' && (i > 0 && charArray[i - 1] != '\\')) {
+        } else if (c == ' ' && !escaped) {
           bakeToken(tokens, currentToken);
           currentToken = new StringBuilder();
           continue;
@@ -187,5 +189,14 @@ class Parsing {
         : str.isEmpty()
             ? str
             : DecoderUtil.decodeEncodedWords(str);
+  }
+
+  public static Collection<String> getKeyVariations(Multimap<String, String> headers, String... keys) {
+    for (String key : keys) {
+      Collection<String> values = headers.get(key);
+      if (!values.isEmpty())
+        return values;
+    }
+    return ImmutableList.of();
   }
 }

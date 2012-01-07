@@ -82,4 +82,11 @@ public class MailClientHandlerTest {
     assertTrue(Command.isEndOfSequence(2L, "2 OK [READ-ONLY] [Gmail]/All Mail selected. (Success)"));
     assertFalse(Command.isEndOfSequence("> OK [READ-ONLY] [Gmail]/All Mail selected. (Success)"));
   }
+
+  @Test
+  public final void testMessageCouldNotBeFetchedRegex() throws ExtractionException {
+    assertTrue(MailClientHandler.MESSAGE_COULDNT_BE_FETCHED_REGEX
+        .matcher("3 NO Some messages could not be FETCHed (Failure)")
+        .matches());
+  }
 }

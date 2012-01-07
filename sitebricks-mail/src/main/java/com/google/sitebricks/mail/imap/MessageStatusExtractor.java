@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -52,7 +51,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       }
 
       // Appears that this message got split between lines. So unfold.
-      if (!message.endsWith(")")) {
+      while (!message.endsWith(")")) {
         String next = messages.get(i + 1);
         message = message + '\n' + next;
 

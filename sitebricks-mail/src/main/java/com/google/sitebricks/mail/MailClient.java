@@ -162,9 +162,15 @@ public interface MailClient {
   WireError lastError();
 
   /**
-   * Returns the last few items on the wire, useful for debugging.
+   * Returns the last few items received on the wire, useful for debugging.
    */
   List<String> getWireTrace();
+
+  /**
+   * Returns the last few commands sent on the wire, used for debugging.
+   * @return
+   */
+  public List<String> getCommandTrace();
 
   /**
    * Returns true if this client has successfully entered and is currently in IMAP IDLE.

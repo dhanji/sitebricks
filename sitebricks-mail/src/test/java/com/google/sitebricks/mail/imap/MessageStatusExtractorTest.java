@@ -60,7 +60,7 @@ public class MessageStatusExtractorTest {
         new MessageStatusExtractor().extract(data);
 
     MessageStatus status = statuses.get(0);
-    assertEquals(statuses.size(), 17);
+    assertEquals(statuses.size(), 18);
     assertEquals(EnumSet.noneOf(Flag.class), status.getFlags());
     assertEquals("<BANLkTi=zC_UQExUuaNqiP0dJXoswDej1Ww@mail.gmail.com>", status.getMessageUid());
     assertEquals("Get Gmail on your mobile phone", status.getSubject());
@@ -79,7 +79,7 @@ public class MessageStatusExtractorTest {
     List<String> unfoldedAssertions = Lists.newArrayListWithCapacity(assertions.size());
     for (int i = 0; i < assertions.size(); i++) {
       String assertion = assertions.get(i);
-      if (!assertion.endsWith("}")) {
+      while (!assertion.endsWith("}")) {
         String next = assertions.get(i + 1);
         if (!next.startsWith("MessageStatus{")) {
           assertion += '\n' + next;
