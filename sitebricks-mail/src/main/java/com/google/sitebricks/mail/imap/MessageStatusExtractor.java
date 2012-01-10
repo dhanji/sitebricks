@@ -152,8 +152,15 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     status.setLabels(Sets.<String>newHashSet());
 
     // Check if there are labels to add.
-    while (!")".equals(tokens.peek())) {
+    while (!")".equals(tokens.peek())) { // \Inbox
       String token = tokens.poll();
+
+      // HACK: horrible hack!!!
+      // The original Parser incorrectly left escaped backslashes intact. We now
+      // emulate this by putting them back in...
+      // this code replaces all single backslashes (escaped here as "\\\\") to double backslashes.
+      token = token.replaceAll("\\\\", "\\\\\\\\");
+
       status.getLabels().add(token);
     }
     Parsing.eat(tokens, ")");
