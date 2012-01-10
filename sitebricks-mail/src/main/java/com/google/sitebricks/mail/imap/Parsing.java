@@ -109,9 +109,18 @@ public class Parsing {
     char[] charArray = message.toCharArray();
     boolean inString = false;
     StringBuilder currentToken = new StringBuilder();
+    boolean escaped = false;
     for (int i = 0, charArrayLength = charArray.length; i < charArrayLength; i++) {
       char c = charArray[i];
-      boolean escaped = (i > 0 && charArray[i - 1] == '\\' && (i < 2 || charArray[i - 2] != '\\'));
+      if (c == '\\') {
+        if (escaped) { // i.e. two backlashes in a row..
+          currentToken.append('\\');
+          escaped = false;
+        } else {
+          escaped = true;
+        }
+        continue;
+      }
 
       // String checks, but only if we're not an escaped quote character.
       if (c == '"' && !escaped) {
@@ -130,11 +139,9 @@ public class Parsing {
           currentToken.append('"');
         }
         continue;
-
-        // Handle parentheses as their own tokens.
       }
 
-      if (!inString)
+      if (!inString) {
         if (c == '(') {
           bakeToken(tokens, currentToken);
           tokens.add("(");
@@ -153,13 +160,18 @@ public class Parsing {
           currentToken = new StringBuilder();
           continue;
         }
+      }
+
+      // Only swallow backslashes if this character was escaped inside a string.
+      if (escaped && !inString) {
+        currentToken.append('\\');
+      }
       currentToken.append(c);
+      escaped = false;
     }
 
     // Close up dangling tokens.
-    if (currentToken.length() > 0) {
-      bakeToken(tokens, currentToken);
-    }
+    bakeToken(tokens, currentToken);
 
     return tokens;
   }
