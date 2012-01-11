@@ -51,7 +51,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       }
 
       // Appears that this message got split between lines. So unfold.
-      while (!message.endsWith(")")) {
+      while (!message.endsWith(")") && (i + 1 < messagesSize)) {
         String next = messages.get(i + 1);
         message = message + '\n' + next;
 
