@@ -180,6 +180,8 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       } catch (ParseException e) {
         log.error("Malformed received date format {}. Unable to parse.", receivedDate, e);
       }
+    } else if (receivedDate != null) {
+      Parsing.eat(tokens, "NIL");
     }
 
     status.setSubject(Parsing.decode(Parsing.match(tokens, String.class)));

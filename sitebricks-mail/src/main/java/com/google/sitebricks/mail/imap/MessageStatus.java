@@ -173,7 +173,7 @@ public class MessageStatus {
     return "MessageStatus{" +
         "imapUid=" + imapUid +
         ", messageUid='" + messageUid + '\'' +
-        ", receivedDate=" + ISO_C_DATE_SYDNEY.format(receivedDate) +
+        ", receivedDate=" + (receivedDate == null ? "null" : ISO_C_DATE_SYDNEY.format(receivedDate)) +
         ", subject='" + subject + '\'' +
         ", inReplyTo='" + inReplyTo + '\'' +
         ", from=" + from +
