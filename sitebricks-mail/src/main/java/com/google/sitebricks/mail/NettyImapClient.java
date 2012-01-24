@@ -84,7 +84,7 @@ class NettyImapClient implements MailClient, Idler {
     // Reset state (helps if this is a reconnect).
     this.currentFolder = null;
     this.sequence.set(0L);
-    mailClientHandler.idling.set(false);
+    mailClientHandler.idleRequested.set(false);
   }
 
   @Override
@@ -183,7 +183,7 @@ class NettyImapClient implements MailClient, Idler {
     try {
       // If there is an error with the handler, dont bother logging out.
       if (!mailClientHandler.isHalted()) {
-        if (mailClientHandler.idling.get()) {
+        if (mailClientHandler.idleRequested.get()) {
           log.warn("Disconnect called while IDLE, leaving idle and logging out.");
           done();
         }
@@ -234,7 +234,7 @@ class NettyImapClient implements MailClient, Idler {
   // @Stateless
   public ListenableFuture<List<String>> listFolders() {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
 
     SettableFuture<List<String>> valueFuture = SettableFuture.create();
@@ -265,7 +265,7 @@ class NettyImapClient implements MailClient, Idler {
   // @Stateless
   public ListenableFuture<Folder> open(String folder, boolean readWrite) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
 
     final SettableFuture<Folder> valueFuture = SettableFuture.create();
@@ -297,7 +297,7 @@ class NettyImapClient implements MailClient, Idler {
   @Override
   public ListenableFuture<List<MessageStatus>> list(Folder folder, int start, int end) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
 
     checkCurrentFolder(folder);
@@ -340,7 +340,7 @@ class NettyImapClient implements MailClient, Idler {
                                                       boolean add) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(),
         "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
     checkCurrentFolder(folder);
     SettableFuture<Set<Flag>> valueFuture = SettableFuture.create();
@@ -354,7 +354,7 @@ class NettyImapClient implements MailClient, Idler {
                                                               Set<String> labels, boolean add) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(),
         "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
     checkCurrentFolder(folder);
     SettableFuture<Set<String>> valueFuture = SettableFuture.create();
@@ -378,7 +378,7 @@ class NettyImapClient implements MailClient, Idler {
                                                       Set<String> labels) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(),
         "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
     checkCurrentFolder(folder);
     SettableFuture<Set<String>> valueFuture = SettableFuture.create();
@@ -401,7 +401,7 @@ class NettyImapClient implements MailClient, Idler {
   public ListenableFuture<List<Message>> fetch(Folder folder, int start, int end) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(),
         "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
 
     checkCurrentFolder(folder);
@@ -419,7 +419,7 @@ class NettyImapClient implements MailClient, Idler {
   @Override
   public ListenableFuture<Message> fetchUid(Folder folder, int uid) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
 
     checkCurrentFolder(folder);
@@ -436,7 +436,7 @@ class NettyImapClient implements MailClient, Idler {
   public synchronized void watch(Folder folder, FolderObserver observer) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
     checkCurrentFolder(folder);
-    Preconditions.checkState(mailClientHandler.idling.compareAndSet(false, true), "Already idling...");
+    Preconditions.checkState(mailClientHandler.idleRequested.compareAndSet(false, true), "Already idling...");
 
     // This MUST happen in the following order, otherwise send() may trigger a new mail event
     // before we've registered the folder observer.
@@ -446,7 +446,7 @@ class NettyImapClient implements MailClient, Idler {
 
   @Override
   public synchronized void unwatch() {
-    if (!mailClientHandler.idling.get())
+    if (!mailClientHandler.idleRequested.get())
       return;
 
     done();
