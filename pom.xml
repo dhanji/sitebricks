@@ -67,6 +67,11 @@
         <artifactId>sitebricks-annotations</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.google.sitebricks</groupId>
+        <artifactId>sitebricks-decorator</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.mvel</groupId>
