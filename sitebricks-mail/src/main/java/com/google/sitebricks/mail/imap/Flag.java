@@ -1,13 +1,13 @@
 package com.google.sitebricks.mail.imap;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 
@@ -22,11 +22,15 @@ public enum Flag {
   FLAGGED,
   ANSWERED,
   FORWARDED,
+  NOT_JUNK,
+  JUNK
   ;
 
   private static final Logger log = LoggerFactory.getLogger(Flag.class);
 
-  private static BiMap<String, Flag> flagMap = HashBiMap.create(10);
+  private static final Map<String, Flag> flagMap = new HashMap<String, Flag>();
+  private static final Map<Flag, String> lookup = new HashMap<Flag, String>();
+
   static {
     flagMap.put("\\seen", SEEN);
     flagMap.put("\\recent", RECENT);
@@ -35,6 +39,15 @@ public enum Flag {
     flagMap.put("\\flagged", FLAGGED);
     flagMap.put("\\answered", ANSWERED);
     flagMap.put("$forwarded", FORWARDED);
+    flagMap.put("$notjunk", NOT_JUNK);
+    flagMap.put("notjunk", NOT_JUNK);
+    flagMap.put("junk", JUNK);
+    flagMap.put("$junk", JUNK);
+
+    // Build reverse lookup map.
+    for (Entry<String, Flag> entry : flagMap.entrySet()) {
+      lookup.put(entry.getValue(), entry.getKey());
+    }
   }
 
   public static Flag parse(String flag) {
@@ -42,7 +55,7 @@ public enum Flag {
   }
 
   public static String toImap(Flag f) {
-    return flagMap.inverse().get(f);
+    return lookup.get(f);
   }
 
   public static String toImap(Set<Flag> flags) {

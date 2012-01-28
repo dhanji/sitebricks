@@ -162,6 +162,17 @@ public interface MailClient {
   WireError lastError();
 
   /**
+   * Returns the last few items received on the wire, useful for debugging.
+   */
+  List<String> getWireTrace();
+
+  /**
+   * Returns the last few commands sent on the wire, used for debugging.
+   * @return
+   */
+  public List<String> getCommandTrace();
+
+  /**
    * Returns true if this client has successfully entered and is currently in IMAP IDLE.
    */
   boolean isIdling();
@@ -176,6 +187,14 @@ public interface MailClient {
    * @param tokenSecret A string contianing the token secret pair of the accessToken.
    */
   void updateOAuthAccessToken(String accessToken, String tokenSecret);
+
+  /**
+   * Fetches a single message by its uid.
+   */
+  ListenableFuture<Message> fetchUid(Folder folder, int uid);
+
+  ListenableFuture<Set<String>> setGmailLabels(Folder folder, int imapUid,
+                                               Set<String> labels);
 
   static interface DisconnectListener {
     void disconnected();
@@ -195,5 +214,6 @@ public interface MailClient {
     String message();
     List<String> trace();
     String expected();
+    String toString();
   }
 }
