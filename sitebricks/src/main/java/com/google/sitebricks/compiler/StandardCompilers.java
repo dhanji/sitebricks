@@ -65,11 +65,11 @@ class StandardCompilers implements Compilers {
     return new MvelTemplateCompiler(page).compile(template);
   }
 
-  public Renderable compileFreemarker( Class<?> page, String template ) {
+  public Renderable compileFreemarker( Class<?> page, Template template ) {
     return new FreemarkerTemplateCompiler(page).compile(template);
   }
 
-  public Renderable compileFreemarkerDecorator( Class<?> page, Template template ) {
+  public Renderable compileMagicTemplate( Class<?> page, Template template ) {
     return new FreemarkerDecoratorTemplateCompiler(page).compile(template);
   }
   
@@ -154,10 +154,10 @@ class StandardCompilers implements Compilers {
         widget = compileMvel(templateClass, template.getText());
         break;
       case FREEMARKER:
-        widget = compileFreemarker(templateClass, template.getText());
+        widget = compileFreemarker(templateClass, template);
         break;
-      case FREEMARKER_DECORATOR:
-        widget = compileFreemarkerDecorator(templateClass, template);
+      case MAGIC:
+        widget = compileMagicTemplate(templateClass, template);
         break;
     }
     return widget;

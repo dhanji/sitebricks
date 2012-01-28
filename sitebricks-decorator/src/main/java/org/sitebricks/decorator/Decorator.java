@@ -9,4 +9,5 @@ import java.util.Map;
  */
 public interface Decorator {
   void decorate(File decoratorSource, Map<String, Object> context, Writer writer);
+  void decorate(File decoratorSource, String xhtml, Map<String, Object> context, Writer writer);
 }

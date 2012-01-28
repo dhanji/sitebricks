@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,8 @@ import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 import org.jsoup.Jsoup;
 import org.sitebricks.decorator.Decorator;
+import org.sitebricks.extractor.ExtractResult;
+import org.sitebricks.extractor.jsoup.JSoupXhtmlExtractor;
 
 import freemarker.core.Environment;
 import freemarker.template.Configuration;
@@ -27,12 +30,29 @@ import freemarker.template.TemplateExceptionHandler;
 public class FreemarkerDecorator implements Decorator {
 
   private Configuration configuration;
+  private JSoupXhtmlExtractor extractor;
 
   public FreemarkerDecorator() {
     configuration = new Configuration();
     configuration.setTemplateExceptionHandler(new IdiomTemplateExceptionHandler());
+    extractor = new JSoupXhtmlExtractor();
+    
   }
 
+  public void decorate(File decorator, String xhtml, Map<String, Object> context, Writer writer) {
+    //
+    // Extract content from page
+    //
+    ExtractResult er = extractor.extract(xhtml);
+    context.put("title", er.getTitle());
+    context.put("body", er.getBody());
+    context.put("head", er.getHead());
+    context.put("links", er.getLinks());
+    
+    decorate(decorator, context, writer);
+  }
+  
+  
   public void decorate(File decorator, Map<String, Object> context, Writer writer) {
 
     //
@@ -49,12 +69,14 @@ public class FreemarkerDecorator implements Decorator {
         for (String fileName : files) {
           File brickFile = new File(brickSource, fileName);
           String brickId = brickFile.getName().substring(0, brickFile.getName().indexOf("-brick"));
-          //
-          // We want to extract the contents between <body>...</body> tags and make that
-          // the source of the brick.
-          //
-          String body = Jsoup.parse(brickFile, "UTF-8").body().html();
-          context.put(brickId, body);
+          
+          ExtractResult result = extractor.extract(brickFile);
+          
+          if(result.getBody() != null && result.getBody().trim().length() != 0) {
+            context.put(brickId, result.getBody());            
+          } else if (result.getHead() != null && result.getHead().trim().length() != 0) {
+            context.put(brickId, result.getHead());
+          }          
         }
       } catch (IOException e) {
         throw new RuntimeException(e);

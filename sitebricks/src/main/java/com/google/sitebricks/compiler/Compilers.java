@@ -23,8 +23,8 @@ public interface Compilers {
    */
   Renderable compileMvel(Class<?> page, String template);
 
-  Renderable compileFreemarker( Class<?> page, String text );
-  Renderable compileFreemarkerDecorator( Class<?> page, Template text );
+  Renderable compileFreemarker( Class<?> page, Template text );
+  Renderable compileMagicTemplate( Class<?> page, Template template );
 
   /**
    * Performs static analysis of the given page class to

@@ -3,6 +3,7 @@ package org.sitebricks.decorator;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ import org.sitebricks.extractor.ExtractResult;
 import org.sitebricks.extractor.XhtmlExtractor;
 import org.sonatype.guice.bean.containers.InjectedTestCase;
 
-public class RenderTest extends InjectedTestCase {
+public class ExtractorTest extends InjectedTestCase {
 
   @Inject
   @Named("${basedir}/src/test/xhtml")
@@ -40,7 +41,8 @@ public class RenderTest extends InjectedTestCase {
     context.put("body", er.getBody());
     context.put("head", er.getHead());
     outputDirectory.mkdirs();
-    Writer writer = new FileWriter(new File(outputDirectory,"full.html"));
+    Writer writer = new StringWriter();
     skinner.decorate(skin, context, writer);
+    System.out.println(writer.toString());
   }
 }
