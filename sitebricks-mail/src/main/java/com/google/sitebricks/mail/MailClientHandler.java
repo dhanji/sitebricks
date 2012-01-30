@@ -259,11 +259,7 @@ class MailClientHandler extends SimpleChannelHandler {
   private synchronized void complete(String message) {
     // This is a weird problem with writing stuff while idling. Need to investigate it more, but
     // for now just ignore it.
-    if ("* BAD [CLIENTBUG] Invalid tag".equalsIgnoreCase(message)) {
-      log.warn("Invalid tag warning, ignored.");
-      errorStack.push(new Error(completions.peek(), message, wireTrace.list()));
-      throw new RuntimeException("Some messages in the batch could not be fetched for user " + config.getUsername());
-    } else if (MESSAGE_COULDNT_BE_FETCHED_REGEX.matcher(message).matches()) {
+   if (MESSAGE_COULDNT_BE_FETCHED_REGEX.matcher(message).matches()) {
       log.warn("Some messages in the batch could not be fetched for {}\n" +
           "---cmd---\n{}\n---wire---\n{}\n---end---\n", new Object[] {
           config.getUsername(),
