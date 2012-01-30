@@ -21,6 +21,12 @@
 		<artifactId>velocity</artifactId>
 		<version>1.7</version>
 	</dependency>
+	<dependency>
+		<groupId>oro</groupId>
+		<artifactId>oro</artifactId>
+		<version>2.0.8</version>
+		<scope>runtime</scope>
+	</dependency>
     <dependency>
       <groupId>com.google.sitebricks</groupId>
       <artifactId>sitebricks-converter</artifactId>
@@ -132,11 +138,11 @@
   <distributionManagement>
     <snapshotRepository>
       <id>ext-snapshot-local</id>
-      <url>http://cerberus.local:8080/artifactory/ext-snapshot-local</url>
+      <url>http://nightflight.local:8383/artifactory/ext-snapshot-local</url>
     </snapshotRepository>
     <repository>
       <id>ext-release-local</id>
-      <url>http://cerberus.local:8080/artifactory/ext-release-local</url>
+      <url>http://nightflight.local:8383/artifactory/ext-release-local</url>
     </repository>
   </distributionManagement>
 

@@ -13,6 +13,7 @@ import com.google.sitebricks.Show;
 import com.google.sitebricks.Template;
 import com.google.sitebricks.TemplateLoader;
 import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
+import com.google.sitebricks.compiler.template.VelocityEngineProvider;
 import com.google.sitebricks.compiler.template.VelocityTemplateCompiler;
 import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.headless.Reply;
@@ -33,15 +34,18 @@ class StandardCompilers implements Compilers {
     private final SystemMetrics metrics;
     private final Map<String, Class<? extends Annotation>> httpMethods;
     private final TemplateLoader loader;
+    private final VelocityEngineProvider velocityEngineProvider;
 
     @Inject
     public StandardCompilers(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics,
-            @Bricks Map<String, Class<? extends Annotation>> httpMethods, TemplateLoader loader) {
+            @Bricks Map<String, Class<? extends Annotation>> httpMethods, TemplateLoader loader,
+            VelocityEngineProvider velocityEngineProvider) {
         this.registry = registry;
         this.pageBook = pageBook;
         this.metrics = metrics;
         this.httpMethods = httpMethods;
         this.loader = loader;
+        this.velocityEngineProvider = velocityEngineProvider;
     }
 
     @Override
@@ -73,7 +77,7 @@ class StandardCompilers implements Compilers {
 
     @Override
     public Renderable compileVelocity(Class<?> page, String template) {
-        return new VelocityTemplateCompiler().compile(template);
+        return new VelocityTemplateCompiler(velocityEngineProvider).compile(template);
     }
 
     // TODO(dhanji): Feedback errors as return rather than throwing.
