@@ -116,9 +116,10 @@ class MailClientHandler extends SimpleChannelHandler {
 
   private static class PushedData {
     volatile boolean idleExitSent = false;
-    final Set<Integer> pushAdds = Collections.synchronizedSet(Sets.<Integer>newTreeSet());
-    final Set<Integer> pushRemoves = Collections.synchronizedSet(Sets.<Integer>newTreeSet());
-
+    // guarded by idleMutex.
+    final SortedSet<Integer> pushAdds = Sets.<Integer>newTreeSet();
+    // guarded by idleMutex.
+    final SortedSet<Integer> pushRemoves = Sets.<Integer>newTreeSet();
   }
 
   // DO NOT synchronize!
