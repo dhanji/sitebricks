@@ -262,15 +262,16 @@ class MailClientHandler extends SimpleChannelHandler {
     if ("* BAD [CLIENTBUG] Invalid tag".equalsIgnoreCase(message)) {
       log.warn("Invalid tag warning, ignored.");
       errorStack.push(new Error(completions.peek(), message, wireTrace.list()));
-      return;
+      throw new RuntimeException("Some messages in the batch could not be fetched for user " + config.getUsername());
     } else if (MESSAGE_COULDNT_BE_FETCHED_REGEX.matcher(message).matches()) {
-      log.warn("Some messages in the batch could not be fetched\n" +
+      log.warn("Some messages in the batch could not be fetched for {}\n" +
           "---cmd---\n{}\n---wire---\n{}\n---end---\n", new Object[] {
+          config.getUsername(),
           getCommandTrace(),
           getWireTrace()
       });
       errorStack.push(new Error(completions.peek(), message, wireTrace.list()));
-      return;
+      throw new RuntimeException("Some messages in the batch could not be fetched for user " + config.getUsername());
     }
 
     CommandCompletion completion = completions.peek();
