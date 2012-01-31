@@ -217,9 +217,11 @@ class MailClientHandler extends SimpleChannelHandler {
           }
 
           // Stop idling, when we get the idle ended message (next cycle) we can publish what's been gathered.
-          if (matched && !pushedData.idleExitSent) {
-            idler.done();
-            pushedData.idleExitSent = true;
+          if (matched) {
+            if(!pushedData.idleExitSent) {
+              idler.done();
+              pushedData.idleExitSent = true;
+            }
             return;
           }
         }
