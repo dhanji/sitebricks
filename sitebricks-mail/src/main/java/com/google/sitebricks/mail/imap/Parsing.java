@@ -3,6 +3,7 @@ package com.google.sitebricks.mail.imap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import org.apache.james.mime4j.codec.DecodeMonitor;
 import org.apache.james.mime4j.codec.DecoderUtil;
 
 import java.util.Collection;
@@ -196,11 +197,12 @@ public class Parsing {
   }
 
   public static String decode(String str) {
+    // decode as per http://www.ietf.org/rfc/rfc2047.txt
     return str == null
         ? null
         : str.isEmpty()
             ? str
-            : DecoderUtil.decodeEncodedWords(str);
+            : DecoderUtil.decodeEncodedWords(str, DecodeMonitor.SILENT);
   }
 
   public static Collection<String> getKeyVariations(Multimap<String, String> headers, String... keys) {
