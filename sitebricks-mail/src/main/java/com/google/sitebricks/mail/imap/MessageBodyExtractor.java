@@ -3,6 +3,7 @@ package com.google.sitebricks.mail.imap;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
 import org.apache.commons.io.IOUtils;
+import org.apache.james.mime4j.codec.DecodeMonitor;
 import org.apache.james.mime4j.codec.DecoderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -573,7 +574,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       value = decode(value, headerEncoding, "utf-8");
 
     // Header values can be specially encoded.
-    value = DecoderUtil.decodeEncodedWords(value);
+    value = DecoderUtil.decodeEncodedWords(value, DecodeMonitor.SILENT);
     headers.put(split[0], value);
   }
 }
