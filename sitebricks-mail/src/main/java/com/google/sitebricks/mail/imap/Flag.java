@@ -48,6 +48,10 @@ public enum Flag {
     for (Entry<String, Flag> entry : flagMap.entrySet()) {
       lookup.put(entry.getValue(), entry.getKey());
     }
+
+    // Overrides
+    lookup.put(JUNK, "$Junk");
+    lookup.put(NOT_JUNK, "$NotJunk");
   }
 
   public static Flag parse(String flag) {
