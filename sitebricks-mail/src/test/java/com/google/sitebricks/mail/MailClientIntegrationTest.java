@@ -1,5 +1,6 @@
 package com.google.sitebricks.mail;
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.inject.Guice;
 import com.google.sitebricks.mail.Mail.Auth;
@@ -27,10 +28,15 @@ public class MailClientIntegrationTest {
 
   public static void main(String... args) throws InterruptedException, ExecutionException {
     Mail mail = Guice.createInjector().getInstance(Mail.class);
-    final MailClient client = mail.clientOf("imap.gmail.com", 993)
-        .prepare(Auth.SSL, System.getProperty("sitebricks-mail.username"),
-            System.getProperty("sitebricks-mail.password"));
 
+    final String username = System.getProperty("sitebricks-mail.username");
+    final String password = System.getProperty("sitebricks-mail.password");
+    Preconditions.checkArgument(username != null && password != null);
+
+    MailClientHandler.addUserForVerboseLogging(username, true);
+    NettyImapClient.addUserForVerboseOutput(username, true);
+
+    final MailClient client = mail.clientOf("imap.gmail.com", 993).prepare(Auth.SSL, username, password);
     try {
       client.connect();
     } catch (Exception e) {
@@ -47,12 +53,12 @@ public class MailClientIntegrationTest {
     System.out.println("CAPS: " + capabilities);
 
     System.out.println("FOLDERS: " + client.listFolders().get());
-    try {
-      Folder f = client.open("Thumping through the brush.", false).get();
-      System.out.println("Expected failure attempting to open invalid folder.");
-    } catch (ExecutionException ee) {
-      // expected.
-    }
+//    try {
+//      Folder f = client.open("Thumping through the brush.", false).get();
+//      System.out.println("Expected failure attempting to open invalid folder.");
+//    } catch (ExecutionException ee) {
+//      // expected.
+//    }
 
     final ListenableFuture<FolderStatus> fStatus =
         client.statusOf("[Gmail]/All Mail");
@@ -67,7 +73,7 @@ public class MailClientIntegrationTest {
       @Override
       public void run() {
         final ListenableFuture<List<MessageStatus>> messageStatuses =
-            client.list(allMail, folderStatus.getMessages() - 1, -1);
+            client.list(allMail, folderStatus.getMessages() - 10, -1);
 
         try {
           for (MessageStatus messageStatus : messageStatuses.get()) {
@@ -105,8 +111,6 @@ public class MailClientIntegrationTest {
                 System.out.println("Fetched: " + message);
 
                 client.disconnect();
-                System.exit(0);
-
               } catch (InterruptedException e) {
                 e.printStackTrace();
               } catch (ExecutionException e) {

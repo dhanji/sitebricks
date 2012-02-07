@@ -33,8 +33,7 @@ import java.util.regex.Pattern;
 class MailClientHandler extends SimpleChannelHandler {
   private static final Logger log = LoggerFactory.getLogger(MailClientHandler.class);
 
-  private static final Set<String> logAllMessagesForUsers =
-      Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+  private static final Map<String, Boolean> logAllMessagesForUsers = new ConcurrentHashMap<String, Boolean>();
 
   public static final String CAPABILITY_PREFIX = "* CAPABILITY";
   static final Pattern AUTH_SUCCESS_REGEX =
@@ -86,18 +85,23 @@ class MailClientHandler extends SimpleChannelHandler {
         config.getUsername());
   }
 
+  // For debugging, use with caution!
+  public static void addUserForVerboseLogging(String username, boolean toStdOut) {
+    logAllMessagesForUsers.put(username, toStdOut);
+  }
+
   @ManagedOperation
   public void logAllMessages(boolean b) {
     log.info("logAllMessagesForUsers[" + config.getUsername() + "] = " + b);
     if (b)
-      logAllMessagesForUsers.add(config.getUsername());
+      logAllMessagesForUsers.put(config.getUsername(), false);
     else
       logAllMessagesForUsers.remove(config.getUsername());
   }
 
   @ManagedAttribute
   public Set<String> getLogAllMessagesFor() {
-    return logAllMessagesForUsers;
+    return logAllMessagesForUsers.keySet();
   }
 
   @ManagedAttribute
@@ -137,8 +141,12 @@ class MailClientHandler extends SimpleChannelHandler {
   }
 
   private void processMessage(String message) throws Exception {
-    if (logAllMessagesForUsers.contains(config.getUsername())) {
-      log.info("IMAP [{}]: {}", config.getUsername(), message);
+    Boolean toStdOut = logAllMessagesForUsers.get(config.getUsername());
+    if (toStdOut != null) {
+      if (toStdOut)
+        System.out.println("IMAPrcv[" + config.getUsername() + "]: " + message);
+      else
+        log.info("IMAPrcv[{}]: {}", config.getUsername(), message);
     }
 
     wireTrace.add(message);

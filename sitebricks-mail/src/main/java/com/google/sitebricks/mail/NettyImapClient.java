@@ -16,9 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +28,9 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 class NettyImapClient implements MailClient, Idler {
   private static final Logger log = LoggerFactory.getLogger(NettyImapClient.class);
+
+  // For debugging, use with caution!
+  private static final Map<String, Boolean> logAllMessagesForUsers = new ConcurrentHashMap<String, Boolean>();
 
   private final ExecutorService workerPool;
   private final ExecutorService bossPool;
@@ -55,6 +57,11 @@ class NettyImapClient implements MailClient, Idler {
 
   static {
     System.setProperty("mail.mime.decodetext.strict", "false");
+  }
+
+  // For debugging, use with caution!
+  public static void addUserForVerboseOutput(String username, boolean toStdOut) {
+    logAllMessagesForUsers.put(username, toStdOut);
   }
 
   public boolean isConnected() {
@@ -220,8 +227,18 @@ class NettyImapClient implements MailClient, Idler {
     // Log the command but clip the \r\n
     log.debug("Sending {} to server...", commandString.substring(0, commandString.length() - 2));
 
+    Boolean toStdOut = logAllMessagesForUsers.get(config.getUsername());
+    if (toStdOut != null) {
+      if (toStdOut)
+        System.out.println("IMAPsnd[" + config.getUsername() + "]: " + commandString.substring(0, commandString.length() - 2));
+      else
+        log.info("IMAPsnd[{}]: {}", config.getUsername(), commandString.substring(0, commandString.length() - 2));
+    }
+
     // Enqueue command.
     mailClientHandler.enqueue(new CommandCompletion(command, seq, valueFuture, commandString));
+
+
     return channel.write(commandString);
   }
 
