@@ -402,11 +402,12 @@ class MailClientHandler extends SimpleChannelHandler {
   static class InputBuffer {
     volatile private StringBuilder buffer = new StringBuilder();
 
-
     @VisibleForTesting
     List<String> processMessage(String message) {
+      // Nuke all CR characters, and we'll only count LF.
+      message = message.replaceAll("\r", "");
       // Split leaves a trailing empty line if there's a terminating newline.
-      ArrayList<String> split = Lists.newArrayList(message.split("\r?\n", -1));
+      ArrayList<String> split = Lists.newArrayList(message.split("\n", -1));
       Preconditions.checkArgument(split.size() > 0);
 
       synchronized (this) {

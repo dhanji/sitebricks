@@ -1,4 +1,4 @@
-* 45970 FETCH (UID 1001 BODY[] {4299}
+* 45970 FETCH (UID 1001 BODY[] {1673}
 Received: by 10.231.31.195 with SMTP id z3fc89823ibc;
         Thu, 8 Sep 2011 17:07:49 -0700 (PDT)
 Received: from ww7 (ww7.sitebricks.org [10.241.242.135])
@@ -39,7 +39,7 @@ and may contain CONFIDENTIAL, PRIVILEGED COMMUNICATIONS,
 and/or PRODUCT INFORMATION. If you are not the intended
 recipient, please contact the sender by reply email and delete the email.
 )
-* 45971 FETCH (UID 1002 BODY[] {4299}
+* 45971 FETCH (UID 1002 BODY[] {440}
 Delivered-To: dhanji@gmail.com
 Message-ID: <CAEEYBPNq6o3Maos__x3m1PxeLn-Ghjn3k3ztE_ftburkvUg@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -58,7 +58,7 @@ dude@sitebricks.org
 p: 555.555.5555
 
 --------------------)
-* 45972 FETCH (UID 1003 BODY[] {4299}
+* 45972 FETCH (UID 1003 BODY[] {1138}
 Message-ID: <askdopaksdNq6o3M+veqCfc+x3m1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
 Content-Type: multipart/alternative;
@@ -96,7 +96,7 @@ I am OOO and may have sporadic access to email.
 This is called the epilogue. This is ignored.
 
 )
-* 45973 FETCH (UID 1004 BODY[] {4299}
+* 45973 FETCH (UID 1004 BODY[] {998}
 Delivered-To: dhanji@gmail.com
 Date: Thu, 8 Sep 2011 17:07:44 -0700
 Message-ID: CAEEYBPaoksdpoak+veqCfc+x3m1PxeLn-raisdj@mail.gmail.com
@@ -126,7 +126,7 @@ MALFORMED_HEADER_MISSING_COLON
 I am OOO and may have sporadic access to email.
 </body>
 --_000_:9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--)
-* 45974 FETCH (UID 1005 BODY[] {4299}
+* 45974 FETCH (UID 1005 BODY[] {1020}
 Delivered-To: dhanji@gmail.com
 Date: Thu, 8 Sep 2011 17:07:44 -0700
 Message-ID: CAEEYBPaoksdpoak+veqCfc+x3m1PxeLn-raisdj@mail.gmail.com
@@ -157,7 +157,7 @@ I am OOO and may have sporadic access to email.
 --_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--
 Tight epilogue. Invalid, but let's see how it's handled.
 )
-* 45975 FETCH (UID 1006 BODY[] {4299}
+* 45975 FETCH (UID 1006 BODY[] {1287}
 Delivered-To: dhanji@gmail.com
 Message-ID: <CAEEYBPNq6o3M+aisjd+x3m1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -199,7 +199,7 @@ This is a signature.
 --_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--
 trueeee epilogue. also ignored.
 )
-* 45976 FETCH (UID 1007 BODY[] {4299}
+* 45976 FETCH (UID 1007 BODY[] {1367}
 Delivered-To: dhanji@gmail.com
 Message-ID: <CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -261,7 +261,7 @@ This is a signature.
     weeee
 
 )
-* 45976 FETCH (UID 1008 BODY[] {4299}
+* 45976 FETCH (UID 1008 BODY[] {1052}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -295,7 +295,7 @@ This is a signature.
 
 --_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_--
 )
-* 45976 FETCH (UID 1009 BODY[] {4299}
+* 45976 FETCH (UID 1009 BODY[] {926}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -328,7 +328,7 @@ MIME-Version: 1.0
 This is a signature.
 
 ------NextPart_1293809.9123_LLas--)
-* 45976 FETCH (UID 1010 BODY[] {4299}
+* 45976 FETCH (UID 1010 BODY[] {1781}
 Delivered-To: dhanji@gmail.com
 Message-ID: <id> id
 Subject: Re: Slow to Respond
@@ -415,7 +415,7 @@ Content-Type: text/html
 --__BERIC-BOUNDARRION__--
 --__BOUNDARY__--
 )
-* 45979 FETCH (UID 1011 BODY[] {4299}
+* 45979 FETCH (UID 1011 BODY[] {1177}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -456,7 +456,7 @@ This is a signature.
 
 ------OuterBoundaryMsgUID1011--)
 4 OK Success
-* 45979 FETCH (UID 1012 BODY[] {4299}
+* 45979 FETCH (UID 1012 BODY[] {1129}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -494,7 +494,7 @@ This is a signature.
 
 ------OuterBoundaryMsgUID1012--)
 4 OK Success
-* 45979 FETCH (UID 1013 BODY[] {4299}
+* 45979 FETCH (UID 1013 BODY[] {1238}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -540,7 +540,7 @@ This is a signature.
 
 ------OuterBoundaryMsgUID1013--)
 4 OK Success
-* 45979 FETCH (UID 1014 BODY[] {4299}
+* 45979 FETCH (UID 1014 BODY[] {2156}
 Delivered-To: dhanji@gmail.com
 Message-ID: <SPLAT_CAEEYBPNq6o3Mm1PxeLn-raisdj@mail.gmail.com>
 Subject: Re: Slow to Respond
@@ -601,7 +601,7 @@ This is a signature.
 
 ------OuterBoundaryMsgUID1014--)
 4 OK Success
-* 45980 FETCH (UID 1015 BODY[] {4299}
+* 45980 FETCH (UID 1015 BODY[] {1051}
 Delivered-To: dhanji@gmail.com
 Received: by 10.220.150.202 with SMTP id z10cs2110vcv;
         Mon, 24 Oct 2011 06:03:12 -0700 (PDT)
@@ -641,7 +641,7 @@ hiya
 
 ------_=_NextPart_001_01CC924D.3EEB0FA2--)
 45980 OK Success
-* 45981 FETCH (UID 1016 BODY[] {99999}
+* 45981 FETCH (UID 1016 BODY[] {434}
 Delivered-To: jochen@bekmann.com
 Received: by 10.142.240.18 with SMTP id n18cs10279wfh;
         Mon, 26 Dec 2011 09:50:23 -0800 (PST)
@@ -657,3 +657,156 @@ Content-Transfer-Encoding: 8bit
 Danke für die Weihnachtswünsche! Viele Grüße.
 )
 45980 OK Success
+* 45988 FETCH (UID 1017 BODY[] {999999999999999999}
+Delivered-To: jochen@bekmann.com
+Date: Thu, 5 Jan 2012 23:11:52 +0000 (UTC)
+From: "Dhanji R. Prasanna" <dhanji@gmail.com>
+Reply-To: dhanji@gmail.com
+To: jochen@bekmann.com
+Message-ID: <-1442414943.0.134b0248d5a.c@fluent.io>
+Subject: test trailing gunk with email following
+
+the message body
+)
+
+45988 OK Success
+* 197 FETCH (UID 1018 BODY[] {1611}
+Delivered-To: wickedwavewrangler@gmail.com
+Received: by 10.204.60.15 with SMTP id n15cs294075bkh;
+        Wed, 1 Feb 2012 21:06:39 -0800 (PST)
+Received: by 10.68.240.135 with SMTP id wa7mr4565506pbc.7.1328159198111;
+        Wed, 01 Feb 2012 21:06:38 -0800 (PST)
+Return-Path: <jochen@bekmann.com>
+Received: from mail-pz0-f49.google.com (mail-pz0-f49.google.com [209.85.210.49])
+        by mx.google.com with ESMTPS id g8si1969211pbq.238.2012.02.01.21.06.37
+        (version=TLSv1/SSLv3 cipher=OTHER);
+        Wed, 01 Feb 2012 21:06:37 -0800 (PST)
+Received-SPF: neutral (google.com: 209.85.210.49 is neither permitted nor denied by best guess record for domain of jochen@bekmann.com) client-ip=209.85.210.49;
+Authentication-Results: mx.google.com; spf=neutral (google.com: 209.85.210.49 is neither permitted nor denied by best guess record for domain of jochen@bekmann.com) smtp.mail=jochen@bekmann.com
+Received: by mail-pz0-f49.google.com with SMTP id p5so1837981dak.36
+        for <wickedwavewrangler@gmail.com>; Wed, 01 Feb 2012 21:06:37 -0800 (PST)
+Received: by 10.68.217.132 with SMTP id oy4mr4520251pbc.30.1328159197165; Wed,
+ 01 Feb 2012 21:06:37 -0800 (PST)
+MIME-Version: 1.0
+Received: by 10.143.82.10 with HTTP; Wed, 1 Feb 2012 21:06:17 -0800 (PST)
+X-Originating-IP: [121.44.170.197]
+From: jochen@bekmann.com
+Date: Thu, 2 Feb 2012 16:06:17 +1100
+Message-ID: <CADR1xrzP6dXj4kcQHDSHK_xrGg7Kcembum8q_uDO9PBiJ=x5Bw@mail.gmail.com>
+Subject: fake end
+To: wickedwavewrangler <wickedwavewrangler@gmail.com>
+Content-Type: text/plain; charset=ISO-8859-1
+
+fake ending
+
+)
+10 OK Success
+)
+30 OK Success
+* 196 FETCH (UID 1019 BODY[] {3519}
+Delivered-To: wickedwavewrangler@gmail.com
+Received: by 10.204.60.15 with SMTP id n15cs293535bkh;
+        Wed, 1 Feb 2012 20:35:21 -0800 (PST)
+Received: by mail-pz0-f46.google.com with SMTP id p15so1512776dad.19
+        for <wavewranglers@googlegroups.com>; Wed, 01 Feb 2012 20:35:20 -0800 (PST)
+Received: by 10.68.227.132 with SMTP id sa4mr4287922pbc.64.1328157320217; Wed,
+ 01 Feb 2012 20:35:20 -0800 (PST)
+MIME-Version: 1.0
+From: jochen@bekmann.com
+X-Goomoji-Body: true
+Date: Thu, 2 Feb 2012 15:35:00 +1100
+Message-ID: <CADR1xryVPmFf9sEK8XntCWkg=mMPVewT6RvV1-SuS0xqZEBi_A@mail.gmail.com>
+Subject: do you like attachments with lots of parts?
+To: wavewranglers@googlegroups.com
+Sender: wavewranglers@googlegroups.com
+Content-Type: multipart/mixed; boundary=047d7b2e77e447044004b7f3b91c
+
+--047d7b2e77e447044004b7f3b91c
+Content-Type: multipart/related; boundary=047d7b2e77e447043e04b7f3b91b
+
+--047d7b2e77e447043e04b7f3b91b
+Content-Type: multipart/alternative; boundary=047d7b2e77e447043c04b7f3b91a
+
+--047d7b2e77e447043c04b7f3b91a
+Content-Type: text/plain; charset=ISO-8859-1
+
+This is html, do you like it?
+[?]
+beatbox, dude.
+
+--047d7b2e77e447043c04b7f3b91a
+Content-Type: text/html; charset=ISO-8859-1
+
+This is html, do you like it?<div><img src="cid:81F@goomoji.gmail" style="margin-top: 0px; margin-right: 0.2ex; margin-bottom: 0px; margin-left: 0.2ex; vertical-align: middle; " goomoji="81F"><br></div><div>beatbox, dude.</div>
+
+<div><br></div>
+
+--047d7b2e77e447043c04b7f3b91a--
+--047d7b2e77e447043e04b7f3b91b
+Content-Type: image/gif; name="81F.gif"
+Content-Transfer-Encoding: base64
+Content-ID: <81F@goomoji.gmail>
+X-Attachment-Id: 81F@goomoji.gmail
+
+R0lGODlhDwAPAKIFANbz15flmETIRwqdCgBbAN3t+gAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh
++QQJFAAFACwAAAAADwAPAAADPli63K7jySgdrewyQbovmkIACklAoqeuBRG8cAx3AzEEwqALQV17
+N58tQFMFdTqijbYTOJ/IznNK5bRW2FMCACH5BAkUAAUALAAAAAAPAA8AAANAWLrcruPJKB11IYd1
+mSBgWHQFQJRbcY5K6L4noc10AA7EEAhDLwQ4XEgXzNlyLmKvdxQuBdAorweSWqUxGKyQAAAh+QQJ
+FAAFACwAAAAADwAPAAADQli63K7jKUEFlLbkEluwH9MtwiAQaMo5RNOuRSrPLRHceI6jAzF8g6Ag
+0OulfkVfgCdDBoNLH09YqTxR1Wy1RqMVEgAh+QQJFAAFACwAAAAADwAPAAADQli63CpQqOGenS5I
+zSgTFNh4jUCcaEEuRNOqCirPLRHceI6fAzFog6Ag0OuhfkVfgCdDBoNLH08YiTxP1Wy1RqMVEgAh
++QQJFAAFACwAAAAADwAPAAADQVizU/5QuTZjEQ1D+gZR32aNlSUQaCpF4RNSaSx/RGDf+I16Q4At
+ggAv1hv2dkQh40jwNIGCqJSBklqvp8JsW0gAACH5BAkUAAUALAAAAAAPAA8AAANCKFW6/qyEtgYs
+Vti3r+8eBDoCYZ7YRUBrWpxwvBJBbd+2ORDDNPyCwG536g15AR3M+PsleTqgYEptmqjYbOklkxUS
+ACH5BAkUAAUALAAAAAAPAA8AAAM9GFLc3mK8Iqel19bsthNEKGIPUTKVqK4mEbxwDIcDMShDLgR1
+Ld49W4CmAuZyQxtNJ2g6jyGndAoqsK6FBAAh+QQFFAAFACwAAAAADwAPAAADOxhS3P5wwMkkjRdD
+QbovlkM8I8h4aDoSQeu+bjcQgzLcQjDPXr3TARnKd7sFaTKcYMksdpjQKKegqhYSADs=
+--047d7b2e77e447043e04b7f3b91b--
+--047d7b2e77e447044004b7f3b91c
+Content-Type: text/plain; charset=US-ASCII; name="deleteme.txt"
+Content-Disposition: attachment; filename="deleteme.txt"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gy5ak2fc2
+
+YmVmb3JlIHJlc3RhcnQKd2MgLWwgcHJvZF9sYXlvdXQvbG9ncy9jaHVua3kubG9nCjk1MTQ3IHBy
+b2RfbGF5b3V0L2xvZ3MvY2h1bmt5LmxvZw==
+--047d7b2e77e447044004b7f3b91c
+Content-Type: application/octet-stream; name=foo
+Content-Disposition: attachment; filename=foo
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gy5aium20
+
+aGkKCg==
+--047d7b2e77e447044004b7f3b91c
+Content-Type: application/octet-stream; name=foo
+Content-Disposition: attachment; filename=foo
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gy5ajk8p1
+
+aGkKCg==
+--047d7b2e77e447044004b7f3b91c--)
+15 OK Success
+* 45988 FETCH (UID 1020 BODY[] {295}
+Delivered-To: jochen@bekmann.com
+Date: Thu, 5 Jan 2012 23:11:52 +0000 (UTC)
+From: "Dhanji R. Prasanna" <dhanji@gmail.com>
+Reply-To: dhanji@gmail.com
+To: jochen@bekmann.com
+Message-ID: <-1442414943.0.134b0248d5a.c@fluent.io>
+Subject: test length excluding newline at end
+
+the message body
+)
+45988 OK Success
+* 45989 FETCH (UID 1021 BODY[] {280}
+Delivered-To: jochen@bekmann.com
+Date: Thu, 5 Jan 2012 23:11:52 +0000 (UTC)
+From: "Dhanji R. Prasanna" <dhanji@gmail.com>
+Reply-To: dhanji@gmail.com
+To: jochen@bekmann.com
+Message-ID: <-1442414943.0.134b0248d5a.c@fluent.io>
+Subject: test invalid email length succeeds
+
+the message body
+)
+45989 OK Success

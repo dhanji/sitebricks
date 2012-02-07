@@ -65,13 +65,26 @@ public class MessageBodyExtractorTest {
    * WARNING: THIS TEST IS DATA-DEPENDENT!
    */
   @Test
-  public final void testAwkwardGmailEmailStream() throws IOException, ParseException {
+  public final void testAwkwardGmailEmailStreamUsingTruncatorGroping() throws IOException, ParseException {
+    testAwkwardGmailEmailStream(true);
+  }
+
+  /**
+   * WARNING: THIS TEST IS DATA-DEPENDENT!
+   */
+  @Test
+  public final void testAwkwardGmailEmailStreamUsingLengths() throws IOException, ParseException {
+    testAwkwardGmailEmailStream(false);
+  }
+
+
+  public final void testAwkwardGmailEmailStream(boolean forceTruncatorGroping) throws IOException, ParseException {
     final List<String> lines =
         Resources.readLines(MessageBodyExtractorTest.class.getResource("fetch_bodies.txt"),
             Charsets.UTF_8);
 
-    List<Message> extract = new MessageBodyExtractor().extract(lines);
-    assertEquals(extract.size(), 16);
+    List<Message> extract = new MessageBodyExtractor(forceTruncatorGroping, 999999999999999999L).extract(lines);
+    assertEquals(extract.size(), 21);
     // ------------------------------------------------------------
     // First message.
     // Folded headers with tabs + spaces, repeat headers, one body.
@@ -258,36 +271,65 @@ public class MessageBodyExtractorTest {
     assertRfc822(message, "quoted-printable");
 
     // ------------------------------------------------------------
-    // Twelfth message.
     // multipart 3 parts, 1-level deep, message/rfc822 nested message.
     message = extract.get(11);
     assertRfc822(message, null);
 
     // ------------------------------------------------------------
-    // Thirteenth message.
     // multipart 3 parts, message/rfc822 nested multipart message.
     message = extract.get(12);
     assertMultipartRfc822(message);
 
     // ------------------------------------------------------------
-    // Fourteenth message.
     // multipart 3 parts, message/rfc822 nested message with multipart and attachment.
     message = extract.get(13);
     assertRfc822withAttachment(message);
 
     // ------------------------------------------------------------
-    // Fourteenth message.
     // Test mixed case in Content-Type.
     message = extract.get(14);
     assertEquals(2, message.getBodyParts().size());
 
     // ------------------------------------------------------------
-    // Fifteenth message.
     // Test mixed case in Content-Type.
     message = extract.get(15);
     assertEquals(1, message.getBodyParts().size());
     assertEquals(message.getBodyParts().get(0).getBody(),
         "Danke für die Weihnachtswünsche! Viele Grüße.\r\n");
+
+    // ------------------------------------------------------------
+    // This one is intentionally broken and forces terminator groping,
+    // check that we get what we expect.
+    message = extract.get(16);
+    assertEquals(1, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().get(0).getBody(),
+        "the message body\r\n)\r\n\r\n45988 OK Success\r\n");
+
+    message = extract.get(17);
+    assertEquals(1, message.getBodyParts().size());
+    if (forceTruncatorGroping)
+      assertEquals(message.getBodyParts().get(0).getBody(),
+          "fake ending\r\n\r\n");
+    else
+      assertEquals(message.getBodyParts().get(0).getBody(),
+          "fake ending\r\n\r\n)\r\n10 OK Success\r\n");
+
+    // ------------------------------------------------------------
+    // Many parts, with verified length as sent by gmail.
+    message = extract.get(18);
+    assertEquals(4, message.getBodyParts().size());
+
+    // ------------------------------------------------------------
+    // Invalid body length, but still expect correct parsing
+    message = extract.get(19);
+    assertEquals(1, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().get(0).getBody(),
+          "the message body\r\n");
+
+    message = extract.get(20);
+    assertEquals(1, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().get(0).getBody(),
+        "the message body\r\n");
   }
 
   private void assertRfc822(Message message, String contentTransferEncoding) {

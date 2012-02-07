@@ -1,10 +1,13 @@
 package com.google.sitebricks.mail.imap;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.*;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import org.apache.commons.io.IOUtils;
 import org.apache.james.mime4j.codec.DecodeMonitor;
 import org.apache.james.mime4j.codec.DecoderUtil;
+import org.jetbrains.annotations.TestOnly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +16,7 @@ import javax.mail.internet.MimeUtility;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -30,6 +34,7 @@ import java.util.regex.Pattern;
  */
 class MessageBodyExtractor implements Extractor<List<Message>> {
   private static final Logger log = LoggerFactory.getLogger(MessageBodyExtractor.class);
+
   static final Pattern BOUNDARY_REGEX = Pattern.compile(
       ";[\\s]*boundary[\\s]*=[\\s]*[\"]?([^\"^;]*)[\"]?",
       Pattern.CASE_INSENSITIVE);
@@ -39,7 +44,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   static final Pattern MESSAGE_START_PREFIX_REGEX = Pattern.compile("^\\* \\d+ FETCH \\(UID \\d+ BODY\\[\\]",
       Pattern.CASE_INSENSITIVE);
   static final Pattern MESSAGE_START_REGEX = Pattern.compile("[*] \\d+ FETCH \\(UID \\d+ BODY\\[\\] " +
-      "\\{\\d+\\}\\s*",
+      "\\{(\\d+)\\}\\s*",
       Pattern.CASE_INSENSITIVE);
 
   static final Pattern EOS_REGEX =
@@ -74,6 +79,21 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     CONVERTIBLE_ENCODINGS.put("quoted-printablemime", "quoted-printable");
   }
 
+  private final boolean forceTruncatorGroping;
+  private final long ignoreMessageBodyLengthForTesting;
+
+  // Special constructor for testing only.
+  @TestOnly
+  MessageBodyExtractor(boolean forceTruncatorGroping, long ignoreMessageBodyLengthForTesting) {
+    this.forceTruncatorGroping = forceTruncatorGroping;
+    this.ignoreMessageBodyLengthForTesting = ignoreMessageBodyLengthForTesting;
+  }
+
+  MessageBodyExtractor() {
+    forceTruncatorGroping = false;
+    ignoreMessageBodyLengthForTesting = 0;
+  }
+
   @Override
   public List<Message> extract(List<String> messages) {
     List<Message> emails = Lists.newArrayList();
@@ -85,7 +105,17 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     int start = 0;
     for (int i = 0, messagesSize = messages.size(); i < messagesSize; i++) {
       String message = messages.get(i);
-      if (MESSAGE_START_REGEX.matcher(message).matches() && i > start) {
+      final Matcher matcher = MESSAGE_START_REGEX.matcher(message);
+      if (matcher.matches() && i > start) {
+        try {
+          int msgLen = Integer.parseInt(matcher.group(1));
+        } catch(NumberFormatException e) {
+          log.error("Got message with invalid length specification: {} dumping 5 lines...",
+              matcher.group(1) );
+          for (int j = i; j < messages.size() && j - i < 5; j++) {
+            log.error(messages.get(j));
+          }
+        }
         // Partition.
         partitionedMessagesSet.add(messages.subList(start, i));
         start = i;
@@ -102,16 +132,22 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         // Count errors as you go, don't throw exceptions s.t. we can carry on parsing and
         // yet give error report at high level.
         AtomicInteger errorCount = new AtomicInteger();
-        while (iterator.hasNext()) {
-          errorCount.set(0);
-          Message message = parseMessage(iterator, errorCount);
-          // Messages may be null if there are gaps in the returned body. These should be safe.
-          if (null != message)
-            emails.add(message);
+        errorCount.set(0);
+        Message message = parseMessage(iterator, errorCount);
+        // Messages may be null if there are gaps in the returned body. These should be safe.
+        if (null != message)
+          emails.add(message);
 
-          if (errorCount.get() > 0) {
-            // Instead add a sentinel for this message.
-            dumpError(emails, partitionedMessages, errorCount.get());
+        if (errorCount.get() > 0) {
+          // Instead add a sentinel for this message.
+          dumpError(emails, partitionedMessages, errorCount.get());
+        }
+        // Jochen: remove this as soon as satisfied this is safe. (should be, there should never be another FETCH
+        // or interesting stuff trailing the mail).
+        while (iterator.hasNext()) {
+          String next = iterator.next();
+          if (!EOS_REGEX.matcher(next).matches()) {
+            log.warn("Suspect line trailing id: {} line: {}", message.getImapUid(), next);
           }
         }
       } catch (RuntimeException e) {
@@ -120,7 +156,6 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         e.printStackTrace();
         dumpError(emails, partitionedMessages, 1);
       }
-
     }
 
     return emails;
@@ -134,6 +169,44 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     }
     sb.append("============\n");
     log.error("{} Message parsing error(s) encountered in:\n {}", errorCount, sb.toString());
+  }
+
+  private ListIterator<String> selectLengthBasedSection(ListIterator<String> iterator, long msgSize) throws ParseException {
+    // Trim the message according to the length, and get on with parsing.
+    List<String> lengthTruncated = Lists.newLinkedList();
+    long len = 0;
+    int lines = 0;
+
+    try {
+      while (iterator.hasNext()) {
+        String s = iterator.next();
+        lines++;
+        len += s.length();
+        if (len > msgSize) {
+          lengthTruncated.add(s);
+          if (!s.endsWith(")")) {
+            log.info("Invalid email length passed len:{} size:{} s:\"{}\"", new Object[]{len, msgSize, s});
+            iterator.previous();
+            iterator.previous();
+            log.info("Invalid length context: {}", iterator.next());
+            log.info("Invalid length context: {}", iterator.next());
+            throw new ParseException("Invalid email length passed, actual len: " + len + " msg size: " + msgSize +
+                " s: \"" + s + "\". Reverting to default parsing", lines);
+          }
+          break;
+        } else {
+          lengthTruncated.add(s);
+        }
+        len += 2;
+      }
+  
+      return lengthTruncated.listIterator();
+    } catch(ParseException e) {
+      // reset iterator if we failed.
+      while (lines-- > 0)
+        iterator.previous();
+      throw e;
+    }
   }
 
   private Message parseMessage(ListIterator<String> iterator, AtomicInteger errorCount) {
@@ -150,15 +223,35 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     email.setImapUid(Parsing.match(tokens, int.class));
     Parsing.eat(tokens, "BODY[]");
     String sizeString = Parsing.match(tokens, String.class);
-    int size = 0;
+    long size = 0;
+    boolean gropeForTruncator = true;
+    boolean moreErrorInfo = false;
 
     // Parse out size in bytes from "{NNN}"
-    // TODO: find out whether we can use this value, otherwise delete the variable.
-    if (sizeString != null && sizeString.length() > 2) {
-      size = Integer.parseInt(sizeString.substring(1, sizeString.length() - 1));
+    if (sizeString != null && sizeString.length() > 0) {
+      try {
+        size = Long.parseLong(sizeString.substring(1, sizeString.length() - 1));
+      } catch(NumberFormatException e) {
+        log.error("Internal error: regex match should never have passed invalid number string: {}", sizeString);
+        moreErrorInfo = true;
+      }
+    }
+
+    gropeForTruncator = forceTruncatorGroping || size == 0 || size == ignoreMessageBodyLengthForTesting;
+
+    if (!gropeForTruncator) {
+      try {
+        iterator = selectLengthBasedSection(iterator, size);
+      } catch (ParseException e) {
+        log.error(e.getMessage());
+        gropeForTruncator = true;
+        moreErrorInfo = true;
+      }
     }
 
     // OK now parse the header stream.
+    // Don't pass gropeForTruncator, in case there's an error and we get an abridged email,
+    //  we don't expect rogue terminators in the header section, so play it safe.
     parseHeaderSection(iterator, email.getHeaders(), null, errorCount);
 
     // OK now parse the body/mime stream...
@@ -167,22 +260,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
     // Normalize mimetype case.
     mimeType = mimeType.toLowerCase();
-    parseBodyParts(iterator, email, mimeType, boundary(mimeType), errorCount);
+    parseBodyParts(iterator, email, mimeType, boundary(mimeType), errorCount, gropeForTruncator);
 
-    // Try to chew up the end of sequence marker if it exists.
-    while (iterator.hasNext()) {
-      // Chew up all the end of sequence markers, whitespace and garbage at the end of a message,
-      // Until we see the start of a new message or the end of the entire sequence.
-      String next = iterator.next();
-      if (EOS_REGEX.matcher(next).matches()) {
-        iterator.previous();
-        break;
-      } else if (MESSAGE_START_PREFIX_REGEX.matcher(next).find()) {
-        iterator.previous();
-        break;
-      }
+    if (moreErrorInfo) {
+      log.warn("previous error pertained to email with uid: {} headers: {}", email.getImapUid(), email.getHeaders());
     }
-
     return email;
   }
 
@@ -242,10 +324,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
    * @return whether a boundary end marker was encountered.
    */
   private static boolean parseBodyParts(ListIterator<String> iterator, HasBodyParts entity,
-                                        String mimeType, String boundary, AtomicInteger errorCount) {
+                                        String mimeType, String boundary, AtomicInteger errorCount,
+                                        boolean gropeForTruncator) {
 
     if (mimeType.startsWith("text/") && !isAttachment(entity.getHeaders())) {
-      String body = readBodyAsString(iterator, boundary);
+      String body = readBodyAsString(iterator, boundary, gropeForTruncator);
 
       entity.setBody(decode(body, transferEncoding(entity), charset(mimeType)));
     } else if (mimeType.startsWith("multipart/") /* mixed|alternative|digest */) {
@@ -288,7 +371,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
         // If the inner body was parsed up until we reached boundary end marker, ending with "--"
         // then skip everything until we see a start boundary marker.
-        if (parseBodyParts(iterator, bodyPart, partMimeType, innerBoundary, errorCount)) {
+        if (parseBodyParts(iterator, bodyPart, partMimeType, innerBoundary, errorCount, gropeForTruncator)) {
           //noinspection StatementWithEmptyBody
           while (iterator.hasNext() && !Parsing.startsWithIgnoreCase(iterator.next(),
               boundaryToken)) ;
@@ -300,7 +383,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         if (Parsing.startsWithIgnoreCase(lastLineRead, boundaryToken + "--")) {
           iterator.next();
           return true;
-        } else if (hasImapTerminator(iterator, iterator.next())) {
+        } else if (hasImapTerminator(iterator, iterator.next(), gropeForTruncator)) {
           break;
         }
       }
@@ -324,12 +407,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
       // For quoted-printable do the efficient thing, just decode each line separately.
       if (quotedPrintable) {
-        boolean endMarker = false;
         List<String> rfc822msg = Lists.newArrayList();
         StringBuilder sb = new StringBuilder();
         while (iterator.hasNext()) {
           final String s = iterator.next();
-          if (hasImapTerminator(iterator, s) ||
+          if (hasImapTerminator(iterator, s, gropeForTruncator) ||
               boundary != null && Parsing.startsWithIgnoreCase(s, boundary)) {
             alreadyHitEndMarker = Parsing.startsWithIgnoreCase(s, boundary + "--");
             if (sb.length() > 0) // save dangly bit, though technically illegal here.
@@ -364,11 +446,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       String bodyBoundary = boundary(mimeType);
       boolean gotEndMarker = parseBodyParts(rfc822iterator, bodyPart,
           mimeType(bodyPart.getHeaders()),
-          bodyBoundary != null ? bodyBoundary : boundary, errorCount);
+          bodyBoundary != null ? bodyBoundary : boundary, errorCount, gropeForTruncator);
       return quotedPrintable ? alreadyHitEndMarker : gotEndMarker;
     } else {
       entity.setBodyBytes(readBodyAsBytes(transferEncoding(entity), iterator, boundary,
-          charset(mimeType), errorCount));
+          charset(mimeType), errorCount, gropeForTruncator));
     }
     return false;
   }
@@ -435,14 +517,15 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
                                         ListIterator<String> iterator,
                                         String boundary,
                                         String charset,
-                                        AtomicInteger errorCount) {
+                                        AtomicInteger errorCount,
+                                        boolean gropeForTruncator) {
     byte[] bytes = new byte[0];
     try {
-      bytes = readBodyAsString(iterator, boundary).getBytes(charset);
+      bytes = readBodyAsString(iterator, boundary, gropeForTruncator).getBytes(charset);
     } catch (UnsupportedEncodingException e) {
       log.error("Could not decode body as string due to encoding, using default encoding.", e);
       errorCount.incrementAndGet();
-      bytes = readBodyAsString(iterator, boundary).getBytes();
+      bytes = readBodyAsString(iterator, boundary, gropeForTruncator).getBytes();
     }
 
     // Decode if this is encoded as binary-to-text.
@@ -460,7 +543,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     return bytes;
   }
 
-  private static String readBodyAsString(ListIterator<String> iterator, String terminator) {
+  private static String readBodyAsString(ListIterator<String> iterator, String terminator,
+                                         boolean gropeForTruncator) {
     StringBuilder textBody = new StringBuilder();
     // Parse as plain text.
     while (iterator.hasNext()) {
@@ -470,7 +554,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         return textBody.toString();
       } else {
         // Check for IMAP command stream delimiter.
-        if (hasImapTerminator(iterator, line)) {
+        if (hasImapTerminator(iterator, line, gropeForTruncator)) {
           Preconditions.checkArgument(terminator == null || !line.contains(terminator + "--"));
           // If this is actually a boundary with the closing ) token, ignore it. Otherwise add it
           // to the body, it's possible for misbehaving clients to generate this kind of body.
@@ -486,7 +570,10 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   }
 
   private static boolean hasImapTerminator(ListIterator<String> iterator,
-                                           String line) {
+                                           String line, boolean gropeForTruncator) {
+    if (!gropeForTruncator)
+      return line.trim().endsWith(")") && !iterator.hasNext();
+
     // It's possible for the ) to occur on its own line, or on the same line as the boundary marker.
     // It's also possible for misbehaving clients (Google Groups) to generate a ) on the same line
     // as body text. FUCK.

@@ -26,7 +26,7 @@ public class MailClientHandlerTest {
     // ib is stateful.
     MailClientHandler.InputBuffer ib = new MailClientHandler.InputBuffer();
     assertProcess(ib, "hi ", ImmutableList.<String>of());
-    assertProcess(ib, "bob\r\nhow\n", ImmutableList.of("hi bob", "how"));
+    assertProcess(ib, "bob\r\nhow\n\r", ImmutableList.of("hi bob", "how"));
     assertProcess(ib, "\nis\n\r\n", ImmutableList.of("", "is", ""));
     assertProcess(ib, "your snake\nfeeling ", ImmutableList.of("your snake"));
     assertProcess(ib, "after\neating\nthat", ImmutableList.of("feeling after", "eating"));

@@ -73,7 +73,7 @@ public class MailClientIntegrationTest {
       @Override
       public void run() {
         final ListenableFuture<List<MessageStatus>> messageStatuses =
-            client.list(allMail, folderStatus.getMessages() - 10, -1);
+            client.list(allMail, folderStatus.getMessages() , -1);
 
         try {
           for (MessageStatus messageStatus : messageStatuses.get()) {
