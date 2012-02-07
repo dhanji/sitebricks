@@ -9,9 +9,6 @@ import java.util.*;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class MessageStatus {
-
-  public static final MessageStatus KNOWN_MESSAGE_MARKER = new MessageStatus();
-
   private int imapUid;
   private String messageUid;
   private Date receivedDate;
