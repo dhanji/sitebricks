@@ -11,8 +11,10 @@ import com.google.sitebricks.conversion.DateConverters;
 import com.google.sitebricks.debug.DebugPage;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
+import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
+import com.google.sitebricks.http.Put;
 import com.google.sitebricks.routing.Action;
 import com.google.sitebricks.stat.StatModule;
 
@@ -45,6 +47,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
 //        scan(SitebricksConfig.class.getPackage());
         bindExplicitly();
         bindActions();
+        bindCrudActions();
 
         at("/no_annotations/service").serve(RestfulWebServiceNoAnnotations.class);
         at("/debug").show(DebugPage.class);
@@ -118,7 +121,29 @@ public class SitebricksConfig extends GuiceServletContextListener {
             .perform(action("post:junk_subpath1"))
             .on(Post.class);
       }
-    });
+    
+      private void bindCrudActions() {
+        //
+        // Handle the base path
+        //
+        at("/issue")
+            .perform(action("READ_COLLECTION"))
+            .on(Get.class)
+            .perform(action("CREATE"))
+            .on(Post.class);
+        
+        //
+        // Handle subpaths for verbs that have parameters
+        //
+        at("/issue/:id")
+            .perform(action("READ"))
+            .on(Get.class)
+            .perform(action("UPDATE"))
+            .on(Put.class)
+            .perform(action("DELETE"))
+            .on(Delete.class);
+      }
+    });    
   }
 
   private Action action(final String reply) {
@@ -129,7 +154,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
       }
 
       @Override
-      public Object call(Object page, Map<String, String> map) {
+      public Object call(Request request, Object page, Map<String, String> map) {
         return Reply.with(reply);
       }
     };

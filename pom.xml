@@ -14,7 +14,7 @@
 
   <properties>
     <guice.version>3.0</guice.version>
-    <org.codehaus.jackson.version>1.8.0</org.codehaus.jackson.version>
+    <org.codehaus.jackson.version>1.9.0</org.codehaus.jackson.version>
     <org.mortbay.jetty.version>6.1.9</org.mortbay.jetty.version>
     <org.seleniumhq.webdriver.version>0.9.7376</org.seleniumhq.webdriver.version>
     <org.testng.version>5.8</org.testng.version>
@@ -23,14 +23,14 @@
 
   <modules>
     <module>sitebricks</module>
+    <module>sitebricks-annotations</module>
     <module>sitebricks-converter</module>
     <module>sitebricks-async</module>
     <module>sitebricks-client</module>
+    <module>sitebricks-easy-client</module>
     <module>sitebricks-acceptance-tests</module>
-    <!--
-    We'll move the examples to their own repo shortly
+    <module>sitebricks-test-support</module>
     <module>sitebricks-web</module>
-    -->
     <module>sitebricks-mail</module>
     <module>sitebricks-options</module>
     <module>sitebricks-jetty-archetype</module>
@@ -58,6 +58,11 @@
       <dependency>
         <groupId>com.google.sitebricks</groupId>
         <artifactId>sitebricks-client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.sitebricks</groupId>
+        <artifactId>sitebricks-annotations</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -289,10 +294,5 @@
   </distributionManagement>
 
   <repositories>
-    <repository>
-      <id>scala.org</id>
-      <name>Scala.org Repository</name>
-      <url>http://scala-tools.org/repo-releases/</url>
-    </repository>
-</repositories>
+  </repositories>
 </project>

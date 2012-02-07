@@ -13,7 +13,7 @@ public interface HasBodyParts {
   Multimap<String, String> getHeaders();
 
   void setBody(String body);
-  void setBody(byte[] body);
+  void setBodyBytes(byte[] body);
 
   void createBodyParts();
 }

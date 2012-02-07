@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 public enum Command {
   LIST_FOLDERS("list"),
   FETCH_BODY("fetch"),
+  FETCH_BODY_UID("uid fetch"),
   FOLDER_STATUS("status"),
   FOLDER_OPEN("select"),
   FOLDER_EXAMINE("examine"),
@@ -20,6 +21,10 @@ public enum Command {
   STORE_FLAGS("uid store"),
   STORE_LABELS("uid store");
   private static final Pattern OK_SUCCESS = Pattern.compile("\\d+ ok (.* )?\\(?success\\)?",
+      Pattern.CASE_INSENSITIVE);
+  private static final Pattern NO_FAILURE = Pattern.compile("\\d+ no .*",
+      Pattern.CASE_INSENSITIVE);
+  private static final Pattern BAD_FAILURE = Pattern.compile("\\d+ bad .*",
       Pattern.CASE_INSENSITIVE);
 
   private final String commandString;
@@ -34,16 +39,30 @@ public enum Command {
   /**
    * Expects message to be lower case.
    */
-  public static boolean isEndOfSequence(Long sequence, String message) {
+  public static boolean isEndOfSequence(Long sequence, String message) throws ExtractionException {
     final String prefix = Long.toString(sequence) + " ";
 
-    return message.length() >= (prefix.length())
-        && prefix.equals(message.substring(0, prefix.length()))
-        && OK_SUCCESS.matcher(message).matches();
+    if (message.length() < (prefix.length()) || !prefix.equals(message.substring(0, prefix.length())))
+      return false;
+
+    if (OK_SUCCESS.matcher(message).matches())
+      return true;
+
+    if (NO_FAILURE.matcher(message).matches() ||
+           BAD_FAILURE.matcher(message).matches()) {
+      throw new ExtractionException(message);
+    }
+    return false;
   }
 
-  public static boolean isEndOfSequence(String message) {
-    return IMAP_COMMAND_SUCCESS.matcher(message).matches();
+  public static boolean isEndOfSequence(String message) throws ExtractionException {
+    if (IMAP_COMMAND_SUCCESS.matcher(message).matches())
+      return true;
+
+    if (NO_FAILURE.matcher(message).matches() || (BAD_FAILURE.matcher(message).matches())) {
+      throw new ExtractionException(message);
+    }
+    return false;
   }
 
   static {
@@ -55,6 +74,7 @@ public enum Command {
     dataExtractors.put(FOLDER_EXAMINE, new OpenFolderExtractor());
     dataExtractors.put(FETCH_HEADERS, new MessageStatusExtractor());
     dataExtractors.put(FETCH_BODY, new MessageBodyExtractor());
+    dataExtractors.put(FETCH_BODY_UID, new SingleMessageBodyExtractor());
     dataExtractors.put(STORE_FLAGS, new StoreFlagsResponseExtractor());
     dataExtractors.put(STORE_LABELS, new StoreLabelsResponseExtractor());
   }

@@ -43,6 +43,29 @@ public class MessageStatusExtractorTest {
     assertEquals(new ArrayList<String>(tokens), Arrays.asList(expected), "Tokens mismatched, expected: " + expected + " got: " + tokens);
   }
 
+  @Test
+  public final void testTokenizerWithDoubleEscaping() throws IOException, ParseException {
+    // raw: "\"your website \\\"cenqua.com\\\"\""
+    Queue<String> tokens =Parsing.tokenize(
+        "ENVELOPE (\"\\\"your website \\\\\\\"fluent.com\\\\\\\"\\\"\") Flags (\\Seen)");
+
+    String[] expected = new String[] { "ENVELOPE", "(", "\"\"your website \\\"fluent.com\\\"\"\"",
+        ")", "Flags", "(", "\\Seen", ")" } ;
+
+    assertEquals(new ArrayList<String>(tokens), Arrays.asList(expected), "Tokens mismatched, expected: " + Arrays.asList(expected) + " got: " + tokens);
+  }
+
+  @Test
+  public final void testTokenizerWithQuotesAndEscaping() throws IOException, ParseException {
+    // raw:  ENVELOPE ("backslash quote \\\" and double backslash quote \\\\\" OK?")
+    Queue<String> tokens =Parsing.tokenize(
+        "ENVELOPE (\"backslash quote \\\\\\\" and double backslash quote \\\\\\\\\\\" OK?\")");
+
+    String[] expected = new String[] { "ENVELOPE", "(", "\"backslash quote \\\" and double backslash quote \\\\\" OK?\"", ")" } ;
+
+    assertEquals(new ArrayList<String>(tokens), Arrays.asList(expected), "Tokens mismatched, expected: " + Arrays.asList(expected) + " got: " + tokens);
+  }
+
   /**
    * WARNING: THIS TEST IS DATA-DEPENDENT!
    */
@@ -60,7 +83,7 @@ public class MessageStatusExtractorTest {
         new MessageStatusExtractor().extract(data);
 
     MessageStatus status = statuses.get(0);
-    assertEquals(statuses.size(), 17);
+    assertEquals(statuses.size(), 22);
     assertEquals(EnumSet.noneOf(Flag.class), status.getFlags());
     assertEquals("<BANLkTi=zC_UQExUuaNqiP0dJXoswDej1Ww@mail.gmail.com>", status.getMessageUid());
     assertEquals("Get Gmail on your mobile phone", status.getSubject());
@@ -79,7 +102,7 @@ public class MessageStatusExtractorTest {
     List<String> unfoldedAssertions = Lists.newArrayListWithCapacity(assertions.size());
     for (int i = 0; i < assertions.size(); i++) {
       String assertion = assertions.get(i);
-      if (!assertion.endsWith("}")) {
+      while (!assertion.endsWith("}")) {
         String next = assertions.get(i + 1);
         if (!next.startsWith("MessageStatus{")) {
           assertion += '\n' + next;

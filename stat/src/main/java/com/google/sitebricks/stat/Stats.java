@@ -1,25 +1,27 @@
 package com.google.sitebricks.stat;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
+import static com.google.common.base.Preconditions.checkState;
+
 /**
  * This class represents the collection of registered stats within an
- * application.  Its main roles are to act as a container for these stats, and
+ * injector. Its main roles are to act as a container for these stats, and
  * to provide access to them through its {@link #snapshot()} method.
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-final class Stats {
+@Singleton
+final class Stats implements StatsSnapshotter {
   private static final Logger logger =
       Logger.getLogger(Stats.class.getCanonicalName());
 
@@ -66,7 +68,8 @@ final class Stats {
     }
   }
 
-  ImmutableMap<StatDescriptor, Object> snapshot() {
+  @Override
+  public ImmutableMap<StatDescriptor, Object> snapshot() {
     checkState(injector != null,
         "Stats may not be snapshotted yet; injector has not been set");
     ImmutableMap.Builder<StatDescriptor, Object> builder =

@@ -30,6 +30,6 @@ public class ParsingTest {
     assertEquals(
         Parsing.readAddress(Parsing.tokenize(
             "(\"<newsletter=pukaraestate.com.au@mail85.us1.rsgsv.net>\" NIL \"\\\"Pukara Estate\\\"\" NIL)")),
-        "\"<newsletter=pukaraestate.com.au@mail85.us1.rsgsv.net>\" \\\"Pukara Estate\\\"@null");
+        "\"<newsletter=pukaraestate.com.au@mail85.us1.rsgsv.net>\" \"Pukara Estate\"@null");
   }
 }

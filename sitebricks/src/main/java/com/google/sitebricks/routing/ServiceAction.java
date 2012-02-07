@@ -23,7 +23,7 @@ public abstract class ServiceAction implements Action {
   }
 
   @Override
-  public final Object call(Object page, Map<String, String> map) {
+  public final Object call(Request request, Object page, Map<String, String> map) {
     return call(requestProvider.get(), map);
   }
 

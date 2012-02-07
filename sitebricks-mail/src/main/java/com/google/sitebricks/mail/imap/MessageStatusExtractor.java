@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -42,11 +41,17 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         continue;
 
       // Discard the success token.
-      if (Command.isEndOfSequence(message))
+
+      try {
+        if (Command.isEndOfSequence(message))
+          continue;
+      } catch (ExtractionException ee) {
+        log.error("Warning: error parsing email message status! {}", messages, ee);
         continue;
+      }
 
       // Appears that this message got split between lines. So unfold.
-      if (!message.endsWith(")")) {
+      while (!message.endsWith(")") && (i + 1 < messagesSize)) {
         String next = messages.get(i + 1);
         message = message + '\n' + next;
 
@@ -147,8 +152,15 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     status.setLabels(Sets.<String>newHashSet());
 
     // Check if there are labels to add.
-    while (!")".equals(tokens.peek())) {
+    while (!")".equals(tokens.peek())) { // \Inbox
       String token = tokens.poll();
+
+      // HACK: horrible hack!!!
+      // The original Parser incorrectly left escaped backslashes intact. We now
+      // emulate this by putting them back in...
+      // this code replaces all single backslashes (escaped here as "\\\\") to double backslashes.
+      token = token.replaceAll("\\\\", "\\\\\\\\");
+
       status.getLabels().add(token);
     }
     Parsing.eat(tokens, ")");
@@ -168,6 +180,8 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       } catch (ParseException e) {
         log.error("Malformed received date format {}. Unable to parse.", receivedDate, e);
       }
+    } else if (receivedDate != null) {
+      Parsing.eat(tokens, "NIL");
     }
 
     status.setSubject(Parsing.decode(Parsing.match(tokens, String.class)));
