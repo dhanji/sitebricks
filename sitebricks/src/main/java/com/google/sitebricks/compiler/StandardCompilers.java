@@ -1,5 +1,9 @@
 package com.google.sitebricks.compiler;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Map;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.sitebricks.Bricks;
@@ -9,16 +13,14 @@ import com.google.sitebricks.Show;
 import com.google.sitebricks.Template;
 import com.google.sitebricks.TemplateLoader;
 import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
+import com.google.sitebricks.compiler.template.VelocityEngineProvider;
+import com.google.sitebricks.compiler.template.VelocityTemplateCompiler;
 import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.rendering.Decorated;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Map;
 
 /**
  * A factory for internal template compilers.
@@ -32,15 +34,17 @@ class StandardCompilers implements Compilers {
   private final SystemMetrics metrics;
   private final Map<String, Class<? extends Annotation>> httpMethods;
   private final TemplateLoader loader;
+private final VelocityEngineProvider velocityEngineProvider;
 
   @Inject
   public StandardCompilers(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics,
-                           @Bricks Map<String, Class<? extends Annotation>> httpMethods, TemplateLoader loader) {
+                           @Bricks Map<String, Class<? extends Annotation>> httpMethods, TemplateLoader loader, VelocityEngineProvider velocityEngineProvider) {
     this.registry = registry;
     this.pageBook = pageBook;
     this.metrics = metrics;
     this.httpMethods = httpMethods;
     this.loader = loader;
+	this.velocityEngineProvider = velocityEngineProvider;
   }
 
   public Renderable compileXml(Class<?> page, String template) {
@@ -66,6 +70,11 @@ class StandardCompilers implements Compilers {
 
   public Renderable compileFreemarker( Class<?> page, String template ) {
     return new FreemarkerTemplateCompiler(page).compile(template);
+  }
+  
+  @Override
+  public Renderable compileVelocity(Class<?> page, String template) {
+      return new VelocityTemplateCompiler(velocityEngineProvider).compile(template);
   }
 
   // TODO(dhanji): Feedback errors as return rather than throwing.
@@ -151,8 +160,10 @@ class StandardCompilers implements Compilers {
       case FREEMARKER:
         widget = compileFreemarker(templateClass, template.getText());
         break;
+      case VELOCITY:
+    	widget = compileVelocity(templateClass, template.getText());
+        break;
     }
     return widget;
   }
-
 }
