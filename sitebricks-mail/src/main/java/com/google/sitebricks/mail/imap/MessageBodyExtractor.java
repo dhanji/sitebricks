@@ -54,6 +54,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   private static final Map<String, String> CONVERTIBLE_CHARSETS = Maps.newHashMap();
   private static final Map<String, String> CONVERTIBLE_ENCODINGS = Maps.newHashMap();
   private static final String SEVEN_BIT = "7bit";
+  private static final String EIGHT_BIT = "8bit";
   private static final String UTF_8 = "UTF-8";
 
   static {
@@ -432,7 +433,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
           // encoded body.
         }
         rfc822iterator = decode(rfc822msg, "quoted-printable", charset(mimeType)).listIterator();
-      } else if(SEVEN_BIT.equals(bodyEncoding)) {
+      } else if(SEVEN_BIT.equals(bodyEncoding) || EIGHT_BIT.equals(bodyEncoding) || "binary".equals(bodyEncoding)) {
         // No decoding needed.
 
       } else {
