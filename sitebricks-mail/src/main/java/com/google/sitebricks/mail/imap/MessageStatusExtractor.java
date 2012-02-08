@@ -1,5 +1,6 @@
 package com.google.sitebricks.mail.imap;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.joda.time.format.DateTimeFormat;
@@ -50,11 +51,13 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         continue;
       }
 
-      // Appears that this message got split between lines. So unfold.
-      while (!message.endsWith(")") && (i + 1 < messagesSize)) {
+      // The only newlines allowed are inside strings, so check whether the message
+      // might have been split between lines and unfold as appropriate.
+      boolean isUnterminatedString = isUnterminatedString(message, false);
+      while (isUnterminatedString && (i + 1 < messagesSize)) {
         String next = messages.get(i + 1);
         message = message + '\n' + next;
-
+        isUnterminatedString = isUnterminatedString(next, isUnterminatedString);
         // Skip next.
         i++;
       }
@@ -65,6 +68,32 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     return statuses;
   }
 
+  /**
+   Check for string termination, will check for quote escaping, but only if it's escaped
+   within a string... otherwise it's illegal and we'll treat it as a regular quote.
+   A trailing backslash indicates a \CRLF was received (as envisaged in RFC 822 3.4.5).
+   */
+  @VisibleForTesting
+  static boolean isUnterminatedString(String message, boolean alreadyInString) {
+    boolean escaped = false;
+    boolean inString = alreadyInString;
+    for (int i = 0; i < message.length(); i++) {
+      final char c = message.charAt(i);
+      if (inString) {
+        if (c == '\\') {
+          escaped = !escaped;
+        } else if (c == '"') {
+          if (!escaped)
+            inString = false;
+          escaped = false;
+        } else
+          escaped = false;
+      } else
+        inString = c == '"';
+    }
+    return inString;
+  }
+  
   private static MessageStatus parseStatus(String message) {
     Queue<String> tokens = Parsing.tokenize(message);
     MessageStatus status = new MessageStatus();

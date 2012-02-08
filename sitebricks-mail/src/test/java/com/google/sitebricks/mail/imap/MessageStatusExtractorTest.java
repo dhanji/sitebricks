@@ -1,6 +1,7 @@
 package com.google.sitebricks.mail.imap;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import org.testng.annotations.Test;
@@ -43,6 +44,48 @@ public class MessageStatusExtractorTest {
     assertEquals(new ArrayList<String>(tokens), Arrays.asList(expected), "Tokens mismatched, expected: " + expected + " got: " + tokens);
   }
 
+  private void assertUnterminated(boolean expected, String s, boolean alreadyInString) {
+    assertEquals(MessageStatusExtractor.isUnterminatedString(s, alreadyInString), expected);
+  }
+
+  @Test
+  public void testUnterminatedString() throws Exception {
+    assertUnterminated(true, "fo\"o", false);
+    assertUnterminated(false, "fo\"o", true);
+
+    assertUnterminated(false, "end\" \"start", false);
+    assertUnterminated(true, "end\" \"start", true);
+    assertUnterminated(false, "end\" \"", false);
+
+    assertUnterminated(false, " \"start\\\"quoted\\\" end\" ", false);
+    assertUnterminated(false, " \"start\\\"quote end\" ", false);
+
+    assertUnterminated(true, " \"start\\\"quote end\" \"start", false);
+
+    assertUnterminated(false, "fo\\ \"o", true);
+    assertUnterminated(true, "fo\\ \"o", false);
+
+    assertUnterminated(false, " \"start triple backslash quote \\\\\\\" end\"", false);
+    assertUnterminated(true, " \"start double backslash quote end\\\\\" \"start", false);
+  }
+
+  @Test
+  public void testTrickyHeader() throws Exception {
+    List<String> header = ImmutableList.of("* 129233 FETCH (X-GM-THRID 66666666666666 " +
+        "X-GM-MSGID 66666666666666 X-GM-LABELS (error) UID 666666 RFC822.SIZE " +
+        "6757 INTERNALDATE \"20-Sep-2011 13:05:10 +0000\" FLAGS (\\Seen) ENVELOPE (\"Tue, 20 Sep 2011 13:12:09 +0000\" " +
+        "\"start on\\\" one line",
+        "continue on next (with bracket)",
+        " end on second line\" ((NIL NIL \"errorboss\" \"sitebricks.org\")) ((NIL NIL \"errorboss\" \"sitebricks.org\")) " +
+            "((NIL NIL \"errorboss\" \"sitebricks.org\")) ((NIL NIL \"errorboss\" \"sitebricks.org\")) NIL NIL NIL" +
+            " \"<66666666666666666@foobar.com>\"))");
+
+    MessageStatusExtractor mse = new MessageStatusExtractor();
+    List<MessageStatus> statuses = mse.extract(header);
+    assertEquals(statuses.size(), 1);
+    assertEquals(statuses.get(0).getSubject(), "start on\" one line\ncontinue on next (with bracket)\n end on second line");
+  }
+
   @Test
   public final void testTokenizerWithDoubleEscaping() throws IOException, ParseException {
     // raw: "\"your website \\\"cenqua.com\\\"\""
@@ -83,7 +126,7 @@ public class MessageStatusExtractorTest {
         new MessageStatusExtractor().extract(data);
 
     MessageStatus status = statuses.get(0);
-    assertEquals(statuses.size(), 22);
+    assertEquals(statuses.size(), 24);
     assertEquals(EnumSet.noneOf(Flag.class), status.getFlags());
     assertEquals("<BANLkTi=zC_UQExUuaNqiP0dJXoswDej1Ww@mail.gmail.com>", status.getMessageUid());
     assertEquals("Get Gmail on your mobile phone", status.getSubject());
