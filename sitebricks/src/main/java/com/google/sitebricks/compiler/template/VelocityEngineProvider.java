@@ -25,7 +25,8 @@ public class VelocityEngineProvider implements Provider<VelocityEngine> {
             throw new RuntimeException(e);
         }
 
-        return new VelocityEngine(properties);
+        VelocityEngine velocityEngine = new VelocityEngine(properties);
+        return velocityEngine;
     }
 
 }

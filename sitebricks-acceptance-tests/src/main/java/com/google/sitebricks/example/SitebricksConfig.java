@@ -23,6 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.velocity.runtime.directive.VelocimacroProxy;
+
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
@@ -110,6 +112,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
 
         // templating by extension
         at("/template").show(DecoratedPage.class);
+        at("/velocitySample").show(VelocitySample.class);
 
         embed(HelloWorld.class).as("Hello");
       }

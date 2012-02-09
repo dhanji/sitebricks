@@ -14,10 +14,12 @@ import com.google.sitebricks.Respond;
 public class VelocityTemplateCompiler {
 
     private final VelocityEngineProvider provider;
+    private final VelocityContextProvider velocityContextProvider;
 
     @Inject
-    public VelocityTemplateCompiler(VelocityEngineProvider provider) {
+    public VelocityTemplateCompiler(VelocityEngineProvider provider, VelocityContextProvider velocityContextProvider) {
         this.provider = provider;
+        this.velocityContextProvider = velocityContextProvider;
     }
 
     public Renderable compile(final String templateContent) {
@@ -26,7 +28,7 @@ public class VelocityTemplateCompiler {
 
             @Override
             public void render(Object bound, Respond respond) {
-                final VelocityContext context = new VelocityContext();
+              VelocityContext context = velocityContextProvider.get();
                 context.put("page", bound);
                 StringWriter writer = new StringWriter();
                 provider.get().evaluate(context, writer, "", templateContent);
