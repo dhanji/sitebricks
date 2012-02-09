@@ -183,7 +183,7 @@ public class MessageStatus {
         ", bcc=" + bcc +
         ", replyTo=" + replyTo +
         ", flags=" + flags +
-        ", internalDate=" + ISO_C_DATE_SYDNEY.format(internalDate) +
+        ", internalDate=" + (internalDate == null ? "null" : ISO_C_DATE_SYDNEY.format(internalDate)) +
         ", size=" + size +
 
         ((threadId != null) ?
