@@ -175,17 +175,23 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   private ListIterator<String> selectLengthBasedSection(ListIterator<String> iterator, long msgSize) throws ParseException {
     // Trim the message according to the length, and get on with parsing.
     List<String> lengthTruncated = Lists.newLinkedList();
-    long len = 0;
     int lines = 0;
-
     try {
+      long len = 0;
+      String s = "";
       while (iterator.hasNext()) {
-        String s = iterator.next();
+        String last = s;
+        s = iterator.next();
         lines++;
         len += s.length();
-        if (len > msgSize) {
+        if (len <= msgSize) {
           lengthTruncated.add(s);
+          len += 2;
+        } else {
           if (!s.endsWith(")")) {
+            if (EOS_REGEX.matcher(s).matches() && last.endsWith(")")) // Seen in wild, when length is under-estimated.
+              break;
+
             log.info("Invalid email length passed len:{} size:{} s:\"{}\"", new Object[]{len, msgSize, s});
             iterator.previous();
             iterator.previous();
@@ -194,11 +200,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
             throw new ParseException("Invalid email length passed, actual len: " + len + " msg size: " + msgSize +
                 " s: \"" + s + "\". Reverting to default parsing", lines);
           }
-          break;
-        } else {
           lengthTruncated.add(s);
+          break;
         }
-        len += 2;
       }
   
       return lengthTruncated.listIterator();
@@ -233,7 +237,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       try {
         size = Long.parseLong(sizeString.substring(1, sizeString.length() - 1));
       } catch(NumberFormatException e) {
-        log.error("Internal error: regex match should never have passed invalid number string: {}", sizeString);
+        log.warn("Internal error: regex match should never have passed invalid number string: {}", sizeString);
         moreErrorInfo = true;
       }
     }
@@ -244,7 +248,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       try {
         iterator = selectLengthBasedSection(iterator, size);
       } catch (ParseException e) {
-        log.error(e.getMessage());
+        log.warn(e.getMessage());
         gropeForTruncator = true;
         moreErrorInfo = true;
       }
