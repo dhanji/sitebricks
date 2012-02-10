@@ -6,7 +6,6 @@ import com.google.inject.Guice;
 import com.google.sitebricks.mail.Mail.Auth;
 import com.google.sitebricks.mail.MailClient.WireError;
 import com.google.sitebricks.mail.imap.Folder;
-import com.google.sitebricks.mail.imap.FolderStatus;
 import com.google.sitebricks.mail.imap.MessageStatus;
 
 import java.util.List;
@@ -51,7 +50,7 @@ public class MailClientIntegrationTest {
     List<String> capabilities = client.capabilities();
     System.out.println("CAPS: " + capabilities);
 
-    System.out.println("FOLDERS: " + client.listFolders().get());
+//    System.out.println("FOLDERS: " + client.listFolders().get());
 //    try {
 //      Folder f = client.open("Thumping through the brush.", false).get();
 //      System.out.println("Expected failure attempting to open invalid folder.");
@@ -59,20 +58,20 @@ public class MailClientIntegrationTest {
 //      // expected.
 //    }
 
-    final ListenableFuture<FolderStatus> fStatus =
-        client.statusOf("[Gmail]/All Mail");
+//    final ListenableFuture<FolderStatus> fStatus =
+//        client.statusOf("[Gmail]/All Mail");
     ListenableFuture<Folder> future = client.open("[Gmail]/All Mail", true);
     final Folder allMail = future.get();
-    final FolderStatus folderStatus = fStatus.get();
-    System.out
-        .println("Folder opened: " + allMail.getName() + " with count " + folderStatus.getMessages());
+//    final FolderStatus folderStatus = fStatus.get();
+//    System.out
+//        .println("Folder opened: " + allMail.getName() + " with count " + folderStatus.getMessages());
 
     final ExecutorService executor = Executors.newCachedThreadPool();
     future.addListener(new Runnable() {
       @Override
       public void run() {
         final ListenableFuture<List<MessageStatus>> messageStatuses =
-            client.listUidThin(allMail, allMail.getCount() - 1 , -1);
+            client.listUidThin(allMail, allMail.getNextUid() - 2 , -1);
 
         try {
           for (MessageStatus messageStatus : messageStatuses.get()) {
