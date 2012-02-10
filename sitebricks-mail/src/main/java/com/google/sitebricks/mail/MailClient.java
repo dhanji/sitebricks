@@ -85,6 +85,15 @@ public interface MailClient {
   ListenableFuture<List<MessageStatus>> list(Folder folder, int start, int end);
 
   /**
+   * <p>
+   * Exactly the same as {@link #list(com.google.sitebricks.mail.imap.Folder, int, int)}
+   * except the range specified is in IMAP UID, rather than sequence number.
+   * <p>
+   * <b>NOTE: you must call {@link #open(String)} first.</b>
+   */
+  ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, int start, int end);
+
+  /**
    * Adds flags to a range of messages.
    *
    * @return the new flags on the message, null on failure.

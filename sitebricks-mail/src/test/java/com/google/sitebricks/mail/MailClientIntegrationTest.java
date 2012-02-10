@@ -7,7 +7,6 @@ import com.google.sitebricks.mail.Mail.Auth;
 import com.google.sitebricks.mail.MailClient.WireError;
 import com.google.sitebricks.mail.imap.Folder;
 import com.google.sitebricks.mail.imap.FolderStatus;
-import com.google.sitebricks.mail.imap.Message;
 import com.google.sitebricks.mail.imap.MessageStatus;
 
 import java.util.List;
@@ -73,51 +72,51 @@ public class MailClientIntegrationTest {
       @Override
       public void run() {
         final ListenableFuture<List<MessageStatus>> messageStatuses =
-            client.list(allMail, folderStatus.getMessages() , -1);
+            client.listUidThin(allMail, allMail.getCount() - 1 , -1);
 
         try {
           for (MessageStatus messageStatus : messageStatuses.get()) {
             System.out.println(messageStatus);
           }
 
-          final ListenableFuture<Message> msgFuture =
-              client.fetchUid(allMail, messageStatuses.get().iterator().next().getImapUid());
+//          final ListenableFuture<Message> msgFuture =
+//              client.fetchUid(allMail, messageStatuses.get().iterator().next().getImapUid());
 
-          msgFuture.addListener(new Runnable() {
-            @Override
-            public void run() {
-              try {
-                Message message = msgFuture.get();
-                //            System.out.println(ToStringBuilder.reflectionToString(message));
-                for (Message.BodyPart bodyPart : message.getBodyParts()) {
-                  //              System.out.println(ToStringBuilder.reflectionToString(bodyPart));
-                }
-
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>");
-                System.out.println(message.getImapUid());
-                System.out.println(message.getHeaders().get("Message-ID"));
-                System.out.println(message.getHeaders());
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
-
-//                System.out.println("Gmail flags set: " +
-//                    client.addFlags(allMail, message.getImapUid(),
-//                        ImmutableSet.of(Flag.SEEN)).get());
-
-                System.out
-                    .println("Matched UID: " + (message.getImapUid() == messageStatuses.get()
-                        .iterator()
-                        .next()
-                        .getImapUid()));
-                System.out.println("Fetched: " + message);
-
-                client.disconnect();
-              } catch (InterruptedException e) {
-                e.printStackTrace();
-              } catch (ExecutionException e) {
-                e.printStackTrace();
-              }
-            }
-          }, executor);
+//          msgFuture.addListener(new Runnable() {
+//            @Override
+//            public void run() {
+//              try {
+//                Message message = msgFuture.get();
+//                //            System.out.println(ToStringBuilder.reflectionToString(message));
+//                for (Message.BodyPart bodyPart : message.getBodyParts()) {
+//                  //              System.out.println(ToStringBuilder.reflectionToString(bodyPart));
+//                }
+//
+//                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>");
+//                System.out.println(message.getImapUid());
+//                System.out.println(message.getHeaders().get("Message-ID"));
+//                System.out.println(message.getHeaders());
+//                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
+//
+////                System.out.println("Gmail flags set: " +
+////                    client.addFlags(allMail, message.getImapUid(),
+////                        ImmutableSet.of(Flag.SEEN)).get());
+//
+//                System.out
+//                    .println("Matched UID: " + (message.getImapUid() == messageStatuses.get()
+//                        .iterator()
+//                        .next()
+//                        .getImapUid()));
+//                System.out.println("Fetched: " + message);
+//
+//                client.disconnect();
+//              } catch (InterruptedException e) {
+//                e.printStackTrace();
+//              } catch (ExecutionException e) {
+//                e.printStackTrace();
+//              }
+//            }
+//          }, executor);
 
         } catch (InterruptedException e) {
           e.printStackTrace();

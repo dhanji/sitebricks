@@ -17,6 +17,7 @@ public enum Command {
   FOLDER_OPEN("select"),
   FOLDER_EXAMINE("examine"),
   FETCH_HEADERS("fetch"),
+  FETCH_THIN_HEADERS_UID("uid fetch"),
   IDLE("idle"),
   STORE_FLAGS("uid store"),
   STORE_LABELS("uid store");
@@ -73,6 +74,7 @@ public enum Command {
     dataExtractors.put(FOLDER_OPEN, new OpenFolderExtractor());
     dataExtractors.put(FOLDER_EXAMINE, new OpenFolderExtractor());
     dataExtractors.put(FETCH_HEADERS, new MessageStatusExtractor());
+    dataExtractors.put(FETCH_THIN_HEADERS_UID, new MessageStatusExtractor());
     dataExtractors.put(FETCH_BODY, new MessageBodyExtractor());
     dataExtractors.put(FETCH_BODY_UID, new SingleMessageBodyExtractor());
     dataExtractors.put(STORE_FLAGS, new StoreFlagsResponseExtractor());

@@ -320,7 +320,7 @@ class NettyImapClient implements MailClient, Idler {
     checkCurrentFolder(folder);
     checkRange(start, end);
     Preconditions.checkArgument(start > 0, "Start must be greater than zero (IMAP uses 1-based " +
-        "indexing)");
+            "indexing)");
     SettableFuture<List<MessageStatus>> valueFuture = SettableFuture.create();
 
     // -ve end range means get everything (*).
@@ -328,6 +328,27 @@ class NettyImapClient implements MailClient, Idler {
     String args = start + ":" + toUpperBound(end) + " (RFC822.SIZE INTERNALDATE FLAGS ENVELOPE"
         + extensions + ")";
     send(Command.FETCH_HEADERS, args, valueFuture);
+
+    return valueFuture;
+  }
+
+  @Override
+  public ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, int start, int end) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
+        "Can't execute command while idling (are you watching a folder?)");
+
+    checkCurrentFolder(folder);
+    checkRange(start, end);
+    Preconditions.checkArgument(start > 0, "Start must be greater than zero (IMAP uses 1-based " +
+        "indexing)");
+    SettableFuture<List<MessageStatus>> valueFuture = SettableFuture.create();
+
+    // -ve end range means get everything (*).
+    String extensions = config.useGmailExtensions() ? " X-GM-MSGID X-GM-THRID X-GM-LABELS UID" : "";
+    String args = start + ":" + toUpperBound(end) + " (FLAGS"
+        + extensions + ")";
+    send(Command.FETCH_THIN_HEADERS_UID, args, valueFuture);
 
     return valueFuture;
   }
