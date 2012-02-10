@@ -1,0 +1,6 @@
+USERNAME="<your username here>"
+PASSWORD="<your password here>"
+mvn test-compile dependency:build-classpath -Dmdep.outputFile="./._classpath" -Dmdep.regenerateFile -DincludeScope="runtime"
+CLASSPATH=`cat ./._classpath`:target/classes:target/test-classes
+java -Dsitebricks-mail.username="$USERNAME" -Dsitebricks-mail.password="$PASSWORD" -classpath $CLASSPATH com.google.sitebricks.mail.MailClientIntegrationTest $*
+rm ._classpath

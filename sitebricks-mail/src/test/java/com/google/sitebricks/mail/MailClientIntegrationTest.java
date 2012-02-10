@@ -6,9 +6,10 @@ import com.google.inject.Guice;
 import com.google.sitebricks.mail.Mail.Auth;
 import com.google.sitebricks.mail.MailClient.WireError;
 import com.google.sitebricks.mail.imap.Folder;
-import com.google.sitebricks.mail.imap.MessageStatus;
+import com.google.sitebricks.mail.imap.Message;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -66,57 +67,67 @@ public class MailClientIntegrationTest {
 //    System.out
 //        .println("Folder opened: " + allMail.getName() + " with count " + folderStatus.getMessages());
 
+
+
     final ExecutorService executor = Executors.newCachedThreadPool();
     future.addListener(new Runnable() {
       @Override
       public void run() {
-        final ListenableFuture<List<MessageStatus>> messageStatuses =
-            client.listUidThin(allMail, allMail.getNextUid() - 2 , -1);
+//        final ListenableFuture<List<MessageStatus>> messageStatuses =
+//            client.listUidThin(allMail, allMail.getCount() - 1, -1);
 
         try {
-          for (MessageStatus messageStatus : messageStatuses.get()) {
-            System.out.println(messageStatus);
+//          for (MessageStatus messageStatus : messageStatuses.get()) {
+//            System.out.println(messageStatus);
+//          }
+
+          fetchUidAndDump(client, allMail, 33287, executor).await();
+          fetchUidAndDump(client, allMail, 33288, executor).await();
+          client.disconnect();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+//        } catch (ExecutionException e) {
+//          e.printStackTrace();
+        }
+      }
+    }, executor);
+  }
+
+  private static CountDownLatch fetchUidAndDump(final MailClient client, Folder allMail, int uid,
+                                                ExecutorService executor) {
+    final ListenableFuture<Message> msgFuture = client.fetchUid(allMail, uid);
+
+    final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    msgFuture.addListener(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          Message message = msgFuture.get();
+          //            System.out.println(ToStringBuilder.reflectionToString(message));
+          for (Message.BodyPart bodyPart : message.getBodyParts()) {
+            //              System.out.println(ToStringBuilder.reflectionToString(bodyPart));
           }
 
-//          final ListenableFuture<Message> msgFuture =
-//              client.fetchUid(allMail, messageStatuses.get().iterator().next().getImapUid());
+          System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>");
+          System.out.println(message.getImapUid());
+          System.out.println(message.getHeaders().get("Message-ID"));
+          System.out.println(message.getHeaders());
+          System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
 
-//          msgFuture.addListener(new Runnable() {
-//            @Override
-//            public void run() {
-//              try {
-//                Message message = msgFuture.get();
-//                //            System.out.println(ToStringBuilder.reflectionToString(message));
-//                for (Message.BodyPart bodyPart : message.getBodyParts()) {
-//                  //              System.out.println(ToStringBuilder.reflectionToString(bodyPart));
-//                }
-//
-//                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>");
-//                System.out.println(message.getImapUid());
-//                System.out.println(message.getHeaders().get("Message-ID"));
-//                System.out.println(message.getHeaders());
-//                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>\n\n\n");
-//
-////                System.out.println("Gmail flags set: " +
-////                    client.addFlags(allMail, message.getImapUid(),
-////                        ImmutableSet.of(Flag.SEEN)).get());
-//
+//                System.out.println("Gmail flags set: " +
+//                    client.addFlags(allMail, message.getImapUid(),
+//                        ImmutableSet.of(Flag.SEEN)).get());
+
 //                System.out
 //                    .println("Matched UID: " + (message.getImapUid() == messageStatuses.get()
 //                        .iterator()
 //                        .next()
 //                        .getImapUid()));
 //                System.out.println("Fetched: " + message);
-//
-//                client.disconnect();
-//              } catch (InterruptedException e) {
-//                e.printStackTrace();
-//              } catch (ExecutionException e) {
-//                e.printStackTrace();
-//              }
-//            }
-//          }, executor);
+          dumpBodyParts(message.getBodyParts(), "");
 
+          countDownLatch.countDown();
         } catch (InterruptedException e) {
           e.printStackTrace();
         } catch (ExecutionException e) {
@@ -124,5 +135,19 @@ public class MailClientIntegrationTest {
         }
       }
     }, executor);
+    return countDownLatch;
+  }
+  
+  private static void dumpBodyParts(List<Message.BodyPart> parts, String indent) {
+    if (parts != null) {
+      for (Message.BodyPart part : parts) {
+        if (part != null) {
+          System.out.println(indent + "Body part:");
+          System.out.println(indent + part.getHeaders().entries());
+          System.out.println(indent + part.getBody());
+          dumpBodyParts(part.getBodyParts(), indent + ">>>>");
+        }
+      }
+    }
   }
 }
