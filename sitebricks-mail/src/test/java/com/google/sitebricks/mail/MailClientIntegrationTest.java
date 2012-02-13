@@ -81,8 +81,8 @@ public class MailClientIntegrationTest {
 //            System.out.println(messageStatus);
 //          }
 
-          fetchUidAndDump(client, allMail, 33287, executor).await();
-          fetchUidAndDump(client, allMail, 33288, executor).await();
+          fetchUidAndDump(client, allMail, 33285, executor).await();
+//          fetchUidAndDump(client, allMail, 33288, executor).await();
           client.disconnect();
         } catch (InterruptedException e) {
           e.printStackTrace();
