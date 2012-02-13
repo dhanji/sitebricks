@@ -274,7 +274,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   }
 
   static String mimeType(Multimap<String, String> headers) {
-    Collection<String> mimeType = Parsing.getKeyVariations(headers, "Content-Type", "Content-type");
+    Collection<String> mimeType = Parsing.getKeyVariations(headers, "Content-Type", "Content-type", "content-type");
     if (mimeType.isEmpty())
       return "text/plain";    // Default to text plain mimetype.
     return Parsing.stripQuotes(mimeType.iterator().next().toLowerCase().trim()).trim();
@@ -284,7 +284,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     if (null == entity.getHeaders())
       return SEVEN_BIT;
     Collection<String> values = Parsing.getKeyVariations(entity.getHeaders(), "Content-Transfer-Encoding",
-        "Content-transfer-encoding", "Content-Transfer-encoding");
+        "Content-transfer-encoding", "Content-Transfer-encoding", "content-transfer-encoding");
     if (values.isEmpty())
       return SEVEN_BIT;
 
@@ -317,7 +317,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
   private static boolean isAttachment(Multimap<String, String> headers) {
     Collection<String> values = Parsing.getKeyVariations(headers, "Content-Disposition",
-        "Content-disposition");
+        "Content-disposition", "content-disposition");
     if (values.isEmpty())
       return false;
 

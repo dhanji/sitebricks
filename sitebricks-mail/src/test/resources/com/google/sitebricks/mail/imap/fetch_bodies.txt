@@ -810,3 +810,23 @@ Subject: test invalid email length succeeds
 the message body
 )
 45989 OK Success
+* 45990 FETCH (UID 1022 BODY[] {999999999999999999}
+Delivered-To: jochen@bekmann.com
+Date: Thu, 5 Jan 2012 23:11:52 +0000 (UTC)
+From: "Dhanji R. Prasanna" <dhanji@gmail.com>
+Reply-To: dhanji@gmail.com
+To: jochen@bekmann.com
+Message-ID: <foobar@fluent.io>
+Subject: multipart body lower case content type encoding
+Content-Type: multipart/alternative;
+  	boundary="_000_289F6410F290174FA1E7F2B0A50DC0550C35D307F0EXMBSYD2ffxjf_"
+
+--_000_289F6410F290174FA1E7F2B0A50DC0550C35D307F0EXMBSYD2ffxjf_
+Content-Type: text/plain; charset="utf-8"
+content-transfer-encoding: base64
+
+aGkKCg==
+
+--_000_289F6410F290174FA1E7F2B0A50DC0550C35D307F0EXMBSYD2ffxjf_--
+)
+45990 OK Success
