@@ -1,6 +1,7 @@
 package com.google.sitebricks.mail;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.sitebricks.mail.imap.*;
@@ -334,26 +335,38 @@ class NettyImapClient implements MailClient, Idler {
 
   @Override
   public ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, int start, int end) {
-    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
-        "Can't execute command while idling (are you watching a folder?)");
-
-    checkCurrentFolder(folder);
-    checkRange(start, end);
-    Preconditions.checkArgument(start > 0, "Start must be greater than zero (IMAP uses 1-based " +
-        "indexing)");
-    SettableFuture<List<MessageStatus>> valueFuture = SettableFuture.create();
-
-    // -ve end range means get everything (*).
-    String extensions = config.useGmailExtensions() ? " X-GM-MSGID X-GM-THRID X-GM-LABELS UID" : "";
-    String args = start + ":" + toUpperBound(end) + " (FLAGS"
-        + extensions + ")";
-    send(Command.FETCH_THIN_HEADERS_UID, args, valueFuture);
-
-    return valueFuture;
+    return listUidThin(folder, ImmutableList.of(new Sequence(start, end)));
   }
 
-  private static void checkRange(int start, int end) {
+    @Override
+    public ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, List<Sequence> sequences) {
+      Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
+      Preconditions.checkState(!mailClientHandler.idleRequested.get(),
+              "Can't execute command while idling (are you watching a folder?)");
+
+      checkCurrentFolder(folder);
+      SettableFuture<List<MessageStatus>> valueFuture = SettableFuture.create();
+
+      // -ve end range means get everything (*).
+      String extensions = config.useGmailExtensions() ? " X-GM-MSGID X-GM-THRID X-GM-LABELS UID" : "";
+      StringBuilder argsBuilder = new StringBuilder();
+
+      // Emit ranges.
+      for (int i = 0, sequencesSize = sequences.size(); i < sequencesSize; i++) {
+          Sequence seq = sequences.get(i);
+          argsBuilder.append(toUpperBound(seq.start));
+          if (seq.end != 0)
+              argsBuilder.append(':').append(toUpperBound(seq.end));
+          if (i < sequencesSize - 1)
+              argsBuilder.append(',');
+      }
+      argsBuilder.append(" (FLAGS" + extensions + ")");
+      send(Command.FETCH_THIN_HEADERS_UID, argsBuilder.toString(), valueFuture);
+
+      return valueFuture;
+    }
+
+    private static void checkRange(int start, int end) {
     Preconditions.checkArgument(start <= end || end == -1, "Start must be <= end");
   }
 

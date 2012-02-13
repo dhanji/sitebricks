@@ -1,5 +1,6 @@
 package com.google.sitebricks.mail;
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.sitebricks.mail.imap.*;
 
@@ -92,6 +93,8 @@ public interface MailClient {
    * <b>NOTE: you must call {@link #open(String)} first.</b>
    */
   ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, int start, int end);
+
+  ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, List<Sequence> sequences);
 
   /**
    * Adds flags to a range of messages.
@@ -224,5 +227,27 @@ public interface MailClient {
     List<String> trace();
     String expected();
     String toString();
+  }
+
+  public static class Sequence {
+    public final int start;
+    public final int end;
+
+    /**
+     * A range of uids or seq number. Specify -1 for wildcard for either bound.
+     * An end of 0 indicates
+     */
+    public Sequence(int start, int end) {
+      Preconditions.checkArgument(start != 0, "Start of range cannot be 0");
+      this.start = start;
+      this.end = end;
+    }
+
+    /**
+     * A single number to fetch.
+     */
+    public Sequence(int start) {
+      this(start, 0);
+    }
   }
 }
