@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class NettyImapClient implements MailClient, Idler {
+public class NettyImapClient implements MailClient, Idler {
   private static final Logger log = LoggerFactory.getLogger(NettyImapClient.class);
 
   // For debugging, use with caution!
@@ -63,6 +63,10 @@ class NettyImapClient implements MailClient, Idler {
   // For debugging, use with caution!
   public static void addUserForVerboseOutput(String username, boolean toStdOut) {
     logAllMessagesForUsers.put(username, toStdOut);
+  }
+
+  public static void addUserForVerboseLogging(String username, boolean toStdOut) {
+    MailClientHandler.addUserForVerboseLogging(username, toStdOut);
   }
 
   public boolean isConnected() {
