@@ -115,12 +115,14 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
   }
 
   private void extendedPages(Set<Page> pagesToCompile) {
+    Set<Page> pageExtensions = Sets.newHashSet();
     for (Page page : pagesToCompile) {
       if (page.pageClass().isAnnotationPresent(Decorated.class)) {
         // recursively add extension pages
-        analyseExtension(pagesToCompile, page.pageClass());
+        analyseExtension(pageExtensions, page.pageClass());
       }
     }
+    pagesToCompile.addAll(pageExtensions);
   }
 
   //processes all explicit bindings, including static resources.
@@ -206,8 +208,9 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
     return pagesToCompile;
   }
 
-  private void analyseExtension(Set<PageBook.Page> pagesToCompile, Class<?> extendClass) {
+  private void analyseExtension(Set<PageBook.Page> pagesToCompile, final Class<?> extendClassArgument) {
     // store the page with a special page name used by ExtendWidget
+    Class<?> extendClass = extendClassArgument;
     pagesToCompile.add(pageBook.decorate(extendClass));
     
     // recursively analyse super class
@@ -221,7 +224,7 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
         return;
       }
     }
-    throw new IllegalStateException("Could not find super class annotated with @Show");
+    throw new IllegalStateException("Could not find super class annotated with @Show on parent of class: " + extendClassArgument);
   }
 
   private void compilePages(Set<PageBook.Page> pagesToCompile) {
