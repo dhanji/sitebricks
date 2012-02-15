@@ -26,7 +26,6 @@ class OpenFolderExtractor implements Extractor<Folder> {
         int left = message.indexOf(pieces[2]) + pieces[2].length();
         folderName = message.substring(left, message.indexOf(SELECTED)).trim();
       } else {
-          System.out.println("Matching: " + message);
         Matcher matcher = UIDNEXT_REGEX.matcher(message);
         if (matcher.find()) {
           String uidNext = matcher.group(1);

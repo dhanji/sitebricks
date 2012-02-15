@@ -7,6 +7,7 @@ import com.google.sitebricks.mail.Mail.Auth;
 import com.google.sitebricks.mail.MailClient.WireError;
 import com.google.sitebricks.mail.imap.Folder;
 import com.google.sitebricks.mail.imap.Message;
+import com.google.sitebricks.mail.imap.MessageStatus;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -73,21 +74,21 @@ public class MailClientIntegrationTest {
     future.addListener(new Runnable() {
       @Override
       public void run() {
-//        final ListenableFuture<List<MessageStatus>> messageStatuses =
-//            client.listUidThin(allMail, allMail.getCount() - 1, -1);
+        final ListenableFuture<List<MessageStatus>> messageStatuses =
+            client.listUidThin(allMail, allMail.getCount() - 1, -1);
 
         try {
-//          for (MessageStatus messageStatus : messageStatuses.get()) {
-//            System.out.println(messageStatus);
-//          }
+          for (MessageStatus messageStatus : messageStatuses.get()) {
+            System.out.println(messageStatus);
+          }
 
-          fetchUidAndDump(client, allMail, 33285, executor).await();
+//          fetchUidAndDump(client, allMail, 33285, executor).await();
 //          fetchUidAndDump(client, allMail, 33288, executor).await();
           client.disconnect();
         } catch (InterruptedException e) {
           e.printStackTrace();
-//        } catch (ExecutionException e) {
-//          e.printStackTrace();
+        } catch (ExecutionException e) {
+          e.printStackTrace();
         }
       }
     }, executor);
@@ -137,7 +138,7 @@ public class MailClientIntegrationTest {
     }, executor);
     return countDownLatch;
   }
-  
+
   private static void dumpBodyParts(List<Message.BodyPart> parts, String indent) {
     if (parts != null) {
       for (Message.BodyPart part : parts) {
