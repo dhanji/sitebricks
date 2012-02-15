@@ -78,6 +78,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     CONVERTIBLE_ENCODINGS.put("quotedprintablemime", "quoted-printable");
     CONVERTIBLE_ENCODINGS.put("quoted-printable-mime", "quoted-printable");
     CONVERTIBLE_ENCODINGS.put("quoted-printablemime", "quoted-printable");
+
+    // Add uncompliant and broken transfer encodings, as seen in the wild:
+    CONVERTIBLE_ENCODINGS.put("text/plain", "7bit");
   }
 
   private final boolean forceTruncatorGroping;

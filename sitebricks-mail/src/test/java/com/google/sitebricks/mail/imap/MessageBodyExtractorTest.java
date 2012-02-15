@@ -84,7 +84,7 @@ public class MessageBodyExtractorTest {
             Charsets.UTF_8);
 
     List<Message> extract = new MessageBodyExtractor(forceTruncatorGroping, 999999999999999999L).extract(lines);
-    assertEquals(extract.size(), 22);
+    assertEquals(extract.size(), 23);
     // ------------------------------------------------------------
     // First message.
     // Folded headers with tabs + spaces, repeat headers, one body.
@@ -339,6 +339,14 @@ public class MessageBodyExtractorTest {
     assertEquals(1, message.getBodyParts().size());
     assertEquals(message.getBodyParts().get(0).getBody(),
         "hi\n\n");
+
+    // ------------------------------------------------------------
+    // Accept bad content transfer encoding
+    message = extract.get(22);
+    assertEquals(1, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().get(0).getBody(),
+        "Danke für die Weihnachtswünsche! Viele Grüße.\r\n");
+
   }
 
   private void assertRfc822(Message message, String contentTransferEncoding) {
