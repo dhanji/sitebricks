@@ -830,3 +830,19 @@ aGkKCg==
 --_000_289F6410F290174FA1E7F2B0A50DC0550C35D307F0EXMBSYD2ffxjf_--
 )
 45990 OK Success
+* 45991 FETCH (UID 1023 BODY[] {999999999999999999}
+Delivered-To: jochen@bekmann.com
+Received: by 10.142.240.18 with SMTP id n18cs10279wfh;
+        Mon, 26 Dec 2011 09:50:23 -0800 (PST)
+Message-ID: <4EF8B3DB.4040402@gmx.de>
+Date: Mon, 26 Dec 2011 18:50:19 +0100
+From: <thedude@theranch.com>
+MIME-Version: 1.0
+To: jochen@bekmann.com
+Subject: accept uncompliant content transfer encoding
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: text/plain
+
+Danke für die Weihnachtswünsche! Viele Grüße.
+)
+45991 OK Success
