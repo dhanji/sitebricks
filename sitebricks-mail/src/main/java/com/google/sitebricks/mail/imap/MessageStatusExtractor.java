@@ -32,6 +32,8 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
 
   static final DateTimeFormatter INTERNAL_DATE = DateTimeFormat.forPattern(
       "dd-MMM-yyyy HH:mm:ss Z");
+  private static final Pattern HELPFUL_NOTIFICATION_PATTERN = Pattern.compile("[*] \\d+ (EXISTS|EXPUNGE)\\s*",
+      Pattern.CASE_INSENSITIVE);
 
   @Override
   public List<MessageStatus> extract(List<String> messages) {
@@ -41,10 +43,9 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       if (null == message || message.isEmpty())
         continue;
 
-      // Discard the success token.
-
+      // Discard the success token and any EXISTS or EXPUNGE tokens.
       try {
-        if (Command.isEndOfSequence(message))
+        if (Command.isEndOfSequence(message) || HELPFUL_NOTIFICATION_PATTERN.matcher(message).matches())
           continue;
       } catch (ExtractionException ee) {
         log.error("Warning: error parsing email message status! {}", messages, ee);
@@ -93,7 +94,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     }
     return inString;
   }
-  
+
   private static MessageStatus parseStatus(String message) {
     Queue<String> tokens = Parsing.tokenize(message);
     MessageStatus status = new MessageStatus();
