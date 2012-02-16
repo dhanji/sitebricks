@@ -164,8 +164,9 @@ public interface MailClient {
    * Note the subtle point that this method (though it doesn't block) will
    * immediately stop firing events to its FolderObserver. This happens
    * even before IDLEing ceases on the server.
+   * @return whether the connection was being watched when called.
    */
-  void unwatch();
+  boolean unwatch();
 
   /**
    * Returns a string containing the last error message from the server or
