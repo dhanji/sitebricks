@@ -148,6 +148,23 @@
     </dependency>
 
   </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+           <execution>
+             <goals>
+               <goal>jar</goal>
+             </goals>
+          </execution>
+       </executions>
+      </plugin>
+    </plugins>
+  </build>
+  
 
   <!-- This should be removed when the googlecode repositories are migrated to the standard Nexus OSS repository infrastructure -->
   <distributionManagement>
