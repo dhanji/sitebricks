@@ -500,11 +500,12 @@ public class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public synchronized void unwatch() {
+  public synchronized boolean unwatch() {
     if (!mailClientHandler.idleRequested.get())
-      return;
+      return false;
 
     done();
+    return true;
   }
 
   @Override
