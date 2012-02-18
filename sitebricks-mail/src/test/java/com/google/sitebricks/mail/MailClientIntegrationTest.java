@@ -51,7 +51,7 @@ public class MailClientIntegrationTest {
     List<String> capabilities = client.capabilities();
     System.out.println("CAPS: " + capabilities);
 
-//    System.out.println("FOLDERS: " + client.listFolders().get());
+    System.out.println("FOLDERS: " + client.listFolders().get());
 //    try {
 //      Folder f = client.open("Thumping through the brush.", false).get();
 //      System.out.println("Expected failure attempting to open invalid folder.");
@@ -73,21 +73,22 @@ public class MailClientIntegrationTest {
     future.addListener(new Runnable() {
       @Override
       public void run() {
-//        final ListenableFuture<List<MessageStatus>> messageStatuses =
-//            client.listUidThin(allMail, allMail.getCount() - 1, -1);
+        final ListenableFuture<List<Integer>> messageStatuses =
+            client.searchUid(allMail, "is:read");
 
         try {
+          System.out.println(messageStatuses.get());
 //          for (MessageStatus messageStatus : messageStatuses.get()) {
 //            System.out.println(messageStatus);
 //          }
 
-          fetchUidAndDump(client, allMail, 33285, executor).await();
+//          fetchUidAndDump(client, allMail, 33285, executor).await();
 //          fetchUidAndDump(client, allMail, 33288, executor).await();
           client.disconnect();
         } catch (InterruptedException e) {
           e.printStackTrace();
-//        } catch (ExecutionException e) {
-//          e.printStackTrace();
+        } catch (ExecutionException e) {
+          e.printStackTrace();
         }
       }
     }, executor);
@@ -137,7 +138,7 @@ public class MailClientIntegrationTest {
     }, executor);
     return countDownLatch;
   }
-  
+
   private static void dumpBodyParts(List<Message.BodyPart> parts, String indent) {
     if (parts != null) {
       for (Message.BodyPart part : parts) {

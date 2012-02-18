@@ -342,35 +342,55 @@ public class NettyImapClient implements MailClient, Idler {
     return listUidThin(folder, ImmutableList.of(new Sequence(start, end)));
   }
 
-    @Override
-    public ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, List<Sequence> sequences) {
-      Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-      Preconditions.checkState(!mailClientHandler.idleRequested.get(),
-              "Can't execute command while idling (are you watching a folder?)");
+  @Override
+  public ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, List<Sequence> sequences) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
+            "Can't execute command while idling (are you watching a folder?)");
 
-      checkCurrentFolder(folder);
-      SettableFuture<List<MessageStatus>> valueFuture = SettableFuture.create();
+    checkCurrentFolder(folder);
+    SettableFuture<List<MessageStatus>> valueFuture = SettableFuture.create();
 
-      // -ve end range means get everything (*).
-      String extensions = config.useGmailExtensions() ? " X-GM-MSGID X-GM-THRID X-GM-LABELS UID" : "";
-      StringBuilder argsBuilder = new StringBuilder();
+    // -ve end range means get everything (*).
+    String extensions = config.useGmailExtensions() ? " X-GM-MSGID X-GM-THRID X-GM-LABELS UID" : "";
+    StringBuilder argsBuilder = new StringBuilder();
 
-      // Emit ranges.
-      for (int i = 0, sequencesSize = sequences.size(); i < sequencesSize; i++) {
-          Sequence seq = sequences.get(i);
-          argsBuilder.append(toUpperBound(seq.start));
-          if (seq.end != 0)
-              argsBuilder.append(':').append(toUpperBound(seq.end));
-          if (i < sequencesSize - 1)
-              argsBuilder.append(',');
-      }
-      argsBuilder.append(" (FLAGS" + extensions + ")");
-      send(Command.FETCH_THIN_HEADERS_UID, argsBuilder.toString(), valueFuture);
-
-      return valueFuture;
+    // Emit ranges.
+    for (int i = 0, sequencesSize = sequences.size(); i < sequencesSize; i++) {
+        Sequence seq = sequences.get(i);
+        argsBuilder.append(toUpperBound(seq.start));
+        if (seq.end != 0)
+            argsBuilder.append(':').append(toUpperBound(seq.end));
+        if (i < sequencesSize - 1)
+            argsBuilder.append(',');
     }
+    argsBuilder.append(" (FLAGS" + extensions + ")");
+    send(Command.FETCH_THIN_HEADERS_UID, argsBuilder.toString(), valueFuture);
 
-    private static void checkRange(int start, int end) {
+    return valueFuture;
+  }
+
+  @Override
+  public ListenableFuture<List<Integer>> searchUid(Folder folder, String query) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
+            "Can't execute command while idling (are you watching a folder?)");
+
+    checkCurrentFolder(folder);
+    SettableFuture<List<Integer>> valueFuture = SettableFuture.create();
+
+    StringBuilder argsBuilder = new StringBuilder();
+
+    if (config.useGmailExtensions()) {
+      argsBuilder.append("X-GM-RAW \"").append(query).append('"');
+    } else
+      argsBuilder.append(query);
+    send(Command.SEARCH_RAW_UID, argsBuilder.toString(), valueFuture);
+
+    return valueFuture;
+  }
+
+  private static void checkRange(int start, int end) {
     Preconditions.checkArgument(start <= end || end == -1, "Start must be <= end");
   }
 
