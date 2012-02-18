@@ -24,7 +24,8 @@ class SearchResultExtractor implements Extractor<List<Integer>> {
 
       // Discard the success token and any EXISTS or EXPUNGE tokens.
       try {
-        if (Command.isEndOfSequence(message)
+        if (Command.OK_SUCCESS.matcher(message).matches()
+            || Command.isEndOfSequence(message)
             || MessageStatusExtractor.HELPFUL_NOTIFICATION_PATTERN.matcher(message).matches())
           continue;
       } catch (ExtractionException ee) {
@@ -39,6 +40,9 @@ class SearchResultExtractor implements Extractor<List<Integer>> {
       if (uids == null)
         uids = Lists.newArrayList();
       for (String piece : message.split("[ ]+")) {
+        if (piece.isEmpty())
+          continue;
+
         try {
           uids.add(Integer.valueOf(piece));
         } catch (NumberFormatException nfe) {

@@ -22,7 +22,7 @@ public enum Command {
   IDLE("idle"),
   STORE_FLAGS("uid store"),
   STORE_LABELS("uid store");
-  private static final Pattern OK_SUCCESS = Pattern.compile("\\d+ ok (.* )?\\(?success\\)?",
+  public static final Pattern OK_SUCCESS = Pattern.compile("\\d+ ok (.* )?\\(?success\\)?",
       Pattern.CASE_INSENSITIVE);
   private static final Pattern NO_FAILURE = Pattern.compile("\\d+ no .*",
       Pattern.CASE_INSENSITIVE);

@@ -30,4 +30,16 @@ public class SearchResultExtractorTest {
 
     assertEquals(Arrays.asList(123, 3, 6, 4, -10), new SearchResultExtractor().extract(messages));
   }
+  @Test
+  public void testExtractLonger() throws Exception {
+    List<String> messages = ImmutableList.of(
+        "* search  42187 275543 287963 298411 298834 299843 305799 306131 319620 323938 328364 329370 329566 329599 331454 332401 338293 339646 341368 342169 342969 343541 344924 345047 345730 348037 349247 351914 351941 351945 352041 352461 352462",
+        "* Ok SEARCH completed (Success)"
+    );
+
+    String thing = "[42187 275543 287963 298411 298834 299843 305799 306131 319620 323938 328364 329370 329566 329599 331454 332401 338293 339646 341368 342169 342969 343541 344924 345047 345730 348037 349247 351914 351941 351945 352041 352461 352462]".replace(" ", ", ");
+
+
+    assertEquals(thing, new SearchResultExtractor().extract(messages).toString());
+  }
 }
