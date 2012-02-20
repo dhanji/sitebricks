@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.sitebricks.mail.imap.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -105,7 +106,7 @@ public interface MailClient {
   /**
    * Returns the list of uids that exist in the given folder.
    */
-  ListenableFuture<List<Integer>> exists(Folder folder, List<Integer> uids);
+  ListenableFuture<List<Integer>> exists(Folder folder, List<Integer> uids, Date since);
 
   /**
    * Adds flags to a range of messages.

@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -29,6 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class NettyImapClient implements MailClient, Idler {
   private static final Logger log = LoggerFactory.getLogger(NettyImapClient.class);
+  private static final SimpleDateFormat SINCE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy");
 
   // For debugging, use with caution!
   private static final Map<String, Boolean> logAllMessagesForUsers = new ConcurrentHashMap<String, Boolean>();
@@ -391,8 +393,9 @@ public class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public ListenableFuture<List<Integer>> exists(Folder folder, List<Integer> uids) {
-    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
+  public ListenableFuture<List<Integer>> exists(Folder folder, List<Integer> uids, Date since) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(),
+        "Can't execute command because client is not logged in");
     Preconditions.checkState(!mailClientHandler.idleRequested.get(),
             "Can't execute command while idling (are you watching a folder?)");
 
@@ -406,6 +409,9 @@ public class NettyImapClient implements MailClient, Idler {
       if (i < uidsSize - 1)
         argsBuilder.append(",");
     }
+
+    if (since != null)
+      argsBuilder.append(" since ").append(SINCE_FORMAT.format(since));
 
     send(Command.SEARCH_UID_ONLY, argsBuilder.toString(), valueFuture);
 
