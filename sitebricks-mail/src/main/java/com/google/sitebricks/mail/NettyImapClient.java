@@ -325,7 +325,7 @@ public class NettyImapClient implements MailClient, Idler {
     checkCurrentFolder(folder);
     checkRange(start, end);
     Preconditions.checkArgument(start > 0, "Start must be greater than zero (IMAP uses 1-based " +
-            "indexing)");
+        "indexing)");
     SettableFuture<List<MessageStatus>> valueFuture = SettableFuture.create();
 
     // -ve end range means get everything (*).
@@ -386,6 +386,28 @@ public class NettyImapClient implements MailClient, Idler {
     } else
       argsBuilder.append(query);
     send(Command.SEARCH_RAW_UID, argsBuilder.toString(), valueFuture);
+
+    return valueFuture;
+  }
+
+  @Override
+  public ListenableFuture<List<Integer>> exists(Folder folder, List<Integer> uids) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
+            "Can't execute command while idling (are you watching a folder?)");
+
+    checkCurrentFolder(folder);
+    SettableFuture<List<Integer>> valueFuture = SettableFuture.create();
+
+    StringBuilder argsBuilder = new StringBuilder("uid ");
+    for (int i = 0, uidsSize = uids.size(); i < uidsSize; i++) {
+      argsBuilder.append(uids.get(i));
+
+      if (i < uidsSize - 1)
+        argsBuilder.append(",");
+    }
+
+    send(Command.SEARCH_UID_ONLY, argsBuilder.toString(), valueFuture);
 
     return valueFuture;
   }

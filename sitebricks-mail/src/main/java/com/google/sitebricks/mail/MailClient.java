@@ -103,6 +103,11 @@ public interface MailClient {
   ListenableFuture<List<Integer>> searchUid(Folder folder, String query);
 
   /**
+   * Returns the list of uids that exist in the given folder.
+   */
+  ListenableFuture<List<Integer>> exists(Folder folder, List<Integer> uids);
+
+  /**
    * Adds flags to a range of messages.
    *
    * @return the new flags on the message, null on failure.
