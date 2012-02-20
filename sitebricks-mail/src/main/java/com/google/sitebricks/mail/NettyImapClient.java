@@ -373,7 +373,7 @@ public class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public ListenableFuture<List<Integer>> searchUid(Folder folder, String query) {
+  public ListenableFuture<List<Integer>> searchUid(Folder folder, String query, Date since) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
     Preconditions.checkState(!mailClientHandler.idleRequested.get(),
             "Can't execute command while idling (are you watching a folder?)");
@@ -387,13 +387,17 @@ public class NettyImapClient implements MailClient, Idler {
       argsBuilder.append("X-GM-RAW \"").append(query).append('"');
     } else
       argsBuilder.append(query);
+
+    if (since != null)
+      argsBuilder.append(" since ").append(SINCE_FORMAT.format(since));
+
     send(Command.SEARCH_RAW_UID, argsBuilder.toString(), valueFuture);
 
     return valueFuture;
   }
 
   @Override
-  public ListenableFuture<List<Integer>> exists(Folder folder, List<Integer> uids, Date since) {
+  public ListenableFuture<List<Integer>> exists(Folder folder, List<Integer> uids) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(),
         "Can't execute command because client is not logged in");
     Preconditions.checkState(!mailClientHandler.idleRequested.get(),
@@ -409,9 +413,6 @@ public class NettyImapClient implements MailClient, Idler {
       if (i < uidsSize - 1)
         argsBuilder.append(",");
     }
-
-    if (since != null)
-      argsBuilder.append(" since ").append(SINCE_FORMAT.format(since));
 
     send(Command.SEARCH_UID_ONLY, argsBuilder.toString(), valueFuture);
 

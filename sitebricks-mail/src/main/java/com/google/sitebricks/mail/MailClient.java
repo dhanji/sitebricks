@@ -101,12 +101,12 @@ public interface MailClient {
    * Runs a search for a raw query as provided by gmail, and returns the UIDs of the
    * corresponding result. Returns null if there were no results.
    */
-  ListenableFuture<List<Integer>> searchUid(Folder folder, String query);
+  ListenableFuture<List<Integer>> searchUid(Folder folder, String query, Date since);
 
   /**
    * Returns the list of uids that exist in the given folder.
    */
-  ListenableFuture<List<Integer>> exists(Folder folder, List<Integer> uids, Date since);
+  ListenableFuture<List<Integer>> exists(Folder folder, List<Integer> uids);
 
   /**
    * Adds flags to a range of messages.
