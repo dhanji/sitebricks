@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.sitebricks.mail.imap.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -95,6 +96,17 @@ public interface MailClient {
   ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, int start, int end);
 
   ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, List<Sequence> sequences);
+
+  /**
+   * Runs a search for a raw query as provided by gmail, and returns the UIDs of the
+   * corresponding result. Returns null if there were no results.
+   */
+  ListenableFuture<List<Integer>> searchUid(Folder folder, String query, Date since);
+
+  /**
+   * Returns the list of uids that exist in the given folder.
+   */
+  ListenableFuture<List<Integer>> exists(Folder folder, List<Integer> uids);
 
   /**
    * Adds flags to a range of messages.

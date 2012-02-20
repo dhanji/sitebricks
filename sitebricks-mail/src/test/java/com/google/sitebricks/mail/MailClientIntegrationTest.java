@@ -9,6 +9,7 @@ import com.google.sitebricks.mail.imap.Folder;
 import com.google.sitebricks.mail.imap.Message;
 import com.google.sitebricks.mail.imap.MessageStatus;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -52,7 +53,7 @@ public class MailClientIntegrationTest {
     List<String> capabilities = client.capabilities();
     System.out.println("CAPS: " + capabilities);
 
-//    System.out.println("FOLDERS: " + client.listFolders().get());
+    System.out.println("FOLDERS: " + client.listFolders().get());
 //    try {
 //      Folder f = client.open("Thumping through the brush.", false).get();
 //      System.out.println("Expected failure attempting to open invalid folder.");
@@ -74,13 +75,14 @@ public class MailClientIntegrationTest {
     future.addListener(new Runnable() {
       @Override
       public void run() {
-        final ListenableFuture<List<MessageStatus>> messageStatuses =
-            client.listUidThin(allMail, allMail.getCount() - 1, -1);
+        final ListenableFuture<List<Integer>> messageStatuses =
+            client.searchUid(allMail, "is:read", new Date(System.currentTimeMillis() - (500L * 24L * 60L * 60L * 1000L)));
 
         try {
-          for (MessageStatus messageStatus : messageStatuses.get()) {
-            System.out.println(messageStatus);
-          }
+          System.out.println(messageStatuses.get());
+//          for (MessageStatus messageStatus : messageStatuses.get()) {
+//            System.out.println(messageStatus);
+//          }
 
 //          fetchUidAndDump(client, allMail, 33285, executor).await();
 //          fetchUidAndDump(client, allMail, 33288, executor).await();

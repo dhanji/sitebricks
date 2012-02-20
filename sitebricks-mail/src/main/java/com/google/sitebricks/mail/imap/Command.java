@@ -18,10 +18,12 @@ public enum Command {
   FOLDER_EXAMINE("examine"),
   FETCH_HEADERS("fetch"),
   FETCH_THIN_HEADERS_UID("uid fetch"),
+  SEARCH_RAW_UID("uid search"),
+  SEARCH_UID_ONLY("uid search"),
   IDLE("idle"),
   STORE_FLAGS("uid store"),
   STORE_LABELS("uid store");
-  private static final Pattern OK_SUCCESS = Pattern.compile("\\d+ ok (.* )?\\(?success\\)?",
+  public static final Pattern OK_SUCCESS = Pattern.compile("\\d+ ok (.* )?\\(?success\\)?",
       Pattern.CASE_INSENSITIVE);
   private static final Pattern NO_FAILURE = Pattern.compile("\\d+ no .*",
       Pattern.CASE_INSENSITIVE);
@@ -75,6 +77,8 @@ public enum Command {
     dataExtractors.put(FOLDER_EXAMINE, new OpenFolderExtractor());
     dataExtractors.put(FETCH_HEADERS, new MessageStatusExtractor());
     dataExtractors.put(FETCH_THIN_HEADERS_UID, new MessageStatusExtractor());
+    dataExtractors.put(SEARCH_RAW_UID, new SearchResultExtractor());
+    dataExtractors.put(SEARCH_UID_ONLY, new SearchResultExtractor());
     dataExtractors.put(FETCH_BODY, new MessageBodyExtractor());
     dataExtractors.put(FETCH_BODY_UID, new SingleMessageBodyExtractor());
     dataExtractors.put(STORE_FLAGS, new StoreFlagsResponseExtractor());

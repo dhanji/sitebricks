@@ -32,7 +32,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
 
   static final DateTimeFormatter INTERNAL_DATE = DateTimeFormat.forPattern(
       "dd-MMM-yyyy HH:mm:ss Z");
-  private static final Pattern HELPFUL_NOTIFICATION_PATTERN = Pattern.compile("[*] \\d+ (EXISTS|EXPUNGE)\\s*",
+  static final Pattern HELPFUL_NOTIFICATION_PATTERN = Pattern.compile("[*] \\d+ (EXISTS|EXPUNGE)\\s*",
       Pattern.CASE_INSENSITIVE);
 
   @Override
