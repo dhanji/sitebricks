@@ -8,6 +8,7 @@ import com.google.sitebricks.mail.MailClient.WireError;
 import com.google.sitebricks.mail.imap.Folder;
 import com.google.sitebricks.mail.imap.Message;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -74,7 +75,7 @@ public class MailClientIntegrationTest {
       @Override
       public void run() {
         final ListenableFuture<List<Integer>> messageStatuses =
-            client.searchUid(allMail, "is:read");
+            client.searchUid(allMail, "is:read", new Date(System.currentTimeMillis() - (500L * 24L * 60L * 60L * 1000L)));
 
         try {
           System.out.println(messageStatuses.get());
