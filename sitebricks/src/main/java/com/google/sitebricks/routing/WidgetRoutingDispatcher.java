@@ -107,7 +107,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
         respond.redirect(contextualize(request, targetPage.getUri()));
       } else if (redirect instanceof Reply) {
         // page wants to be headless
-        return bindAndReply(request, page, instance);
+        return redirect;
       } else {
         // Handle page-chaining driven redirection.
         PageBook.Page targetPage = book.forInstance(redirect);
