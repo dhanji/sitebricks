@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.AssertJUnit.assertNull;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -19,7 +18,7 @@ public class SearchResultExtractorTest {
         "* search"
     );
 
-    assertNull(new SearchResultExtractor().extract(messages));
+    assertEquals(0, new SearchResultExtractor().extract(messages).size());
   }
 
   @Test

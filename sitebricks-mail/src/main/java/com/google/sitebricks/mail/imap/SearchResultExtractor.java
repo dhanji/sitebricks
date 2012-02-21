@@ -16,7 +16,7 @@ class SearchResultExtractor implements Extractor<List<Integer>> {
 
   @Override
   public List<Integer> extract(List<String> messages) {
-    List<Integer> uids = null;
+    final List<Integer> uids = Lists.newArrayList();
     for (int i = 0, messagesSize = messages.size(); i < messagesSize; i++) {
       String message = messages.get(i);
       if (null == message || message.isEmpty())
@@ -37,8 +37,6 @@ class SearchResultExtractor implements Extractor<List<Integer>> {
       if (message.trim().isEmpty())
         continue;
 
-      if (uids == null)
-        uids = Lists.newArrayList();
       for (String piece : message.split("[ ]+")) {
         if (piece.isEmpty())
           continue;
