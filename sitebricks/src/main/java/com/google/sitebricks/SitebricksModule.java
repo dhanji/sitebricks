@@ -107,6 +107,12 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
         .toInstance(negotiations);
 
     Localizer.localizeAll(binder(), localizations);
+    
+    configureTemplateSystem();
+  }
+  
+  private void configureTemplateSystem() {    
+    bind(TemplateSystem.class).to(DefaultTemplateSystem.class);
   }
   
   /**

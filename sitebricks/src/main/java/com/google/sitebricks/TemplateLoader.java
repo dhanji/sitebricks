@@ -13,18 +13,20 @@ import java.net.URL;
  */
 @Immutable
 public class TemplateLoader {
+  
   private final Provider<ServletContext> context;
-
-  private final String[] fileNameTemplates = new String[] { "%s.html", "%s.xhtml", "%s.xml",
-      "%s.txt", "%s.fml", "%s.dml", "%s.mvel" };
-
+  private final TemplateSystem templateSystem;
+  
   @Inject
-  public TemplateLoader(Provider<ServletContext> context) {
+  public TemplateLoader(Provider<ServletContext> context, TemplateSystem templateSystem) {
     this.context = context;
+    this.templateSystem = templateSystem;
   }
 
   public Template load(Class<?> pageClass) {
+    //
 	  // try to find the template name
+    //
     Show show = pageClass.getAnnotation(Show.class);
     String template = null;
     if (null != show) {
@@ -38,15 +40,20 @@ public class TemplateLoader {
     }
 
     TemplateSource templateSource = null;
+    
     String text;
     try {
       InputStream stream = null;
+      //      
       //first look in class neighborhood for template
+      //
       if (null != template) {
         stream = pageClass.getResourceAsStream(template);
       }
 
+      //
       //look on the webapp resource path if not in classpath
+      //
       if (null == stream) {
 
         final ServletContext servletContext = context.get();
@@ -54,7 +61,9 @@ public class TemplateLoader {
           stream = open(template, servletContext).resource;
         }
 
+        //
         //resolve again, but this time on the webapp resource path
+        //
         if (null == stream) {
           final ResolvedTemplate resolvedTemplate = resolve(pageClass, servletContext, template);
           if (null != resolvedTemplate) {
@@ -64,12 +73,12 @@ public class TemplateLoader {
           }
         }
 
+        //
         //if there's still no template, then error out
+        //
         if (null == stream) {
-          throw new MissingTemplateException(String.format("Could not find a suitable template for %s, " +
-              "did you remember to place an @Show? None of [" +
-              fileNameTemplates[0] +
-              "] could be found in either package [%s], in the root of the resource dir OR in WEB-INF/.",
+          throw new MissingTemplateException(String.format("Could not find a suitable template for %s, " + "did you remember to place an @Show? None of [" +
+              templateSystem.getTemplateExtensions()[0] + "] could be found in either package [%s], in the root of the resource dir OR in WEB-INF/.",
               pageClass.getName(), pageClass.getSimpleName(),
               pageClass.getPackage().getName()));
         }
@@ -85,7 +94,7 @@ public class TemplateLoader {
   
   private ResolvedTemplate resolve(Class<?> pageClass, ServletContext context, String template) {
     //first resolve using url conversion
-    for (String nameTemplate : fileNameTemplates) {
+    for (String nameTemplate : templateSystem.getTemplateExtensions()) {
       String templateName = String.format(nameTemplate, pageClass.getSimpleName());
       ResolvedTemplate resolvedTemplate = open(templateName, context);
 
@@ -111,7 +120,7 @@ public class TemplateLoader {
     }
 
     //resolve again using servlet context if that fails
-    for (String nameTemplate : fileNameTemplates) {
+    for (String nameTemplate : templateSystem.getTemplateExtensions()) {
       String templateName = String.format(nameTemplate, pageClass.getSimpleName());
       InputStream resource = context.getResourceAsStream(templateName);
 
@@ -150,7 +159,7 @@ public class TemplateLoader {
 
   //resolves a location for this page class's template (assuming @Show is not present)
   private String resolve(Class<?> pageClass) {
-    for (String nameTemplate : fileNameTemplates) {
+    for (String nameTemplate : templateSystem.getTemplateExtensions()) {
       String name = String.format(nameTemplate, pageClass.getSimpleName());
       URL resource = pageClass.getResource(name);
 
