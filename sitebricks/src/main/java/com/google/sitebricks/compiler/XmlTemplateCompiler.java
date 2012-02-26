@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -26,6 +25,7 @@ import org.xml.sax.SAXException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Template;
 import com.google.sitebricks.conversion.generics.Generics;
 import com.google.sitebricks.rendering.control.Chains;
 import com.google.sitebricks.rendering.control.WidgetChain;
@@ -60,7 +60,6 @@ public class XmlTemplateCompiler {
 
 
     public XmlTemplateCompiler(Class<?> page,
-                               EvaluatorCompiler compiler,
                                WidgetRegistry registry,
                                PageBook pageBook,
                                SystemMetrics metrics) {
@@ -70,10 +69,10 @@ public class XmlTemplateCompiler {
         this.pageBook = pageBook;
         this.metrics = metrics;
 
-        this.lexicalScopes.push(compiler);
+        this.lexicalScopes.push(new MvelEvaluatorCompiler(page));
     }
 
-    public Renderable compile(String template) {
+    public Renderable compile(Template template) {
         WidgetChain widgetChain;
         try {
             final SAXReader reader = new SAXReader();
@@ -92,10 +91,10 @@ public class XmlTemplateCompiler {
                 }
             });
 
-            widgetChain = walk(reader.read(new StringReader(template)));
+            widgetChain = walk(reader.read(new StringReader(template.getText())));
         } catch (DocumentException e) {
             errors.add(
-                    CompileError.in(template)
+                    CompileError.in(template.getText())
                     .near(0)
                     .causedBy(CompileErrors.MALFORMED_TEMPLATE)
             );
@@ -111,8 +110,10 @@ public class XmlTemplateCompiler {
             metrics.logErrorsAndWarnings(page, errors, warnings);
 
             // Only explode if there are errors.
-            if (!errors.isEmpty())
-                throw new TemplateCompileException(page, template, errors, warnings);
+            if (!errors.isEmpty()) {
+              System.out.println("!!!!!!! " + template.getText());  
+              throw new TemplateCompileException(page, template.getText(), errors, warnings);
+            }
         }
 
         return widgetChain;

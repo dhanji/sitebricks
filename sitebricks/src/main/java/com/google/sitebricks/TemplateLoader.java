@@ -222,13 +222,13 @@ public class TemplateLoader {
     switch(Kind.kindOf(template.getTemplatename())) {
       default:
       case HTML:
-        widget = new HtmlTemplateCompiler(templateClass, new MvelEvaluatorCompiler(templateClass), registry, pageBook, metrics).compile(template.getText()); 
+        widget = new HtmlTemplateCompiler(templateClass, registry, pageBook, metrics).compile(template); 
         break;
       case XML:
-        widget = new XmlTemplateCompiler(templateClass, new MvelEvaluatorCompiler(templateClass), registry, pageBook, metrics).compile(template.getText());         
+        widget = new XmlTemplateCompiler(templateClass, registry, pageBook, metrics).compile(template);         
         break;
       case FLAT:
-        widget = new FlatTemplateCompiler(templateClass, new MvelEvaluatorCompiler(templateClass), metrics, registry).compile(template.getText()); 
+        widget = new FlatTemplateCompiler(templateClass, metrics, registry).compile(template); 
         break;
       case MVEL:
         /**
@@ -236,7 +236,7 @@ public class TemplateLoader {
          * These are not to be confused with Sitebricks templates
          * that *use* MVEL. Rather, this is MVEL's template technology.
          */                
-        widget = new MvelTemplateCompiler(templateClass).compile(template.getText()); 
+        widget = new MvelTemplateCompiler(templateClass).compile(template); 
         break;
       case FREEMARKER:
         widget = new FreemarkerTemplateCompiler(templateClass).compile(template); 
@@ -252,7 +252,7 @@ public class TemplateLoader {
     HTML, XML, FLAT, MVEL, FREEMARKER, MAGIC;
 
     public static Kind kindOf(String template) {
-      if (template.startsWith("m_") || template.endsWith(".dml")) {
+      if (template.endsWith(".dml")) {
         return MAGIC;
       } else if (template.endsWith(".html") || template.endsWith(".xhtml"))
         return HTML;

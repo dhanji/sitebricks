@@ -16,6 +16,10 @@ public class Template {
   //
   private String transformedText;
 
+  public Template(String text) {
+    this(null, text, null);
+  }
+  
   public Template(String templateName, String text, TemplateSource source) {
     this.templateName = templateName;
     this.text = text;

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="3" passed="3">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Failed suite [Failed suite [Failed suite [Failed suite [Failed suite [Failed suite [Default suite]]]]]]" duration-ms="494" started-at="2012-02-25T22:15:29Z" finished-at="2012-02-25T22:15:29Z">
+    <groups>
+    </groups>
+    <test name="Default test(failed)(failed)(failed)(failed)(failed)(failed)" duration-ms="494" started-at="2012-02-25T22:15:29Z" finished-at="2012-02-25T22:15:29Z">
+      <class name="com.google.sitebricks.compiler.HtmlTemplateCompilerTest">
+        <test-method status="PASS" signature="pre()[pri:0, instance:com.google.sitebricks.compiler.HtmlTemplateCompilerTest@320cf66b]" name="pre" is-config="true" duration-ms="13" started-at="2012-02-25T22:15:29Z" finished-at="2012-02-25T22:15:29Z">
+        </test-method> <!-- pre -->
+        <test-method status="PASS" signature="readTextWidgetValues()[pri:0, instance:com.google.sitebricks.compiler.HtmlTemplateCompilerTest@320cf66b]" name="readTextWidgetValues" duration-ms="152" started-at="2012-02-25T22:15:29Z" finished-at="2012-02-25T22:15:29Z">
+        </test-method> <!-- readTextWidgetValues -->
+        <test-method status="PASS" signature="pre()[pri:0, instance:com.google.sitebricks.compiler.HtmlTemplateCompilerTest@320cf66b]" name="pre" is-config="true" duration-ms="1" started-at="2012-02-25T22:15:29Z" finished-at="2012-02-25T22:15:29Z">
+        </test-method> <!-- pre -->
+        <test-method status="PASS" signature="readHtmlWidget()[pri:0, instance:com.google.sitebricks.compiler.HtmlTemplateCompilerTest@320cf66b]" name="readHtmlWidget" duration-ms="2" started-at="2012-02-25T22:15:29Z" finished-at="2012-02-25T22:15:29Z">
+        </test-method> <!-- readHtmlWidget -->
+        <test-method status="PASS" signature="pre()[pri:0, instance:com.google.sitebricks.compiler.HtmlTemplateCompilerTest@320cf66b]" name="pre" is-config="true" duration-ms="1" started-at="2012-02-25T22:15:29Z" finished-at="2012-02-25T22:15:29Z">
+        </test-method> <!-- pre -->
+        <test-method status="PASS" signature="readHtmlWidgetWithChildren()[pri:0, instance:com.google.sitebricks.compiler.HtmlTemplateCompilerTest@320cf66b]" name="readHtmlWidgetWithChildren" duration-ms="6" started-at="2012-02-25T22:15:29Z" finished-at="2012-02-25T22:15:29Z">
+        </test-method> <!-- readHtmlWidgetWithChildren -->
+      </class> <!-- com.google.sitebricks.compiler.HtmlTemplateCompilerTest -->
+      <class name="com.google.sitebricks.routing.PageBookImplTest">
+        <test-method status="PASS" signature="pre()[pri:0, instance:com.google.sitebricks.routing.PageBookImplTest@bc5fde0]" name="pre" is-config="true" duration-ms="310" started-at="2012-02-25T22:15:29Z" finished-at="2012-02-25T22:15:29Z">
+        </test-method> <!-- pre -->
+      </class> <!-- com.google.sitebricks.routing.PageBookImplTest -->
+    </test> <!-- Default test(failed)(failed)(failed)(failed)(failed)(failed) -->
+  </suite> <!-- Failed suite [Failed suite [Failed suite [Failed suite [Failed suite [Failed suite [Default suite]]]]]] -->
+</testng-results>

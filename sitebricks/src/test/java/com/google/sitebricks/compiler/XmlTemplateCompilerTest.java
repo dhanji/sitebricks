@@ -1,11 +1,33 @@
 package com.google.sitebricks.compiler;
 
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
-import com.google.sitebricks.*;
+import com.google.sitebricks.Bricks;
+import com.google.sitebricks.Evaluator;
+import com.google.sitebricks.MvelEvaluator;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Respond;
+import com.google.sitebricks.RespondersForTesting;
+import com.google.sitebricks.Template;
+import com.google.sitebricks.TestRequestCreator;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
@@ -16,16 +38,6 @@ import com.google.sitebricks.rendering.control.Chains;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import java.lang.annotation.Annotation;
-import java.util.Map;
-
-import static com.google.sitebricks.compiler.HtmlTemplateCompilerTest
-.mockRequestProviderForContext;
-import static org.easymock.EasyMock.createNiceMock;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -78,10 +90,10 @@ public class XmlTemplateCompilerTest {
   public final void readShowIfWidgetTrue() {
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
+    final Template template = new Template("<xml>@ShowIf(true)<p>hello</p></xml>");
     final MvelEvaluatorCompiler compiler = new MvelEvaluatorCompiler(TestBackingType.class);
-    Renderable widget =
-        new XmlTemplateCompiler(Object.class, compiler, registry, pageBook, metrics)
-            .compile("<xml>@ShowIf(true)<p>hello</p></xml>");
+    Renderable widget = new XmlTemplateCompiler(Object.class, registry, pageBook, metrics)
+      .compile(template);
 
     assert null != widget : " null ";
 
@@ -132,11 +144,8 @@ public class XmlTemplateCompilerTest {
     final Evaluator evaluator = new MvelEvaluator();
 
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
-
-
-    Renderable widget =
-        new XmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(Object.class), registry, pageBook, metrics)
-            .compile(String.format("<xml>@ShowIf(%s)<p>hello</p></xml>", expression));
+    Renderable widget = new XmlTemplateCompiler(Object.class, registry, pageBook, metrics)
+      .compile(new Template(String.format("<xml>@ShowIf(%s)<p>hello</p></xml>", expression)));
 
     assert null != widget : " null ";
 
@@ -166,8 +175,8 @@ public class XmlTemplateCompilerTest {
 
 
     Renderable widget =
-        new XmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(Object.class), registry, pageBook, metrics)
-            .compile("<xml>@ShowIf(false)<p>hello</p></xml>");
+        new XmlTemplateCompiler(Object.class, registry, pageBook, metrics)
+            .compile(new Template("<xml>@ShowIf(false)<p>hello</p></xml>"));
 
     assert null != widget : " null ";
 
@@ -183,7 +192,6 @@ public class XmlTemplateCompilerTest {
 
   @Test
   public final void readTextWidgetValues() {
-    final Evaluator evaluator = new MvelEvaluator();
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(Request.class).toProvider(mockRequestProviderForContext());
@@ -195,8 +203,8 @@ public class XmlTemplateCompilerTest {
 
 
     Renderable widget =
-        new XmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, pageBook, metrics)
-            .compile("<xml><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></xml>");
+        new XmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
+            .compile(new Template("<xml><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></xml>"));
 
     assert null != widget : " null ";
 
@@ -256,12 +264,12 @@ public class XmlTemplateCompilerTest {
 
 
     Renderable widget =
-        new XmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, pageBook, metrics)
-            .compile("<html> <head>" +
+        new XmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
+            .compile(new Template("<html> <head>" +
                 "   @Require <script type='text/javascript' src='my.js'> </script>" +
                 "   @Require <script type='text/javascript' src='my.js'> </script>" +
                 "</head>" +
-                "<div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></html>");
+                "<div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></html>"));
 
     assert null != widget : " null ";
 
@@ -289,8 +297,8 @@ public class XmlTemplateCompilerTest {
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
     Renderable widget =
-        new XmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, pageBook, metrics)
-            .compile("<xml><div class='${clazz}'>hello</div></xml>");
+        new XmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
+            .compile(new Template("<xml><div class='${clazz}'>hello</div></xml>"));
 
     assert null != widget : " null ";
 
@@ -311,8 +319,8 @@ public class XmlTemplateCompilerTest {
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
     Renderable widget =
-        new XmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, pageBook, metrics)
-            .compile("<xml><div class='${clazz}'>hello @ShowIf(false)<a href='/hi/${id}'>hideme</a></div></xml>");
+        new XmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
+            .compile(new Template("<xml><div class='${clazz}'>hello @ShowIf(false)<a href='/hi/${id}'>hideme</a></div></xml>"));
 
     assert null != widget : " null ";
 
@@ -361,8 +369,8 @@ public class XmlTemplateCompilerTest {
     registry.addEmbed("myfave");
 
     Renderable widget =
-        new XmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, book, metrics)
-            .compile("<xml><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></xml>");
+        new XmlTemplateCompiler(TestBackingType.class, registry, book, metrics)
+            .compile(new Template("<xml><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></xml>"));
 
     assert null != widget : " null ";
 
@@ -399,8 +407,8 @@ public class XmlTemplateCompilerTest {
     registry.addEmbed("myfave");
 
     Renderable widget =
-        new XmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, pageBook, metrics)
-            .compile("<xml><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></xml>");
+        new XmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
+            .compile(new Template("<xml><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></xml>"));
 
     assert null != widget : " null ";
 
@@ -416,7 +424,6 @@ public class XmlTemplateCompilerTest {
     assert "<xml><div class=\"content\">hello </div></xml>"
         .equals(s) : "Did not write expected output, instead: " + s;
   }
-
 
   //TODO Fix this test!
 //    @Test
@@ -457,4 +464,23 @@ public class XmlTemplateCompilerTest {
 //                .equals(s) : "Did not write expected output, instead: " + s;
 //    }
 
+  public static Provider<Request> mockRequestProviderForContext() {
+    return new Provider<Request>() {
+      public Request get() {
+        final HttpServletRequest request = createNiceMock(HttpServletRequest.class);
+        expect(request.getContextPath())
+            .andReturn("")
+            .anyTimes();
+        expect(request.getMethod())
+            .andReturn("POST")
+            .anyTimes();
+        expect(request.getParameterMap())
+            .andReturn(ImmutableMap.of())
+            .anyTimes();
+        replay(request);
+
+        return TestRequestCreator.from(request, null);
+      }
+    };
+  }
 }

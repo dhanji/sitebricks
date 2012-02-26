@@ -3,6 +3,8 @@ package com.google.sitebricks.compiler.template;
 import com.google.common.collect.ImmutableSet;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
+import com.google.sitebricks.Template;
+
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.templates.TemplateCompiler;
 import org.mvel2.templates.TemplateRuntime;
@@ -20,9 +22,9 @@ public class MvelTemplateCompiler {
     this.page = page;
   }
 
-  public Renderable compile(String template) {
+  public Renderable compile(Template template) {
     // Compile template immediately.
-    final CompiledTemplate compiledTemplate = TemplateCompiler.compileTemplate(template);
+    final CompiledTemplate compiledTemplate = TemplateCompiler.compileTemplate(template.getText());
 
     return new Renderable() {
       @Override

@@ -13,6 +13,7 @@ import com.google.sitebricks.MvelEvaluator;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.RespondersForTesting;
+import com.google.sitebricks.Template;
 import com.google.sitebricks.TestRequestCreator;
 import com.google.sitebricks.conversion.MvelTypeConverter;
 import com.google.sitebricks.conversion.TypeConverter;
@@ -90,10 +91,9 @@ public class HtmlTemplateCompilerTest {
   public final void readShowIfWidgetTrue() {
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
-    final MvelEvaluatorCompiler compiler = new MvelEvaluatorCompiler(TestBackingType.class);
     Renderable widget =
-        new HtmlTemplateCompiler(Object.class, compiler, registry, pageBook, metrics)
-          .compile("<html>@ShowIf(true)<p>hello</p></html>");
+        new HtmlTemplateCompiler(Object.class, registry, pageBook, metrics)
+          .compile(new Template("<html>@ShowIf(true)<p>hello</p></html>"));
 
 //        .compile("<!doctype html>\n" +
 //              "<html><head><meta charset=\"UTF-8\"><title>small test</title></head><body>\n" +
@@ -154,8 +154,8 @@ public class HtmlTemplateCompilerTest {
 
 
     Renderable widget =
-        new HtmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(Object.class), registry, pageBook, metrics)
-            .compile(String.format("<html>@ShowIf(%s)<p>hello</p></html>", expression));
+        new HtmlTemplateCompiler(Object.class, registry, pageBook, metrics)
+            .compile(new Template(String.format("<html>@ShowIf(%s)<p>hello</p></html>", expression)));
 
     assert null != widget : " null ";
 
@@ -185,8 +185,8 @@ public class HtmlTemplateCompilerTest {
 
 
     Renderable widget =
-        new HtmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(Object.class), registry, pageBook, metrics)
-            .compile("<html>@ShowIf(false)<p>hello</p></html>");
+        new HtmlTemplateCompiler(Object.class, registry, pageBook, metrics)
+            .compile(new Template("<html>@ShowIf(false)<p>hello</p></html>"));
 
     assert null != widget : " null ";
 
@@ -214,8 +214,8 @@ public class HtmlTemplateCompilerTest {
 
 
     Renderable widget =
-        new HtmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, pageBook, metrics)
-            .compile("<html><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></html>");
+        new HtmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
+            .compile(new Template("<html><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></html>"));
 
     assert null != widget : " null ";
 
@@ -272,19 +272,15 @@ public class HtmlTemplateCompilerTest {
     Parsing.setTypeConverter(converter);
 
     final PageBook pageBook = injector.getInstance(PageBook.class);
-
-
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
-
-
     Renderable widget =
-        new HtmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, pageBook, metrics)
-            .compile("<html> <head>" +
+        new HtmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
+            .compile(new Template("<html> <head>" +
                 "   @Require <script type='text/javascript' src='my.js'> </script>" +
                 "   @Require <script type='text/javascript' src='my.js'> </script>" +
                 "</head><body>" +
                 "<div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div>" +
-                "</body></html>");
+                "</body></html>"));
 
     assert null != widget : " null ";
 
@@ -309,8 +305,8 @@ public class HtmlTemplateCompilerTest {
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
     Renderable widget =
-        new HtmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, pageBook, metrics)
-            .compile("<html><div class='${clazz}'>hello</div></html>");
+        new HtmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
+            .compile(new Template("<html><div class='${clazz}'>hello</div></html>"));
 
     assert null != widget : " null ";
 
@@ -331,8 +327,8 @@ public class HtmlTemplateCompilerTest {
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
     Renderable widget =
-        new HtmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, pageBook, metrics)
-            .compile("<!doctype html><html><body><div class='${clazz}'>hello @ShowIf(false)<a href='/hi/${id}'>hideme</a></div></body></html>");
+        new HtmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
+            .compile(new Template("<!doctype html><html><body><div class='${clazz}'>hello @ShowIf(false)<a href='/hi/${id}'>hideme</a></div></body></html>"));
 
     assert null != widget : " null ";
 
@@ -380,8 +376,8 @@ public class HtmlTemplateCompilerTest {
     registry.addEmbed("myfave");
 
     Renderable widget =
-        new HtmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, book, metrics)
-            .compile("<xml><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></xml>");
+        new HtmlTemplateCompiler(TestBackingType.class, registry, book, metrics)
+            .compile(new Template("<xml><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></xml>"));
 
     assert null != widget : " null ";
 
@@ -418,8 +414,8 @@ public class HtmlTemplateCompilerTest {
     registry.addEmbed("myfave");
 
     Renderable widget =
-        new HtmlTemplateCompiler(Object.class, new MvelEvaluatorCompiler(TestBackingType.class), registry, pageBook, metrics)
-            .compile("<html><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></html>");
+        new HtmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
+            .compile(new Template("<html><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></html>"));
 
     assert null != widget : " null ";
 

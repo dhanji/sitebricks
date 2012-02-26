@@ -11,6 +11,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.sitebricks.compiler.Parsing;
+import com.google.sitebricks.compiler.TemplateRenderer;
 import com.google.sitebricks.conversion.Converter;
 import com.google.sitebricks.conversion.ConverterUtils;
 import com.google.sitebricks.core.CaseWidget;
@@ -113,6 +114,8 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   
   private void configureTemplateSystem() {    
     bind(TemplateSystem.class).to(DefaultTemplateSystem.class);
+    // need to fully normalize the template renderer signature    
+    Multibinder<TemplateRenderer> multibinder = Multibinder.newSetBinder(binder(), TemplateRenderer.class);
   }
   
   /**
