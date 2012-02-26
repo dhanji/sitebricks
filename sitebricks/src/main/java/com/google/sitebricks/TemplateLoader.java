@@ -1,12 +1,30 @@
 package com.google.sitebricks;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import net.jcip.annotations.Immutable;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 import javax.servlet.ServletContext;
-import java.io.*;
-import java.net.URL;
+
+import net.jcip.annotations.Immutable;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.sitebricks.compiler.FlatTemplateCompiler;
+import com.google.sitebricks.compiler.HtmlTemplateCompiler;
+import com.google.sitebricks.compiler.MvelEvaluatorCompiler;
+import com.google.sitebricks.compiler.XmlTemplateCompiler;
+import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
+import com.google.sitebricks.compiler.template.freemarker.FreemarkerDecoratorTemplateCompiler;
+import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
+import com.google.sitebricks.rendering.control.WidgetRegistry;
+import com.google.sitebricks.routing.PageBook;
+import com.google.sitebricks.routing.SystemMetrics;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -14,11 +32,17 @@ import java.net.URL;
 @Immutable
 public class TemplateLoader {
   
+  private final WidgetRegistry registry;
+  private final PageBook pageBook;
+  private final SystemMetrics metrics;  
   private final Provider<ServletContext> context;
   private final TemplateSystem templateSystem;
   
   @Inject
-  public TemplateLoader(Provider<ServletContext> context, TemplateSystem templateSystem) {
+  public TemplateLoader(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics, Provider<ServletContext> context, TemplateSystem templateSystem) {
+    this.registry = registry;
+    this.pageBook = pageBook;
+    this.metrics = metrics;
     this.context = context;
     this.templateSystem = templateSystem;
   }
@@ -33,7 +57,9 @@ public class TemplateLoader {
       template = show.value();
     }
     
+    //
     // an empty string means no template name was given
+    //
     if (template == null || template.length() == 0) {
       // use the default name for the page class
       template = resolve(pageClass);
@@ -89,7 +115,7 @@ public class TemplateLoader {
       throw new TemplateLoadingException("Could not load template for (i/o error): " + pageClass, e);
     }
 
-    return new Template(Template.Kind.kindOf(template), text, templateSource);
+    return new Template(template, text, templateSource);
   }
   
   private ResolvedTemplate resolve(Class<?> pageClass, ServletContext context, String template) {
@@ -186,4 +212,58 @@ public class TemplateLoader {
 
     return builder.toString();
   }
+  
+  public Renderable compile(Class<?> templateClass) {
+    
+    final Template template = load(templateClass);
+
+    Renderable widget;
+
+    switch(Kind.kindOf(template.getTemplatename())) {
+      default:
+      case HTML:
+        widget = new HtmlTemplateCompiler(templateClass, new MvelEvaluatorCompiler(templateClass), registry, pageBook, metrics).compile(template.getText()); 
+        break;
+      case XML:
+        widget = new XmlTemplateCompiler(templateClass, new MvelEvaluatorCompiler(templateClass), registry, pageBook, metrics).compile(template.getText());         
+        break;
+      case FLAT:
+        widget = new FlatTemplateCompiler(templateClass, new MvelEvaluatorCompiler(templateClass), metrics, registry).compile(template.getText()); 
+        break;
+      case MVEL:
+        /**
+         * Creates a Renderable that can process MVEL templates.
+         * These are not to be confused with Sitebricks templates
+         * that *use* MVEL. Rather, this is MVEL's template technology.
+         */                
+        widget = new MvelTemplateCompiler(templateClass).compile(template.getText()); 
+        break;
+      case FREEMARKER:
+        widget = new FreemarkerTemplateCompiler(templateClass).compile(template); 
+        break;
+      case MAGIC:
+        widget = new FreemarkerDecoratorTemplateCompiler(templateClass).compile(template); 
+        break;
+    }
+    return widget;    
+  }
+
+  public static enum Kind {
+    HTML, XML, FLAT, MVEL, FREEMARKER, MAGIC;
+
+    public static Kind kindOf(String template) {
+      if (template.startsWith("m_") || template.endsWith(".dml")) {
+        return MAGIC;
+      } else if (template.endsWith(".html") || template.endsWith(".xhtml"))
+        return HTML;
+      else if (template.endsWith(".xml"))
+        return XML;
+      else if (template.endsWith(".mvel"))
+        return MVEL;
+      else if (template.endsWith(".fml"))
+        return FREEMARKER;
+      else
+        return FLAT;
+    }
+  }    
 }

@@ -29,7 +29,6 @@ import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.RespondersForTesting;
 import com.google.sitebricks.Template;
-import com.google.sitebricks.Template.Kind;
 import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
@@ -88,7 +87,7 @@ public class FreemarkerTemplateCompilerTest {
   }
 
   private Template template(String text) {
-    return new Template(Kind.FREEMARKER, text, new MemoryTemplateSource());
+    return new Template("template.fml", text, new MemoryTemplateSource());
   }
   
   @Test

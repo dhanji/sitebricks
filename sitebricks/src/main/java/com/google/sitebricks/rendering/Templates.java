@@ -1,5 +1,8 @@
 package com.google.sitebricks.rendering;
 
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
@@ -7,12 +10,8 @@ import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.StringBuilderRespond;
-import com.google.sitebricks.Template;
 import com.google.sitebricks.TemplateLoader;
 import com.google.sitebricks.compiler.Compilers;
-
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -64,12 +63,10 @@ public class Templates {
   public static class Descriptor {
     private final Class<?> clazz;
     private final String fileName;
-    private final Template.Kind kind;
 
     public Descriptor(Class<?> clazz, String fileName) {
       this.clazz = clazz;
       this.fileName = fileName;
-      this.kind = Template.Kind.kindOf(fileName);
     }
 
     public Class<?> getClazz() {
@@ -78,10 +75,6 @@ public class Templates {
 
     public String getFileName() {
       return fileName;
-    }
-
-    public Template.Kind getKind() {
-      return kind;
     }
   }
 }

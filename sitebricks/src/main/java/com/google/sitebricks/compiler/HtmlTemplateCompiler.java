@@ -29,7 +29,7 @@ import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
  *
  */
 @NotThreadSafe
-class HtmlTemplateCompiler {
+public class HtmlTemplateCompiler {
     private final Class<?> page;
     private final WidgetRegistry registry;
     private final PageBook pageBook;

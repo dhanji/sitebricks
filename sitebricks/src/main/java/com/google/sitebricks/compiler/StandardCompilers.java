@@ -1,25 +1,19 @@
 package com.google.sitebricks.compiler;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Map;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.MissingTemplateException;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Show;
-import com.google.sitebricks.Template;
 import com.google.sitebricks.TemplateLoader;
-import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
-import com.google.sitebricks.compiler.template.freemarker.FreemarkerDecoratorTemplateCompiler;
-import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.rendering.Decorated;
-import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
-import com.google.sitebricks.routing.SystemMetrics;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Map;
 
 /**
  * A factory for internal template compilers.
@@ -28,18 +22,13 @@ import java.util.Map;
  */
 @Singleton
 class StandardCompilers implements Compilers {
-  private final WidgetRegistry registry;
   private final PageBook pageBook;
-  private final SystemMetrics metrics;
   private final Map<String, Class<? extends Annotation>> httpMethods;
   private final TemplateLoader loader;
 
   @Inject
-  public StandardCompilers(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics,
-                           @Bricks Map<String, Class<? extends Annotation>> httpMethods, TemplateLoader loader) {
-    this.registry = registry;
+  public StandardCompilers(PageBook pageBook, @Bricks Map<String, Class<? extends Annotation>> httpMethods, TemplateLoader loader) {
     this.pageBook = pageBook;
-    this.metrics = metrics;
     this.httpMethods = httpMethods;
     this.loader = loader;
   }
@@ -117,46 +106,9 @@ class StandardCompilers implements Compilers {
     //
     page.apply(widget);
   }
-  
+    
   @Override
-  public Renderable compile(Class<?> templateClass) {
-    final Template template = loader.load(templateClass);
-
-    Renderable widget;
-
-    switch(template.getKind()) {
-      default:
-      case HTML:
-        widget = new HtmlTemplateCompiler(templateClass, new MvelEvaluatorCompiler(templateClass), registry, pageBook, metrics).compile(template.getText()); 
-        //compileHtml(templateClass, template.getText());
-        break;
-      case XML:
-        widget = new XmlTemplateCompiler(templateClass, new MvelEvaluatorCompiler(templateClass), registry, pageBook, metrics).compile(template.getText());         
-        //compileXml(templateClass, template.getText());
-        break;
-      case FLAT:
-        widget = new FlatTemplateCompiler(templateClass, new MvelEvaluatorCompiler(templateClass), metrics, registry).compile(template.getText()); 
-        //compileFlat(templateClass, template.getText());
-        break;
-      case MVEL:
-        /**
-         * Creates a Renderable that can process MVEL templates.
-         * These are not to be confused with Sitebricks templates
-         * that *use* MVEL. Rather, this is MVEL's template technology.
-         */                
-        widget = new MvelTemplateCompiler(templateClass).compile(template.getText()); 
-        //compileMvel(templateClass, template.getText());
-        break;
-      case FREEMARKER:
-        widget = new FreemarkerTemplateCompiler(templateClass).compile(template); 
-        //compileFreemarker(templateClass, template);
-        break;
-      case MAGIC:
-        widget = new FreemarkerDecoratorTemplateCompiler(templateClass).compile(template); 
-        //compileMagicTemplate(templateClass, template);
-        break;
-    }
-    return widget;
-  }
-
+  public Renderable compile(Class<?> templateClass) {    
+    return loader.compile(templateClass);
+  }  
 }
