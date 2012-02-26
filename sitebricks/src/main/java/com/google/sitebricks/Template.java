@@ -26,7 +26,7 @@ public class Template {
     this.source = source;
   }
 
-  public String getTemplatename() {
+  public String getName() {
     return templateName;
   }
   

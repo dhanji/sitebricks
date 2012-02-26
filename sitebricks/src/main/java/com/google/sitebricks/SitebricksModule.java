@@ -11,9 +11,13 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import com.google.sitebricks.compiler.FlatTemplateCompiler;
 import com.google.sitebricks.compiler.HtmlTemplateCompiler;
 import com.google.sitebricks.compiler.Parsing;
-import com.google.sitebricks.compiler.TemplateRenderer;
+import com.google.sitebricks.compiler.TemplateCompiler;
+import com.google.sitebricks.compiler.XmlTemplateCompiler;
+import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
+import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.conversion.Converter;
 import com.google.sitebricks.conversion.ConverterUtils;
 import com.google.sitebricks.core.CaseWidget;
@@ -115,10 +119,17 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   }
   
   private void configureTemplateSystem() {    
-    bind(TemplateSystem.class).to(DefaultTemplateSystem.class);
-    // need to fully normalize the template renderer signature
-    MapBinder<String,TemplateRenderer> templateCompilers = MapBinder.newMapBinder(binder(), String.class, TemplateRenderer.class);
+    //
+    // 
+    //
+    MapBinder<String,TemplateCompiler> templateCompilers = MapBinder.newMapBinder(binder(), String.class, TemplateCompiler.class);
     templateCompilers.addBinding("html").to(HtmlTemplateCompiler.class);
+    templateCompilers.addBinding("xml").to(XmlTemplateCompiler.class);
+    templateCompilers.addBinding("flat").to(FlatTemplateCompiler.class);
+    templateCompilers.addBinding("mvel").to(MvelTemplateCompiler.class);
+    templateCompilers.addBinding("fml").to(FreemarkerTemplateCompiler.class);
+    
+    bind(TemplateSystem.class).to(DefaultTemplateSystem.class);
   }
   
   /**

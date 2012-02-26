@@ -42,7 +42,7 @@ import com.google.sitebricks.routing.SystemMetrics;
  * @author Shawn based on XMLTemplateCompiler by Dhanji R. Prasanna (dhanji@gmail.com)
  *
  */
-public class HtmlTemplateCompiler implements TemplateRenderer {
+public class HtmlTemplateCompiler implements TemplateCompiler {
     
   private final WidgetRegistry registry;
     private final PageBook pageBook;

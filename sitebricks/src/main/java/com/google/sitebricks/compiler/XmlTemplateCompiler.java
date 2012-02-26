@@ -24,6 +24,7 @@ import org.xml.sax.SAXException;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Template;
 import com.google.sitebricks.compiler.HtmlTemplateCompiler.PageCompilingContext;
@@ -39,8 +40,7 @@ import com.google.sitebricks.routing.SystemMetrics;
  * 
  * TODO share code with HtmlTemplateCompiler
  */
-@NotThreadSafe
-public class XmlTemplateCompiler implements TemplateRenderer {
+public class XmlTemplateCompiler implements TemplateCompiler {
     
   private final WidgetRegistry registry;
     private final PageBook pageBook;
@@ -51,6 +51,7 @@ public class XmlTemplateCompiler implements TemplateRenderer {
     private static final String REPEAT_WIDGET = "repeat";
     private static final String CHOOSE_WIDGET = "choose";
 
+    @Inject
     public XmlTemplateCompiler(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics) {
         this.registry = registry;
         this.pageBook = pageBook;

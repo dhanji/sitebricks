@@ -5,7 +5,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import com.google.sitebricks.compiler.TemplateRenderer;
+import com.google.sitebricks.compiler.TemplateCompiler;
 import com.google.sitebricks.compiler.template.AbstractMagicTemplateCompiler;
 
 import freemarker.core.Environment;
@@ -17,7 +17,7 @@ import freemarker.template.TemplateExceptionHandler;
 /**
  * Creates renderables, given a Freemarker template page.
  */
-public class FreemarkerTemplateCompiler extends AbstractMagicTemplateCompiler implements TemplateRenderer {
+public class FreemarkerTemplateCompiler extends AbstractMagicTemplateCompiler implements TemplateCompiler {
 
   @Override
   public String process(Class<?> page, Object bound, com.google.sitebricks.Template sitebricksTemplate) {

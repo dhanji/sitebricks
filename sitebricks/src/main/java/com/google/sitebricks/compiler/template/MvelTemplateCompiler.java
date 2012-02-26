@@ -4,10 +4,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.Template;
-import com.google.sitebricks.compiler.TemplateRenderer;
+import com.google.sitebricks.compiler.TemplateCompiler;
 
 import org.mvel2.templates.CompiledTemplate;
-import org.mvel2.templates.TemplateCompiler;
 import org.mvel2.templates.TemplateRuntime;
 
 import java.util.HashMap;
@@ -16,11 +15,11 @@ import java.util.Set;
 /**
  * Creates renderables, given an MVEL template page.
  */
-public class MvelTemplateCompiler implements TemplateRenderer {
+public class MvelTemplateCompiler implements TemplateCompiler {
 
   public Renderable compile(final Class<?> page, final Template template) {
     // Compile template immediately.
-    final CompiledTemplate compiledTemplate = TemplateCompiler.compileTemplate(template.getText());
+    final CompiledTemplate compiledTemplate = org.mvel2.templates.TemplateCompiler.compileTemplate(template.getText());
 
     return new Renderable() {
       @Override

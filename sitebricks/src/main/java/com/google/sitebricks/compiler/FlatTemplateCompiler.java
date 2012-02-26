@@ -1,5 +1,6 @@
 package com.google.sitebricks.compiler;
 
+import com.google.inject.Inject;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Template;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
@@ -15,10 +16,11 @@ import java.util.List;
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  * @see XmlTemplateCompiler
  */
-public class FlatTemplateCompiler implements TemplateRenderer {
+public class FlatTemplateCompiler implements TemplateCompiler {
     private final SystemMetrics metrics;
     private final WidgetRegistry registry;
 
+    @Inject
     public FlatTemplateCompiler(SystemMetrics metrics, WidgetRegistry registry) {
         this.metrics = metrics;
         this.registry = registry;

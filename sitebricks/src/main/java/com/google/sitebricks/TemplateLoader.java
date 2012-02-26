@@ -15,13 +15,7 @@ import net.jcip.annotations.Immutable;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.sitebricks.compiler.FlatTemplateCompiler;
-import com.google.sitebricks.compiler.HtmlTemplateCompiler;
-import com.google.sitebricks.compiler.MvelEvaluatorCompiler;
-import com.google.sitebricks.compiler.XmlTemplateCompiler;
-import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
-import com.google.sitebricks.compiler.template.freemarker.FreemarkerDecoratorTemplateCompiler;
-import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
+import com.google.sitebricks.compiler.TemplateCompiler;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
@@ -32,17 +26,11 @@ import com.google.sitebricks.routing.SystemMetrics;
 @Immutable
 public class TemplateLoader {
   
-  private final WidgetRegistry registry;
-  private final PageBook pageBook;
-  private final SystemMetrics metrics;  
   private final Provider<ServletContext> context;
   private final TemplateSystem templateSystem;
   
   @Inject
   public TemplateLoader(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics, Provider<ServletContext> context, TemplateSystem templateSystem) {
-    this.registry = registry;
-    this.pageBook = pageBook;
-    this.metrics = metrics;
     this.context = context;
     this.templateSystem = templateSystem;
   }
@@ -212,58 +200,18 @@ public class TemplateLoader {
 
     return builder.toString();
   }
-  
-  public Renderable compile(Class<?> templateClass) {
-    
-    final Template template = load(templateClass);
 
-    Renderable widget;
-
-    switch(Kind.kindOf(template.getTemplatename())) {
-      default:
-      case HTML:
-        widget = new HtmlTemplateCompiler(registry, pageBook, metrics).compile(templateClass, template); 
-        break;
-      case XML:
-        widget = new XmlTemplateCompiler(registry, pageBook, metrics).compile(templateClass, template);         
-        break;
-      case FLAT:
-        widget = new FlatTemplateCompiler(metrics, registry).compile(templateClass, template); 
-        break;
-      case MVEL:
-        /**
-         * Creates a Renderable that can process MVEL templates.
-         * These are not to be confused with Sitebricks templates
-         * that *use* MVEL. Rather, this is MVEL's template technology.
-         */                
-        widget = new MvelTemplateCompiler().compile(templateClass,template); 
-        break;
-      case FREEMARKER:
-        widget = new FreemarkerTemplateCompiler().compile(templateClass, template); 
-        break;
-      case MAGIC:
-        widget = new FreemarkerDecoratorTemplateCompiler().compile(templateClass,template); 
-        break;
+  public Renderable compile(Class<?> templateClass) {   
+    Template template = load(templateClass);
+    TemplateCompiler templateCompiler = templateSystem.compilerFor(template.getName());
+    //
+    // This is how the old mechanism worked, for example if dynamic.js comes through the system we still pass back
+    // the html compiler. JVZ: not sure why this wouldn't be directly routed to the right resource. TODO: investigate
+    //
+    if(templateCompiler == null) {
+      templateCompiler = templateSystem.compilerFor("html");
     }
-    return widget;    
-  }
-
-  public static enum Kind {
-    HTML, XML, FLAT, MVEL, FREEMARKER, MAGIC;
-
-    public static Kind kindOf(String template) {
-      if (template.endsWith(".dml")) {
-        return MAGIC;
-      } else if (template.endsWith(".html") || template.endsWith(".xhtml"))
-        return HTML;
-      else if (template.endsWith(".xml"))
-        return XML;
-      else if (template.endsWith(".mvel"))
-        return MVEL;
-      else if (template.endsWith(".fml"))
-        return FREEMARKER;
-      else
-        return FLAT;
-    }
-  }    
+        
+    return templateCompiler.compile(templateClass, template);
+  }  
 }
