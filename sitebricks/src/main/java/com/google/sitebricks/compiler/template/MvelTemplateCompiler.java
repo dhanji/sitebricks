@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.Template;
+import com.google.sitebricks.compiler.TemplateRenderer;
 
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.templates.TemplateCompiler;
@@ -15,7 +16,7 @@ import java.util.Set;
 /**
  * Creates renderables, given an MVEL template page.
  */
-public class MvelTemplateCompiler {
+public class MvelTemplateCompiler implements TemplateRenderer {
   private final Class<?> page;
 
   public MvelTemplateCompiler(Class<?> page) {

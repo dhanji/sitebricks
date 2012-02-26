@@ -44,7 +44,7 @@ import com.google.sitebricks.routing.SystemMetrics;
  *
  */
 @NotThreadSafe
-public class HtmlTemplateCompiler {
+public class HtmlTemplateCompiler implements TemplateRenderer {
     private final Class<?> page;
     private final WidgetRegistry registry;
     private final PageBook pageBook;

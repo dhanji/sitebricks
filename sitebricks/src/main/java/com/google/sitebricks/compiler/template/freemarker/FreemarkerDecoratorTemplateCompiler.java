@@ -11,6 +11,7 @@ import java.util.Map;
 import org.sitebricks.decorator.Decorator;
 import org.sitebricks.decorator.freemarker.FreemarkerDecorator;
 
+import com.google.sitebricks.compiler.TemplateRenderer;
 import com.google.sitebricks.compiler.template.AbstractMagicTemplateCompiler;
 
 import freemarker.core.Environment;
@@ -23,7 +24,7 @@ import freemarker.template.TemplateExceptionHandler;
  * Creates renderables, given a Freemarker decorator template and simple xhtml content that is parsed by JSoup. We take the title, head, body, and links as parsed from JSoup and inject them into the
  * template context as ${title}, ${head}, ${body}, and ${links}.
  */
-public class FreemarkerDecoratorTemplateCompiler extends AbstractMagicTemplateCompiler {
+public class FreemarkerDecoratorTemplateCompiler extends AbstractMagicTemplateCompiler implements TemplateRenderer {
   
   private final Decorator decorator;
 

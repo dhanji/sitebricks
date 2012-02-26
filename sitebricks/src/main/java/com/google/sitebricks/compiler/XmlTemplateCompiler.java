@@ -39,7 +39,7 @@ import com.google.sitebricks.routing.SystemMetrics;
  * TODO share code with HtmlTemplateCompiler
  */
 @NotThreadSafe
-public class XmlTemplateCompiler {
+public class XmlTemplateCompiler implements TemplateRenderer {
     private final Class<?> page;
     private final WidgetRegistry registry;
     private final PageBook pageBook;
