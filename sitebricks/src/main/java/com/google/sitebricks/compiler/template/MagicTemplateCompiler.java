@@ -4,5 +4,5 @@ import com.google.sitebricks.Template;
 
 public interface MagicTemplateCompiler {
   Template transform(Template template);
-  String process(Object bound, Template template);
+  String process(Class<?> page, Object bound, Template template);
 }

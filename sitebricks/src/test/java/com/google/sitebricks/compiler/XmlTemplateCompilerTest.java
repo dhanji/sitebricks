@@ -92,8 +92,8 @@ public class XmlTemplateCompilerTest {
 
     final Template template = new Template("<xml>@ShowIf(true)<p>hello</p></xml>");
     final MvelEvaluatorCompiler compiler = new MvelEvaluatorCompiler(TestBackingType.class);
-    Renderable widget = new XmlTemplateCompiler(Object.class, registry, pageBook, metrics)
-      .compile(template);
+    Renderable widget = new XmlTemplateCompiler(registry, pageBook, metrics)
+      .compile(Object.class, template);
 
     assert null != widget : " null ";
 
@@ -144,8 +144,8 @@ public class XmlTemplateCompilerTest {
     final Evaluator evaluator = new MvelEvaluator();
 
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
-    Renderable widget = new XmlTemplateCompiler(Object.class, registry, pageBook, metrics)
-      .compile(new Template(String.format("<xml>@ShowIf(%s)<p>hello</p></xml>", expression)));
+    Renderable widget = new XmlTemplateCompiler(registry, pageBook, metrics)
+      .compile(Object.class, new Template(String.format("<xml>@ShowIf(%s)<p>hello</p></xml>", expression)));
 
     assert null != widget : " null ";
 
@@ -175,8 +175,8 @@ public class XmlTemplateCompilerTest {
 
 
     Renderable widget =
-        new XmlTemplateCompiler(Object.class, registry, pageBook, metrics)
-            .compile(new Template("<xml>@ShowIf(false)<p>hello</p></xml>"));
+        new XmlTemplateCompiler(registry, pageBook, metrics)
+            .compile(Object.class, new Template("<xml>@ShowIf(false)<p>hello</p></xml>"));
 
     assert null != widget : " null ";
 
@@ -203,8 +203,8 @@ public class XmlTemplateCompilerTest {
 
 
     Renderable widget =
-        new XmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
-            .compile(new Template("<xml><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></xml>"));
+        new XmlTemplateCompiler(registry, pageBook, metrics)
+            .compile(TestBackingType.class, new Template("<xml><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></xml>"));
 
     assert null != widget : " null ";
 
@@ -264,8 +264,8 @@ public class XmlTemplateCompilerTest {
 
 
     Renderable widget =
-        new XmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
-            .compile(new Template("<html> <head>" +
+        new XmlTemplateCompiler(registry, pageBook, metrics)
+            .compile(TestBackingType.class, new Template("<html> <head>" +
                 "   @Require <script type='text/javascript' src='my.js'> </script>" +
                 "   @Require <script type='text/javascript' src='my.js'> </script>" +
                 "</head>" +
@@ -297,8 +297,8 @@ public class XmlTemplateCompilerTest {
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
     Renderable widget =
-        new XmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
-            .compile(new Template("<xml><div class='${clazz}'>hello</div></xml>"));
+        new XmlTemplateCompiler(registry, pageBook, metrics)
+            .compile(TestBackingType.class, new Template("<xml><div class='${clazz}'>hello</div></xml>"));
 
     assert null != widget : " null ";
 
@@ -319,8 +319,8 @@ public class XmlTemplateCompilerTest {
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
     Renderable widget =
-        new XmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
-            .compile(new Template("<xml><div class='${clazz}'>hello @ShowIf(false)<a href='/hi/${id}'>hideme</a></div></xml>"));
+        new XmlTemplateCompiler(registry, pageBook, metrics)
+            .compile(TestBackingType.class, new Template("<xml><div class='${clazz}'>hello @ShowIf(false)<a href='/hi/${id}'>hideme</a></div></xml>"));
 
     assert null != widget : " null ";
 
@@ -369,8 +369,8 @@ public class XmlTemplateCompilerTest {
     registry.addEmbed("myfave");
 
     Renderable widget =
-        new XmlTemplateCompiler(TestBackingType.class, registry, book, metrics)
-            .compile(new Template("<xml><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></xml>"));
+        new XmlTemplateCompiler(registry, book, metrics)
+            .compile(TestBackingType.class, new Template("<xml><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></xml>"));
 
     assert null != widget : " null ";
 
@@ -407,8 +407,8 @@ public class XmlTemplateCompilerTest {
     registry.addEmbed("myfave");
 
     Renderable widget =
-        new XmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
-            .compile(new Template("<xml><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></xml>"));
+        new XmlTemplateCompiler(registry, pageBook, metrics)
+            .compile(TestBackingType.class, new Template("<xml><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></xml>"));
 
     assert null != widget : " null ";
 

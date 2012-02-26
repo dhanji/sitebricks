@@ -8,14 +8,8 @@ import com.google.sitebricks.Respond;
 import com.google.sitebricks.Template;
 
 public abstract class AbstractMagicTemplateCompiler implements MagicTemplateCompiler {
-  
-  protected final Class<?> page;
-
-  public AbstractMagicTemplateCompiler(Class<?> page) {
-    this.page = page;
-  }
-  
-  public Renderable compile(final Template sitebricksTemplate) {
+    
+  public Renderable compile(final Class<?> page, final Template sitebricksTemplate) {
             
     return new Renderable() {
       @Override
@@ -27,7 +21,7 @@ public abstract class AbstractMagicTemplateCompiler implements MagicTemplateComp
         // 2. Process the XHTML however the client wishes
         // 3. Blow the processed XHTML out of pipe
         //
-        respond.write(process(bound, transform(sitebricksTemplate)));
+        respond.write(process(page, bound, transform(sitebricksTemplate)));
       }
 
       @Override
@@ -41,5 +35,5 @@ public abstract class AbstractMagicTemplateCompiler implements MagicTemplateComp
     return sitebricksTemplate;
   }
 
-  public abstract String process(Object bound, Template sitebricksTemplate);  
+  public abstract String process(Class<?> page, Object bound, Template sitebricksTemplate);  
 }

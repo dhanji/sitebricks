@@ -1,5 +1,19 @@
 package com.google.sitebricks.compiler;
 
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.testng.Assert.assertEquals;
+
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
@@ -8,8 +22,6 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.sitebricks.Bricks;
-import com.google.sitebricks.Evaluator;
-import com.google.sitebricks.MvelEvaluator;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.RespondersForTesting;
@@ -27,18 +39,6 @@ import com.google.sitebricks.rendering.control.Chains;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import javax.servlet.http.HttpServletRequest;
-import java.lang.annotation.Annotation;
-import java.util.Map;
-
-import static org.easymock.EasyMock.createNiceMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -46,10 +46,19 @@ import static org.testng.Assert.assertEquals;
 public class HtmlTemplateCompilerTest {
   private static final String ANNOTATION_EXPRESSIONS = "Annotation expressions";
   private Injector injector;
+  private WidgetRegistry registry;
   private PageBook pageBook;
   private SystemMetrics metrics;
   private final Map<String, Class<? extends Annotation>> methods = Maps.newHashMap();
 
+  private HtmlTemplateCompiler compiler() {
+    registry = injector.getInstance(WidgetRegistry.class);    
+    registry.addEmbed("myfave");
+    pageBook = injector.getInstance(PageBook.class);    
+    pageBook.at("/somewhere", MyEmbeddedPage.class).apply(Chains.terminal());
+    return new HtmlTemplateCompiler(registry, pageBook, metrics);
+  }
+   
   @BeforeMethod
   public void pre() {
     methods.put("get", Get.class);
@@ -89,11 +98,9 @@ public class HtmlTemplateCompilerTest {
 
   @Test
   public final void readShowIfWidgetTrue() {
-    final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
-    Renderable widget =
-        new HtmlTemplateCompiler(Object.class, registry, pageBook, metrics)
-          .compile(new Template("<html>@ShowIf(true)<p>hello</p></html>"));
+    Renderable widget = compiler()
+        .compile(Object.class, new Template("<html>@ShowIf(true)<p>hello</p></html>"));
 
 //        .compile("<!doctype html>\n" +
 //              "<html><head><meta charset=\"UTF-8\"><title>small test</title></head><body>\n" +
@@ -103,7 +110,6 @@ public class HtmlTemplateCompilerTest {
 
     assert null != widget : " null ";
 
-    final StringBuilder builder = new StringBuilder();
     final Respond mockRespond = RespondersForTesting.newRespond();
 //        final Respond mockRespond = new StringBuilderRespond() {
 //            @Override
@@ -147,54 +153,27 @@ public class HtmlTemplateCompilerTest {
   }
 
   @Test(dataProvider = ANNOTATION_EXPRESSIONS)
-  public final void readAWidgetWithVariousExpressions(String expression) {
-    final Evaluator evaluator = new MvelEvaluator();
-
-    final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
-
-
-    Renderable widget =
-        new HtmlTemplateCompiler(Object.class, registry, pageBook, metrics)
-            .compile(new Template(String.format("<html>@ShowIf(%s)<p>hello</p></html>", expression)));
-
-    assert null != widget : " null ";
-
-    final StringBuilder builder = new StringBuilder();
-
-    final Respond mockRespond = RespondersForTesting.newRespond();
-
-    widget.render(new Object(), mockRespond);
-
-    final String value = mockRespond.toString();
-    System.out.println(value);
+  public final void readAWidgetWithVariousExpressions(String expression) {    
+    Renderable widget = compiler()
+        .compile(Object.class, new Template(String.format("<html>@ShowIf(%s)<p>hello</p></html>", expression)));
+    
+    assert null != widget : " null ";    
+    final Respond mockRespond = RespondersForTesting.newRespond();    
+    widget.render(new Object(), mockRespond);    
+    final String value = mockRespond.toString();    
     assert "<html><p>hello</p></html>".equals(value) : "Did not write expected output, instead: " + value;
   }
 
 
   @Test
   public final void readShowIfWidgetFalse() {
-    final Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Request.class).toProvider(mockRequestProviderForContext());
-      }
-    });
 
-    final Evaluator evaluator = new MvelEvaluator();
-
-    final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
-
-
-    Renderable widget =
-        new HtmlTemplateCompiler(Object.class, registry, pageBook, metrics)
-            .compile(new Template("<html>@ShowIf(false)<p>hello</p></html>"));
+    Renderable widget = compiler()
+        .compile(Object.class, new Template("<html>@ShowIf(false)<p>hello</p></html>"));
 
     assert null != widget : " null ";
-
-    final StringBuilder builder = new StringBuilder();
-
     final Respond mockRespond = RespondersForTesting.newRespond();
     widget.render(new Object(), mockRespond);
-
     final String value = mockRespond.toString();
     assert "<html></html>".equals(value) : "Did not write expected output, instead: " + value;
   }
@@ -202,28 +181,13 @@ public class HtmlTemplateCompilerTest {
 
   @Test
   public final void readTextWidgetValues() {
-    final Evaluator evaluator = new MvelEvaluator();
-    final Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Request.class).toProvider(mockRequestProviderForContext());
-      }
-    });
 
-
-    final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
-
-
-    Renderable widget =
-        new HtmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
-            .compile(new Template("<html><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></html>"));
+    Renderable widget = compiler()
+        .compile(TestBackingType.class, new Template("<html><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></html>"));
 
     assert null != widget : " null ";
-
-
     final Respond mockRespond = RespondersForTesting.newRespond();
-
     widget.render(new TestBackingType("Dhanji", "content", 12), mockRespond);
-
     final String value = mockRespond.toString();
     assert "<html><div class='content'>hello <a href='/people/12'>Dhanji</a></div></html>"
         .replaceAll("'", "\"")
@@ -257,35 +221,22 @@ public class HtmlTemplateCompilerTest {
 
   @Test
   public final void readAndRenderRequireWidget() {
-    final Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Request.class).toProvider(mockRequestProviderForContext());
-        bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
-        })
-            .annotatedWith(Bricks.class)
-            .toInstance(methods);
-      }
-    });
-    
+ 
     // make a basic type converter without creating  
     TypeConverter converter = new MvelTypeConverter();
     Parsing.setTypeConverter(converter);
 
-    final PageBook pageBook = injector.getInstance(PageBook.class);
-    final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
-    Renderable widget =
-        new HtmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
-            .compile(new Template("<html> <head>" +
+    Renderable widget = compiler()
+        //new HtmlTemplateCompiler(registry, pageBook, metrics)
+            .compile(TestBackingType.class, new Template("<html> <head>" +
                 "   @Require <script type='text/javascript' src='my.js'> </script>" +
                 "   @Require <script type='text/javascript' src='my.js'> </script>" +
                 "</head><body>" +
                 "<div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div>" +
                 "</body></html>"));
-
+    
     assert null != widget : " null ";
-
     final Respond respond = RespondersForTesting.newRespond();
-
     widget.render(new TestBackingType("Dhanji", "content", 12), respond);
 
     final String value = respond.toString();
@@ -294,7 +245,6 @@ public class HtmlTemplateCompilerTest {
         "</head><body>" +
         "<div class='content'>hello <a href='/people/12'>Dhanji</a></div></body></html>";
     expected = expected.replaceAll("'", "\"");
-
     assertEquals(value, expected);
   }
 
@@ -302,19 +252,12 @@ public class HtmlTemplateCompilerTest {
   @Test
   public final void readHtmlWidget() {
 
-    final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
-
-    Renderable widget =
-        new HtmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
-            .compile(new Template("<html><div class='${clazz}'>hello</div></html>"));
+    Renderable widget = compiler()
+        .compile(TestBackingType.class, new Template("<html><div class='${clazz}'>hello</div></html>"));
 
     assert null != widget : " null ";
-
-
     final Respond mockRespond = RespondersForTesting.newRespond();
-
     widget.render(new TestBackingType("Dhanji", "content", 12), mockRespond);
-
     final String s = mockRespond.toString();
     assert "<html><div class=\"content\">hello</div></html>"
         .equals(s) : "Did not write expected output, instead: " + s;
@@ -324,19 +267,12 @@ public class HtmlTemplateCompilerTest {
   @Test
   public final void readHtmlWidgetWithChildren() {
 
-    final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
-
-    Renderable widget =
-        new HtmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
-            .compile(new Template("<!doctype html><html><body><div class='${clazz}'>hello @ShowIf(false)<a href='/hi/${id}'>hideme</a></div></body></html>"));
+    Renderable widget = compiler()
+        .compile(TestBackingType.class, new Template("<!doctype html><html><body><div class='${clazz}'>hello @ShowIf(false)<a href='/hi/${id}'>hideme</a></div></body></html>"));
 
     assert null != widget : " null ";
-
-
     final Respond mockRespond = RespondersForTesting.newRespond();
-
     widget.render(new TestBackingType("Dhanji", "content", 12), mockRespond);
-
     final String s = mockRespond.toString();
     assertEquals(s, "<!doctype html><html><body><div class=\"content\">hello </div></body></html>");
   }
@@ -357,38 +293,18 @@ public class HtmlTemplateCompilerTest {
 
   @Test
   public final void readEmbedWidgetAndStoreAsPage() {
-    final Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Request.class).toProvider(mockRequestProviderForContext());
-        bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
-        })
-            .annotatedWith(Bricks.class)
-            .toInstance(methods);
-      }
-    });
-    final PageBook book = injector      //hacky, where are you super-packages!
-        .getInstance(PageBook.class);
 
-    book.at("/somewhere", MyEmbeddedPage.class).apply(Chains.terminal());
-
-
-    final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
-    registry.addEmbed("myfave");
-
-    Renderable widget =
-        new HtmlTemplateCompiler(TestBackingType.class, registry, book, metrics)
-            .compile(new Template("<xml><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></xml>"));
+    Renderable widget = compiler()
+        .compile(TestBackingType.class, new Template("<xml><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></xml>"));
 
     assert null != widget : " null ";
 
     //tell pagebook to track this as an embedded widget
-    book.embedAs(MyEmbeddedPage.class, MyEmbeddedPage.MY_FAVE_ANNOTATION)
+    pageBook.embedAs(MyEmbeddedPage.class, MyEmbeddedPage.MY_FAVE_ANNOTATION)
         .apply(Chains.terminal());
 
     final Respond mockRespond = RespondersForTesting.newRespond();
-
     widget.render(new TestBackingType("Dhanji", "content", 12), mockRespond);
-
     final String s = mockRespond.toString();
     assert "<xml><div class=\"content\">hello </div></xml>"
         .equals(s) : "Did not write expected output, instead: " + s;
@@ -397,30 +313,14 @@ public class HtmlTemplateCompilerTest {
 
   @Test
   public final void readEmbedWidgetOnly() {
-    final Injector injector = Guice.createInjector(new AbstractModule() {
-      protected void configure() {
-        bind(Request.class).toProvider(mockRequestProviderForContext());
-        bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
-        })
-            .annotatedWith(Bricks.class)
-            .toInstance(methods);
-      }
-    });
-    final PageBook book = injector      //hacky, where are you super-packages!
-        .getInstance(PageBook.class);
 
-
-    final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
-    registry.addEmbed("myfave");
-
-    Renderable widget =
-        new HtmlTemplateCompiler(TestBackingType.class, registry, pageBook, metrics)
-            .compile(new Template("<html><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></html>"));
+    Renderable widget = compiler()
+        .compile(TestBackingType.class, new Template("<html><div class='content'>hello @MyFave(should=false)<a href='/hi/${id}'>hideme</a></div></html>"));
 
     assert null != widget : " null ";
 
     //tell pagebook to track this as an embedded widget
-    book.embedAs(MyEmbeddedPage.class, MyEmbeddedPage.MY_FAVE_ANNOTATION)
+    pageBook.embedAs(MyEmbeddedPage.class, MyEmbeddedPage.MY_FAVE_ANNOTATION)
         .apply(Chains.terminal());
 
     final Respond mockRespond = RespondersForTesting.newRespond();

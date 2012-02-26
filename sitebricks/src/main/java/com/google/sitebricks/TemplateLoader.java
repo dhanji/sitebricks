@@ -222,13 +222,13 @@ public class TemplateLoader {
     switch(Kind.kindOf(template.getTemplatename())) {
       default:
       case HTML:
-        widget = new HtmlTemplateCompiler(templateClass, registry, pageBook, metrics).compile(template); 
+        widget = new HtmlTemplateCompiler(registry, pageBook, metrics).compile(templateClass, template); 
         break;
       case XML:
-        widget = new XmlTemplateCompiler(templateClass, registry, pageBook, metrics).compile(template);         
+        widget = new XmlTemplateCompiler(registry, pageBook, metrics).compile(templateClass, template);         
         break;
       case FLAT:
-        widget = new FlatTemplateCompiler(templateClass, metrics, registry).compile(template); 
+        widget = new FlatTemplateCompiler(metrics, registry).compile(templateClass, template); 
         break;
       case MVEL:
         /**
@@ -236,13 +236,13 @@ public class TemplateLoader {
          * These are not to be confused with Sitebricks templates
          * that *use* MVEL. Rather, this is MVEL's template technology.
          */                
-        widget = new MvelTemplateCompiler(templateClass).compile(template); 
+        widget = new MvelTemplateCompiler().compile(templateClass,template); 
         break;
       case FREEMARKER:
-        widget = new FreemarkerTemplateCompiler(templateClass).compile(template); 
+        widget = new FreemarkerTemplateCompiler().compile(templateClass, template); 
         break;
       case MAGIC:
-        widget = new FreemarkerDecoratorTemplateCompiler(templateClass).compile(template); 
+        widget = new FreemarkerDecoratorTemplateCompiler().compile(templateClass,template); 
         break;
     }
     return widget;    

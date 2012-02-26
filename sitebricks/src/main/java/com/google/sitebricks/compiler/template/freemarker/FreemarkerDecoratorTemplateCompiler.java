@@ -28,8 +28,7 @@ public class FreemarkerDecoratorTemplateCompiler extends AbstractMagicTemplateCo
   
   private final Decorator decorator;
 
-  public FreemarkerDecoratorTemplateCompiler(Class<?> page) {
-    super(page);
+  public FreemarkerDecoratorTemplateCompiler() {
     this.decorator = new FreemarkerDecorator();
   }
   
@@ -42,7 +41,7 @@ public class FreemarkerDecoratorTemplateCompiler extends AbstractMagicTemplateCo
   }
 
   @Override
-  public String process(Object bound, com.google.sitebricks.Template sitebricksTemplate) {
+  public String process(Class<?> page, Object bound, com.google.sitebricks.Template sitebricksTemplate) {
     //
     // Process the page with Freemarker
     //

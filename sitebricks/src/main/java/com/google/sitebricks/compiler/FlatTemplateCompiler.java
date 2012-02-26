@@ -16,21 +16,18 @@ import java.util.List;
  * @see XmlTemplateCompiler
  */
 public class FlatTemplateCompiler implements TemplateRenderer {
-    private final Class<?> page;
-    private final MvelEvaluatorCompiler compiler;
     private final SystemMetrics metrics;
     private final WidgetRegistry registry;
 
-    public FlatTemplateCompiler(Class<?> page, SystemMetrics metrics, WidgetRegistry registry) {
-        this.page = page;
-        this.compiler = new MvelEvaluatorCompiler(page);
+    public FlatTemplateCompiler(SystemMetrics metrics, WidgetRegistry registry) {
         this.metrics = metrics;
         this.registry = registry;
     }
 
-    public Renderable compile(Template template) {
+    public Renderable compile(Class<?> page, Template template) {
+      
         try {
-            return registry.textWidget(template.getText(), compiler);
+            return registry.textWidget(template.getText(), new MvelEvaluatorCompiler(page));
 
         } catch (ExpressionCompileException e) {
             final List<CompileError> errors = Arrays.asList(

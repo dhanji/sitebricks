@@ -19,12 +19,8 @@ import freemarker.template.TemplateExceptionHandler;
  */
 public class FreemarkerTemplateCompiler extends AbstractMagicTemplateCompiler implements TemplateRenderer {
 
-  public FreemarkerTemplateCompiler(Class<?> page) {
-    super(page);
-  }
-
   @Override
-  public String process(Object bound, com.google.sitebricks.Template sitebricksTemplate) {
+  public String process(Class<?> page, Object bound, com.google.sitebricks.Template sitebricksTemplate) {
 
     final Template template = getTemplate(page, sitebricksTemplate);
 

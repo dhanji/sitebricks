@@ -94,8 +94,8 @@ public class FreemarkerTemplateCompilerTest {
   public final void readShowIfWidgetTrue() {
     
     Renderable widget =
-        new FreemarkerTemplateCompiler(Object.class)
-          .compile(template("<html><#if true><p>hello</p></#if></html>"));
+        new FreemarkerTemplateCompiler()
+          .compile(Object.class, template("<html><#if true><p>hello</p></#if></html>"));
 
     assert null != widget : " null ";
 
@@ -134,8 +134,8 @@ public class FreemarkerTemplateCompilerTest {
     System.out.println( templateValue );
     
     Renderable widget =
-        new FreemarkerTemplateCompiler(Object.class)
-            .compile(template(templateValue));
+        new FreemarkerTemplateCompiler()
+            .compile(Object.class, template(templateValue));
 
     assert null != widget : " null ";
 
@@ -165,8 +165,8 @@ public class FreemarkerTemplateCompilerTest {
 
 
     Renderable widget =
-        new FreemarkerTemplateCompiler(Object.class)
-            .compile(template("<html><#if false><p>hello</p></#if></html>"));
+        new FreemarkerTemplateCompiler()
+            .compile(Object.class, template("<html><#if false><p>hello</p></#if></html>"));
 
     assert null != widget : " null ";
 
@@ -189,8 +189,8 @@ public class FreemarkerTemplateCompilerTest {
     });
 
     Renderable widget =
-        new FreemarkerTemplateCompiler(Object.class)
-            .compile(template("<html><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></html>"));
+        new FreemarkerTemplateCompiler()
+            .compile(Object.class, template("<html><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></html>"));
 
     assert null != widget : " null ";
 
@@ -281,8 +281,8 @@ public class FreemarkerTemplateCompilerTest {
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
     Renderable widget =
-        new FreemarkerTemplateCompiler(Object.class)
-            .compile(template("<html><div class='${clazz}'>hello</div></html>"));
+        new FreemarkerTemplateCompiler()
+            .compile(Object.class, template("<html><div class='${clazz}'>hello</div></html>"));
 
     assert null != widget : " null ";
 
@@ -304,8 +304,8 @@ public class FreemarkerTemplateCompilerTest {
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
     Renderable widget =
-        new FreemarkerTemplateCompiler(Object.class)
-            .compile(template("<!doctype html><html><body><div class='${clazz}'>hello <#if false><a href='/hi/${id}'>hideme</a></#if></div></body></html>"));
+        new FreemarkerTemplateCompiler()
+            .compile(Object.class, template("<!doctype html><html><body><div class='${clazz}'>hello <#if false><a href='/hi/${id}'>hideme</a></#if></div></body></html>"));
 
     assert null != widget : " null ";
 

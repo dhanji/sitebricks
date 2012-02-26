@@ -10,7 +10,7 @@ public class DelegatingMagicTemplateCompiler implements MagicTemplateCompiler {
   }
 
   @Override
-  public String process(Object bound, Template template) {
+  public String process(Class<?> page, Object bound, Template template) {
     return null;
   }
 }

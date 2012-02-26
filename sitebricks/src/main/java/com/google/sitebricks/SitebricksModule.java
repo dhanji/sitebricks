@@ -9,7 +9,9 @@ import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import com.google.sitebricks.compiler.HtmlTemplateCompiler;
 import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.compiler.TemplateRenderer;
 import com.google.sitebricks.conversion.Converter;
@@ -114,8 +116,9 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   
   private void configureTemplateSystem() {    
     bind(TemplateSystem.class).to(DefaultTemplateSystem.class);
-    // need to fully normalize the template renderer signature    
-    Multibinder<TemplateRenderer> multibinder = Multibinder.newSetBinder(binder(), TemplateRenderer.class);
+    // need to fully normalize the template renderer signature
+    MapBinder<String,TemplateRenderer> templateCompilers = MapBinder.newMapBinder(binder(), String.class, TemplateRenderer.class);
+    templateCompilers.addBinding("html").to(HtmlTemplateCompiler.class);
   }
   
   /**

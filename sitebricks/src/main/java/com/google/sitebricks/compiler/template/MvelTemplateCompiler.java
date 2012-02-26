@@ -17,13 +17,8 @@ import java.util.Set;
  * Creates renderables, given an MVEL template page.
  */
 public class MvelTemplateCompiler implements TemplateRenderer {
-  private final Class<?> page;
 
-  public MvelTemplateCompiler(Class<?> page) {
-    this.page = page;
-  }
-
-  public Renderable compile(Template template) {
+  public Renderable compile(final Class<?> page, final Template template) {
     // Compile template immediately.
     final CompiledTemplate compiledTemplate = TemplateCompiler.compileTemplate(template.getText());
 
