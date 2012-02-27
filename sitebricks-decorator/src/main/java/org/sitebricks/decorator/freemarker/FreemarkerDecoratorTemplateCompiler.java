@@ -1,4 +1,4 @@
-package com.google.sitebricks.compiler.template.freemarker;
+package org.sitebricks.decorator.freemarker;
 
 import java.io.File;
 import java.io.IOException;

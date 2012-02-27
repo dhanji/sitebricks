@@ -18,10 +18,6 @@
     </dependency>
     <dependency>
       <groupId>com.google.sitebricks</groupId>
-      <artifactId>sitebricks-decorator</artifactId>
-    </dependency>    
-    <dependency>
-      <groupId>com.google.sitebricks</groupId>
       <artifactId>sitebricks-converter</artifactId>
     </dependency>
     <dependency>

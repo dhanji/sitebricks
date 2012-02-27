@@ -5,16 +5,21 @@
     <groupId>com.google.sitebricks</groupId>
     <artifactId>sitebricks-parent</artifactId>
     <version>0.8.6-SNAPSHOT</version>
-  </parent>  
+  </parent>
   <artifactId>sitebricks-decorator</artifactId>
   <name>Sitebricks :: Decorator</name>
 
   <properties>
+    <sitebricksVersion>0.8.6-SNAPSHOT</sitebricksVersion>
     <sisuInjectVersion>2.2.1</sisuInjectVersion>
     <junitVersion>4.8.2</junitVersion>
   </properties>
-  
+
   <dependencies>
+    <dependency>
+      <groupId>com.google.sitebricks</groupId>
+      <artifactId>sitebricks</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.sonatype.sisu</groupId>
       <artifactId>sisu-inject-bean</artifactId>
