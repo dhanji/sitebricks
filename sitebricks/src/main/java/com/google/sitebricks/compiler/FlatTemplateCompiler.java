@@ -1,6 +1,7 @@
 package com.google.sitebricks.compiler;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Template;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
@@ -16,6 +17,7 @@ import java.util.List;
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  * @see XmlTemplateCompiler
  */
+@Singleton
 public class FlatTemplateCompiler implements TemplateCompiler {
     private final SystemMetrics metrics;
     private final WidgetRegistry registry;

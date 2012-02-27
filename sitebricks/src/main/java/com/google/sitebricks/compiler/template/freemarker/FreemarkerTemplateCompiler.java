@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import com.google.inject.Singleton;
 import com.google.sitebricks.compiler.TemplateCompiler;
 import com.google.sitebricks.compiler.template.AbstractMagicTemplateCompiler;
 
@@ -14,9 +15,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
-/**
- * Creates renderables, given a Freemarker template page.
- */
+@Singleton
 public class FreemarkerTemplateCompiler extends AbstractMagicTemplateCompiler implements TemplateCompiler {
 
   @Override

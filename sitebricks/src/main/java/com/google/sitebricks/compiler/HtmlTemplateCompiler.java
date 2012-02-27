@@ -28,6 +28,7 @@ import org.jsoup.nodes.XmlDeclaration;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Template;
 import com.google.sitebricks.conversion.generics.Generics;
@@ -40,20 +41,13 @@ import com.google.sitebricks.routing.SystemMetrics;
 
 /**
  * @author Shawn based on XMLTemplateCompiler by Dhanji R. Prasanna (dhanji@gmail.com)
- *
  */
+@Singleton
 public class HtmlTemplateCompiler implements TemplateCompiler {
     
   private final WidgetRegistry registry;
     private final PageBook pageBook;
     private final SystemMetrics metrics;
-
-    //private final List<CompileError> errors = Lists.newArrayList();
-    //private final List<CompileError> warnings = Lists.newArrayList();
-
-    //state variables
-    //private Element form;
-    //private final Stack<EvaluatorCompiler> lexicalScopes = new Stack<EvaluatorCompiler>();
 
     //special widget types (built-in symbol table)
     private static final String REQUIRE_WIDGET = "@require";

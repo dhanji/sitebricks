@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import net.jcip.annotations.NotThreadSafe;
-
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -25,9 +23,9 @@ import org.xml.sax.SAXException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Template;
-import com.google.sitebricks.compiler.HtmlTemplateCompiler.PageCompilingContext;
 import com.google.sitebricks.conversion.generics.Generics;
 import com.google.sitebricks.rendering.control.Chains;
 import com.google.sitebricks.rendering.control.WidgetChain;
@@ -40,6 +38,7 @@ import com.google.sitebricks.routing.SystemMetrics;
  * 
  * TODO share code with HtmlTemplateCompiler
  */
+@Singleton
 public class XmlTemplateCompiler implements TemplateCompiler {
     
   private final WidgetRegistry registry;
