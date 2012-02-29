@@ -9,7 +9,7 @@ import com.google.sitebricks.client.Transport;
  *
  * @author dhanji@google.com (Dhanji R. Prasanna)
  */
-@ImplementedBy(JacksonJsonTransport.class)
+@ImplementedBy(SimpleJacksonJsonTransport.class)
 public abstract class Json implements Transport {
 
   public String contentType() {
