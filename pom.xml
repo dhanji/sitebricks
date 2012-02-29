@@ -30,7 +30,6 @@
     <module>sitebricks-client</module>
     <module>sitebricks-easy-client</module>
     <module>sitebricks-acceptance-tests</module>
-    <module>sitebricks-decorator</module>
     <module>sitebricks-test-support</module>
     <module>sitebricks-web</module>
     <module>sitebricks-mail</module>

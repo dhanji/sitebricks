@@ -3,8 +3,10 @@ package com.google.sitebricks;
 import java.util.Map;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.sitebricks.compiler.TemplateCompiler;
 
+@Singleton
 public class DefaultTemplateSystem implements TemplateSystem {
 
   private Map<String, TemplateCompiler> templateCompilers;

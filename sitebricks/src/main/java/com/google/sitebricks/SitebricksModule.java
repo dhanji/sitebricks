@@ -114,22 +114,20 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
         .toInstance(negotiations);
 
     Localizer.localizeAll(binder(), localizations);
-    
+
     configureTemplateSystem();
   }
   
-  private void configureTemplateSystem() {    
+  protected void configureTemplateSystem() {    
     //
-    // 
+    // Map of all the implementations keyed by type they can handle 
     //
     MapBinder<String,TemplateCompiler> templateCompilers = MapBinder.newMapBinder(binder(), String.class, TemplateCompiler.class);
     templateCompilers.addBinding("html").to(HtmlTemplateCompiler.class);
     templateCompilers.addBinding("xml").to(XmlTemplateCompiler.class);
     templateCompilers.addBinding("flat").to(FlatTemplateCompiler.class);
     templateCompilers.addBinding("mvel").to(MvelTemplateCompiler.class);
-    templateCompilers.addBinding("fml").to(FreemarkerTemplateCompiler.class);
-    
-    bind(TemplateSystem.class).to(DefaultTemplateSystem.class);
+    templateCompilers.addBinding("fml").to(FreemarkerTemplateCompiler.class);    
   }
   
   /**
