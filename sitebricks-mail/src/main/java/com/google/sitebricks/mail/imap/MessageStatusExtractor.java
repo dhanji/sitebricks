@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -34,6 +35,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       "dd-MMM-yyyy HH:mm:ss Z");
   static final Pattern HELPFUL_NOTIFICATION_PATTERN = Pattern.compile("[*] \\d+ (EXISTS|EXPUNGE)\\s*",
       Pattern.CASE_INSENSITIVE);
+  static final Pattern SIZE_MARKER = Pattern.compile(" \\{(\\d+)\\}$", Pattern.MULTILINE);
 
   @Override
   public List<MessageStatus> extract(List<String> messages) {
@@ -61,6 +63,32 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         isUnterminatedString = isUnterminatedString(next, isUnterminatedString);
         // Skip next.
         i++;
+      }
+
+      // Newlines are actually also allowed outside strings if a length marker is specified.
+      Matcher matcher = SIZE_MARKER.matcher(message);
+      if (matcher.find()) {
+        int size = Integer.parseInt(matcher.group(1));
+        StringBuilder subject = new StringBuilder("\n");
+        String rest = "";
+        while (subject.length() < size && (i + 1 < messagesSize)) {
+          String next = messages.get(i + 1);
+          if (next.length() <= size) {
+            subject.append(next).append('\n');
+          } else {
+            int offset = size - subject.length();
+            subject.append(next.substring(0, offset));
+            rest = next.substring(offset);
+          }
+
+          // Skip next.
+          i++;
+        }
+
+        // Now take the extracted subject and compose it into the message header as though it
+        // were quoted.
+        message = matcher.replaceAll("");
+        message += '"' + subject.toString() + '"' + rest;
       }
 
       statuses.add(parseStatus(message.replaceFirst("^[*] ", "")));

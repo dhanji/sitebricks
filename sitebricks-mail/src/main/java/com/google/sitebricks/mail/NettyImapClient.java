@@ -397,7 +397,7 @@ public class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public ListenableFuture<List<Integer>> exists(Folder folder, List<Integer> uids) {
+  public ListenableFuture<List<Integer>> exists(Folder folder, Collection<Integer> uids) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(),
         "Can't execute command because client is not logged in");
     Preconditions.checkState(!mailClientHandler.idleRequested.get(),
@@ -407,8 +407,10 @@ public class NettyImapClient implements MailClient, Idler {
     SettableFuture<List<Integer>> valueFuture = SettableFuture.create();
 
     StringBuilder argsBuilder = new StringBuilder("uid ");
+
+    Iterator<Integer> iterator = uids.iterator();
     for (int i = 0, uidsSize = uids.size(); i < uidsSize; i++) {
-      argsBuilder.append(uids.get(i));
+      argsBuilder.append(iterator.next());
 
       if (i < uidsSize - 1)
         argsBuilder.append(",");
