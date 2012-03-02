@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.jcip.annotations.NotThreadSafe;
-
 import org.jetbrains.annotations.Nullable;
 import org.mvel2.CompileException;
 import org.mvel2.MVEL;
@@ -24,6 +22,7 @@ import org.mvel2.compiler.ExpressionCompiler;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.inject.Singleton;
 import com.google.sitebricks.Evaluator;
 import com.google.sitebricks.Visible;
 import com.google.sitebricks.conversion.generics.Generics;
@@ -31,10 +30,8 @@ import com.google.sitebricks.conversion.generics.ParameterizedTypeImpl;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
- * 
- * TODO make this thread-safe when pages can be compiled on demand 
  */
-@NotThreadSafe
+@Singleton
 public class MvelEvaluatorCompiler implements EvaluatorCompiler {
   private final Class<?> backingType;
   private final Map<String, Type> backingTypes;

@@ -13,6 +13,6 @@ import com.google.sitebricks.client.Transport;
 public abstract class Json implements Transport {
 
   public String contentType() {
-    return "text/json";
+    return "application/json";
   }
 }

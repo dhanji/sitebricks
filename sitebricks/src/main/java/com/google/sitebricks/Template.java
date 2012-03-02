@@ -4,41 +4,45 @@ package com.google.sitebricks;
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
 public class Template {
-  private final Kind templateKind;
+  
+  //
+  // templateName like foo.html or bar.fml
+  //
+  private final String templateName;
   private final String text;
+  private final TemplateSource source;
+  //
+  // The text may be transformed in some way like markdown --> xhtml
+  //
+  private String transformedText;
 
-  public Template(Kind templateKind, String text) {
-    this.templateKind = templateKind;
+  public Template(String text) {
+    this(null, text, null);
+  }
+  
+  public Template(String templateName, String text, TemplateSource source) {
+    this.templateName = templateName;
     this.text = text;
+    this.source = source;
   }
 
-  public Kind getKind() {
-    return templateKind;
+  public String getName() {
+    return templateName;
   }
-
+  
   public String getText() {
     return text;
   }
 
-  public static enum Kind {
-    HTML, XML, FLAT, MVEL, FREEMARKER;
+  public TemplateSource getTemplateSource() {
+    return source;
+  }
+    
+  public String getTransformedText() {
+    return transformedText;
+  }
 
-    /**
-     * Returns whether a given template should be treated as html, xml or flat
-     * (currently by looking at file extension)
-     */
-    public static Kind kindOf(String template) {
-      if (template.endsWith(".html") || template.endsWith(".xhtml"))
-        return HTML;
-      else if (template.endsWith(".xml"))
-        return XML;
-      else if (template.endsWith(".mvel"))
-        return MVEL;
-      else if (template.endsWith(".fml"))
-        return FREEMARKER;
-      else
-        return FLAT;
-    }
-
+  public void setTransformedText(String transformedText) {
+    this.transformedText = transformedText;
   }
 }
