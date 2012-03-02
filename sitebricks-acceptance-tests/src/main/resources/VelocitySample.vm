@@ -1,0 +1,11 @@
+<html>
+<head>
+<title>velocity sample</title>
+</head>
+<body>
+<h1>velocity sample</h1>
+<h2>$page.name</h2>
+<h2>$page.message</h2>
+</body>
+
+</html>

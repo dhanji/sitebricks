@@ -16,7 +16,7 @@ public class TemplateLoader {
   private final Provider<ServletContext> context;
 
   private final String[] fileNameTemplates = new String[] { "%s.html", "%s.xhtml", "%s.xml",
-      "%s.txt", "%s.fml", "%s.mvel" };
+      "%s.txt", "%s.fml", "%s.mvel", "%s.vm" };
 
   @Inject
   public TemplateLoader(Provider<ServletContext> context) {

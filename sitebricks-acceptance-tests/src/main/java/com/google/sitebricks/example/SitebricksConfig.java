@@ -23,6 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.velocity.runtime.directive.VelocimacroProxy;
+
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
@@ -82,6 +84,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/repeat").show(Repeat.class);
         at("/showif").show(ShowIf.class);
         at("/dynamic.js").show(DynamicJs.class);
+        at("/pageWithReply").show(PageWithReply.class);
 
         at("/conversion").show(Conversion.class);
 
@@ -109,6 +112,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
 
         // templating by extension
         at("/template").show(DecoratedPage.class);
+        at("/velocitySample").show(VelocitySample.class);
 
         embed(HelloWorld.class).as("Hello");
       }
