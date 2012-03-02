@@ -10,13 +10,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.regex.Pattern;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class Parsing {
-  private static final Pattern ENDS_IN_PARENTHETICAL = Pattern.compile("[ ]*\\(.+\\)$");
 
   static List<String> readAddresses(Queue<String> tokens) {
     // Weird base case where we don't get nil, but instead get an empty address set.
