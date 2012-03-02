@@ -24,6 +24,13 @@ public class HomePage {
     // This is where you would normally fetch stuff from a database, for example.
     message = "Hello from Sitebricks!";
   }
+  
+  /**
+   * TODO This getter should be removed when @Visible annotation processing by mvel will be fixed.
+   */
+  public String getMessage() {
+      return message;
+  }
 
   public boolean getShouldShow() {
     // Always show our message.
