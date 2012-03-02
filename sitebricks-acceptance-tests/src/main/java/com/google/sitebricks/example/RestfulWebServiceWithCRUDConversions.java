@@ -28,11 +28,11 @@ public class RestfulWebServiceWithCRUDConversions {
 	}
 
 	private static void populate() {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy HH:mm");
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 		try {
-			addWidget(new Widget(1, "Widget 1", sdf.parse("01-JAN-1990 12:00"), 1.50));
-			addWidget(new Widget(2, "Widget 2", sdf.parse("02-FEB-2000 18:00"), 21.75));
-			addWidget(new Widget(3, "Widget 3", sdf.parse("03-MAR-2010 23:00"), 19.99));
+			addWidget(new Widget(1, "Widget 1", sdf.parse("01-01-1990 12:00"), 1.50));
+			addWidget(new Widget(2, "Widget 2", sdf.parse("02-02-2000 18:00"), 21.75));
+			addWidget(new Widget(3, "Widget 3", sdf.parse("03-03-2010 23:00"), 19.99));
 		} catch (Exception e) {
 		}
 	}

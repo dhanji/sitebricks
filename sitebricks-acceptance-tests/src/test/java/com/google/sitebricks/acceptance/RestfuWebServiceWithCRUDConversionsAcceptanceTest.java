@@ -1,5 +1,12 @@
 package com.google.sitebricks.acceptance;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import org.testng.annotations.Test;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -13,15 +20,11 @@ import com.google.sitebricks.conversion.ConverterRegistry;
 import com.google.sitebricks.conversion.StandardTypeConverter;
 import com.google.sitebricks.example.RestfulWebServiceWithCRUDConversions;
 import com.google.sitebricks.example.RestfulWebServiceWithCRUDConversions.Widget;
-import org.testng.annotations.Test;
-
-import java.util.Date;
-import java.util.List;
 
 @Test(suiteName = AcceptanceTest.SUITE)
 public class RestfuWebServiceWithCRUDConversionsAcceptanceTest {
 	private Widget testWidget = new Widget(100, "Widget 100", new Date(), 1.50);
-	private Widget widgetOne = RestfulWebServiceWithCRUDConversions.findWidget(1).clone();
+	private Widget widgetOne  = RestfulWebServiceWithCRUDConversions.findWidget(1).clone();
 
 	public void create() {
 		String url = AcceptanceTest.BASE_URL + RestfulWebServiceWithCRUDConversions.AT_ME;

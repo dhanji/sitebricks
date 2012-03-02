@@ -109,7 +109,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
 
         // templating by extension
         at("/template").show(DecoratedPage.class);
-
+        template(HelloWorld.class,"HelloBetterWorld.html");
         embed(HelloWorld.class).as("Hello");
       }
 
