@@ -17,6 +17,22 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+		<groupId>org.apache.velocity</groupId>
+		<artifactId>velocity</artifactId>
+		<version>1.7</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.velocity</groupId>
+		<artifactId>velocity-tools</artifactId>
+		<version>2.0</version>
+	</dependency>
+	<dependency>
+		<groupId>oro</groupId>
+		<artifactId>oro</artifactId>
+		<version>2.0.8</version>
+		<scope>runtime</scope>
+	</dependency>
+    <dependency>
       <groupId>com.google.sitebricks</groupId>
       <artifactId>sitebricks-converter</artifactId>
     </dependency>
@@ -136,9 +152,9 @@
   <!-- This should be removed when the googlecode repositories are migrated to the standard Nexus OSS repository infrastructure -->
   <distributionManagement>
     <snapshotRepository>
-      <id>google-snapshots</id>
-      <name>Sonatype OSS Nexus Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
+      <id>${snapshots.id}</id>
+      <name>${snapshots.name}</name>
+      <url>${snapshots.url}</url>
     </snapshotRepository>
     <repository>
       <id>google-with-staging</id>

@@ -23,6 +23,8 @@ public interface Compilers {
   Renderable compileMvel(Class<?> page, String template);
 
   Renderable compileFreemarker( Class<?> page, String text );
+  
+  Renderable compileVelocity(Class<?> page, String template);
 
   /**
    * Performs static analysis of the given page class to

@@ -41,9 +41,9 @@
        standard Nexus OSS repository infrastructure -->
   <distributionManagement>
     <snapshotRepository>
-      <id>google-snapshots</id>
-      <name>Sonatype OSS Nexus Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
+      <id>${snapshots.id}</id>
+      <name>${snapshots.name}</name>
+      <url>${snapshots.url}</url>
     </snapshotRepository>
     <repository>
       <id>google-with-staging</id>
