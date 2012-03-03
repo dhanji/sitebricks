@@ -91,8 +91,8 @@ class MailClientHandler extends SimpleChannelHandler {
   }
 
   @ManagedOperation
-  public void logAllMessages(boolean b) {
-    log.info("logAllMessagesForUsers[" + config.getUsername() + "] = " + b);
+  public void setReceiveLogging(boolean b) {
+    log.info("setReceiveLogging[" + config.getUsername() + "] = " + b);
     if (b)
       logAllMessagesForUsers.put(config.getUsername(), false);
     else
