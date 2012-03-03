@@ -24,3 +24,4 @@ bin/
 #secret stuff
 *.log
 
+test-output/

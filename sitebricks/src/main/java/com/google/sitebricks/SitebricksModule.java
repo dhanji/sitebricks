@@ -9,8 +9,15 @@ import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import com.google.sitebricks.compiler.FlatTemplateCompiler;
+import com.google.sitebricks.compiler.HtmlTemplateCompiler;
 import com.google.sitebricks.compiler.Parsing;
+import com.google.sitebricks.compiler.TemplateCompiler;
+import com.google.sitebricks.compiler.XmlTemplateCompiler;
+import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
+import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.conversion.Converter;
 import com.google.sitebricks.conversion.ConverterUtils;
 import com.google.sitebricks.core.CaseWidget;
@@ -107,6 +114,20 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
         .toInstance(negotiations);
 
     Localizer.localizeAll(binder(), localizations);
+
+    configureTemplateSystem();
+  }
+  
+  protected void configureTemplateSystem() {    
+    //
+    // Map of all the implementations keyed by type they can handle 
+    //
+    MapBinder<String,TemplateCompiler> templateCompilers = MapBinder.newMapBinder(binder(), String.class, TemplateCompiler.class);
+    templateCompilers.addBinding("html").to(HtmlTemplateCompiler.class);
+    templateCompilers.addBinding("xml").to(XmlTemplateCompiler.class);
+    templateCompilers.addBinding("flat").to(FlatTemplateCompiler.class);
+    templateCompilers.addBinding("mvel").to(MvelTemplateCompiler.class);
+    templateCompilers.addBinding("fml").to(FreemarkerTemplateCompiler.class);    
   }
   
   /**
