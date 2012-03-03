@@ -23,8 +23,11 @@ class Slf4jInjectionTypeListener implements TypeListener {
         @Override
         public void afterInjection(I injectee) {
           try {
+            boolean b = field.isAccessible();
+            if (!b) field.setAccessible(true);
             field.set(injectee,
                 LoggerFactory.getLogger(type.getRawType()));
+            if (!b) field.setAccessible(false);
           } catch (IllegalAccessException e) {
             throw new ProvisionException(
                 "Unable to inject SLF4J logger", e);
