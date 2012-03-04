@@ -34,22 +34,26 @@ public class Slf4jIntegrationTest {
     // inherited logger
     TheService inheritedInstance = injector.getInstance(TheService.class);
 
-    assertNotNull(inheritedInstance.log);
+    assertNotNull(inheritedInstance.getLog());
     assertEquals(TheService.class.getName(),
-        inheritedInstance.log.getName());
+        inheritedInstance.getLog().getName());
 
     // Expect no exception thrown.
-    inheritedInstance.log.debug("Works!");
+    inheritedInstance.getLog().debug("Works!");
   }
 
   public static class AbstractService {
-    Logger log;
+    protected Logger log;
+
+    public Logger getLog() {
+      return log;
+    }
   }
 
   public static class TheService extends AbstractService {
   }
 
   public static class AService {
-    Logger log;
+    private Logger log;
   }
 }
