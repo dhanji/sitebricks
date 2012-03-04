@@ -101,7 +101,53 @@ public class MessageStatusExtractorTest {
   }
 
   @Test
-  public final void testMultilineUnquotedSubject() throws IOException, ParseException {
+  public final void testMultilineUnquotedSubjectWithCrLfs() throws IOException, ParseException {
+@SuppressWarnings("unchecked")
+    final List<MessageStatus> extract =
+        new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+            "* 27012 FETCH (X-GM-THRID 1279068049360518352 X-GM-MSGID 1279068049360518352 X-GM-LABELS () UID 60961 RFC822.SIZE 24305 INTERNALDATE \"27-Aug-2008 05:19:07 +0000\" FLAGS (\\Seen) ENVELOPE (\"27 Aug 2008 01:19:06 -0400\" {93}\n" +
+                "Ttkii Regency The quick brown fox ran over AK 7 Day Arrival Notice\n" +
+                " - BATTY SCORTI - 16257294 ((\"Ttkii E-Concierge\" NIL \"Concierge\" \"quickcolamakerXL.com\")) ((\"Ttkii E-Concierge\" NIL \"Concierge\" \"quickcolamakerXL.com\")) ((\"Ttkii E-Concierge\" NIL \"Concierge\" \"quickcolamakerXL.com\")) ((NIL NIL \"BATTY.SCORTI\" \"gmail.com\")) NIL NIL NIL \"<20010927011966.SM02008@CDC0044>\"))\n" +
+                "* 27013 FETCH (X-GM-THRID 1279040815276852413 X-GM-MSGID 1279068775892017394 X-GM-LABELS () UID 60962 RFC822.SIZE 4717 INTERNALDATE \"27-Aug-2008 05:30:40 +0000\" FLAGS (\\Seen) ENVELOPE (\"Tue, 26 Aug 2008 22:30:39 -0700 (PDT)\" \"Re: Test\" ((\"copiusmcfriendly co\" NIL \"copiusmcfriendlyco\" \"yahoo.com\")) ((\"copiusmcfriendly co\" NIL \"copiusmcfriendlyco\" \"yahoo.com\")) ((\"copiusmcfriendly co\" NIL \"copiusmcfriendlyco\" \"yahoo.com\")) ((\"BATTY SCORTI\" NIL \"BATTY.SCORTI\" \"gmail.com\")) NIL NIL NIL \"<154989.22248.kl@web40805.mail.dum.wahoo.com>\"))"
+        )));
+
+    assertNotNull(extract);
+    assertEquals(2, extract.size());
+
+    MessageStatus status = extract.get(0);
+    assertEquals("\n" +
+        "Ttkii Regency The quick brown fox ran over AK 7 Day Arrival Notice\n" +
+        " - BATTY SCORTI - 16257294 ", status.getSubject());
+
+    assertEquals("<20010927011966.SM02008@CDC0044>", status.getMessageUid());
+    assertEquals(60961, status.getImapUid());
+    assertEquals("\"Ttkii E-Concierge\" Concierge@quickcolamakerXL.com", status.getFrom().get(0));
+    assertEquals(ImmutableList.of("BATTY.SCORTI@gmail.com"), status.getTo());
+    assertNull(status.getCc());
+    assertNull(status.getBcc());
+    assertEquals(ImmutableSet.of(Flag.SEEN), status.getFlags());
+    assertEquals(ImmutableSet.of(), status.getLabels());
+    assertEquals(1279068049360518352L, (long) status.getGmailMsgId());
+    assertEquals(1279068049360518352L, (long) status.getThreadId());
+
+    status = extract.get(1);
+    assertEquals("Re: Test", status.getSubject());
+
+    assertEquals("<154989.22248.kl@web40805.mail.dum.wahoo.com>", status.getMessageUid());
+    assertEquals(60962, status.getImapUid());
+    assertEquals("\"copiusmcfriendly co\" copiusmcfriendlyco@yahoo.com", status.getFrom().get(0));
+    assertEquals(ImmutableList.of("\"BATTY SCORTI\" BATTY.SCORTI@gmail.com"), status.getTo());
+    assertNull(status.getCc());
+    assertNull(status.getBcc());
+    assertEquals(ImmutableSet.of(Flag.SEEN), status.getFlags());
+    assertEquals(ImmutableSet.of(), status.getLabels());
+    assertEquals(1279068775892017394L, (long) status.getGmailMsgId());
+    assertEquals(1279040815276852413L, (long) status.getThreadId());
+  }
+
+
+  @Test
+  public final void testMultilineUnquotedSubjectWithLfs() throws IOException, ParseException {
     @SuppressWarnings("unchecked")
     final List<MessageStatus> extract =
         new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(

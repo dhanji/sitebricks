@@ -71,14 +71,23 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         int size = Integer.parseInt(matcher.group(1));
         StringBuilder subject = new StringBuilder("\n");
         String rest = "";
+        int newlines = 1;
         while (subject.length() < size && (i + 1 < messagesSize)) {
           String next = messages.get(i + 1);
           if (next.length() <= size) {
             subject.append(next).append('\n');
+            newlines++;
           } else {
             int offset = size - subject.length();
             subject.append(next.substring(0, offset));
             rest = next.substring(offset);
+
+            // Heuristic hack to get around the fact that we neutralize \r\n to \n
+            if (!rest.startsWith("((") && !Parsing.startsWithIgnoreCase(rest, "NIL")) {
+              // Chew up "newlines" more characters to account for the missing '\r's
+              subject.append(rest.substring(0, newlines));
+              rest = rest.substring(newlines);
+            }
           }
 
           // Skip next.
