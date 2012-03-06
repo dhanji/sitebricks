@@ -111,6 +111,11 @@ public interface MailClient {
   ListenableFuture<List<Integer>> exists(Folder folder, Collection<Integer> uids);
 
   /**
+   * Flush the messages marked as \Deleted in this connection/session.
+   */
+  void expunge();
+
+  /**
    * Adds flags to a range of messages.
    *
    * @return the new flags on the message, null on failure.

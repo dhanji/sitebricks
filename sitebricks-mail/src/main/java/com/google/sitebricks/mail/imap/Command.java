@@ -20,6 +20,7 @@ public enum Command {
   FETCH_THIN_HEADERS_UID("uid fetch"),
   SEARCH_RAW_UID("uid search"),
   SEARCH_UID_ONLY("uid search"),
+  EXPUNGE("expunge"),
   IDLE("idle"),
   STORE_FLAGS("uid store"),
   STORE_LABELS("uid store");
@@ -83,6 +84,7 @@ public enum Command {
     dataExtractors.put(FETCH_BODY_UID, new SingleMessageBodyExtractor());
     dataExtractors.put(STORE_FLAGS, new StoreFlagsResponseExtractor());
     dataExtractors.put(STORE_LABELS, new StoreLabelsResponseExtractor());
+    dataExtractors.put(EXPUNGE, new ExpungeConfirmationExtractor());
   }
 
   @SuppressWarnings("unchecked") // Heterogenous collections are a pita in Java.
