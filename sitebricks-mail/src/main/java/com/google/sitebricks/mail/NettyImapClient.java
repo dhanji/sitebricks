@@ -434,6 +434,11 @@ public class NettyImapClient implements MailClient, Idler {
     return valueFuture;
   }
 
+  @Override
+  public void expunge() {
+    send(Command.EXPUNGE, "", SettableFuture.<Void>create());
+  }
+
   private static void checkRange(int start, int end) {
     Preconditions.checkArgument(start <= end || end == -1, "Start must be <= end");
   }
