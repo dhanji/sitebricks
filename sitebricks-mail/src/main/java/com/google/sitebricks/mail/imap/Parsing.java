@@ -15,7 +15,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class Parsing {
-
   static List<String> readAddresses(Queue<String> tokens) {
     // Weird base case where we don't get nil, but instead get an empty address set.
     if (tokens.isEmpty())

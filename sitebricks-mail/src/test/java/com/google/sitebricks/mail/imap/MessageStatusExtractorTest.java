@@ -117,7 +117,7 @@ public class MessageStatusExtractorTest {
     MessageStatus status = extract.get(0);
     assertEquals("\n" +
         "Ttkii Regency The quick brown fox ran over AK 7 Day Arrival Notice\n" +
-        " - BATTY SCORTI - 16257294 ", status.getSubject());
+        " - BATTY SCORTI - 16257294", status.getSubject());
 
     assertEquals("<20010927011966.SM02008@CDC0044>", status.getMessageUid());
     assertEquals(60961, status.getImapUid());
@@ -163,7 +163,7 @@ public class MessageStatusExtractorTest {
     MessageStatus status = extract.get(0);
     assertEquals("\n" +
         "ASIX News - Social Innovation Sydney Barcamp - Hub Melbourne news - Social\n" +
-        "Impact Scholarships ", status.getSubject());
+        "Impact Scholarships", status.getSubject());
 
     assertEquals("<E1123Yq-756Z-Fs@c.consumer.fluent.io>", status.getMessageUid());
     assertEquals(5474, status.getImapUid());
@@ -190,6 +190,28 @@ public class MessageStatusExtractorTest {
     assertEquals(1460332421305584218L, (long) status.getGmailMsgId());
     assertEquals(13603324213584218L, (long) status.getThreadId());
   }
+
+  @Test
+  public void testMultilineUnquotedCC() throws Exception {
+    @SuppressWarnings("unchecked")
+    final List<MessageStatus> extract =
+        new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+          "* 67236 FETCH (X-GM-THRID 132443254747 X-GM-MSGID 13256345038 X-GM-LABELS (\"\\\\Inbox\") UID 197888 RFC822.SIZE 34646 INTERNALDATE \"23-Jan-2010 05:06:26 +0000\" FLAGS (\\Seen) " +
+              "ENVELOPE (\"Sat, 23 Jan 2010 05:04:06 +0000\" \"QUOTED SUBJECT\" (({14}\n" +
+              "Other\n" +
+              " Dude NIL \"otherdude\" \"yahoo.com\")) NIL NIL NIL NIL NIL \"<foo@bar.com>\"))"
+    )));
+    assertNotNull(extract);
+    assertEquals(1, extract.size());
+    MessageStatus status = extract.get(0);
+    assertEquals(ImmutableSet.of("\"\\\\Inbox\""), status.getLabels());
+    assertEquals(ImmutableList.of("\"\nOther\n Dude\" otherdude@yahoo.com"), status.getFrom());
+    assertEquals(ImmutableSet.of("\"\\\\Inbox\""), status.getLabels());
+    assertEquals(13256345038L, (long) status.getGmailMsgId());
+    assertEquals(132443254747L, (long) status.getThreadId());
+    assertNull(status.getCc());
+    assertNull(status.getBcc());
+}
 
   @Test
   public final void testTokenizerWithDoubleEscaping() throws IOException, ParseException {

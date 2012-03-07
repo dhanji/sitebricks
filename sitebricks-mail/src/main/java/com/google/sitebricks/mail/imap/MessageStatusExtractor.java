@@ -3,6 +3,7 @@ package com.google.sitebricks.mail.imap;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       "dd-MMM-yyyy HH:mm:ss Z");
   static final Pattern HELPFUL_NOTIFICATION_PATTERN = Pattern.compile("[*] \\d+ (EXISTS|EXPUNGE)\\s*",
       Pattern.CASE_INSENSITIVE);
-  static final Pattern SIZE_MARKER = Pattern.compile(" \\{(\\d+)\\}$", Pattern.MULTILINE);
+  static final Pattern SIZE_MARKER = Pattern.compile("\\{(\\d+)\\}$", Pattern.MULTILINE);
 
   @Override
   public List<MessageStatus> extract(List<String> messages) {
@@ -69,24 +70,30 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       Matcher matcher = SIZE_MARKER.matcher(message);
       if (matcher.find()) {
         int size = Integer.parseInt(matcher.group(1));
-        StringBuilder subject = new StringBuilder("\n");
+        StringBuilder stringToken = new StringBuilder("\n");
         String rest = "";
         int newlines = 1;
-        while (subject.length() < size && (i + 1 < messagesSize)) {
+        boolean done = false;
+        while (stringToken.length() < size && !done && (i + 1 < messagesSize)) {
           String next = messages.get(i + 1);
           if (next.length() <= size) {
-            subject.append(next).append('\n');
+            stringToken.append(next).append('\n');
             newlines++;
           } else {
-            int offset = size - subject.length();
-            subject.append(next.substring(0, offset));
+            int offset = Math.max(0, size - stringToken.length() - newlines * 2);
+            stringToken.append(next.substring(0, offset));
             rest = next.substring(offset);
 
-            // Heuristic hack to get around the fact that we neutralize \r\n to \n
-            if (!rest.startsWith("((") && !Parsing.startsWithIgnoreCase(rest, "NIL")) {
-              // Chew up "newlines" more characters to account for the missing '\r's
-              subject.append(rest.substring(0, newlines));
-              rest = rest.substring(newlines);
+            // We could have over-counted as newlines are not always counted as 2 characters.
+            // For sanity
+            final int bracketPos = rest.indexOf(" ((");
+            final int nilPos = rest.indexOf(" NIL");
+            int delim = Math.min(bracketPos == -1 ? Integer.MAX_VALUE : bracketPos,
+                nilPos == -1 ? Integer.MAX_VALUE : nilPos);
+            if (delim > 0 && delim != Integer.MAX_VALUE) {
+              stringToken.append(rest.substring(0, delim));
+              rest = rest.substring(delim);
+              done = true;
             }
           }
 
@@ -97,7 +104,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         // Now take the extracted subject and compose it into the message header as though it
         // were quoted.
         message = matcher.replaceAll("");
-        message += '"' + subject.toString() + '"' + rest;
+        message += '"' + stringToken.toString() + '"' + rest;
       }
 
       statuses.add(parseStatus(message.replaceFirst("^[*] ", "")));
