@@ -221,6 +221,8 @@ public class NettyImapClient implements MailClient, Idler {
       }
 
       currentFolder = null;
+    } catch (Exception e) {
+      // swallow any exceptions.
     } finally {
       // Shut down all channels and exit (leave threadpools as is--for reconnects).
       // The Netty channel close listener will fire a disconnect event to our client,

@@ -44,7 +44,7 @@ class CommandCompletion {
         new Object[] { commandString, sequence, message, builder.toString(), e });
 
     // TODO Send this back to the client as an exception so it can be handled correctly.
-//    valueFuture.setException(new MailHandlingException(value, message, e));
+    valueFuture.setException(new MailHandlingException(value, message, e));
   }
 
   public boolean complete(String message) {

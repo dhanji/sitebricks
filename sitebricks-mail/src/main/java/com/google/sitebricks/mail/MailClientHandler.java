@@ -270,7 +270,7 @@ class MailClientHandler extends SimpleChannelHandler {
   private synchronized void complete(String message) {
     // This is a weird problem with writing stuff while idling. Need to investigate it more, but
     // for now just ignore it.
-   if (MESSAGE_COULDNT_BE_FETCHED_REGEX.matcher(message).matches()) {
+    if (MESSAGE_COULDNT_BE_FETCHED_REGEX.matcher(message).matches()) {
       log.warn("Some messages in the batch could not be fetched for {}\n" +
           "---cmd---\n{}\n---wire---\n{}\n---end---\n", new Object[] {
           config.getUsername(),
@@ -278,7 +278,15 @@ class MailClientHandler extends SimpleChannelHandler {
           getWireTrace()
       });
       errorStack.push(new Error(completions.peek(), message, wireTrace.list()));
-      throw new RuntimeException("Some messages in the batch could not be fetched for user " + config.getUsername());
+      final CommandCompletion completion = completions.peek();
+      String errorMsg = "Some messages in the batch could not be fetched for user " + config.getUsername();
+      RuntimeException ex = new RuntimeException(errorMsg);
+      if (completion != null) {
+        completion.error(errorMsg, new MailHandlingException(getWireTrace(), errorMsg, ex));
+        completions.poll();
+      } else {
+        throw ex;
+      }
     }
 
     CommandCompletion completion = completions.peek();
