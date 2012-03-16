@@ -145,7 +145,6 @@ public class MessageStatusExtractorTest {
     assertEquals(1279040815276852413L, (long) status.getThreadId());
   }
 
-
   @Test
   public final void testMultilineUnquotedSubjectWithLfs() throws IOException, ParseException {
     @SuppressWarnings("unchecked")
@@ -192,6 +191,21 @@ public class MessageStatusExtractorTest {
   }
 
   @Test
+  public void testMutlilineUnquotedWithEmbeddedQuote() throws Exception {
+    @SuppressWarnings("unchecked")
+    final List<MessageStatus> extract = new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+        "* 234 FETCH (X-GM-THRID 23432423423 X-GM-MSGID 23432423 X-GM-LABELS () UID 210140 RFC822.SIZE 58816" +
+        " INTERNALDATE \"17-Oct-2009 17:27:26 +0000\" FLAGS () ENVELOPE (\"17 Oct 2009 13:27:22 -0400\" {75}\n" +
+        "A Reminder to attend \"The Windows Vista Positioning Disaster:\n" +
+        " An Analysis\" ((\"foobar\" NIL \"foor\" \"bar.com\")) NIL NIL NIL NIL NIL \"<foo@bar.com>\"))"
+    )));
+    assertNotNull(extract);
+    assertEquals(1, extract.size());
+    MessageStatus status = extract.get(0);
+    assertEquals("\nA Reminder to attend \"The Windows Vista Positioning Disaster:\n An Analysis\"", status.getSubject());
+  }
+
+  @Test
   public void testMultilineUnquotedCC() throws Exception {
     @SuppressWarnings("unchecked")
     final List<MessageStatus> extract =
@@ -211,7 +225,8 @@ public class MessageStatusExtractorTest {
     assertEquals(132443254747L, (long) status.getThreadId());
     assertNull(status.getCc());
     assertNull(status.getBcc());
-}
+  }
+
 
   @Test
   public final void testTokenizerWithDoubleEscaping() throws IOException, ParseException {
