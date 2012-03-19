@@ -31,7 +31,6 @@
     <module>sitebricks-easy-client</module>
     <module>sitebricks-acceptance-tests</module>
     <module>sitebricks-test-support</module>
-    <module>sitebricks-web</module>
     <module>sitebricks-mail</module>
     <module>sitebricks-options</module>
     <module>sitebricks-jetty-archetype</module>
