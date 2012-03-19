@@ -46,7 +46,12 @@ public enum Flag {
 
     // Build reverse lookup map.
     for (Entry<String, Flag> entry : flagMap.entrySet()) {
-      lookup.put(entry.getValue(), entry.getKey());
+      String flag = entry.getKey();
+      char first = flag.charAt(0);
+      if (first == '\\' || first == '$')
+        flag = Character.toString(first) + Character.toUpperCase(flag.charAt(1)) + flag.substring(2);
+
+      lookup.put(entry.getValue(), flag);
     }
 
     // Overrides

@@ -77,7 +77,7 @@ public class StoreResponseExtractorTest {
   @Test
   public final void testFlagsStingifier() {
     Set<Flag> testSet = ImmutableSet.of(Flag.SEEN, Flag.DELETED, Flag.FLAGGED);
-    assertEquals(Flag.toImap(testSet), "FLAGS (\\seen \\deleted \\flagged)");
+    assertEquals(Flag.toImap(testSet), "FLAGS (\\Seen \\Deleted \\Flagged)");
   }
 
   @Test
