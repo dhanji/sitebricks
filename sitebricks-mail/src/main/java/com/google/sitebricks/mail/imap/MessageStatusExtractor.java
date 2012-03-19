@@ -67,15 +67,16 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
 
       // Newlines are actually also allowed outside strings if a length marker is specified.
       Matcher matcher = SIZE_MARKER.matcher(message);
-      if (matcher.find()) {
+      while (matcher.find()) {
         int size = Integer.parseInt(matcher.group(1));
         StringBuilder stringToken = new StringBuilder("\n");
         String rest = "";
         int newlines = 1;
         boolean done = false;
         while (stringToken.length() < size && !done && (i + 1 < messagesSize)) {
-          String next = messages.get(i + 1);
-          if (next.length() <= size) {
+          String next = messages.get(i + 1).trim();
+          ++i;
+          if (next.length() + stringToken.length() <= size) {
             stringToken.append(next).append('\n');
             newlines++;
           } else {
@@ -95,9 +96,6 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
               done = true;
             }
           }
-
-          // Skip next.
-          i++;
         }
 
         // Now take the extracted subject and compose it into the message header as though it
@@ -106,6 +104,8 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         // Escape nested quotes:
         String newToken = stringToken.toString().replaceAll("\"", "\\\\\"");
         message += '"' + newToken + '"' + rest;
+        // The new message string might have further size markers.
+        matcher = SIZE_MARKER.matcher(message);
       }
 
       statuses.add(parseStatus(message.replaceFirst("^[*] ", "")));
@@ -144,24 +144,29 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     Queue<String> tokens = Parsing.tokenize(message);
     MessageStatus status = new MessageStatus();
 
-    // Assert that we have an envelope.
-    Parsing.match(tokens, int.class);
-    Parsing.eat(tokens, "FETCH", "(");
+    try {
+      // Assert that we have an envelope.
+      Parsing.match(tokens, int.class);
+      Parsing.eat(tokens, "FETCH", "(");
 
-    while (!tokens.isEmpty()) {
-      boolean match = parseUid(tokens, status);
-      match |= parseEnvelope(tokens, status);
-      match |= parseFlags(tokens, status);
-      match |= parseInternalDate(tokens, status);
-      match |= parseRfc822Size(tokens, status);
+      while (!tokens.isEmpty()) {
+        boolean match = parseUid(tokens, status);
+        match |= parseEnvelope(tokens, status);
+        match |= parseFlags(tokens, status);
+        match |= parseInternalDate(tokens, status);
+        match |= parseRfc822Size(tokens, status);
 
-      match |= parseGmailUid(tokens, status);
-      match |= parseGmailThreadId(tokens, status);
-      match |= parseGmailLabels(tokens, status);
+        match |= parseGmailUid(tokens, status);
+        match |= parseGmailThreadId(tokens, status);
+        match |= parseGmailLabels(tokens, status);
 
-      if (!match) {
-        break;
+        if (!match) {
+          break;
+        }
       }
+    } catch (IllegalArgumentException e) {
+      log.warn("Error parsing status: {}", message);
+      throw e;
     }
 
     // We don't really need to bother closing the last ')'

@@ -9,7 +9,6 @@ import com.google.sitebricks.mail.imap.Folder;
 import com.google.sitebricks.mail.imap.Message;
 import com.google.sitebricks.mail.imap.MessageStatus;
 
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -75,16 +74,18 @@ public class MailClientIntegrationTest {
     future.addListener(new Runnable() {
       @Override
       public void run() {
-        final ListenableFuture<List<Integer>> messageStatuses =
-            client.searchUid(allMail, "is:read", new Date(System.currentTimeMillis() - (500L * 24L * 60L * 60L * 1000L)));
+//        final ListenableFuture<List<Integer>> messageStatuses =
+//            client.searchUid(allMail, "is:read", new Date(System.currentTimeMillis() - (500L * 24L * 60L * 60L * 1000L)));
+        final ListenableFuture<List<MessageStatus>> messageStatuses =
+            client.list(allMail, allMail.getCount() -5 , -1);
 
         try {
-          System.out.println(messageStatuses.get());
-//          for (MessageStatus messageStatus : messageStatuses.get()) {
-//            System.out.println(messageStatus);
-//          }
+//          System.out.println(messageStatuses.get());
+          for (MessageStatus messageStatus : messageStatuses.get()) {
+            System.out.println(messageStatus);
+          }
 
-//          fetchUidAndDump(client, allMail, 33285, executor).await();
+          fetchUidAndDump(client, allMail, 491, executor).await();
 //          fetchUidAndDump(client, allMail, 33288, executor).await();
           client.disconnect();
         } catch (InterruptedException e) {
