@@ -3,7 +3,6 @@ package com.google.sitebricks.mail.imap;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -104,7 +103,9 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         // Now take the extracted subject and compose it into the message header as though it
         // were quoted.
         message = matcher.replaceAll("");
-        message += '"' + stringToken.toString() + '"' + rest;
+        // Escape nested quotes:
+        String newToken = stringToken.toString().replaceAll("\"", "\\\\\"");
+        message += '"' + newToken + '"' + rest;
       }
 
       statuses.add(parseStatus(message.replaceFirst("^[*] ", "")));
