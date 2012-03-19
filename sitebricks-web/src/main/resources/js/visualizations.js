@@ -1,3 +1,0 @@
-$(function() {
-  console.info("HELOOOOOOO!");
-});
