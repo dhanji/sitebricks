@@ -23,6 +23,7 @@ public enum Command {
   EXPUNGE("expunge"),
   IDLE("idle"),
   STORE_FLAGS("uid store"),
+  COPY("uid copy"),
   STORE_LABELS("uid store");
   public static final Pattern OK_SUCCESS = Pattern.compile("\\d+ ok (.* )?\\(?success\\)?",
       Pattern.CASE_INSENSITIVE);
@@ -82,6 +83,7 @@ public enum Command {
     dataExtractors.put(SEARCH_UID_ONLY, new SearchResultExtractor());
     dataExtractors.put(FETCH_BODY, new MessageBodyExtractor());
     dataExtractors.put(FETCH_BODY_UID, new SingleMessageBodyExtractor());
+    dataExtractors.put(COPY, new CopyResponseExtractor());
     dataExtractors.put(STORE_FLAGS, new StoreFlagsResponseExtractor());
     dataExtractors.put(STORE_LABELS, new StoreLabelsResponseExtractor());
     dataExtractors.put(EXPUNGE, new ExpungeConfirmationExtractor());

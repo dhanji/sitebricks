@@ -476,6 +476,19 @@ public class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
+  public ListenableFuture<Boolean> copy(Folder folder, int imapUid, String toFolder) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(),
+        "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
+        "Can't execute command while idling (are you watching a folder?)");
+    checkCurrentFolder(folder);
+    SettableFuture<Boolean> valueFuture = SettableFuture.create();
+    String args = imapUid + " " + toFolder;
+    send(Command.COPY, args, valueFuture);
+    return valueFuture;
+  }
+
+  @Override
   public ListenableFuture<Set<String>> addOrRemoveGmailLabels(Folder folder, int imapUid,
                                                               Set<String> labels, boolean add) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(),

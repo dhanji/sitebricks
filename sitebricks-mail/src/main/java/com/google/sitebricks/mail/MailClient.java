@@ -116,6 +116,11 @@ public interface MailClient {
   void expunge();
 
   /**
+   * Copies a given imap message to the specified folder by UID.
+   */
+  ListenableFuture<Boolean> copy(Folder folder, int imapUid, String toFolder);
+
+  /**
    * Adds flags to a range of messages.
    *
    * @return the new flags on the message, null on failure.
