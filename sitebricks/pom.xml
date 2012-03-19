@@ -3,7 +3,7 @@
   <parent>
     <groupId>com.google.sitebricks</groupId>
     <artifactId>sitebricks-parent</artifactId>
-    <version>0.8.6-SNAPSHOT</version>
+    <version>0.8.5.1</version>
   </parent>
   <artifactId>sitebricks</artifactId>
   <name>Sitebricks :: Core</name>
