@@ -201,6 +201,16 @@ public class NettyImapClient implements MailClient, Idler {
     return mailClientHandler.getCommandTrace();
   }
 
+  @Override
+  public void disconnectAsync() {
+    workerPool.submit(new Runnable() {
+      @Override
+      public void run() {
+        disconnect();
+      }
+    });
+  }
+
   /**
    * Logs out of the current IMAP session and releases all resources, including
    * executor services.
