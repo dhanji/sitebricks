@@ -254,7 +254,8 @@ class MailClientHandler extends SimpleChannelHandler {
       halt();
       // Disconnect abnormally. The user code should reconnect using the mail client.
       errorStack.push(new Error(completions.poll(), message, wireTrace.list()));
-      idler.disconnect();
+
+      idler.disconnectAsync();
     } finally {
       disconnected();
     }
