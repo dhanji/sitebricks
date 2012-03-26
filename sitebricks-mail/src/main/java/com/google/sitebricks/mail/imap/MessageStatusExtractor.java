@@ -73,7 +73,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         String rest = "";
         int newlines = 1;
         boolean done = false;
-        while (stringToken.length() < size && !done && (i + 1 < messagesSize)) {
+        while (stringToken.length() <= size + 1 && !done && (i + 1 < messagesSize)) {
           String next = messages.get(i + 1).trim();
           ++i;
           if (next.length() + stringToken.length() <= size) {
@@ -86,8 +86,11 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
 
             // We could have over-counted as newlines are not always counted as 2 characters.
             // For sanity
-            final int bracketPos = rest.indexOf(" ((");
-            final int nilPos = rest.indexOf(" NIL");
+            int bracketPos = rest.indexOf("((");
+            if (bracketPos > 0 && rest.charAt(bracketPos - 1) == ' ')
+              bracketPos--;
+
+            int nilPos = rest.indexOf(" NIL");
             int delim = Math.min(bracketPos == -1 ? Integer.MAX_VALUE : bracketPos,
                 nilPos == -1 ? Integer.MAX_VALUE : nilPos);
             if (delim > 0 && delim != Integer.MAX_VALUE) {

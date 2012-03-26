@@ -302,6 +302,28 @@ public class MessageStatusExtractorTest {
     assertNull(status.getBcc());
   }
 
+  @Test
+  public void testMultilineNewlineEdgeCase() throws Exception {
+    @SuppressWarnings("unchecked")
+    final List<MessageStatus> extract =
+        new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+          "* 44788 FETCH (X-GM-THRID 34543534 X-GM-MSGID 34545 X-GM-LABELS (\"\\\\Inbox\") UID 61056 RFC822.SIZE 6154 INTERNALDATE \"17-May-2007 22:23:15 +0000\" FLAGS () ENVELOPE (\"Thu, 17 May 2007 15:23:14 -0700\" {29}\n" +
+          "Google Analytics New Version\n" +
+          " ((NIL NIL \"noreply\" \"google.com\")) ((NIL NIL \"noreply\" \"google.com\")) ((NIL NIL \"noreply\" \"google.com\")) ((NIL NIL \"foo\" \"gmail.com\")) NIL NIL NIL \"<345435@google.com>\"))")));
+    assertNotNull(extract);
+    assertEquals(1, extract.size());
+    MessageStatus status = extract.get(0);
+    assertEquals("\nGoogle Analytics New Version\n", status.getSubject());
+  }
+
+  //@Test  DON'T KNOW HOW TO FIX THIS ONE FOR NOW.... LET THE CATCH-ALL HANDLE IT
+  public void testMultilineUnquotedMonster() throws Exception {
+    String s = "* 17594 FETCH (X-GM-THRID 876876876 X-GM-MSGID 876876876876 X-GM-LABELS " +
+        "(Beer \"\\\\Important\") UID 99879 RFC822.SIZE 2535649 INTERNALDATE \"20-Jul-2011 11:57:32 +0000\" " +
+        "FLAGS (\\Seen) ENVELOPE (\"Wed, 20 Jul 2011 21:57:32 +1000\" \"subject\" ((\"dude\" NIL \"foo\" \"bar.com.au\")) ((\"dude\" NIL \"foo\" \"bar.com.au\")) ((\"dude\" NIL \"foo\" \"bar.com.au\")) ((\"dude\" NIL \"foo\" \"bar.com.au\")) NIL NIL {1319}\n" +
+        "<AcvlH7iDK2HN4AFKTjOC3NglErqahAAD/L7wAPN6VpAAABPM0AAAD/PAACu82wAAAN460AAKOeegAAAdJ7ABiSpoAAAAO6CwAABldGAAmkskgACRvZcAAAEOG6AAMY09wAAAIMowAAAodVAAAD+a8AAAOcSgAV6oUpAAmWg8wABus/+wAAFOZIAAAD6bUAAALD6QAAAj1OAAADh3AAAA/6uQAAAsdmAAAEG3gAAATm+gAAATvzAAAEFz8AAnGdjgAS1WKvAAABFW8AAJ2YGAAAA0syAAAA1vEAAAKscQAAAmutAAABMlUAAAXtjgAAAYagAAAB9/QAAnvQtQAAq0waAAAFk0cAAwyUvAAI1STgAACX1RYAAAG8SQAAAdnGAAJaqBkAAAFgYgAAAirRAAACRbcAAArVZgAAAkykAAACJ1kAABo0tQAAlSWLAAABoTgAAA0qmQAAAm/GAAACNlkAAASxXQACHRYuAAACXYUAAAGl6QAABGvNAAAAt28AAAG41gAAA+DPAAABRQ8AAAQLQQAAArSIAAABahcAAAWhdAAAAr4GAAACF1oAAAHECgAAAU6oAAAFH/0AAAH/bQAAAbB+ABBpSiwAAjnfswAAGl0TAAlVnmkADIy9RQAAAvHJAAACdEkAAAHDdgAASvzYAAABrdUAAA9ohAAAZLScAAABxxwAAAYJMAAABBlyAAAEZ18AABAm0gAAAScmAAADUH0AAAJ9JwAAFHRmAAAF4w8AAAGt6AAABNhvAAABe/QA\n" +
+        " AADvHAAAAP =?us-ascii?Q ?5QAALxp70AAlbU7gAAD2wKAAABfU8AAAb6qgAABnI9AAAFuMsAAAGNAgAAAO?= CZAAABMZkAAAG46AAAAZm+AAAFH5AAAAU/HAAAAen6AAAA2bcAAAKVnQAAAgMvAAyD1T4AAATLSAAABjU8AAANafgABs1MawACfS7SAAAOBBQAAILREgAACiF1AAAMWDIAAAC/tgAAP3jwAAMBQawAK2Ce7QAAzP6kAA8ppcIAAFA2QAAADbVKAAAE7w8AAjgvPAAAUb2zAAAzkbUAA7K/8QAIXTPmAAELezMABTE1XAAAG5EzAACUjZkAAAD0lAADZj5QAAO8q5kAAAD2rAAAAIhzAAAA82AADjB7AwAAgxDDAAOh5mYAAAQ+SwAAD6CMAAACMUgAD7ClBAAC9JR4AAAFVSwAAEQvggAFjYxdAAD0JNQACJL4EQAAB1lLAAlWjX8AABbXmwAABcizAAAAqj4AAAI9AAAAEknLAAJ4twcACoHI4QAGWW8WAAAnq1EAAAEenQ> \"<A1E7E16E78DDF74BBC872D2D1CF3DFC1BA1105308A@PCEFTSBS08.PCEFTPOS.local>\"))";
+  }
 
   @Test
   public final void testTokenizerWithDoubleEscaping() throws IOException, ParseException {
