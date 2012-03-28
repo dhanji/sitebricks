@@ -93,6 +93,12 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
             int nilPos = rest.indexOf(" NIL");
             int delim = Math.min(bracketPos == -1 ? Integer.MAX_VALUE : bracketPos,
                 nilPos == -1 ? Integer.MAX_VALUE : nilPos);
+            
+            if (delim == Integer.MAX_VALUE) {
+              int spacePos = rest.indexOf(" ");
+              delim = spacePos == -1 ? Integer.MAX_VALUE : spacePos;
+            }
+            
             if (delim > 0 && delim != Integer.MAX_VALUE) {
               stringToken.append(rest.substring(0, delim));
               rest = rest.substring(delim);
