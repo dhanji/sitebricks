@@ -1,5 +1,12 @@
 package com.google.sitebricks.client;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+import net.jcip.annotations.ThreadSafe;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -8,34 +15,28 @@ import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.Realm;
 import com.ning.http.client.RequestBuilder;
 import com.ning.http.client.Response;
-import net.jcip.annotations.ThreadSafe;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author Jeanfrancois Arcand (jfarcand@apache.org)
+ * @author Jason van Zyl
  */
 @ThreadSafe
 class AHCWebClient<T> implements WebClient<T> {
   private final Injector injector;
   private final String url;
   private final Map<String, String> headers;
-  private final Class<T> transporting;
-  private final Key<? extends Transport> transport;
+  private final Class<T> classTypeToTransport;
   private final AsyncHttpClient httpClient;
+  private Transport transport;
 
-  public AHCWebClient(Injector injector, Web.Auth authType, String username, String password, String url, Map<String, String> headers, Class<T> transporting, Key<? extends Transport> transport) {
+  public AHCWebClient(Injector injector, Web.Auth authType, String username, String password, String url, Map<String, String> headers, Class<T> classTypeToTransport,
+      Key<? extends Transport> transportKey) {
 
     this.injector = injector;
     this.url = url;
     this.headers = (null == headers) ? null : ImmutableMap.copyOf(headers);
-    this.transporting = transporting;
-    this.transport = transport;
+    this.classTypeToTransport = classTypeToTransport;
+    this.transport = injector.getInstance(transportKey);
 
     // configure auth
     AsyncHttpClientConfig.Builder c = new AsyncHttpClientConfig.Builder();
@@ -52,15 +53,10 @@ class AHCWebClient<T> implements WebClient<T> {
 
   private WebResponse simpleRequest(RequestBuilder requestBuilder) {
 
-    // set request headers as necessary
-    if (null != headers)
-      for (Map.Entry<String, String> header : headers.entrySet())
-        requestBuilder.addHeader(header.getKey(), header.getValue());
+    requestBuilder = addHeadersToRequestBuilder(requestBuilder);
 
     try {
-
       Response r = httpClient.executeRequest(requestBuilder.build()).get();
-
       return new WebResponseImpl(injector, r);
     } catch (IOException e) {
       throw new TransportException(e);
@@ -73,28 +69,25 @@ class AHCWebClient<T> implements WebClient<T> {
 
   private WebResponse request(RequestBuilder requestBuilder, T t) {
 
-    // set request headers as necessary
-    if (null != headers)
-      for (Map.Entry<String, String> header : headers.entrySet())
-        requestBuilder.addHeader(header.getKey(), header.getValue());
-
-    // fire method
+    requestBuilder = addHeadersToRequestBuilder(requestBuilder);
+        
     try {
-
+      //
       // Read the entity from the transport plugin.
+      //
       final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-      injector.getInstance(transport).out(stream, transporting, t);
+      transport.out(stream, classTypeToTransport, t);
 
       // TODO worry about endian issues? Or will Content-Encoding be sufficient?
       // OOM if the stream is too bug
       final byte[] outBuffer = stream.toByteArray();
 
-      // set request body
+      //
+      // Set request body
+      //
       requestBuilder.setBody(outBuffer);
 
-      Response r = httpClient.executeRequest(requestBuilder.build()).get();
-
-      return new WebResponseImpl(injector, r);
+      return new WebResponseImpl(injector, httpClient.executeRequest(requestBuilder.build()).get());
     } catch (IOException e) {
       throw new TransportException(e);
     } catch (InterruptedException e) {
@@ -104,6 +97,33 @@ class AHCWebClient<T> implements WebClient<T> {
     }
   }
 
+  private RequestBuilder addHeadersToRequestBuilder(RequestBuilder requestBuilder) {
+    //
+    // The user may wish to override the Content-Type header for whatever reason. If they do so we just honour that header and make
+    // sure we don't trample that header with the default Content-Type header as provided by the Transport.
+    //
+    boolean contentTypeOverriddenInHeaders = false;
+
+    if (null != headers) {
+      for (Map.Entry<String, String> header : headers.entrySet()) {
+        if (header.getKey().toLowerCase().equals("content-type")) {
+          contentTypeOverriddenInHeaders = true;
+        }
+        requestBuilder.addHeader(header.getKey(), header.getValue());
+      }
+    }
+
+    if (contentTypeOverriddenInHeaders == false) {
+      //
+      // Set the Content-Type as specified by the Transport. For example if we're using the Json transport the Content-Type header
+      // will be set to application/json.
+      //
+      requestBuilder.addHeader("Content-Type", transport.contentType());
+    }  
+    
+    return requestBuilder;
+  }
+  
   public WebResponse get() {
     return simpleRequest((new RequestBuilder("GET")).setUrl(url));
   }
