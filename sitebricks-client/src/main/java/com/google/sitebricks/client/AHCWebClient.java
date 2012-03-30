@@ -29,20 +29,11 @@ class AHCWebClient<T> implements WebClient<T> {
   private final Key<? extends Transport> transport;
   private final AsyncHttpClient httpClient;
 
-  private final Web.Auth authType;
-  private final String username;
-  private final String password;
-
   public AHCWebClient(Injector injector, Web.Auth authType, String username, String password, String url, Map<String, String> headers, Class<T> transporting, Key<? extends Transport> transport) {
 
     this.injector = injector;
-
     this.url = url;
     this.headers = (null == headers) ? null : ImmutableMap.copyOf(headers);
-
-    this.authType = authType;
-    this.username = username;
-    this.password = password;
     this.transporting = transporting;
     this.transport = transport;
 
@@ -57,7 +48,6 @@ class AHCWebClient<T> implements WebClient<T> {
     }
 
     this.httpClient = new AsyncHttpClient(c.build());
-
   }
 
   private WebResponse simpleRequest(RequestBuilder requestBuilder) {
