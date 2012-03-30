@@ -117,7 +117,7 @@ public class MessageStatusExtractorTest {
     MessageStatus status = extract.get(0);
     assertEquals("\n" +
         "Ttkii Regency The quick brown fox ran over AK 7 Day Arrival Notice\n" +
-        " - BATTY SCORTI - 16257294", status.getSubject());
+        "- BATTY SCORTI - 16257294", status.getSubject());
 
     assertEquals("<20010927011966.SM02008@CDC0044>", status.getMessageUid());
     assertEquals(60961, status.getImapUid());
@@ -202,7 +202,82 @@ public class MessageStatusExtractorTest {
     assertNotNull(extract);
     assertEquals(1, extract.size());
     MessageStatus status = extract.get(0);
-    assertEquals("\nA Reminder to attend \"The Windows Vista Positioning Disaster:\n An Analysis\"", status.getSubject());
+    assertEquals("\nA Reminder to attend \"The Windows Vista Positioning Disaster:\nAn Analysis\"", status.getSubject());
+  }
+
+  @Test
+  public void testMutlilineUnquotedWithEmbeddedQuote2() throws Exception {
+    @SuppressWarnings("unchecked")
+    final List<MessageStatus> extract = new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+        "* 28468 FETCH (X-GM-THRID 34543535 X-GM-MSGID 345435435 X-GM-LABELS (\"\\\\Important\" Notifications) UID 345534 RFC822.SIZE 84553 INTERNALDATE \"04-Oct-2011 07:30:02 +0000\" FLAGS (\\Seen) ENVELOPE (\"04 Oct 2011 00:30:00 -0700\" {998}\n" +
+            "<html>\n" +
+            "<head>\n" +
+            "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n" +
+            "<meta name=\"viewport\" content=\"width=746\">\n" +
+            "<title>Shipment Notification</title>\n" +
+            "<style media=\"only screen and (max-device-width: 768px)\" type=\"text/css\">\n" +
+            "table[id=aapl-info] a {color:#000000}\n" +
+            "table[id=aapl-items] a {color:#666666}\n" +
+            "table[class=aapl-faq] a {color:#797979;text-decoration:underline}\n" +
+            "table[id=aapl-promo] a {color:#999999}\n" +
+            "</style>\n" +
+            "<style type=\"text/css\" media=\"screen\">\n" +
+            "a, a:link, a.aapl-link:link {text-decoration:none}\n" +
+            "a:hover, a.aapl-link:hover {cursor:pointer;text-decoration:underline}\n" +
+            "</style>\n" +
+            "<!--[if gte mso 9]>\n" +
+            "<style type=\"text/css\">\n" +
+            "table,td,div,p {font-family: Lucida Sans, Lucida Sans Unicode, Lucida Grande, Arial, Helvetica, Verdana, sans-serif !important;line-height:normal !important}\n" +
+            "</style>\n" +
+            "<![endif]-->\n" +
+            "<!--[if lte mso 7]>\n" +
+            "<style type=\"text/css\">\n" +
+            "table,td,div,p {font-family: Lucida Grande, Lucida Sans, Lucida Sans Unicode, Arial, Helvetica, Verdana, sans-se ((\"Apple Store\" NIL \"order_acknowledgment\" \"orders.apple.com\")) ((\"Apple Store\" NIL \"order_acknowledgment\" \"orders.apple.com\")) ((\"Apple Store\" NIL \"order_acknowledgment\" \"orders.apple.com\")) ((NIL NIL \"dude\" \"bar.com\")) NIL NIL NIL \"<345435@badger-txnvip.apple.com>\"))"
+    )));
+    assertNotNull(extract);
+    assertEquals(1, extract.size());
+    MessageStatus status = extract.get(0);
+    assertEquals("\n<html>\n" +
+        "<head>\n" +
+        "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\n" +
+        "<meta name=\"viewport\" content=\"width=746\">\n" +
+        "<title>Shipment Notification</title>\n" +
+        "<style media=\"only screen and (max-device-width: 768px)\" type=\"text/css\">\n" +
+        "table[id=aapl-info] a {color:#000000}\n" +
+        "table[id=aapl-items] a {color:#666666}\n" +
+        "table[class=aapl-faq] a {color:#797979;text-decoration:underline}\n" +
+        "table[id=aapl-promo] a {color:#999999}\n" +
+        "</style>\n" +
+        "<style type=\"text/css\" media=\"screen\">\n" +
+        "a, a:link, a.aapl-link:link {text-decoration:none}\n" +
+        "a:hover, a.aapl-link:hover {cursor:pointer;text-decoration:underline}\n" +
+        "</style>\n" +
+        "<!--[if gte mso 9]>\n" +
+        "<style type=\"text/css\">\n" +
+        "table,td,div,p {font-family: Lucida Sans, Lucida Sans Unicode, Lucida Grande, Arial, Helvetica, Verdana, sans-serif !important;line-height:normal !important}\n" +
+        "</style>\n" +
+        "<![endif]-->\n" +
+        "<!--[if lte mso 7]>\n" +
+        "<style type=\"text/css\">\n" +
+        "table,td,div,p {font-family: Lucida Grande, Lucida Sans, Lucida Sans Unicode, Arial, Helvetica, Verdana, sans-se", status.getSubject());
+  }
+
+  @Test
+  public void testMultilineWithWhitespace() throws Exception {
+    @SuppressWarnings("unchecked")
+    final List<MessageStatus> extract =
+        new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+            "* 5553 FETCH (X-GM-THRID 234324 X-GM-MSGID 2343242 X-GM-LABELS () UID 1213437 RFC822.SIZE 1494343 INTERNALDATE \"08-Jun-2006 22:48:06 +0000\" FLAGS () ENVELOPE (\"Fri, 09 Jun 2006 06:50:32 +0800\" \"RE: Long game\" ((NIL NIL \"foo\" \"bar.com.au\")) ((NIL NIL \"foo\" \"bar.com.au\")) ((NIL NIL \"foo\" \"bar.com.au\")) ((NIL NIL \"foo\" \"bar.com.au\"))" +
+                "(({23}\n" +
+                "abcdef,\n" +
+                "        abcdef - AGNRM NIL \"foo\" \"bar.gov.au\") ({25}\n" +
+                "abcde, abcdefgh\n" +
+                "        (actedu) NIL \"foo\" \"bar.edu.au\") (NIL NIL \"foo\" \"bar.edu.au\")) NIL \"<BAY1BE144BB4C38B0@phx.gbl>\" \"<2006060oossg@my.fasthit.net>\"))")));
+    assertNotNull(extract);
+    assertEquals(1, extract.size());
+    MessageStatus status = extract.get(0);
+    assertEquals(ImmutableList.of("\"\nabcdef,\nabcdef - AGNRM\" foo@bar.gov.au",
+        "\"\nabcde, abcdefgh\n(actedu)\" foo@bar.edu.au", "foo@bar.edu.au"), status.getCc());
   }
 
   @Test
@@ -219,7 +294,7 @@ public class MessageStatusExtractorTest {
     assertEquals(1, extract.size());
     MessageStatus status = extract.get(0);
     assertEquals(ImmutableSet.of("\"\\\\Inbox\""), status.getLabels());
-    assertEquals(ImmutableList.of("\"\nOther\n Dude\" otherdude@yahoo.com"), status.getFrom());
+    assertEquals(ImmutableList.of("\"\nOther\nDude\" otherdude@yahoo.com"), status.getFrom());
     assertEquals(ImmutableSet.of("\"\\\\Inbox\""), status.getLabels());
     assertEquals(13256345038L, (long) status.getGmailMsgId());
     assertEquals(132443254747L, (long) status.getThreadId());
@@ -227,6 +302,37 @@ public class MessageStatusExtractorTest {
     assertNull(status.getBcc());
   }
 
+  @Test
+  public void testMultilineNewlineEdgeCase() throws Exception {
+    @SuppressWarnings("unchecked")
+    final List<MessageStatus> extract =
+        new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+          "* 44788 FETCH (X-GM-THRID 34543534 X-GM-MSGID 34545 X-GM-LABELS (\"\\\\Inbox\") UID 61056 RFC822.SIZE 6154 INTERNALDATE \"17-May-2007 22:23:15 +0000\" FLAGS () ENVELOPE (\"Thu, 17 May 2007 15:23:14 -0700\" {29}\n" +
+          "Google Analytics New Version\n" +
+          " ((NIL NIL \"noreply\" \"google.com\")) ((NIL NIL \"noreply\" \"google.com\")) ((NIL NIL \"noreply\" \"google.com\")) ((NIL NIL \"foo\" \"gmail.com\")) NIL NIL NIL \"<345435@google.com>\"))")));
+    assertNotNull(extract);
+    assertEquals(1, extract.size());
+    MessageStatus status = extract.get(0);
+    assertEquals("\nGoogle Analytics New Version\n", status.getSubject());
+  }
+
+  @Test
+  public void testMultilineUnquotedMonster() throws Exception {
+    @SuppressWarnings("unchecked")
+    final List<MessageStatus> extract =
+        new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+    "* 17594 FETCH (X-GM-THRID 876876876 X-GM-MSGID 876876876876 X-GM-LABELS " +
+        "(Beer \"\\\\Important\") UID 99879 RFC822.SIZE 2535649 INTERNALDATE \"20-Jul-2011 11:57:32 +0000\" " +
+        "FLAGS (\\Seen) ENVELOPE (\"Wed, 20 Jul 2011 21:57:32 +1000\" \"subject\" ((\"dude\" NIL \"foo\" \"bar.com.au\")) ((\"dude\" NIL \"foo\" \"bar.com.au\")) ((\"dude\" NIL \"foo\" \"bar.com.au\")) ((\"dude\" NIL \"foo\" \"bar.com.au\")) NIL NIL {1319}\n" +
+        "<AcvlH7iDK2HN4AFKTjOC3NglErqahAAD/L7wAPN6VpAAABPM0AAAD/PAACu82wAAAN460AAKOeegAAAdJ7ABiSpoAAAAO6CwAABldGAAmkskgACRvZcAAAEOG6AAMY09wAAAIMowAAAodVAAAD+a8AAAOcSgAV6oUpAAmWg8wABus/+wAAFOZIAAAD6bUAAALD6QAAAj1OAAADh3AAAA/6uQAAAsdmAAAEG3gAAATm+gAAATvzAAAEFz8AAnGdjgAS1WKvAAABFW8AAJ2YGAAAA0syAAAA1vEAAAKscQAAAmutAAABMlUAAAXtjgAAAYagAAAB9/QAAnvQtQAAq0waAAAFk0cAAwyUvAAI1STgAACX1RYAAAG8SQAAAdnGAAJaqBkAAAFgYgAAAirRAAACRbcAAArVZgAAAkykAAACJ1kAABo0tQAAlSWLAAABoTgAAA0qmQAAAm/GAAACNlkAAASxXQACHRYuAAACXYUAAAGl6QAABGvNAAAAt28AAAG41gAAA+DPAAABRQ8AAAQLQQAAArSIAAABahcAAAWhdAAAAr4GAAACF1oAAAHECgAAAU6oAAAFH/0AAAH/bQAAAbB+ABBpSiwAAjnfswAAGl0TAAlVnmkADIy9RQAAAvHJAAACdEkAAAHDdgAASvzYAAABrdUAAA9ohAAAZLScAAABxxwAAAYJMAAABBlyAAAEZ18AABAm0gAAAScmAAADUH0AAAJ9JwAAFHRmAAAF4w8AAAGt6AAABNhvAAABe/QA\n" +
+        " AADvHAAAAP =?us-ascii?Q ?5QAALxp70AAlbU7gAAD2wKAAABfU8AAAb6qgAABnI9AAAFuMsAAAGNAgAAAO?= CZAAABMZkAAAG46AAAAZm+AAAFH5AAAAU/HAAAAen6AAAA2bcAAAKVnQAAAgMvAAyD1T4AAATLSAAABjU8AAANafgABs1MawACfS7SAAAOBBQAAILREgAACiF1AAAMWDIAAAC/tgAAP3jwAAMBQawAK2Ce7QAAzP6kAA8ppcIAAFA2QAAADbVKAAAE7w8AAjgvPAAAUb2zAAAzkbUAA7K/8QAIXTPmAAELezMABTE1XAAAG5EzAACUjZkAAAD0lAADZj5QAAO8q5kAAAD2rAAAAIhzAAAA82AADjB7AwAAgxDDAAOh5mYAAAQ+SwAAD6CMAAACMUgAD7ClBAAC9JR4AAAFVSwAAEQvggAFjYxdAAD0JNQACJL4EQAAB1lLAAlWjX8AABbXmwAABcizAAAAqj4AAAI9AAAAEknLAAJ4twcACoHI4QAGWW8WAAAnq1EAAAEenQ> \"<lkj@PCEFTSBS08.asdlkfj.local>\"))")));
+    assertNotNull(extract);
+    assertEquals(1, extract.size());
+    MessageStatus status = extract.get(0);
+    assertEquals("\n<AcvlH7iDK2HN4AFKTjOC3NglErqahAAD/L7wAPN6VpAAABPM0AAAD/PAACu82wAAAN460AAKOeegAAAdJ7ABiSpoAAAAO6CwAABldGAAmkskgACRvZcAAAEOG6AAMY09wAAAIMowAAAodVAAAD+a8AAAOcSgAV6oUpAAmWg8wABus/+wAAFOZIAAAD6bUAAALD6QAAAj1OAAADh3AAAA/6uQAAAsdmAAAEG3gAAATm+gAAATvzAAAEFz8AAnGdjgAS1WKvAAABFW8AAJ2YGAAAA0syAAAA1vEAAAKscQAAAmutAAABMlUAAAXtjgAAAYagAAAB9/QAAnvQtQAAq0waAAAFk0cAAwyUvAAI1STgAACX1RYAAAG8SQAAAdnGAAJaqBkAAAFgYgAAAirRAAACRbcAAArVZgAAAkykAAACJ1kAABo0tQAAlSWLAAABoTgAAA0qmQAAAm/GAAACNlkAAASxXQACHRYuAAACXYUAAAGl6QAABGvNAAAAt28AAAG41gAAA+DPAAABRQ8AAAQLQQAAArSIAAABahcAAAWhdAAAAr4GAAACF1oAAAHECgAAAU6oAAAFH/0AAAH/bQAAAbB+ABBpSiwAAjnfswAAGl0TAAlVnmkADIy9RQAAAvHJAAACdEkAAAHDdgAASvzYAAABrdUAAA9ohAAAZLScAAABxxwAAAYJMAAABBlyAAAEZ18AABAm0gAAAScmAAADUH0AAAJ9JwAAFHRmAAAF4w8AAAGt6AAABNhvAAABe/QA\n" +
+        "AADvHAAAAP =?us-ascii?Q ?5QAALxp70AAlbU7gAAD2wKAAABfU8AAAb6qgAABnI9AAAFuMsAAAGNAgAAAO?= CZAAABMZkAAAG46AAAAZm+AAAFH5AAAAU/HAAAAen6AAAA2bcAAAKVnQAAAgMvAAyD1T4AAATLSAAABjU8AAANafgABs1MawACfS7SAAAOBBQAAILREgAACiF1AAAMWDIAAAC/tgAAP3jwAAMBQawAK2Ce7QAAzP6kAA8ppcIAAFA2QAAADbVKAAAE7w8AAjgvPAAAUb2zAAAzkbUAA7K/8QAIXTPmAAELezMABTE1XAAAG5EzAACUjZkAAAD0lAADZj5QAAO8q5kAAAD2rAAAAIhzAAAA82AADjB7AwAAgxDDAAOh5mYAAAQ+SwAAD6CMAAACMUgAD7ClBAAC9JR4AAAFVSwAAEQvggAFjYxdAAD0JNQACJL4EQAAB1lLAAlWjX8AABbXmwAABcizAAAAqj4AAAI9AAAAEknLAAJ4twcACoHI4QAGWW8WAAAnq1EAAAEenQ>",
+        status.getInReplyTo());
+  }
 
   @Test
   public final void testTokenizerWithDoubleEscaping() throws IOException, ParseException {

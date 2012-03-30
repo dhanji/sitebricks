@@ -139,6 +139,10 @@ public class MessageStatus {
     this.inReplyTo = inReplyTo;
   }
 
+  public String getInReplyTo() {
+    return inReplyTo;
+  }
+
   public void setFlags(EnumSet<Flag> flags) {
     this.flags = flags;
   }

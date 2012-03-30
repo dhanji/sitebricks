@@ -38,6 +38,12 @@ public interface MailClient {
   void disconnect();
 
   /**
+   * Same as {@link #disconnect()} but does so on a separate worker thread, the caller
+   * returns immediately.
+   */
+  void disconnectAsync();
+
+  /**
    * Returns true if the underlying channels are connected to the remote server, logged in and
    * open for business.
    */
