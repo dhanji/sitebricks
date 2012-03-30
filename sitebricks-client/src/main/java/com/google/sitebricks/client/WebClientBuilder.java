@@ -1,12 +1,12 @@
 package com.google.sitebricks.client;
 
+import java.util.Map;
+
+import net.jcip.annotations.NotThreadSafe;
+
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Key;
-import net.jcip.annotations.NotThreadSafe;
-
-import java.util.Map;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -65,8 +65,8 @@ class WebClientBuilder implements Web.FormatBuilder {
     }
 
     public WebClient<T> over(Class<? extends Transport> transport) {
-      return new AHCWebClient<T>(injector, authType, username, password, url, 
-          headers, transporting, Key.get(transport));
+      return new AHCWebClient<T>(injector.getInstance(transport), authType, username, password, url, 
+          headers, transporting);
     }
   }
 }

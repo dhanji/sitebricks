@@ -8,8 +8,6 @@ import java.util.concurrent.ExecutionException;
 import net.jcip.annotations.ThreadSafe;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.Realm;
@@ -22,21 +20,18 @@ import com.ning.http.client.Response;
  */
 @ThreadSafe
 class AHCWebClient<T> implements WebClient<T> {
-  private final Injector injector;
   private final String url;
   private final Map<String, String> headers;
   private final Class<T> classTypeToTransport;
   private final AsyncHttpClient httpClient;
   private Transport transport;
 
-  public AHCWebClient(Injector injector, Web.Auth authType, String username, String password, String url, Map<String, String> headers, Class<T> classTypeToTransport,
-      Key<? extends Transport> transportKey) {
+  public AHCWebClient(Transport transport, Web.Auth authType, String username, String password, String url, Map<String, String> headers, Class<T> classTypeToTransport) {
 
-    this.injector = injector;
     this.url = url;
     this.headers = (null == headers) ? null : ImmutableMap.copyOf(headers);
     this.classTypeToTransport = classTypeToTransport;
-    this.transport = injector.getInstance(transportKey);
+    this.transport = transport;
 
     // configure auth
     AsyncHttpClientConfig.Builder c = new AsyncHttpClientConfig.Builder();
@@ -57,7 +52,7 @@ class AHCWebClient<T> implements WebClient<T> {
 
     try {
       Response r = httpClient.executeRequest(requestBuilder.build()).get();
-      return new WebResponseImpl(injector, r);
+      return new WebResponseImpl(transport, r);
     } catch (IOException e) {
       throw new TransportException(e);
     } catch (InterruptedException e) {
@@ -86,8 +81,8 @@ class AHCWebClient<T> implements WebClient<T> {
       // Set request body
       //
       requestBuilder.setBody(outBuffer);
-
-      return new WebResponseImpl(injector, httpClient.executeRequest(requestBuilder.build()).get());
+      Response r = httpClient.executeRequest(requestBuilder.build()).get();
+      return new WebResponseImpl(transport, r);
     } catch (IOException e) {
       throw new TransportException(e);
     } catch (InterruptedException e) {

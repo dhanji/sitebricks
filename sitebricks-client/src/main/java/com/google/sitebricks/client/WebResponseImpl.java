@@ -1,9 +1,5 @@
 package com.google.sitebricks.client;
 
-import com.google.inject.Injector;
-import com.ning.http.client.Response;
-import net.jcip.annotations.NotThreadSafe;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -11,20 +7,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import net.jcip.annotations.NotThreadSafe;
+
+import com.ning.http.client.Response;
+
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  * @author Jeanfrancois Arcand (jfarcand@apache.org)
  */
 @NotThreadSafe
 class WebResponseImpl implements WebResponse {
-  private final Injector injector;
+  
+  private Transport transport;
   private final Response response;
 
   // memo field
   private Map<String, String> headers;
 
-  public WebResponseImpl(Injector injector, Response response) {
-    this.injector = injector;
+  public WebResponseImpl(Transport transport, Response response) {
+    this.transport = transport;
     this.response = response;
   }
 
@@ -45,11 +46,11 @@ class WebResponseImpl implements WebResponse {
 
   public <T> ResponseTransportBuilder<T> to(final Class<T> data) {
     return new ResponseTransportBuilder<T>() {
-      public T using(Class<? extends Transport> transport) {
+      public T using(Class<? extends Transport> transportKey) {
         InputStream in = null;
         try {
           in = response.getResponseBodyAsStream();
-          return injector.getInstance(transport).in(in, data);
+          return transport.in(in, data);
         } catch (IOException e) {
           throw new TransportException(e);
           //
