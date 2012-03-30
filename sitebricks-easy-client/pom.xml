@@ -39,6 +39,7 @@
       <groupId>com.google.sitebricks</groupId>
       <artifactId>sitebricks-test-support</artifactId>
       <version>0.8.7-SNAPSHOT</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.sonatype.sisu</groupId>
