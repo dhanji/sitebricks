@@ -21,132 +21,117 @@ import java.util.concurrent.ExecutionException;
  * @author Jeanfrancois Arcand (jfarcand@apache.org)
  */
 @ThreadSafe
-        //@Concurrent
 class AHCWebClient<T> implements WebClient<T> {
-    private final Injector injector;
-    private final String url;
-    private final Map<String, String> headers;
-    private final Class<T> transporting;
-    private final Key<? extends Transport> transport;
-    private final AsyncHttpClient httpClient;
+  private final Injector injector;
+  private final String url;
+  private final Map<String, String> headers;
+  private final Class<T> transporting;
+  private final Key<? extends Transport> transport;
+  private final AsyncHttpClient httpClient;
 
-    private final Web.Auth authType;
-    private final String username;
-    private final String password;
+  private final Web.Auth authType;
+  private final String username;
+  private final String password;
 
-    public AHCWebClient(Injector injector, Web.Auth authType, String username,
-                        String password, String url, Map<String, String> headers,
-                        Class<T> transporting,
-                        Key<? extends Transport> transport) {
+  public AHCWebClient(Injector injector, Web.Auth authType, String username, String password, String url, Map<String, String> headers, Class<T> transporting, Key<? extends Transport> transport) {
 
-        this.injector = injector;
+    this.injector = injector;
 
-        this.url = url;
-        this.headers = (null == headers) ? null : ImmutableMap.copyOf(headers);
+    this.url = url;
+    this.headers = (null == headers) ? null : ImmutableMap.copyOf(headers);
 
+    this.authType = authType;
+    this.username = username;
+    this.password = password;
+    this.transporting = transporting;
+    this.transport = transport;
 
-        this.authType = authType;
-        this.username = username;
-        this.password = password;
-        this.transporting = transporting;
-        this.transport = transport;
-
-        // configure auth
-        AsyncHttpClientConfig.Builder c = new AsyncHttpClientConfig.Builder();
-        if (null != authType) {
-            Realm.RealmBuilder b = new Realm.RealmBuilder();
-            // TODO: Add support for Kerberos and SPNEGO
-            Realm.AuthScheme scheme = authType.equals(Web.Auth.BASIC) ? Realm.AuthScheme.BASIC : Realm.AuthScheme.DIGEST;
-            b.setPrincipal(username).setPassword(password).setScheme(scheme);
-            c.setRealm(b.build());
-        }
-
-        this.httpClient = new AsyncHttpClient(c.build());
-
+    // configure auth
+    AsyncHttpClientConfig.Builder c = new AsyncHttpClientConfig.Builder();
+    if (null != authType) {
+      Realm.RealmBuilder b = new Realm.RealmBuilder();
+      // TODO: Add support for Kerberos and SPNEGO
+      Realm.AuthScheme scheme = authType.equals(Web.Auth.BASIC) ? Realm.AuthScheme.BASIC : Realm.AuthScheme.DIGEST;
+      b.setPrincipal(username).setPassword(password).setScheme(scheme);
+      c.setRealm(b.build());
     }
 
-    private static URI toUri(String url) {
-        try {
-            return new URI(url);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+    this.httpClient = new AsyncHttpClient(c.build());
+
+  }
+
+  private WebResponse simpleRequest(RequestBuilder requestBuilder) {
+
+    // set request headers as necessary
+    if (null != headers)
+      for (Map.Entry<String, String> header : headers.entrySet())
+        requestBuilder.addHeader(header.getKey(), header.getValue());
+
+    try {
+
+      Response r = httpClient.executeRequest(requestBuilder.build()).get();
+
+      return new WebResponseImpl(injector, r);
+    } catch (IOException e) {
+      throw new TransportException(e);
+    } catch (InterruptedException e) {
+      throw new TransportException(e);
+    } catch (ExecutionException e) {
+      throw new TransportException(e);
     }
+  }
 
-    private WebResponse simpleRequest(RequestBuilder requestBuilder) {
+  private WebResponse request(RequestBuilder requestBuilder, T t) {
 
-        //set request headers as necessary
-        if (null != headers)
-            for (Map.Entry<String, String> header : headers.entrySet())
-                requestBuilder.addHeader(header.getKey(), header.getValue());
+    // set request headers as necessary
+    if (null != headers)
+      for (Map.Entry<String, String> header : headers.entrySet())
+        requestBuilder.addHeader(header.getKey(), header.getValue());
 
-        try {
+    // fire method
+    try {
 
-            Response r = httpClient.executeRequest(requestBuilder.build()).get();
+      // Read the entity from the transport plugin.
+      final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+      injector.getInstance(transport).out(stream, transporting, t);
 
-            return new WebResponseImpl(injector, r);
-        } catch (IOException e) {
-            throw new TransportException(e);
-        } catch (InterruptedException e) {
-            throw new TransportException(e);
-        } catch (ExecutionException e) {
-            throw new TransportException(e);
-        }
+      // TODO worry about endian issues? Or will Content-Encoding be sufficient?
+      // OOM if the stream is too bug
+      final byte[] outBuffer = stream.toByteArray();
+
+      // set request body
+      requestBuilder.setBody(outBuffer);
+
+      Response r = httpClient.executeRequest(requestBuilder.build()).get();
+
+      return new WebResponseImpl(injector, r);
+    } catch (IOException e) {
+      throw new TransportException(e);
+    } catch (InterruptedException e) {
+      throw new TransportException(e);
+    } catch (ExecutionException e) {
+      throw new TransportException(e);
     }
+  }
 
+  public WebResponse get() {
+    return simpleRequest((new RequestBuilder("GET")).setUrl(url));
+  }
 
-    private WebResponse request(RequestBuilder requestBuilder, T t) {
+  public WebResponse post(T t) {
+    return request((new RequestBuilder("POST")).setUrl(url), t);
+  }
 
-        //set request headers as necessary
-        if (null != headers)
-            for (Map.Entry<String, String> header : headers.entrySet())
-                requestBuilder.addHeader(header.getKey(), header.getValue());
+  public WebResponse put(T t) {
+    return request((new RequestBuilder("PUT")).setUrl(url), t);
+  }
 
-        //fire method
-        try {
+  public WebResponse delete() {
+    return simpleRequest((new RequestBuilder("DELETE")).setUrl(url));
+  }
 
-            // Read the entity from the transport plugin.
-            final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            injector.getInstance(transport)
-                    .out(stream, transporting, t);
-
-            // TODO worry about endian issues? Or will Content-Encoding be sufficient?
-            // OOM if the stream is too bug
-            final byte[] outBuffer = stream.toByteArray();
-
-            //set request body
-            requestBuilder.setBody(outBuffer);
-
-            Response r = httpClient.executeRequest(requestBuilder.build()).get();
-
-            return new WebResponseImpl(injector, r);
-        } catch (IOException e) {
-            throw new TransportException(e);
-        } catch (InterruptedException e) {
-            throw new TransportException(e);
-        } catch (ExecutionException e) {
-            throw new TransportException(e);
-        }
-    }
-
-    public WebResponse get() {
-        return simpleRequest((new RequestBuilder("GET")).setUrl(url));
-    }
-
-    public WebResponse post(T t) {
-        return request((new RequestBuilder("POST")).setUrl(url), t);
-    }
-
-    public WebResponse put(T t) {
-        return request((new RequestBuilder("PUT")).setUrl(url), t);
-    }
-
-    public WebResponse delete() {
-        return simpleRequest((new RequestBuilder("DELETE")).setUrl(url));
-    }
-
-    @Override
-    public void close() {
-        httpClient.close();    
-    }
+  @Override
+  public void close() {
+    httpClient.close();
+  }
 }
