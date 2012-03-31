@@ -1,17 +1,15 @@
 package com.google.sitebricks.mail.imap;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Multimap;
-import com.google.common.io.Resources;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeUtility;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Collection;
@@ -20,7 +18,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.testng.Assert.*;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeUtility;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.testng.annotations.Test;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.Multimap;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
+import com.google.common.io.Resources;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -90,7 +98,7 @@ public class MessageBodyExtractorTest {
     // Folded headers with tabs + spaces, repeat headers, one body.
     Message message = extract.get(0);
     String expectedHeaders =
-        IOUtils.toString(MessageBodyExtractorTest.class.getResourceAsStream("fetch_headers_1.txt"));
+        CharStreams.toString(new InputStreamReader(MessageBodyExtractorTest.class.getResourceAsStream("fetch_headers_1.txt")));
     assertEquals(message.getHeaders().toString(), expectedHeaders);
 
     assertEquals(1, message.getBodyParts().size());
@@ -100,9 +108,9 @@ public class MessageBodyExtractorTest {
 
     // We have to compare the raw bytes because the encoded string comes in as ISO-8859-1
     // And Java literals are encoded as UTF-8.
-    assertEquals(part1.getBody().getBytes(), IOUtils.toByteArray(
+    assertEquals(part1.getBody().getBytes(), ByteStreams.toByteArray(
         MessageBodyExtractorTest.class.getResourceAsStream("fetch_body_1_raw.dat")));
-    assertEquals(new String(part1.getBody().getBytes()), new String(IOUtils.toByteArray(
+    assertEquals(new String(part1.getBody().getBytes()), new String(ByteStreams.toByteArray(
         MessageBodyExtractorTest.class.getResourceAsStream("fetch_body_1_raw.dat"))));
 
     // ------------------------------------------------------------
@@ -119,8 +127,8 @@ public class MessageBodyExtractorTest {
     part1 = message.getBodyParts().get(0);
     assertTrue(part1.getHeaders().isEmpty());
     assertNull(part1.getBinBody());
-    assertEquals(part1.getBody(), IOUtils.toString(
-        MessageBodyExtractorTest.class.getResourceAsStream("fetch_body_2.txt")));
+    assertEquals(part1.getBody(), CharStreams.toString(
+        new InputStreamReader(MessageBodyExtractorTest.class.getResourceAsStream("fetch_body_2.txt"))));
 
     // ------------------------------------------------------------
     // Third message.
@@ -771,7 +779,7 @@ public class MessageBodyExtractorTest {
     String charset = "ISO-8859-1";
     final byte[] bytes = body.getBytes(charset);
     final InputStream decoded = MimeUtility.decode(new ByteArrayInputStream(bytes), encoding);
-    String result = IOUtils.toString(decoded, charset);
+    String result = CharStreams.toString(new InputStreamReader(decoded, charset));
     assertEquals(result, body);
   }
 }

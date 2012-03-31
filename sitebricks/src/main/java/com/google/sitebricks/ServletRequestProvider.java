@@ -1,7 +1,16 @@
 package com.google.sitebricks;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.annotation.Annotation;
+import java.util.Enumeration;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.io.ByteStreams;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.inject.Inject;
@@ -11,14 +20,6 @@ import com.google.inject.Singleton;
 import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Parameters;
-import org.apache.commons.io.IOUtils;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.annotation.Annotation;
-import java.util.Enumeration;
-import java.util.Map;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -68,7 +69,7 @@ class ServletRequestProvider implements Provider<Request> {
 
       @Override
       public void readTo(OutputStream out) throws IOException {
-        IOUtils.copy(servletRequest.getInputStream(), out);
+        ByteStreams.copy(servletRequest.getInputStream(), out);
       }
 
       @Override

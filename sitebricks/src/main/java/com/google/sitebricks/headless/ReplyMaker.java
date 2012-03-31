@@ -1,20 +1,21 @@
 package com.google.sitebricks.headless;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.google.common.io.ByteStreams;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.client.transport.Text;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.rendering.Templates;
-import org.apache.commons.io.IOUtils;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
 
 /**
  * A builder implementation of the Reply interface.
@@ -181,7 +182,7 @@ class ReplyMaker<E> extends Reply<E> {
         // Stream the response rather than marshalling it through a transport.
         InputStream inputStream = (InputStream) entity;
         try {
-          IOUtils.copy(inputStream, response.getOutputStream());
+          ByteStreams.copy(inputStream, response.getOutputStream());
         } finally {
           inputStream.close();
         }

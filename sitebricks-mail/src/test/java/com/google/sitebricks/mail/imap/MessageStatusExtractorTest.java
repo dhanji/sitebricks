@@ -1,12 +1,10 @@
 package com.google.sitebricks.mail.imap;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.io.Resources;
-import org.apache.commons.io.IOUtils;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -17,11 +15,14 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Queue;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import org.testng.annotations.Test;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.io.CharStreams;
+import com.google.common.io.Resources;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -104,7 +105,7 @@ public class MessageStatusExtractorTest {
   public final void testMultilineUnquotedSubjectWithCrLfs() throws IOException, ParseException {
 @SuppressWarnings("unchecked")
     final List<MessageStatus> extract =
-        new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+        new MessageStatusExtractor().extract(CharStreams.readLines(new StringReader(
             "* 27012 FETCH (X-GM-THRID 1279068049360518352 X-GM-MSGID 1279068049360518352 X-GM-LABELS () UID 60961 RFC822.SIZE 24305 INTERNALDATE \"27-Aug-2008 05:19:07 +0000\" FLAGS (\\Seen) ENVELOPE (\"27 Aug 2008 01:19:06 -0400\" {93}\n" +
                 "Ttkii Regency The quick brown fox ran over AK 7 Day Arrival Notice\n" +
                 " - BATTY SCORTI - 16257294 ((\"Ttkii E-Concierge\" NIL \"Concierge\" \"quickcolamakerXL.com\")) ((\"Ttkii E-Concierge\" NIL \"Concierge\" \"quickcolamakerXL.com\")) ((\"Ttkii E-Concierge\" NIL \"Concierge\" \"quickcolamakerXL.com\")) ((NIL NIL \"BATTY.SCORTI\" \"gmail.com\")) NIL NIL NIL \"<20010927011966.SM02008@CDC0044>\"))\n" +
@@ -149,7 +150,7 @@ public class MessageStatusExtractorTest {
   public final void testMultilineUnquotedSubjectWithLfs() throws IOException, ParseException {
     @SuppressWarnings("unchecked")
     final List<MessageStatus> extract =
-        new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+        new MessageStatusExtractor().extract(CharStreams.readLines(new StringReader(
             "* 4017 FETCH (X-GM-THRID 13603320389284585 X-GM-MSGID 1460332038925224585 X-GM-LABELS (\"\\\\Inbox\") UID 5474 RFC822.SIZE 24864 INTERNALDATE \"10-Feb-2011 04:55:27 +0000\" FLAGS (\\Seen) ENVELOPE (\"Thu, 10 Feb 2011 15:55:20 +1100\" {96}\n" +
                 "ASIX News - Social Innovation Sydney Barcamp - Hub Melbourne news - Social\n" +
                 "Impact Scholarships ((\"ASIX - Australian Social Innovation eXchange\" NIL \"contact\" \"asix.org.au\")) ((\"ASIX - Australian Social Innovation eXchange\" NIL \"contact\" \"asix.org.au\")) ((\"ASIX - Australian Social Innovation eXchange\" NIL \"contact\" \"asix.org.au\")) ((\"dhanji\" NIL \"mick\" \"rethrick.com\")) NIL NIL NIL \"<E1123Yq-756Z-Fs@c.consumer.fluent.io>\"))\n" +
@@ -193,7 +194,7 @@ public class MessageStatusExtractorTest {
   @Test
   public void testMutlilineUnquotedWithEmbeddedQuote() throws Exception {
     @SuppressWarnings("unchecked")
-    final List<MessageStatus> extract = new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+    final List<MessageStatus> extract = new MessageStatusExtractor().extract(CharStreams.readLines(new StringReader(
         "* 234 FETCH (X-GM-THRID 23432423423 X-GM-MSGID 23432423 X-GM-LABELS () UID 210140 RFC822.SIZE 58816" +
         " INTERNALDATE \"17-Oct-2009 17:27:26 +0000\" FLAGS () ENVELOPE (\"17 Oct 2009 13:27:22 -0400\" {75}\n" +
         "A Reminder to attend \"The Windows Vista Positioning Disaster:\n" +
@@ -208,7 +209,7 @@ public class MessageStatusExtractorTest {
   @Test
   public void testMutlilineUnquotedWithEmbeddedQuote2() throws Exception {
     @SuppressWarnings("unchecked")
-    final List<MessageStatus> extract = new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+    final List<MessageStatus> extract = new MessageStatusExtractor().extract(CharStreams.readLines(new StringReader(
         "* 28468 FETCH (X-GM-THRID 34543535 X-GM-MSGID 345435435 X-GM-LABELS (\"\\\\Important\" Notifications) UID 345534 RFC822.SIZE 84553 INTERNALDATE \"04-Oct-2011 07:30:02 +0000\" FLAGS (\\Seen) ENVELOPE (\"04 Oct 2011 00:30:00 -0700\" {998}\n" +
             "<html>\n" +
             "<head>\n" +
@@ -266,7 +267,7 @@ public class MessageStatusExtractorTest {
   public void testMultilineWithWhitespace() throws Exception {
     @SuppressWarnings("unchecked")
     final List<MessageStatus> extract =
-        new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+        new MessageStatusExtractor().extract(CharStreams.readLines(new StringReader(
             "* 5553 FETCH (X-GM-THRID 234324 X-GM-MSGID 2343242 X-GM-LABELS () UID 1213437 RFC822.SIZE 1494343 INTERNALDATE \"08-Jun-2006 22:48:06 +0000\" FLAGS () ENVELOPE (\"Fri, 09 Jun 2006 06:50:32 +0800\" \"RE: Long game\" ((NIL NIL \"foo\" \"bar.com.au\")) ((NIL NIL \"foo\" \"bar.com.au\")) ((NIL NIL \"foo\" \"bar.com.au\")) ((NIL NIL \"foo\" \"bar.com.au\"))" +
                 "(({23}\n" +
                 "abcdef,\n" +
@@ -284,7 +285,7 @@ public class MessageStatusExtractorTest {
   public void testMultilineUnquotedCC() throws Exception {
     @SuppressWarnings("unchecked")
     final List<MessageStatus> extract =
-        new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+        new MessageStatusExtractor().extract(CharStreams.readLines(new StringReader(
           "* 67236 FETCH (X-GM-THRID 132443254747 X-GM-MSGID 13256345038 X-GM-LABELS (\"\\\\Inbox\") UID 197888 RFC822.SIZE 34646 INTERNALDATE \"23-Jan-2010 05:06:26 +0000\" FLAGS (\\Seen) " +
               "ENVELOPE (\"Sat, 23 Jan 2010 05:04:06 +0000\" \"QUOTED SUBJECT\" (({14}\n" +
               "Other\n" +
@@ -306,7 +307,7 @@ public class MessageStatusExtractorTest {
   public void testMultilineNewlineEdgeCase() throws Exception {
     @SuppressWarnings("unchecked")
     final List<MessageStatus> extract =
-        new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+        new MessageStatusExtractor().extract(CharStreams.readLines(new StringReader(
           "* 44788 FETCH (X-GM-THRID 34543534 X-GM-MSGID 34545 X-GM-LABELS (\"\\\\Inbox\") UID 61056 RFC822.SIZE 6154 INTERNALDATE \"17-May-2007 22:23:15 +0000\" FLAGS () ENVELOPE (\"Thu, 17 May 2007 15:23:14 -0700\" {29}\n" +
           "Google Analytics New Version\n" +
           " ((NIL NIL \"noreply\" \"google.com\")) ((NIL NIL \"noreply\" \"google.com\")) ((NIL NIL \"noreply\" \"google.com\")) ((NIL NIL \"foo\" \"gmail.com\")) NIL NIL NIL \"<345435@google.com>\"))")));
@@ -320,7 +321,7 @@ public class MessageStatusExtractorTest {
   public void testMultilineUnquotedMonster() throws Exception {
     @SuppressWarnings("unchecked")
     final List<MessageStatus> extract =
-        new MessageStatusExtractor().extract(IOUtils.readLines(new StringReader(
+        new MessageStatusExtractor().extract(CharStreams.readLines(new StringReader(
     "* 17594 FETCH (X-GM-THRID 876876876 X-GM-MSGID 876876876876 X-GM-LABELS " +
         "(Beer \"\\\\Important\") UID 99879 RFC822.SIZE 2535649 INTERNALDATE \"20-Jul-2011 11:57:32 +0000\" " +
         "FLAGS (\\Seen) ENVELOPE (\"Wed, 20 Jul 2011 21:57:32 +1000\" \"subject\" ((\"dude\" NIL \"foo\" \"bar.com.au\")) ((\"dude\" NIL \"foo\" \"bar.com.au\")) ((\"dude\" NIL \"foo\" \"bar.com.au\")) ((\"dude\" NIL \"foo\" \"bar.com.au\")) NIL NIL {1319}\n" +

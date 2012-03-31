@@ -1,26 +1,34 @@
 package com.google.sitebricks.mail.imap;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import org.apache.commons.io.IOUtils;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.util.Collection;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeUtility;
+
 import org.apache.james.mime4j.codec.DecodeMonitor;
 import org.apache.james.mime4j.codec.DecoderUtil;
 import org.jetbrains.annotations.TestOnly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeUtility;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
 
 /**
  * Extracts a full Message body from an IMAP fetch. Specifically
@@ -496,8 +504,8 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       // Second time around. Apparently some are slipping through.
       charset = Parsing.stripQuotes(charset);
 
-      return IOUtils.toString(
-          MimeUtility.decode(new ByteArrayInputStream(body.getBytes(charset)), encoding), charset);
+      return CharStreams.toString(
+          new InputStreamReader(MimeUtility.decode(new ByteArrayInputStream(body.getBytes(charset)), encoding), charset));
     } catch (UnsupportedEncodingException e) {
       // In this case, just return it as is and look it up later.
       log.warn("Encountered unknown encoding '{}'. Treating it as a raw string.", charset, e);
@@ -539,7 +547,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     // Decode if this is encoded as binary-to-text.
     if (null != transferEncoding)
       try {
-        bytes = IOUtils.toByteArray(MimeUtility.decode(new ByteArrayInputStream(bytes),
+        bytes = ByteStreams.toByteArray(MimeUtility.decode(new ByteArrayInputStream(bytes),
             transferEncoding));
       } catch (MessagingException e) {
         log.error("Unable to decode message body, proceeding with raw bytes.", e);
