@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Attributes;
@@ -24,6 +23,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.nodes.XmlDeclaration;
+import org.softee.util.Preconditions;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -569,7 +569,7 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
    @return the previous sibling, or null if this is the first sibling
    */
   public Node previousSibling(Node node) {
-      Validate.notNull(node);
+      Preconditions.notNull(node);
 
       List<Node> siblings = findSiblings(node);
       if (null == siblings) return null;
@@ -584,7 +584,7 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
   }      
 
   public List<Node> findSiblings(Node node) {
-      Validate.notNull(node);
+      Preconditions.notNull(node);
     
       Node parent = node.parent();
       if (null == parent) return null;
@@ -601,13 +601,13 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
 
     public Integer siblingIndex(Node node) {
         if (null != node.parent())
-          Validate.notNull(node);
+          Preconditions.notNull(node);
         return indexInList(node, findSiblings(node));
     }
 
     protected static <N extends Node> Integer indexInList(N search, List<N> nodes) {
-        Validate.notNull(search);
-        Validate.notNull(nodes);
+        Preconditions.notNull(search);
+        Preconditions.notNull(nodes);
 
         for (int i = 0; i < nodes.size(); i++) {
             N node = nodes.get(i);

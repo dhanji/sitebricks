@@ -21,10 +21,10 @@ import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Objects;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
@@ -619,10 +619,10 @@ public class MessageBodyExtractorTest {
 
     for (int i = 0, statusesSize = statuses.size(); i < statusesSize; i++) {
       Message message = statuses.get(i);
-      System.out.println(ToStringBuilder.reflectionToString(message));
+      System.out.println(Objects.toStringHelper(message));
       System.out.println("----------->");
       for (Message.BodyPart bodyPart : message.getBodyParts()) {
-        System.out.println(ToStringBuilder.reflectionToString(bodyPart));
+        System.out.println(Objects.toStringHelper(bodyPart));
       }
     }
   }
