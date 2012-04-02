@@ -1,18 +1,14 @@
 package com.google.sitebricks.client;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.Injector;
+import com.ning.http.client.*;
+import net.jcip.annotations.ThreadSafe;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-
-import net.jcip.annotations.ThreadSafe;
-
-import com.google.common.collect.ImmutableMap;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.AsyncHttpClientConfig;
-import com.ning.http.client.Realm;
-import com.ning.http.client.RequestBuilder;
-import com.ning.http.client.Response;
 
 /**
  * @author Jeanfrancois Arcand (jfarcand@apache.org)
@@ -24,10 +20,11 @@ class AHCWebClient<T> implements WebClient<T> {
   private final Map<String, String> headers;
   private final Class<T> classTypeToTransport;
   private final AsyncHttpClient httpClient;
-  private Transport transport;
+  private final Transport transport;
+  private final Injector injector;
 
-  public AHCWebClient(Transport transport, Web.Auth authType, String username, String password, String url, Map<String, String> headers, Class<T> classTypeToTransport) {
-
+  public AHCWebClient(Injector injector, Transport transport, Web.Auth authType, String username, String password, String url, Map<String, String> headers, Class<T> classTypeToTransport) {
+    this.injector = injector;
     this.url = url;
     this.headers = (null == headers) ? null : ImmutableMap.copyOf(headers);
     this.classTypeToTransport = classTypeToTransport;
@@ -52,7 +49,7 @@ class AHCWebClient<T> implements WebClient<T> {
 
     try {
       Response r = httpClient.executeRequest(requestBuilder.build()).get();
-      return new WebResponseImpl(transport, r);
+      return new WebResponseImpl(injector, r);
     } catch (IOException e) {
       throw new TransportException(e);
     } catch (InterruptedException e) {
@@ -65,7 +62,7 @@ class AHCWebClient<T> implements WebClient<T> {
   private WebResponse request(RequestBuilder requestBuilder, T t) {
 
     requestBuilder = addHeadersToRequestBuilder(requestBuilder);
-        
+
     try {
       //
       // Read the entity from the transport plugin.
@@ -82,7 +79,7 @@ class AHCWebClient<T> implements WebClient<T> {
       //
       requestBuilder.setBody(outBuffer);
       Response r = httpClient.executeRequest(requestBuilder.build()).get();
-      return new WebResponseImpl(transport, r);
+      return new WebResponseImpl(injector, r);
     } catch (IOException e) {
       throw new TransportException(e);
     } catch (InterruptedException e) {
@@ -114,11 +111,11 @@ class AHCWebClient<T> implements WebClient<T> {
       // will be set to application/json.
       //
       requestBuilder.addHeader("Content-Type", transport.contentType());
-    }  
-    
+    }
+
     return requestBuilder;
   }
-  
+
   public WebResponse get() {
     return simpleRequest((new RequestBuilder("GET")).setUrl(url));
   }
