@@ -64,6 +64,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         install(new StatModule("/stats"));
         
         converter(new DateConverters.DateStringConverter(DEFAULT_DATE_TIME_FORMAT));
+        converter(new CustomToStringConverter());
 
         install(new AwareModule() {
           @Override
@@ -113,6 +114,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         // templating by extension
         at("/template").show(DecoratedPage.class);
         at("/velocitySample").show(VelocitySample.class);
+        at("/customConvertion").show(CustomConverter.class);
 
         embed(HelloWorld.class).as("Hello");
       }

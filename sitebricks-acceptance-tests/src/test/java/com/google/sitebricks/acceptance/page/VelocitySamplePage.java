@@ -23,7 +23,7 @@ public class VelocitySamplePage {
     }
 
     public boolean hasMessage() {
-        System.out.println(driver.getPageSource());
+//        System.out.println(driver.getPageSource());
         return driver.getPageSource().contains(VelocitySample.MSG);
     }
 
