@@ -1,10 +1,10 @@
-package info.sitebricks.example;
+package ${package};
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.sitebricks.SitebricksModule;
-import info.sitebricks.example.web.HomePage;
+import ${package}.web.HomePage;
 
 /**
  * The main configuration for a sitebricks servlet app. This class is typically

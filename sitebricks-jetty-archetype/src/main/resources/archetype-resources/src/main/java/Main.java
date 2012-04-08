@@ -1,4 +1,4 @@
-package info.sitebricks.example;
+package ${package};
 
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
