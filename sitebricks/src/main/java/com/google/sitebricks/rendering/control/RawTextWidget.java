@@ -12,7 +12,7 @@ import java.util.Set;
 
 @ThreadSafe @SelfRendering
 public class RawTextWidget implements Renderable {
-  private String template; //TODO store some metrics to allocate buffers later
+  private String template;
 
   RawTextWidget(String template, EvaluatorCompiler compiler) throws ExpressionCompileException {
     this.template = template;

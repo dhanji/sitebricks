@@ -58,9 +58,9 @@ public class SitebricksConfig extends GuiceServletContextListener {
         localize(I18n.MyMessages.class).usingDefault();
         localize(I18n.MyMessages.class).using(Locale.CANADA_FRENCH,
             ImmutableMap.of(I18n.HELLO, I18n.HELLO_IN_FRENCH));
-        
+
         install(new StatModule("/stats"));
-        
+
         converter(new DateConverters.DateStringConverter(DEFAULT_DATE_TIME_FORMAT));
 
         install(new AwareModule() {
@@ -72,7 +72,6 @@ public class SitebricksConfig extends GuiceServletContextListener {
       }
 
       private void bindExplicitly() {
-        //TODO explicit bindings should override scanned ones.
         at("/").show(Start.class);
         at("/hello").show(HelloWorld.class);
         at("/case").show(Case.class);
@@ -113,6 +112,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         embed(HelloWorld.class).as("Hello");
       }
 
+      @SuppressWarnings("unchecked")
       private void bindActions() {
         at("/spi/test")
             .perform(action("get:top"))
@@ -120,7 +120,8 @@ public class SitebricksConfig extends GuiceServletContextListener {
             .perform(action("post:junk_subpath1"))
             .on(Post.class);
       }
-    
+
+      @SuppressWarnings("unchecked")
       private void bindCrudActions() {
         //
         // Handle the base path
@@ -130,7 +131,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
             .on(Get.class)
             .perform(action("CREATE"))
             .on(Post.class);
-        
+
         //
         // Handle subpaths for verbs that have parameters
         //
@@ -142,7 +143,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
             .perform(action("DELETE"))
             .on(Delete.class);
       }
-    });    
+    });
   }
 
   private Action action(final String reply) {
