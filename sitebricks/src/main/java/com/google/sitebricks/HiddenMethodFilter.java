@@ -83,7 +83,7 @@ class HiddenMethodFilter implements Filter {
           // Making the input stream available again fix for issue 45
           wrappedRequest = getWrappedRequest(httpRequest, reqBytes);
           //Filtering done, forward to another filter in chain
-          filterChain.doFilter(httpRequest, response);
+          filterChain.doFilter(wrappedRequest, response);
         }
       } finally {
         // Remove the filterDone attribute for this request.
