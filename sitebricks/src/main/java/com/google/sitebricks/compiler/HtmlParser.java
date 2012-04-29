@@ -1,17 +1,25 @@
 package com.google.sitebricks.compiler;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.sitebricks.rendering.Strings;
-import org.apache.commons.lang.Validate;
-import org.jsoup.nodes.*;
-import org.jsoup.parser.Tag;
-import org.jsoup.parser.TokenQueue;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.jsoup.helper.Validate;
+import org.jsoup.nodes.Attribute;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Comment;
+import org.jsoup.nodes.DataNode;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.nodes.XmlDeclaration;
+import org.jsoup.parser.Tag;
+import org.jsoup.parser.TokenQueue;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.sitebricks.rendering.Strings;
 
 /**
  * Parses HTML into a List<{@link org.jsoup.nodes.Node}>

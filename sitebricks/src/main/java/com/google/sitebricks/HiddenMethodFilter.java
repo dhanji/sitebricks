@@ -63,7 +63,7 @@ class HiddenMethodFilter implements Filter {
       httpRequest.setAttribute(filterDoneAttributeName, Boolean.TRUE);
 
       try {
-        String methodName = httpRequest.getParameter(this.hiddenFieldName);
+        String methodName = httpRequest.getParameter(hiddenFieldName);
 
         if ("POST".equalsIgnoreCase(httpRequest.getMethod()) && !Strings.empty(methodName)) {
           String methodNameUppercase = methodName.toUpperCase(Locale.ENGLISH);

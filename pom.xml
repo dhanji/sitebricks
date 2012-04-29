@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -8,13 +9,13 @@
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.8.6-SNAPSHOT</version>
+  <version>0.8.7-SNAPSHOT</version>
   <name>Sitebricks :: Parent</name>
   <url>https://github.com/dhanji/sitebricks</url>
 
   <properties>
     <guice.version>3.0</guice.version>
-    <org.codehaus.jackson.version>1.8.0</org.codehaus.jackson.version>
+    <org.codehaus.jackson.version>1.9.0</org.codehaus.jackson.version>
     <org.mortbay.jetty.version>6.1.9</org.mortbay.jetty.version>
     <org.seleniumhq.webdriver.version>0.9.7376</org.seleniumhq.webdriver.version>
     <org.testng.version>5.8</org.testng.version>
@@ -23,14 +24,12 @@
 
   <modules>
     <module>sitebricks</module>
+    <module>sitebricks-annotations</module>
     <module>sitebricks-converter</module>
-    <module>sitebricks-async</module>
     <module>sitebricks-client</module>
+    <module>sitebricks-easy-client</module>
     <module>sitebricks-acceptance-tests</module>
-    <!--
-    We'll move the examples to their own repo shortly
-    <module>sitebricks-web</module>
-    -->
+    <module>sitebricks-test-support</module>
     <module>sitebricks-mail</module>
     <module>sitebricks-options</module>
     <module>sitebricks-jetty-archetype</module>
@@ -58,6 +57,16 @@
       <dependency>
         <groupId>com.google.sitebricks</groupId>
         <artifactId>sitebricks-client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.sitebricks</groupId>
+        <artifactId>sitebricks-annotations</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.sitebricks</groupId>
+        <artifactId>sitebricks-decorator</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -112,25 +121,7 @@
         <artifactId>freemarker</artifactId>
         <version>2.3.10</version>
       </dependency>
-
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>1.4</version>
-      </dependency>
-
-      <dependency>
-        <groupId>commons-collections</groupId>
-        <artifactId>commons-collections</artifactId>
-        <version>20040616</version>
-      </dependency>
-
-      <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-        <version>2.5</version>
-      </dependency>
-
+      
       <dependency>
         <groupId>com.ning</groupId>
         <artifactId>async-http-client</artifactId>
@@ -289,10 +280,5 @@
   </distributionManagement>
 
   <repositories>
-    <repository>
-      <id>scala.org</id>
-      <name>Scala.org Repository</name>
-      <url>http://scala-tools.org/repo-releases/</url>
-    </repository>
-</repositories>
+  </repositories>
 </project>

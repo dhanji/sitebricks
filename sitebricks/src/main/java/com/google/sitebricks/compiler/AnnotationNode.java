@@ -3,10 +3,6 @@ package com.google.sitebricks.compiler;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.StringUtils;
-
 /**
  Based on jsoup.nodes.TextNode by Jonathan Hedley, jonathan@hedley.net
  AnnotationNode is for Sitebricks text annotations such as

@@ -2,20 +2,19 @@ package com.google.sitebricks.mail.imap;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import org.apache.james.mime4j.codec.DecodeMonitor;
 import org.apache.james.mime4j.codec.DecoderUtil;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.regex.Pattern;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class Parsing {
-  private static final Pattern ENDS_IN_PARENTHETICAL = Pattern.compile("[ ]*\\(.+\\)$");
-
+public class Parsing {
   static List<String> readAddresses(Queue<String> tokens) {
     // Weird base case where we don't get nil, but instead get an empty address set.
     if (tokens.isEmpty())
@@ -108,11 +107,21 @@ class Parsing {
     char[] charArray = message.toCharArray();
     boolean inString = false;
     StringBuilder currentToken = new StringBuilder();
+    boolean escaped = false;
     for (int i = 0, charArrayLength = charArray.length; i < charArrayLength; i++) {
       char c = charArray[i];
+      if (c == '\\') {
+        if (escaped) { // i.e. two backlashes in a row..
+          currentToken.append('\\');
+          escaped = false;
+        } else {
+          escaped = true;
+        }
+        continue;
+      }
 
       // String checks, but only if we're not an escaped quote character.
-      if (c == '"' && (i > 0 && charArray[i - 1] != '\\')) {
+      if (c == '"' && !escaped) {
         if (inString) {
           inString = false;
 
@@ -128,11 +137,9 @@ class Parsing {
           currentToken.append('"');
         }
         continue;
-
-        // Handle parentheses as their own tokens.
       }
 
-      if (!inString)
+      if (!inString) {
         if (c == '(') {
           bakeToken(tokens, currentToken);
           tokens.add("(");
@@ -146,18 +153,23 @@ class Parsing {
 
           // Otherwise whitespace is a delimiter for non-strings. EXCEPT when
           // preceeded by '\', which is an escape character.
-        } else if (c == ' ' && (i > 0 && charArray[i - 1] != '\\')) {
+        } else if (c == ' ' && !escaped) {
           bakeToken(tokens, currentToken);
           currentToken = new StringBuilder();
           continue;
         }
+      }
+
+      // Only swallow backslashes if this character was escaped inside a string.
+      if (escaped && !inString) {
+        currentToken.append('\\');
+      }
       currentToken.append(c);
+      escaped = false;
     }
 
     // Close up dangling tokens.
-    if (currentToken.length() > 0) {
-      bakeToken(tokens, currentToken);
-    }
+    bakeToken(tokens, currentToken);
 
     return tokens;
   }
@@ -182,10 +194,20 @@ class Parsing {
   }
 
   public static String decode(String str) {
+    // decode as per http://www.ietf.org/rfc/rfc2047.txt
     return str == null
         ? null
         : str.isEmpty()
             ? str
-            : DecoderUtil.decodeEncodedWords(str);
+            : DecoderUtil.decodeEncodedWords(str, DecodeMonitor.SILENT);
+  }
+
+  public static Collection<String> getKeyVariations(Multimap<String, String> headers, String... keys) {
+    for (String key : keys) {
+      Collection<String> values = headers.get(key);
+      if (!values.isEmpty())
+        return values;
+    }
+    return ImmutableList.of();
   }
 }

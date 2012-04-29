@@ -1,12 +1,14 @@
 package com.google.sitebricks.mail;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.sitebricks.mail.imap.*;
 import com.google.sitebricks.mail.oauth.OAuthConfig;
 import com.google.sitebricks.mail.oauth.Protocol;
 import com.google.sitebricks.mail.oauth.XoauthSasl;
+import com.google.sitebricks.util.JmxUtil;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -14,11 +16,14 @@ import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.softee.management.annotation.MBean;
+import org.softee.management.annotation.ManagedOperation;
+import org.softee.management.helper.MBeanRegistration;
 
 import java.net.InetSocketAddress;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,8 +32,13 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class NettyImapClient implements MailClient, Idler {
+@MBean
+public class NettyImapClient implements MailClient, Idler {
   private static final Logger log = LoggerFactory.getLogger(NettyImapClient.class);
+  private static final SimpleDateFormat SINCE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy");
+
+  // For debugging, use with caution!
+  private static final Map<String, Boolean> logAllMessagesForUsers = new ConcurrentHashMap<String, Boolean>();
 
   private final ExecutorService workerPool;
   private final ExecutorService bossPool;
@@ -44,6 +54,7 @@ class NettyImapClient implements MailClient, Idler {
   private volatile Channel channel;
   private volatile Folder currentFolder = null;
   private volatile DisconnectListener disconnectListener;
+  private final MBeanRegistration mBeanRegistration;
 
   public NettyImapClient(MailClientConfig config,
                          ExecutorService bossPool,
@@ -51,10 +62,26 @@ class NettyImapClient implements MailClient, Idler {
     this.workerPool = workerPool;
     this.bossPool = bossPool;
     this.config = config;
+    mBeanRegistration = JmxUtil.registerMBean(this, "com.google.sitebricks.mail", "NettyImapClient",
+        config.getUsername());
   }
 
   static {
     System.setProperty("mail.mime.decodetext.strict", "false");
+  }
+
+  // For debugging, use with caution!
+  public static void addUserForVerboseOutput(String username, boolean toStdOut) {
+    logAllMessagesForUsers.put(username, toStdOut);
+  }
+
+  @ManagedOperation
+  public void enableSendLogging(boolean enable) {
+    log.info("Logging of sent IMAP commands for user {} = {}", config.getUsername(), enable);
+    if (enable)
+      logAllMessagesForUsers.put(config.getUsername(), false);
+    else
+      logAllMessagesForUsers.remove(config.getUsername());
   }
 
   public boolean isConnected() {
@@ -84,7 +111,7 @@ class NettyImapClient implements MailClient, Idler {
     // Reset state (helps if this is a reconnect).
     this.currentFolder = null;
     this.sequence.set(0L);
-    mailClientHandler.idling.set(false);
+    mailClientHandler.idleRequested.set(false);
   }
 
   @Override
@@ -134,6 +161,7 @@ class NettyImapClient implements MailClient, Idler {
         Preconditions.checkArgument(oauth != null,
             "Must specify a valid oauth config if not using password auth");
 
+        //noinspection ConstantConditions
         String oauthString = new XoauthSasl(config.getUsername(),
             oauth.clientId,
             oauth.clientSecret)
@@ -142,11 +170,18 @@ class NettyImapClient implements MailClient, Idler {
 
         channel.write(". AUTHENTICATE XOAUTH " + oauthString + "\r\n");
 
-        //noinspection ConstantConditions
       }
       return mailClientHandler.awaitLogin();
     } catch (Exception e) {
-      log.error("Could not oauth or attempt login for {}", config.getUsername(), e);
+      // Capture the wire trace and log it for some extra context here.
+      StringBuilder trace = new StringBuilder();
+      for (String line : mailClientHandler.getWireTrace()) {
+        trace.append(line).append("\n");
+      }
+
+      log.warn("Could not oauth or login for {}. Partial trace follows:\n" +
+          "----begin wiretrace----\n{}\n----end wiretrace----",
+          new Object[]{config.getUsername(), trace.toString(), e});
     }
     return false;
   }
@@ -156,6 +191,26 @@ class NettyImapClient implements MailClient, Idler {
     return mailClientHandler.lastError();
   }
 
+  @Override
+  public List<String> getWireTrace() {
+    return mailClientHandler.getWireTrace();
+  }
+
+  @Override
+  public List<String> getCommandTrace() {
+    return mailClientHandler.getCommandTrace();
+  }
+
+  @Override
+  public void disconnectAsync() {
+    workerPool.submit(new Runnable() {
+      @Override
+      public void run() {
+        disconnect();
+      }
+    });
+  }
+
   /**
    * Logs out of the current IMAP session and releases all resources, including
    * executor services.
@@ -163,9 +218,10 @@ class NettyImapClient implements MailClient, Idler {
   @Override
   public synchronized void disconnect() {
     try {
+      JmxUtil.unregister(mBeanRegistration);
       // If there is an error with the handler, dont bother logging out.
       if (!mailClientHandler.isHalted()) {
-        if (mailClientHandler.idling.get()) {
+        if (mailClientHandler.idleRequested.get()) {
           log.warn("Disconnect called while IDLE, leaving idle and logging out.");
           done();
         }
@@ -175,12 +231,16 @@ class NettyImapClient implements MailClient, Idler {
       }
 
       currentFolder = null;
+    } catch (Exception e) {
+      // swallow any exceptions.
     } finally {
       // Shut down all channels and exit (leave threadpools as is--for reconnects).
       // The Netty channel close listener will fire a disconnect event to our client,
       // automatically. See connect() for details.
       try {
         channel.close().awaitUninterruptibly(config.getTimeout(), TimeUnit.MILLISECONDS);
+      } catch (Exception e) {
+        // swallow any exceptions.
       } finally {
         mailClientHandler.idleAcknowledged.set(false);
         mailClientHandler.disconnected();
@@ -199,9 +259,18 @@ class NettyImapClient implements MailClient, Idler {
 
     // Log the command but clip the \r\n
     log.debug("Sending {} to server...", commandString.substring(0, commandString.length() - 2));
+    Boolean toStdOut = logAllMessagesForUsers.get(config.getUsername());
+    if (toStdOut != null) {
+      if (toStdOut)
+        System.out.println("IMAPsnd[" + config.getUsername() + "]: " + commandString.substring(0, commandString.length() - 2));
+      else
+        log.info("IMAPsnd[{}]: {}", config.getUsername(), commandString.substring(0, commandString.length() - 2));
+    }
 
     // Enqueue command.
     mailClientHandler.enqueue(new CommandCompletion(command, seq, valueFuture, commandString));
+
+
     return channel.write(commandString);
   }
 
@@ -214,12 +283,11 @@ class NettyImapClient implements MailClient, Idler {
   // @Stateless
   public ListenableFuture<List<String>> listFolders() {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
 
     SettableFuture<List<String>> valueFuture = SettableFuture.create();
 
-    // TODO Should we use LIST "[Gmail]" % here instead? That will only fetch top-level folders.
     send(Command.LIST_FOLDERS, "\"\" \"*\"", valueFuture);
 
     return valueFuture;
@@ -246,7 +314,7 @@ class NettyImapClient implements MailClient, Idler {
   // @Stateless
   public ListenableFuture<Folder> open(String folder, boolean readWrite) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
 
     final SettableFuture<Folder> valueFuture = SettableFuture.create();
@@ -278,7 +346,7 @@ class NettyImapClient implements MailClient, Idler {
   @Override
   public ListenableFuture<List<MessageStatus>> list(Folder folder, int start, int end) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
 
     checkCurrentFolder(folder);
@@ -294,6 +362,93 @@ class NettyImapClient implements MailClient, Idler {
     send(Command.FETCH_HEADERS, args, valueFuture);
 
     return valueFuture;
+  }
+
+  @Override
+  public ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, int start, int end) {
+    return listUidThin(folder, ImmutableList.of(new Sequence(start, end)));
+  }
+
+  @Override
+  public ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, List<Sequence> sequences) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
+            "Can't execute command while idling (are you watching a folder?)");
+
+    checkCurrentFolder(folder);
+    SettableFuture<List<MessageStatus>> valueFuture = SettableFuture.create();
+
+    // -ve end range means get everything (*).
+    String extensions = config.useGmailExtensions() ? " X-GM-MSGID X-GM-THRID X-GM-LABELS UID" : "";
+    StringBuilder argsBuilder = new StringBuilder();
+
+    // Emit ranges.
+    for (int i = 0, sequencesSize = sequences.size(); i < sequencesSize; i++) {
+        Sequence seq = sequences.get(i);
+        argsBuilder.append(toUpperBound(seq.start));
+        if (seq.end != 0)
+            argsBuilder.append(':').append(toUpperBound(seq.end));
+        if (i < sequencesSize - 1)
+            argsBuilder.append(',');
+    }
+    argsBuilder.append(" (FLAGS" + extensions + ")");
+    send(Command.FETCH_THIN_HEADERS_UID, argsBuilder.toString(), valueFuture);
+
+    return valueFuture;
+  }
+
+  @Override
+  public ListenableFuture<List<Integer>> searchUid(Folder folder, String query, Date since) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
+            "Can't execute command while idling (are you watching a folder?)");
+
+    checkCurrentFolder(folder);
+    SettableFuture<List<Integer>> valueFuture = SettableFuture.create();
+
+    StringBuilder argsBuilder = new StringBuilder();
+
+    if (config.useGmailExtensions()) {
+      argsBuilder.append("X-GM-RAW \"").append(query).append('"');
+    } else
+      argsBuilder.append(query);
+
+    if (since != null)
+      argsBuilder.append(" since ").append(SINCE_FORMAT.format(since));
+
+    send(Command.SEARCH_RAW_UID, argsBuilder.toString(), valueFuture);
+
+    return valueFuture;
+  }
+
+  @Override
+  public ListenableFuture<List<Integer>> exists(Folder folder, Collection<Integer> uids) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(),
+        "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
+            "Can't execute command while idling (are you watching a folder?)");
+
+    checkCurrentFolder(folder);
+    SettableFuture<List<Integer>> valueFuture = SettableFuture.create();
+
+    StringBuilder argsBuilder = new StringBuilder("uid ");
+
+    Iterator<Integer> iterator = uids.iterator();
+    for (int i = 0, uidsSize = uids.size(); i < uidsSize; i++) {
+      argsBuilder.append(iterator.next());
+
+      if (i < uidsSize - 1)
+        argsBuilder.append(",");
+    }
+
+    send(Command.SEARCH_UID_ONLY, argsBuilder.toString(), valueFuture);
+
+    return valueFuture;
+  }
+
+  @Override
+  public void expunge() {
+    send(Command.EXPUNGE, "", SettableFuture.<Void>create());
   }
 
   private static void checkRange(int start, int end) {
@@ -319,8 +474,9 @@ class NettyImapClient implements MailClient, Idler {
   @Override
   public ListenableFuture<Set<Flag>> addOrRemoveFlags(Folder folder, int imapUid, Set<Flag> flags,
                                                       boolean add) {
-    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(mailClientHandler.isLoggedIn(),
+        "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
     checkCurrentFolder(folder);
     SettableFuture<Set<Flag>> valueFuture = SettableFuture.create();
@@ -330,10 +486,24 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
+  public ListenableFuture<Boolean> copy(Folder folder, int imapUid, String toFolder) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(),
+        "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
+        "Can't execute command while idling (are you watching a folder?)");
+    checkCurrentFolder(folder);
+    SettableFuture<Boolean> valueFuture = SettableFuture.create();
+    String args = imapUid + " " + toFolder;
+    send(Command.COPY, args, valueFuture);
+    return valueFuture;
+  }
+
+  @Override
   public ListenableFuture<Set<String>> addOrRemoveGmailLabels(Folder folder, int imapUid,
                                                               Set<String> labels, boolean add) {
-    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(mailClientHandler.isLoggedIn(),
+        "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
     checkCurrentFolder(folder);
     SettableFuture<Set<String>> valueFuture = SettableFuture.create();
@@ -353,9 +523,34 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
+  public ListenableFuture<Set<String>> setGmailLabels(Folder folder, int imapUid,
+                                                      Set<String> labels) {
+    Preconditions.checkState(mailClientHandler.isLoggedIn(),
+        "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
+        "Can't execute command while idling (are you watching a folder?)");
+    checkCurrentFolder(folder);
+    SettableFuture<Set<String>> valueFuture = SettableFuture.create();
+    StringBuilder args = new StringBuilder();
+    args.append(imapUid);
+    args.append(" X-GM-LABELS (");
+    Iterator<String> it = labels.iterator();
+    while (it.hasNext()) {
+      args.append(it.next());
+      if (it.hasNext())
+        args.append(" ");
+      else
+        args.append(")");
+    }
+    send(Command.STORE_LABELS, args.toString(), valueFuture);
+    return valueFuture;
+  }
+
+  @Override
   public ListenableFuture<List<Message>> fetch(Folder folder, int start, int end) {
-    Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(mailClientHandler.isLoggedIn(),
+        "Can't execute command because client is not logged in");
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
 
     checkCurrentFolder(folder);
@@ -373,7 +568,7 @@ class NettyImapClient implements MailClient, Idler {
   @Override
   public ListenableFuture<Message> fetchUid(Folder folder, int uid) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
-    Preconditions.checkState(!mailClientHandler.idling.get(),
+    Preconditions.checkState(!mailClientHandler.idleRequested.get(),
         "Can't execute command while idling (are you watching a folder?)");
 
     checkCurrentFolder(folder);
@@ -390,7 +585,7 @@ class NettyImapClient implements MailClient, Idler {
   public synchronized void watch(Folder folder, FolderObserver observer) {
     Preconditions.checkState(mailClientHandler.isLoggedIn(), "Can't execute command because client is not logged in");
     checkCurrentFolder(folder);
-    Preconditions.checkState(mailClientHandler.idling.compareAndSet(false, true), "Already idling...");
+    Preconditions.checkState(mailClientHandler.idleRequested.compareAndSet(false, true), "Already idling...");
 
     // This MUST happen in the following order, otherwise send() may trigger a new mail event
     // before we've registered the folder observer.
@@ -399,11 +594,12 @@ class NettyImapClient implements MailClient, Idler {
   }
 
   @Override
-  public synchronized void unwatch() {
-    if (!mailClientHandler.idling.get())
-      return;
+  public synchronized boolean unwatch() {
+    if (!mailClientHandler.idleRequested.get())
+      return false;
 
     done();
+    return true;
   }
 
   @Override

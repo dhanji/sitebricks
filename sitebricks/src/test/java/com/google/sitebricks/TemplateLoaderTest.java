@@ -1,11 +1,15 @@
 package com.google.sitebricks;
 
+import java.util.HashMap;
+
 import com.google.inject.Provider;
-import com.google.sitebricks.compiler.PluggableCompilers;
+import com.google.sitebricks.compiler.TemplateCompiler;
+
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.servlet.ServletContext;
+
 
 import static org.easymock.EasyMock.*;
 
@@ -25,11 +29,13 @@ public class TemplateLoaderTest {
         };
     }
 
+    TemplateSystem templateSystem() {
+      return new DefaultTemplateSystem(new HashMap<String,TemplateCompiler>());
+    }
+    
     @Test(dataProvider = CLASSES_AND_TEMPLATES)
     public final void loadExplicitXmlTemplate(final Class<MyXmlPage> pageClass) {
-        String template = new TemplateLoader(createMock(PluggableCompilers.class), null)
-                    .load(pageClass).getText();
-
+        String template = new TemplateLoader(null, null, null, null, templateSystem()).load(pageClass).getText();
         assert null != template : "no template found!";
         template = template.trim();
         assert template.startsWith("<xml>") && template.endsWith("</xml>"); //a weak sauce test
@@ -50,7 +56,7 @@ public class TemplateLoaderTest {
         expect(ctx.getRealPath("/WEB-INF/MetaInfPage.html")).andReturn(realPath);
 
         replay(ctx);
-        String template = new TemplateLoader(createMock(PluggableCompilers.class), new MockServletContextProvider(ctx)).load(MyMetaInfPage.class).getText();
+        String template = new TemplateLoader(null, null, null, new MockServletContextProvider(ctx), templateSystem()).load(MyMetaInfPage.class).getText();
         verify(ctx);
         
         assert  null != template : "no template found!";

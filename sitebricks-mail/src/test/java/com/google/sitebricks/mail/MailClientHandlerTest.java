@@ -3,16 +3,15 @@ package com.google.sitebricks.mail;
 import com.google.common.collect.ImmutableList;
 import com.google.sitebricks.mail.imap.Command;
 import com.google.sitebricks.mail.imap.ExtractionException;
-import com.sun.tools.javac.util.Pair;
 import org.testng.annotations.Test;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -27,7 +26,7 @@ public class MailClientHandlerTest {
     // ib is stateful.
     MailClientHandler.InputBuffer ib = new MailClientHandler.InputBuffer();
     assertProcess(ib, "hi ", ImmutableList.<String>of());
-    assertProcess(ib, "bob\r\nhow\n", ImmutableList.of("hi bob", "how"));
+    assertProcess(ib, "bob\r\nhow\n\r", ImmutableList.of("hi bob", "how"));
     assertProcess(ib, "\nis\n\r\n", ImmutableList.of("", "is", ""));
     assertProcess(ib, "your snake\nfeeling ", ImmutableList.of("your snake"));
     assertProcess(ib, "after\neating\nthat", ImmutableList.of("feeling after", "eating"));
@@ -82,5 +81,12 @@ public class MailClientHandlerTest {
     assertTrue(Command.isEndOfSequence(1L, "1 OK Success"));
     assertTrue(Command.isEndOfSequence(2L, "2 OK [READ-ONLY] [Gmail]/All Mail selected. (Success)"));
     assertFalse(Command.isEndOfSequence("> OK [READ-ONLY] [Gmail]/All Mail selected. (Success)"));
+  }
+
+  @Test
+  public final void testMessageCouldNotBeFetchedRegex() throws ExtractionException {
+    assertTrue(MailClientHandler.MESSAGE_COULDNT_BE_FETCHED_REGEX
+        .matcher("3 NO Some messages could not be FETCHed (Failure)")
+        .matches());
   }
 }

@@ -2,7 +2,10 @@ package com.google.sitebricks.compiler;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Template;
 import com.google.sitebricks.conversion.generics.Generics;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.rendering.control.Chains;
@@ -10,79 +13,79 @@ import com.google.sitebricks.rendering.control.WidgetChain;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
-import net.jcip.annotations.NotThreadSafe;
-import org.apache.commons.lang.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jsoup.nodes.*;
+import org.softee.util.Preconditions;
 
 import java.lang.reflect.Type;
 import java.util.*;
 
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_CONTENT;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_KEY;
+import static com.google.sitebricks.compiler.AnnotationNode.*;
 import static com.google.sitebricks.compiler.HtmlParser.LINE_NUMBER_ATTRIBUTE;
 import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
 
 /**
  * @author Shawn based on XMLTemplateCompiler by Dhanji R. Prasanna (dhanji@gmail.com)
- *
  */
-@NotThreadSafe
-class HtmlTemplateCompiler implements TemplateCompiler {
-    private final Class<?> page;
-    private final WidgetRegistry registry;
+@Singleton
+public class HtmlTemplateCompiler implements TemplateCompiler {
+    
+  private final WidgetRegistry registry;
     private final PageBook pageBook;
     private final SystemMetrics metrics;
-
-    private final List<CompileError> errors = Lists.newArrayList();
-    private final List<CompileError> warnings = Lists.newArrayList();
-
-    //state variables
-    private Element form;
-    private final Stack<EvaluatorCompiler> lexicalScopes = new Stack<EvaluatorCompiler>();
-
 
     //special widget types (built-in symbol table)
     private static final String REQUIRE_WIDGET = "@require";
     private static final String REPEAT_WIDGET = "repeat";
     private static final String CHOOSE_WIDGET = "choose";
 
-    public HtmlTemplateCompiler(Class<?> page,
-                               EvaluatorCompiler compiler,
-                               WidgetRegistry registry,
-                               PageBook pageBook,
-                               SystemMetrics metrics) {
-        this.page = page;
+    @Inject
+    public HtmlTemplateCompiler(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics) {
         this.registry = registry;
         this.pageBook = pageBook;
         this.metrics = metrics;
-
-        this.lexicalScopes.push(compiler);
     }
-
-    public Renderable compile(String template) {
+    
+    //
+    // compiler state
+    //
+    class PageCompilingContext {
+      Class<?> page;
+      Template template;
+      List<CompileError> errors = Lists.newArrayList();
+      List<CompileError> warnings = Lists.newArrayList();
+      Element form;
+      Stack<EvaluatorCompiler> lexicalScopes = new Stack<EvaluatorCompiler>();      
+    }
+    
+    public Renderable compile(Class<?> page, Template template) {
+      
+        PageCompilingContext pc = new PageCompilingContext();
+        pc.page = page;
+        pc.template = template;
+        pc.lexicalScopes.push(new MvelEvaluatorCompiler(page));
+      
         WidgetChain widgetChain;
-        widgetChain = walk(HtmlParser.parse(template));
+        widgetChain = walk(pc, HtmlParser.parse(template.getText()));
 
         // TODO - get the errors when !(isValid)
-        if (!errors.isEmpty() || !warnings.isEmpty()) {
+        if (!pc.errors.isEmpty() || !pc.warnings.isEmpty()) {
             // If there were any errors we must track them.
-            metrics.logErrorsAndWarnings(page, errors, warnings);
+            metrics.logErrorsAndWarnings(page, pc.errors, pc.warnings);
 
             // Only explode if there are errors.
-            if (!errors.isEmpty())
-                throw new TemplateCompileException(page, template, errors, warnings);
+            if (!pc.errors.isEmpty())
+                throw new TemplateCompileException(page, template.getText(), pc.errors, pc.warnings);
         }
 
       return widgetChain;
     }
 
-    private WidgetChain walk(List<Node> nodes) {
+    private WidgetChain walk(PageCompilingContext pc, List<Node> nodes) {
         WidgetChain chain = Chains.proceeding();
 
         for (Node n: nodes)
-            chain.addWidget(widgetize(n, walk(n)));
+            chain.addWidget(widgetize(pc, n, walk(pc, n)));
 
         return chain;
     }
@@ -91,7 +94,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
      * Walks the DOM recursively, and converts elements into corresponding sitebricks widgets.
      */
     @NotNull
-    private <N extends Node> WidgetChain walk(N node) {
+    private <N extends Node> WidgetChain walk(PageCompilingContext pc, N node) {
 
         WidgetChain widgetChain = Chains.proceeding();
         for (Node n: node.childNodes()) {
@@ -100,20 +103,20 @@ class HtmlTemplateCompiler implements TemplateCompiler {
 
                 //push form if this is a form tag
                 if (child.tagName().equals("form"))
-                    form = (Element) n;
+                    pc.form = (Element) n;
 
                 //setup a lexical scope if we're going into a repeat widget (by reading the previous node)
-                final boolean shouldPopScope = lexicalClimb(child);
+                final boolean shouldPopScope = lexicalClimb(pc, child);
 
                 //continue recursing down, perform a post-order, depth-first traversal of the DOM
                 WidgetChain childsChildren;
                 try {
-                    childsChildren = walk(child);
+                    childsChildren = walk(pc, child);
 
                     //process the widget itself into a Renderable with child tree
-                    widgetChain.addWidget(widgetize(child, childsChildren));
+                    widgetChain.addWidget(widgetize(pc, child, childsChildren));
                 } finally {
-                    lexicalDescend(child, shouldPopScope);
+                    lexicalDescend(pc, child, shouldPopScope);
                 }
 
             } else if (n instanceof TextNode) {
@@ -121,11 +124,11 @@ class HtmlTemplateCompiler implements TemplateCompiler {
             	Renderable textWidget = null;
             	
                 //setup a lexical scope if we're going into a repeat widget (by reading the previous node)
-                final boolean shouldPopScope = lexicalClimb(child);
+                final boolean shouldPopScope = lexicalClimb(pc, child);
 
                 // construct the text widget
                 try {
-                	textWidget = registry.textWidget(cleanHtml(n), lexicalScopes.peek());
+                	textWidget = registry.textWidget(cleanHtml(n), pc.lexicalScopes.peek());
                 	
                 	// if there are no annotations, add the text widget to the chain
                 	if (!child.hasAttr(ANNOTATION_KEY))	{
@@ -137,12 +140,12 @@ class HtmlTemplateCompiler implements TemplateCompiler {
                 		
                 		// make a new widget for the annotation, making the text chain the child
                 		String widgetName = child.attr(ANNOTATION_KEY).toLowerCase();
-                		Renderable annotationWidget = registry.newWidget(widgetName, child.attr(ANNOTATION_CONTENT), childsChildren, lexicalScopes.peek());
+                		Renderable annotationWidget = registry.newWidget(widgetName, child.attr(ANNOTATION_CONTENT), childsChildren, pc.lexicalScopes.peek());
                 		widgetChain.addWidget(annotationWidget);
                 	}
                 	
                 } catch (ExpressionCompileException e) {
-                    errors.add(
+                    pc.errors.add(
                             CompileError.in(node.outerHtml())
                             .near(line(node))
                             .causedBy(e)
@@ -150,15 +153,15 @@ class HtmlTemplateCompiler implements TemplateCompiler {
                 }
 
                 if (shouldPopScope)
-                	lexicalScopes.pop();
+                	pc.lexicalScopes.pop();
             	
             } else if ((n instanceof Comment) || (n instanceof DataNode)) {
                 //process as raw text widget
                 try {
-                    widgetChain.addWidget(registry.textWidget(cleanHtml(n), lexicalScopes.peek()));
+                    widgetChain.addWidget(registry.textWidget(cleanHtml(n), pc.lexicalScopes.peek()));
                 } catch (ExpressionCompileException e) {
 
-                    errors.add(
+                    pc.errors.add(
                             CompileError.in(node.outerHtml())
                             .near(line(node))
                             .causedBy(e)
@@ -168,9 +171,9 @@ class HtmlTemplateCompiler implements TemplateCompiler {
                 try {
                     widgetChain.addWidget(registry
                         .xmlDirectiveWidget(((XmlDeclaration)n).getWholeDeclaration(),
-                        lexicalScopes.peek()));
+                        pc.lexicalScopes.peek()));
                 } catch (ExpressionCompileException e) {
-                    errors.add(
+                    pc.errors.add(
                             CompileError.in(node.outerHtml())
                             .near(line(node))
                             .causedBy(e)
@@ -190,15 +193,15 @@ class HtmlTemplateCompiler implements TemplateCompiler {
      *  This method pops off the stack of lexical scopes when
      *  we're done processing a sitebricks widget.
      */
-    private void lexicalDescend(Element element, boolean shouldPopScope) {
+    private void lexicalDescend(PageCompilingContext pc, Element element, boolean shouldPopScope) {
 
         //pop form
         if ("form".equals(element.tagName()))
-            form = null;
+            pc.form = null;
 
         //pop compiler if the scope ends
         if (shouldPopScope) {
-            lexicalScopes.pop();
+            pc.lexicalScopes.pop();
         }
     }
 
@@ -206,7 +209,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
     /**
      * Called to push a new lexical scope onto the stack.
      */
-    private boolean lexicalClimb(Node node) {
+    private boolean lexicalClimb(PageCompilingContext pc, Node node) {
         if (node.attr(ANNOTATION).length()>1) {
 
             // Setup a new lexical scope (symbol table changes on each scope encountered).
@@ -214,7 +217,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
                 || CHOOSE_WIDGET.equalsIgnoreCase(node.attr(ANNOTATION_KEY))) {
 
                 String[] keyAndContent = {node.attr(ANNOTATION_KEY), node.attr(ANNOTATION_CONTENT)};
-                lexicalScopes.push(new MvelEvaluatorCompiler(parseRepeatScope(keyAndContent, node)));
+                pc.lexicalScopes.push(new MvelEvaluatorCompiler(parseRepeatScope(pc, keyAndContent, node)));
                 return true;
             }
 
@@ -223,10 +226,10 @@ class HtmlTemplateCompiler implements TemplateCompiler {
             if (null != embed) {
                 final Class<?> embedClass = embed.pageClass();
                 MvelEvaluatorCompiler compiler = new MvelEvaluatorCompiler(embedClass);
-                checkEmbedAgainst(compiler, Parsing.toBindMap(node.attr(ANNOTATION_CONTENT)),
+                checkEmbedAgainst(pc, compiler, Parsing.toBindMap(node.attr(ANNOTATION_CONTENT)),
                     embedClass, node);
 
-              lexicalScopes.push(compiler);
+              pc.lexicalScopes.push(compiler);
               return true;
             }
         }
@@ -240,13 +243,13 @@ class HtmlTemplateCompiler implements TemplateCompiler {
      * widget is created.
      */
     @SuppressWarnings({"JavaDoc"}) @NotNull
-    private <N extends Node> Renderable widgetize(N node, WidgetChain childsChildren) {
+    private <N extends Node> Renderable widgetize(PageCompilingContext pc, N node, WidgetChain childsChildren) {
         if (node instanceof XmlDeclaration) {
             try {
               XmlDeclaration decl = (XmlDeclaration)node;
-              return registry.xmlDirectiveWidget(decl.getWholeDeclaration(), lexicalScopes.peek());
+              return registry.xmlDirectiveWidget(decl.getWholeDeclaration(), pc.lexicalScopes.peek());
             } catch (ExpressionCompileException e) {
-                errors.add(
+                pc.errors.add(
                         CompileError.in(node.outerHtml())
                         .near(line(node))
                         .causedBy(e)
@@ -257,9 +260,9 @@ class HtmlTemplateCompiler implements TemplateCompiler {
         // Header widget is a special case, where we match by the name of the tag =(
         if ("head".equals(node.nodeName())) {
           try {
-            return registry.headWidget(childsChildren, parseAttribs(node.attributes()), lexicalScopes.peek());
+            return registry.headWidget(childsChildren, parseAttribs(node.attributes()), pc.lexicalScopes.peek());
           } catch (ExpressionCompileException e) {
-            errors.add(
+            pc.errors.add(
                 CompileError.in(node.outerHtml())
                 .near(line(node))
                 .causedBy(e)
@@ -273,13 +276,13 @@ class HtmlTemplateCompiler implements TemplateCompiler {
         //if there is no annotation, treat as a raw xml-widget (i.e. tag)
         if ((null == annotation) || 0 == annotation.trim().length())
             try {
-                checkUriConsistency(node);
-                checkFormFields(node);
+                checkUriConsistency(pc, node);
+                checkFormFields(pc, node);
 
                 return registry.xmlWidget(childsChildren, node.nodeName(), parseAttribs(node.attributes()),
-                        lexicalScopes.peek());
+                        pc.lexicalScopes.peek());
             } catch (ExpressionCompileException e) {
-                errors.add(
+                pc.errors.add(
                     CompileError.in(node.outerHtml())
                     .near(line(node)) 
                     .causedBy(e)
@@ -292,9 +295,9 @@ class HtmlTemplateCompiler implements TemplateCompiler {
         //   if so, tags in head need to be promoted to head of enclosing page.
         if (REQUIRE_WIDGET.equalsIgnoreCase(annotation.trim()))
             try {
-                return registry.requireWidget(cleanHtml(node), lexicalScopes.peek());
+                return registry.requireWidget(cleanHtml(node), pc.lexicalScopes.peek());
             } catch (ExpressionCompileException e) {
-                errors.add(
+                pc.errors.add(
                     CompileError.in(node.outerHtml())
                     .near(line(node))
                     .causedBy(e)
@@ -310,9 +313,9 @@ class HtmlTemplateCompiler implements TemplateCompiler {
         if (!registry.isSelfRendering(widgetName))
             try {
                 childsChildren = Chains.singleton(registry.xmlWidget(childsChildren, node.nodeName(),
-                        parseAttribs(node.attributes()), lexicalScopes.peek()));
+                        parseAttribs(node.attributes()), pc.lexicalScopes.peek()));
             } catch (ExpressionCompileException e) {
-                errors.add(
+                pc.errors.add(
                     CompileError.in(node.outerHtml())
                     .near(line(node))
                     .causedBy(e)
@@ -322,9 +325,9 @@ class HtmlTemplateCompiler implements TemplateCompiler {
 
         // Recursively build widget from [Key, expression, child widgets].
         try {
-            return registry.newWidget(widgetName, node.attr(ANNOTATION_CONTENT), childsChildren, lexicalScopes.peek());
+            return registry.newWidget(widgetName, node.attr(ANNOTATION_CONTENT), childsChildren, pc.lexicalScopes.peek());
         } catch (ExpressionCompileException e) {
-            errors.add(
+            pc.errors.add(
                 CompileError.in(node.outerHtml())
                 .near(line(node))
                 .causedBy(e)
@@ -338,20 +341,20 @@ class HtmlTemplateCompiler implements TemplateCompiler {
 
 
 
-    private Map<String,Type> parseRepeatScope(String[] extract, Node node) {
+    private Map<String,Type> parseRepeatScope(PageCompilingContext pc, String[] extract, Node node) {
         RepeatToken repeat = registry.parseRepeat(extract[1]);
         Map<String, Type> context = Maps.newHashMap();
 
         // Verify that @Repeat was parsed correctly.
         if (null == repeat.var()) {
-            errors.add(
+            pc.errors.add(
                         CompileError.in(node.outerHtml())
                         .near(node.siblingIndex()) // TODO - line number
                         .causedBy(CompileErrors.MISSING_REPEAT_VAR)
                 );
         }
         if (null == repeat.items()) {
-            errors.add(
+            pc.errors.add(
                     CompileError.in(node.outerHtml())
                     .near(node.siblingIndex())  // TODO  - line number
                     .causedBy(CompileErrors.MISSING_REPEAT_ITEMS)
@@ -359,7 +362,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
         }
 
         try {
-            Type egressType = lexicalScopes.peek().resolveEgressType(repeat.items());
+            Type egressType = pc.lexicalScopes.peek().resolveEgressType(repeat.items());
             
             // convert to collection if we need to
             Type elementType;
@@ -371,7 +374,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
             	elementType = Generics.getTypeParameter(egressType, Collection.class.getTypeParameters()[0]);
             }
             else {
-            	errors.add(
+            	pc.errors.add(
             			CompileError.in(node.outerHtml())
             			.near(node.siblingIndex()) // TODO - line number
             			.causedBy(CompileErrors.REPEAT_OVER_ATOM)
@@ -380,13 +383,13 @@ class HtmlTemplateCompiler implements TemplateCompiler {
             }
 
             context.put(repeat.var(), elementType);
-            context.put(repeat.pageVar(), page);
-            context.put("__page", page);
+            context.put(repeat.pageVar(), pc.page);
+            context.put("__page", pc.page);
             context.put("index", int.class);
             context.put("isLast", boolean.class);
 
         } catch (ExpressionCompileException e) {
-                errors.add(
+                pc.errors.add(
                     CompileError.in(node.outerHtml())
                     .near(node.siblingIndex()) // TODO - line number
                     .causedBy(e)
@@ -399,11 +402,11 @@ class HtmlTemplateCompiler implements TemplateCompiler {
 
 
 
-    private void checkFormFields(Node element) {
-        if (null == form)
+    private void checkFormFields(PageCompilingContext pc, Node element) {
+        if (null == pc.form)
             return;
 
-        String action = form.attr("action");
+        String action = pc.form.attr("action");
 
         // Only look at contextual uris (i.e. hosted by us).
         // TODO - relative, not starting with '/'
@@ -414,7 +417,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
 
         // Only look at pages we actually have registered.
         if (null == page) {
-            warnings.add(
+            pc.warnings.add(
                 CompileError.in(element.outerHtml())
                 .near(line(element))
                 .causedBy(CompileErrors.UNRESOLVABLE_FORM_ACTION)
@@ -433,7 +436,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
 
             //TODO Skip empty?
             if (null == name) {
-                warnings.add(
+                pc.warnings.add(
                         CompileError.in(element.outerHtml())
                         .near(line(element)) 
                         .causedBy(CompileErrors.FORM_MISSING_NAME)
@@ -450,7 +453,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
 
             } catch (ExpressionCompileException e) {
                 //TODO Very hacky, needed to strip out xmlns attribution.
-                warnings.add(
+                pc.warnings.add(
                     CompileError.in(element.outerHtml())
                     .near(element.siblingIndex()) // TODO - line number
                     .causedBy(CompileErrors.UNRESOLVABLE_FORM_BINDING, e)
@@ -461,7 +464,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
 
     }
 
-    private void checkUriConsistency(Node element) {
+    private void checkUriConsistency(PageCompilingContext pc, Node element) {
         String uriAttrib = element.attr("action");
         if (null == uriAttrib)
             uriAttrib = element.attr("src");
@@ -475,7 +478,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
             final String uri = uriAttrib;
             if (uri.startsWith("/"))
                 if (null == pageBook.nonCompilingGet(uri))
-                    warnings.add(
+                    pc.warnings.add(
                         CompileError.in(element.outerHtml())
                         .near(element.siblingIndex()) // TODO - line number
                         .causedBy(CompileErrors.UNRESOLVABLE_FORM_ACTION, uri)
@@ -504,14 +507,13 @@ class HtmlTemplateCompiler implements TemplateCompiler {
   }
 
   // Ensures that embed bound properties are writable
-  private void checkEmbedAgainst(EvaluatorCompiler compiler, Map<String, String> properties,
-                                 Class<?> embedClass, Node node) {
+  private void checkEmbedAgainst(PageCompilingContext pc, EvaluatorCompiler compiler, Map<String, String> properties, Class<?> embedClass, Node node) {
 
     // TODO also type check them against expressions
     for (String property : properties.keySet()) {
         try {
             if (!compiler.isWritable(property)) {
-                errors.add(
+                pc.errors.add(
                     CompileError.in(node.outerHtml())
                       //TODO we need better line number detection if there is whitespace between the annotation and tag.
                       .near(node.siblingIndex()-1) // TODO -  line number of the annotation
@@ -521,7 +523,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
                 );
             }
         } catch (ExpressionCompileException ece) {
-            errors.add(
+            pc.errors.add(
                 CompileError.in(node.outerHtml())
                     .near(node.siblingIndex()) // TODO - line number
                     .causedBy(CompileErrors.ERROR_COMPILING_PROPERTY)
@@ -552,7 +554,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
    @return the previous sibling, or null if this is the first sibling
    */
   public Node previousSibling(Node node) {
-      Validate.notNull(node);
+      Preconditions.notNull(node);
 
       List<Node> siblings = findSiblings(node);
       if (null == siblings) return null;
@@ -567,7 +569,7 @@ class HtmlTemplateCompiler implements TemplateCompiler {
   }      
 
   public List<Node> findSiblings(Node node) {
-      Validate.notNull(node);
+      Preconditions.notNull(node);
     
       Node parent = node.parent();
       if (null == parent) return null;
@@ -584,13 +586,13 @@ class HtmlTemplateCompiler implements TemplateCompiler {
 
     public Integer siblingIndex(Node node) {
         if (null != node.parent())
-          Validate.notNull(node);
+          Preconditions.notNull(node);
         return indexInList(node, findSiblings(node));
     }
 
     protected static <N extends Node> Integer indexInList(N search, List<N> nodes) {
-        Validate.notNull(search);
-        Validate.notNull(nodes);
+        Preconditions.notNull(search);
+        Preconditions.notNull(nodes);
 
         for (int i = 0; i < nodes.size(); i++) {
             N node = nodes.get(i);

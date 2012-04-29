@@ -1,13 +1,15 @@
 package com.google.sitebricks.mail.imap;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Multimap;
-import com.google.common.io.Resources;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.Collection;
@@ -16,7 +18,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.testng.Assert.*;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeUtility;
+
+import org.testng.annotations.Test;
+
+import com.google.common.base.Charsets;
+import com.google.common.base.Objects;
+import com.google.common.collect.Multimap;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
+import com.google.common.io.Resources;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -61,19 +73,32 @@ public class MessageBodyExtractorTest {
    * WARNING: THIS TEST IS DATA-DEPENDENT!
    */
   @Test
-  public final void testAwkwardGmailEmailStream() throws IOException, ParseException {
+  public final void testAwkwardGmailEmailStreamUsingTruncatorGroping() throws IOException, ParseException {
+    testAwkwardGmailEmailStream(true);
+  }
+
+  /**
+   * WARNING: THIS TEST IS DATA-DEPENDENT!
+   */
+  @Test
+  public final void testAwkwardGmailEmailStreamUsingLengths() throws IOException, ParseException {
+    testAwkwardGmailEmailStream(false);
+  }
+
+
+  public final void testAwkwardGmailEmailStream(boolean forceTruncatorGroping) throws IOException, ParseException {
     final List<String> lines =
         Resources.readLines(MessageBodyExtractorTest.class.getResource("fetch_bodies.txt"),
             Charsets.UTF_8);
 
-    List<Message> extract = new MessageBodyExtractor().extract(lines);
-    assertEquals(11, extract.size());
+    List<Message> extract = new MessageBodyExtractor(forceTruncatorGroping, 999999999999999999L).extract(lines);
+    assertEquals(extract.size(), 23);
     // ------------------------------------------------------------
     // First message.
     // Folded headers with tabs + spaces, repeat headers, one body.
     Message message = extract.get(0);
     String expectedHeaders =
-        IOUtils.toString(MessageBodyExtractorTest.class.getResourceAsStream("fetch_headers_1.txt"));
+        CharStreams.toString(new InputStreamReader(MessageBodyExtractorTest.class.getResourceAsStream("fetch_headers_1.txt")));
     assertEquals(message.getHeaders().toString(), expectedHeaders);
 
     assertEquals(1, message.getBodyParts().size());
@@ -83,9 +108,9 @@ public class MessageBodyExtractorTest {
 
     // We have to compare the raw bytes because the encoded string comes in as ISO-8859-1
     // And Java literals are encoded as UTF-8.
-    assertEquals(part1.getBody().getBytes(), IOUtils.toByteArray(
+    assertEquals(part1.getBody().getBytes(), ByteStreams.toByteArray(
         MessageBodyExtractorTest.class.getResourceAsStream("fetch_body_1_raw.dat")));
-    assertEquals(new String(part1.getBody().getBytes()), new String(IOUtils.toByteArray(
+    assertEquals(new String(part1.getBody().getBytes()), new String(ByteStreams.toByteArray(
         MessageBodyExtractorTest.class.getResourceAsStream("fetch_body_1_raw.dat"))));
 
     // ------------------------------------------------------------
@@ -102,8 +127,8 @@ public class MessageBodyExtractorTest {
     part1 = message.getBodyParts().get(0);
     assertTrue(part1.getHeaders().isEmpty());
     assertNull(part1.getBinBody());
-    assertEquals(part1.getBody(), IOUtils.toString(
-        MessageBodyExtractorTest.class.getResourceAsStream("fetch_body_2.txt")));
+    assertEquals(part1.getBody(), CharStreams.toString(
+        new InputStreamReader(MessageBodyExtractorTest.class.getResourceAsStream("fetch_body_2.txt"))));
 
     // ------------------------------------------------------------
     // Third message.
@@ -217,7 +242,6 @@ public class MessageBodyExtractorTest {
     // multipart 2 parts each, 2-level deep, preambles/epilogues.
     message = extract.get(5);
     assertNestedMultipart2LevelDeep(message, "<CAEEYBPNq6o3M+aisjd+x3m1PxeLn-raisdj@mail.gmail.co" +
-
         "m>",
         "_000_9E22DB2E4EF0164D9F76BB4BC3FC689E31BCF27D87CPPXCMS01morg_");
 
@@ -249,13 +273,91 @@ public class MessageBodyExtractorTest {
     assertComplexNestedStructure(message);
 
     // ------------------------------------------------------------
-    // Elevent message.
-    // multipart 3 parts, 1-level deep, message/rfc822 nested message.
+    // Eleventh message.
+    // multipart 3 parts, 1-level deep, message/rfc822 nested message with quoted-printable.
     message = extract.get(10);
-    assertRfc822(message);
+    assertRfc822(message, "quoted-printable");
+
+    // ------------------------------------------------------------
+    // multipart 3 parts, 1-level deep, message/rfc822 nested message.
+    message = extract.get(11);
+    assertRfc822(message, null);
+
+    // ------------------------------------------------------------
+    // multipart 3 parts, message/rfc822 nested multipart message.
+    message = extract.get(12);
+    assertMultipartRfc822(message);
+
+    // ------------------------------------------------------------
+    // multipart 3 parts, message/rfc822 nested message with multipart and attachment.
+    message = extract.get(13);
+    assertRfc822withAttachment(message);
+
+    // ------------------------------------------------------------
+    // Test mixed case in Content-Type.
+    message = extract.get(14);
+    assertEquals(2, message.getBodyParts().size());
+
+    // ------------------------------------------------------------
+    // Test mixed case in Content-Type.
+    message = extract.get(15);
+    assertEquals(1, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().get(0).getBody(),
+        "Danke für die Weihnachtswünsche! Viele Grüße.\r\n");
+
+    // ------------------------------------------------------------
+    // This one is intentionally broken and forces terminator groping,
+    // check that we get what we expect.
+    message = extract.get(16);
+    assertEquals(1, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().get(0).getBody(),
+        "the message body\r\n)\r\n\r\n45988 OK Success\r\n");
+
+    message = extract.get(17);
+    assertEquals(1, message.getBodyParts().size());
+    if (forceTruncatorGroping)
+      assertEquals(message.getBodyParts().get(0).getBody(),
+          "fake ending\r\n\r\n");
+    else
+      assertEquals(message.getBodyParts().get(0).getBody(),
+          "fake ending\r\n\r\n)\r\n10 OK Success\r\n");
+
+    // ------------------------------------------------------------
+    // Many parts, with verified length as sent by gmail.
+    message = extract.get(18);
+    assertEquals(4, message.getBodyParts().size());
+
+    // ------------------------------------------------------------
+    // Awkward length boundary.
+    message = extract.get(19);
+    assertEquals(1, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().get(0).getBody(),
+          "the message body\r\n");
+
+    // ------------------------------------------------------------
+    // Invalid body length, but still expect correct parsing
+    message = extract.get(20);
+    assertEquals(1, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().get(0).getBody(),
+        "the message body\r\n");
+
+    // ------------------------------------------------------------
+    // Multipart with base64 encoding of plain text.
+    message = extract.get(21);
+    assertEquals(1, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().get(0).getBody(),
+        "hi\n\n");
+
+    // ------------------------------------------------------------
+    // Accept bad content transfer encoding
+    message = extract.get(22);
+    assertEquals(1, message.getBodyParts().size());
+    assertEquals(message.getBodyParts().get(0).getBody(),
+        "Danke für die Weihnachtswünsche! Viele Grüße.\r\n");
+
   }
 
-  private void assertRfc822(Message message) {
+  private void assertRfc822(Message message, String contentTransferEncoding) {
     assertEquals(3, message.getBodyParts().size());
 
     Message.BodyPart part1;
@@ -277,19 +379,27 @@ public class MessageBodyExtractorTest {
     assertTrue(
         Parsing.startsWithIgnoreCase(part2.getHeaders().get("Content-Type").iterator().next(),
             "message/rfc822"));
-    assertEquals(part2.getHeaders().get("Message-ID").iterator().next(), "<9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie15>");
-    assertEquals(part2.getHeaders().get("In-Reply-To").iterator().next(), "<AANLkTikNOzOVjj=3DmS8nFXoiuW=3DLPufKKsK_SOPEXdCby@mail.gmail.com>");
-    assertEquals(part2.getHeaders().get("X-Annoy").iterator().next(), "dhanji");
+    if (contentTransferEncoding != null)
+      assertTrue(
+          Parsing.startsWithIgnoreCase(part2.getHeaders().get("Content-Transfer-Encoding").iterator().next(),
+              contentTransferEncoding));
 
     assertNull(part2.getBody());
     assertNull(part2.getBinBody());
 
-    // It should contain its content as a child message.
     assertEquals(1, part2.getBodyParts().size());
+    // It should contain its content as a child message.
     Message.BodyPart rfc822 = part2.getBodyParts().get(0);
-    assertNotNull(rfc822);
 
-    assertEquals(4, rfc822.getHeaders().size());
+    assertNotNull(rfc822);
+    assertEquals(rfc822.getHeaders().size(), 7);
+
+    assertEquals(rfc822.getHeaders().get("Message-ID").iterator().next(), "<9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie15>");
+    assertEquals(rfc822.getHeaders().get("In-Reply-To").iterator().next(), "<AANLkTikNOzOVjj=mS8nFXoiuW=LPufKKsK_SOPEXdCby@mail.gmail.com>");
+    assertEquals(rfc822.getHeaders().get("X-Annoy").iterator().next(), "dhanji");
+    assertEquals(rfc822.getHeaders().get("From").iterator().next(), "example@example.com");
+    assertEquals(rfc822.getHeaders().get("To").iterator().next(), "example2@example.com");
+    assertEquals(rfc822.getHeaders().get("Subject").iterator().next(), "As basic as it gets");
     assertEquals(rfc822.getHeaders().get("Content-Type").iterator().next(), "text/plain");
 
     assertNull(rfc822.getBinBody());
@@ -297,6 +407,102 @@ public class MessageBodyExtractorTest {
     assertEquals("This is the plain text body of the message.  Note the blank line\r\n" +
         "between the header information and the body of the message.\r\n\r\n", rfc822.getBody());
   }
+
+  private void assertMultipartRfc822(Message message) {
+    // Assume all the stuff about the non-rfc822 matches the previous case.
+    // skip right down the the nested message.
+    assertEquals(3, message.getBodyParts().size());
+
+    Message.BodyPart part2;
+
+    part2 = message.getBodyParts().get(1);
+    assertNotNull(part2);
+
+    // Message 2 is an encapsulated rfc822 message.
+    assertTrue(
+        Parsing.startsWithIgnoreCase(part2.getHeaders().get("Content-Type").iterator().next(),
+            "message/rfc822"));
+
+    assertNull(part2.getBody());
+    assertNull(part2.getBinBody());
+
+    assertEquals(1, part2.getBodyParts().size());
+    // It should contain its content as a child message.
+    Message.BodyPart rfc822 = part2.getBodyParts().get(0);
+
+    assertNotNull(rfc822);
+    assertEquals(rfc822.getHeaders().size(), 7);
+
+    assertEquals(rfc822.getHeaders().get("Message-ID").iterator().next(), "<9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie15>");
+    assertEquals(rfc822.getHeaders().get("In-Reply-To").iterator().next(), "<AANLkTikNOzOVjj=mS8nFXoiuW=LPufKKsK_SOPEXdCby@mail.gmail.com>");
+    assertEquals(rfc822.getHeaders().get("X-Annoy").iterator().next(), "dhanji");
+    assertEquals(rfc822.getHeaders().get("From").iterator().next(), "example@example.com");
+    assertEquals(rfc822.getHeaders().get("To").iterator().next(), "example2@example.com");
+    assertEquals(rfc822.getHeaders().get("Subject").iterator().next(), "As basic as it gets");
+    assertEquals(rfc822.getHeaders().get("Content-Type").iterator().next(), "multipart/mixed; boundary=e89a8ff1c384d8017504b42beb91");
+
+    assertEquals(2, rfc822.getBodyParts().size());
+
+    Message.BodyPart sub1 = rfc822.getBodyParts().get(0);
+    Message.BodyPart sub2 = rfc822.getBodyParts().get(1);
+
+    assertEquals(sub1.getHeaders().get("Content-Type").iterator().next(), "text/plain; charset=ISO-8859-1");
+    assertNotNull(sub1.getBody());
+    assertNull(sub1.getBinBody());
+    assertEquals(sub2.getHeaders().get("Content-Type").iterator().next(), "text/plain; charset=ISO-8859-1");
+    assertNotNull(sub2.getBody());
+    assertNull(sub2.getBinBody());
+   }
+
+
+  private void assertRfc822withAttachment(Message message) {
+    // Assume all the stuff about the non-rfc822 matches the previous case.
+    // skip right down the the nested message.
+    assertEquals(message.getBodyParts().size(), 3);
+
+    Message.BodyPart part2;
+
+    part2 = message.getBodyParts().get(1);
+    assertNotNull(part2);
+
+    // Message 2 is an encapsulated rfc822 message.
+    assertTrue(
+        Parsing.startsWithIgnoreCase(part2.getHeaders().get("Content-Type").iterator().next(),
+            "message/rfc822"));
+    assertTrue(
+        Parsing.startsWithIgnoreCase(part2.getHeaders().get("Content-Transfer-Encoding").iterator().next(),
+            "quoted-printable"));
+
+    assertNull(part2.getBody());
+    assertNull(part2.getBinBody());
+
+    assertEquals(1, part2.getBodyParts().size());
+    // It should contain its content as a child message.
+    Message.BodyPart rfc822 = part2.getBodyParts().get(0);
+
+    assertNotNull(rfc822);
+    assertEquals(rfc822.getHeaders().size(), 7);
+
+    assertEquals(rfc822.getHeaders().get("Message-ID").iterator().next(), "<9632091.970.1320441146867.JavaMail.geo-discussion-forums@yqie15>");
+    assertEquals(rfc822.getHeaders().get("In-Reply-To").iterator().next(), "<AANLkTikNOzOVjj=mS8nFXoiuW=LPufKKsK_SOPEXdCby@mail.gmail.com>");
+    assertEquals(rfc822.getHeaders().get("X-Annoy").iterator().next(), "dhanji");
+    assertEquals(rfc822.getHeaders().get("From").iterator().next(), "example@example.com");
+    assertEquals(rfc822.getHeaders().get("To").iterator().next(), "example2@example.com");
+    assertEquals(rfc822.getHeaders().get("Subject").iterator().next(), "As basic as it gets");
+    assertEquals(rfc822.getHeaders().get("Content-Type").iterator().next(), "multipart/mixed; boundary=e89a8ff1c384d8017504b42beb91");
+
+    assertEquals(2, rfc822.getBodyParts().size());
+
+    Message.BodyPart sub1 = rfc822.getBodyParts().get(0);
+    Message.BodyPart sub2 = rfc822.getBodyParts().get(1);
+
+    assertEquals(sub1.getHeaders().get("Content-Type").iterator().next(), "text/plain; charset=ISO-8859-1");
+    assertNotNull(sub1.getBody());
+    assertNull(sub1.getBinBody());
+    assertEquals(sub2.getHeaders().get("Content-Type").iterator().next(), "text/csv; charset=US-ASCII; name=\"csv-demo.csv\"");
+    assertNull(sub2.getBody());
+    assertNotNull(sub2.getBinBody());
+   }
 
   private void assertComplexNestedStructure(Message message) {
     Message.BodyPart part1;
@@ -413,10 +619,10 @@ public class MessageBodyExtractorTest {
 
     for (int i = 0, statusesSize = statuses.size(); i < statusesSize; i++) {
       Message message = statuses.get(i);
-      System.out.println(ToStringBuilder.reflectionToString(message));
+      System.out.println(Objects.toStringHelper(message));
       System.out.println("----------->");
       for (Message.BodyPart bodyPart : message.getBodyParts()) {
-        System.out.println(ToStringBuilder.reflectionToString(bodyPart));
+        System.out.println(Objects.toStringHelper(bodyPart));
       }
     }
   }
@@ -564,5 +770,16 @@ public class MessageBodyExtractorTest {
     assertEquals("UTF-8", MessageBodyExtractor.charset("text/html;charset=;;"));
     assertEquals("UTF-8", MessageBodyExtractor.charset(""));
     assertEquals("UTF-8", MessageBodyExtractor.charset(null));
+  }
+
+  @Test
+  public final void testDecoding() throws MessagingException, IOException {
+    String body = "Grüße";
+    String encoding = "8bit";
+    String charset = "ISO-8859-1";
+    final byte[] bytes = body.getBytes(charset);
+    final InputStream decoded = MimeUtility.decode(new ByteArrayInputStream(bytes), encoding);
+    String result = CharStreams.toString(new InputStreamReader(decoded, charset));
+    assertEquals(result, body);
   }
 }

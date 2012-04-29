@@ -11,8 +11,10 @@ import com.google.sitebricks.conversion.DateConverters;
 import com.google.sitebricks.debug.DebugPage;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
+import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
+import com.google.sitebricks.http.Put;
 import com.google.sitebricks.routing.Action;
 import com.google.sitebricks.stat.StatModule;
 
@@ -45,6 +47,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
 //        scan(SitebricksConfig.class.getPackage());
         bindExplicitly();
         bindActions();
+        bindCrudActions();
 
         at("/no_annotations/service").serve(RestfulWebServiceNoAnnotations.class);
         at("/debug").show(DebugPage.class);
@@ -55,9 +58,9 @@ public class SitebricksConfig extends GuiceServletContextListener {
         localize(I18n.MyMessages.class).usingDefault();
         localize(I18n.MyMessages.class).using(Locale.CANADA_FRENCH,
             ImmutableMap.of(I18n.HELLO, I18n.HELLO_IN_FRENCH));
-        
+
         install(new StatModule("/stats"));
-        
+
         converter(new DateConverters.DateStringConverter(DEFAULT_DATE_TIME_FORMAT));
 
         install(new AwareModule() {
@@ -69,7 +72,6 @@ public class SitebricksConfig extends GuiceServletContextListener {
       }
 
       private void bindExplicitly() {
-        //TODO explicit bindings should override scanned ones.
         at("/").show(Start.class);
         at("/hello").show(HelloWorld.class);
         at("/case").show(Case.class);
@@ -110,12 +112,36 @@ public class SitebricksConfig extends GuiceServletContextListener {
         embed(HelloWorld.class).as("Hello");
       }
 
+      @SuppressWarnings("unchecked")
       private void bindActions() {
         at("/spi/test")
             .perform(action("get:top"))
             .on(Get.class)
             .perform(action("post:junk_subpath1"))
             .on(Post.class);
+      }
+
+      @SuppressWarnings("unchecked")
+      private void bindCrudActions() {
+        //
+        // Handle the base path
+        //
+        at("/issue")
+            .perform(action("READ_COLLECTION"))
+            .on(Get.class)
+            .perform(action("CREATE"))
+            .on(Post.class);
+
+        //
+        // Handle subpaths for verbs that have parameters
+        //
+        at("/issue/:id")
+            .perform(action("READ"))
+            .on(Get.class)
+            .perform(action("UPDATE"))
+            .on(Put.class)
+            .perform(action("DELETE"))
+            .on(Delete.class);
       }
     });
   }
@@ -128,7 +154,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
       }
 
       @Override
-      public Object call(Object page, Map<String, String> map) {
+      public Object call(Request request, Object page, Map<String, String> map) {
         return Reply.with(reply);
       }
     };

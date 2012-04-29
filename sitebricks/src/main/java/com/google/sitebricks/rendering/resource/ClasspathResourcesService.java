@@ -1,19 +1,21 @@
 package com.google.sitebricks.rendering.resource;
 
-import com.google.common.collect.MapMaker;
-import com.google.inject.Singleton;
-import com.google.sitebricks.Export;
-import com.google.sitebricks.Renderable;
-import com.google.sitebricks.Respond;
-import net.jcip.annotations.ThreadSafe;
-import org.apache.commons.io.IOUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
+
+import net.jcip.annotations.ThreadSafe;
+
+import com.google.common.collect.MapMaker;
+import com.google.common.io.CharStreams;
+import com.google.inject.Singleton;
+import com.google.sitebricks.Export;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Respond;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
@@ -118,7 +120,7 @@ class ClasspathResourcesService implements ResourcesService {
               "Couldn't find static resource (did you spell it right?) specified by: "
                   + resource);
 
-        list = IOUtils.readLines(stream);
+        list = CharStreams.readLines(new InputStreamReader(stream));
       } catch (IOException e) {
         throw new ResourceLoadingException(
             "Error loading static resource specified by: " + resource, e);

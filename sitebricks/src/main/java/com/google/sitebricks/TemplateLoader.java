@@ -1,183 +1,217 @@
 package com.google.sitebricks;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.sitebricks.compiler.Compilers;
-import net.jcip.annotations.Immutable;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 import javax.servlet.ServletContext;
-import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+
+import net.jcip.annotations.Immutable;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.sitebricks.compiler.TemplateCompiler;
+import com.google.sitebricks.rendering.control.WidgetRegistry;
+import com.google.sitebricks.routing.PageBook;
+import com.google.sitebricks.routing.SystemMetrics;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 @Immutable
 public class TemplateLoader {
-    private final Provider<ServletContext> context;
-    private Compilers compilers;
+  
+  private final Provider<ServletContext> context;
+  private final TemplateSystem templateSystem;
+  
+  @Inject
+  public TemplateLoader(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics, Provider<ServletContext> context, TemplateSystem templateSystem) {
+    this.context = context;
+    this.templateSystem = templateSystem;
+  }
 
-    @Inject
-    public TemplateLoader(Compilers compilers, Provider<ServletContext> context) {
-        this.compilers = compilers;
-        this.context = context;
+  public Template load(Class<?> pageClass) {
+    //
+	  // try to find the template name
+    //
+    Show show = pageClass.getAnnotation(Show.class);
+    String template = null;
+    if (null != show) {
+      template = show.value();
+    }
+    
+    //
+    // an empty string means no template name was given
+    //
+    if (template == null || template.length() == 0) {
+      // use the default name for the page class
+      template = resolve(pageClass);
     }
 
-    public Template load(Class<?> pageClass) {
-        // try to find the template name
-        Show show = pageClass.getAnnotation(Show.class);
-        String template = null;
-        if (null != show) {
-            template = show.value();
+    TemplateSource templateSource = null;
+    
+    String text;
+    try {
+      InputStream stream = null;
+      //      
+      //first look in class neighborhood for template
+      //
+      if (null != template) {
+        stream = pageClass.getResourceAsStream(template);
+      }
+
+      //
+      //look on the webapp resource path if not in classpath
+      //
+      if (null == stream) {
+
+        final ServletContext servletContext = context.get();
+        if (null != template) {
+          stream = open(template, servletContext).resource;
         }
 
-        // an empty string means no template name was given
-        if (template == null || template.length() == 0) {
-            // use the default name for the page class
-            template = resolve(pageClass);
+        //
+        //resolve again, but this time on the webapp resource path
+        //
+        if (null == stream) {
+          final ResolvedTemplate resolvedTemplate = resolve(pageClass, servletContext, template);
+          if (null != resolvedTemplate) {
+            template = resolvedTemplate.templateName;
+            stream = resolvedTemplate.resource;
+            templateSource = new FileTemplateSource(resolvedTemplate.templateFile);
+          }
         }
 
-        String text;
-        try {
-            InputStream stream = null;
-            //first look in class neighborhood for template
-            if (null != template) {
-                stream = pageClass.getResourceAsStream(template);
-            }
-
-            //look on the webapp resource path if not in classpath
-            if (null == stream) {
-
-                final ServletContext servletContext = context.get();
-                if (null != template)
-                    stream = open(template, servletContext);
-
-                //resolve again, but this time on the webapp resource path
-                if (null == stream) {
-                    final ResolvedTemplate resolvedTemplate = resolve(pageClass, servletContext, template);
-                    if (null != resolvedTemplate) {
-                        template = resolvedTemplate.templateName;
-                        stream = resolvedTemplate.resource;
-                    }
-                }
-
-                //if there's still no template, then error out
-                if (null == stream) {
-                    List<String> templateNames = new ArrayList<String>(compilers.getRegisteredExtensions().size());
-                    for (String fileNameTemplate : compilers.getRegisteredExtensions()) {
-                        templateNames.add(String.format("%s." + fileNameTemplate, pageClass.getSimpleName()));
-                    }
-
-                    throw new MissingTemplateException(String.format("Could not find a suitable template for %s. " +
-                            "did you remember to place an @Show?\n" +
-                            "None of %s could be found in package [%s], OR in the root of the resource dir OR in WEB-INF/.",
-                            pageClass.getName(), templateNames,
-                            pageClass.getPackage().getName()));
-                }
-            }
-
-            text = read(stream);
-        } catch (IOException e) {
-            throw new TemplateLoadingException("Could not load template for (i/o error): " + pageClass, e);
+        //
+        //if there's still no template, then error out
+        //
+        if (null == stream) {
+          throw new MissingTemplateException(String.format("Could not find a suitable template for %s, " + "did you remember to place an @Show? None of [" +
+              templateSystem.getTemplateExtensions()[0] + "] could be found in either package [%s], in the root of the resource dir OR in WEB-INF/.",
+              pageClass.getName(), pageClass.getSimpleName(),
+              pageClass.getPackage().getName()));
         }
+      }
 
-        return new Template(template, text);
+      text = read(stream);
+    } catch (IOException e) {
+      throw new TemplateLoadingException("Could not load template for (i/o error): " + pageClass, e);
     }
 
-    private ResolvedTemplate resolve(Class<?> pageClass, ServletContext context, String template) {
-        //first resolve using url conversion
-        for (String extension : compilers.getRegisteredExtensions()) {
-            String nameTemplate = "%s." + extension;
-            String templateName = String.format(nameTemplate, pageClass.getSimpleName());
-            InputStream resource = open(templateName, context);
+    return new Template(template, text, templateSource);
+  }
+  
+  private ResolvedTemplate resolve(Class<?> pageClass, ServletContext context, String template) {
+    //first resolve using url conversion
+    for (String nameTemplate : templateSystem.getTemplateExtensions()) {
+      String templateName = String.format(nameTemplate, pageClass.getSimpleName());
+      ResolvedTemplate resolvedTemplate = open(templateName, context);
 
-            if (null != resource) {
-                return new ResolvedTemplate(templateName, resource);
-            }
+      if (null != resolvedTemplate.resource) {
+        return resolvedTemplate;
+      }
 
-            resource = openWebInf(templateName, context);
+      resolvedTemplate = openWebInf(templateName, context);
 
-            if (null != resource) {
-                return new ResolvedTemplate(templateName, resource);
-            }
+      if (null != resolvedTemplate.resource) {
+        return resolvedTemplate;
+      }
 
+      if (null == template) {
+          continue;
+      }
+      //try to resolve @Show template from web-inf folder  
+      resolvedTemplate = openWebInf(template, context);
 
-            if (null == template) {
-                continue;
-            }
-            //try to resolve @Show template from web-inf folder
-            resource = openWebInf(template, context);
-
-            if (null != resource) {
-                return new ResolvedTemplate(template, resource);
-            }
-        }
-
-        //resolve again using servlet context if that fails
-        for (String nameTemplate : compilers.getRegisteredExtensions()) {
-            String templateName = String.format("%s." + nameTemplate, pageClass.getSimpleName());
-            InputStream resource = context.getResourceAsStream(templateName);
-
-            if (null != resource) {
-                return new ResolvedTemplate(templateName, resource);
-            }
-        }
-
-        return null;
+      if (null != resolvedTemplate.resource) {
+          return resolvedTemplate;
+      }
     }
 
-    private static class ResolvedTemplate {
-        private final InputStream resource;
-        private final String templateName;
+    //resolve again using servlet context if that fails
+    for (String nameTemplate : templateSystem.getTemplateExtensions()) {
+      String templateName = String.format(nameTemplate, pageClass.getSimpleName());
+      InputStream resource = context.getResourceAsStream(templateName);
 
-        private ResolvedTemplate(String templateName, InputStream resource) {
-            this.templateName = templateName;
-            this.resource = resource;
-        }
+      if (null != resource) {
+        return new ResolvedTemplate(templateName, resource, null);
+      }
     }
 
-    private static InputStream open(String file, ServletContext context) {
-        try {
-            String path = context.getRealPath(file);
-            return path == null ? null : new FileInputStream(new File(path));
-        } catch (FileNotFoundException e) {
-            return null;
-        }
+    return null;
+  }
+
+  private static class ResolvedTemplate {
+    private final InputStream resource;
+    private final String templateName;
+    private final File templateFile;
+
+    private ResolvedTemplate(String templateName, InputStream resource, File templateFile) {
+      this.templateName = templateName;
+      this.resource = resource;
+      this.templateFile = templateFile;
+    }
+  }
+
+  private static ResolvedTemplate open(String templateName, ServletContext context) {
+    try {      
+      String path = context.getRealPath(templateName);
+      return path == null ? null : new ResolvedTemplate(templateName, new FileInputStream(path), new File(path));
+    } catch (FileNotFoundException e) {
+      return new ResolvedTemplate(templateName, null, null);
+    }
+  }
+  
+  private static ResolvedTemplate openWebInf(String templateName, ServletContext context) {
+    return open("/WEB-INF/" + templateName, context);
+  }
+
+  //resolves a location for this page class's template (assuming @Show is not present)
+  private String resolve(Class<?> pageClass) {
+    for (String nameTemplate : templateSystem.getTemplateExtensions()) {
+      String name = String.format(nameTemplate, pageClass.getSimpleName());
+      URL resource = pageClass.getResource(name);
+
+      if (null != resource) {
+        return name;
+      }
     }
 
-    private static InputStream openWebInf(String file, ServletContext context) {
-        return open("/WEB-INF/" + file, context);
+    return null;
+  }
+
+  private static String read(InputStream stream) throws IOException {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+
+    StringBuilder builder = new StringBuilder();
+    try {
+      while (reader.ready()) {
+        builder.append(reader.readLine());
+        builder.append("\n");
+      }
+    } finally {
+      stream.close();
     }
 
-    //resolves a location for this page class's template (assuming @Show is not present)
-    private String resolve(Class<?> pageClass) {
-        for (String nameTemplate : compilers.getRegisteredExtensions()) {
-            String name = String.format("%s." + nameTemplate, pageClass.getSimpleName());
-            URL resource = pageClass.getResource(name);
+    return builder.toString();
+  }
 
-            if (null != resource) {
-                return name;
-            }
-        }
-
-        return null;
+  public Renderable compile(Class<?> templateClass) {   
+    Template template = load(templateClass);
+    TemplateCompiler templateCompiler = templateSystem.compilerFor(template.getName());
+    //
+    // This is how the old mechanism worked, for example if dynamic.js comes through the system we still pass back
+    // the html compiler. JVZ: not sure why this wouldn't be directly routed to the right resource. TODO: investigate
+    //
+    if(templateCompiler == null) {
+      templateCompiler = templateSystem.compilerFor("html");
     }
-
-    private static String read(InputStream stream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-
-        StringBuilder builder = new StringBuilder();
-        try {
-            while (reader.ready()) {
-                builder.append(reader.readLine());
-                builder.append("\n");
-            }
-        } finally {
-            stream.close();
-        }
-
-        return builder.toString();
-    }
+        
+    return templateCompiler.compile(templateClass, template);
+  }  
 }

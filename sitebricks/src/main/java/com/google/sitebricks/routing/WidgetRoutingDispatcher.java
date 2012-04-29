@@ -110,6 +110,10 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
         PageBook.Page targetPage = book.forInstance(redirect);
 
         // should never be null coz it will be validated at compile time.
+        System.out.println(">>> " + flashCacheProvider);
+        System.out.println(">>> " + flashCacheProvider.get());
+        System.out.println(">>> " + targetPage.getUri());
+        System.out.println(">>> " + targetPage);
         flashCacheProvider.get().put(targetPage.getUri(), targetPage);
 
         // Send to the canonical address of the page. This is also

@@ -1,12 +1,13 @@
 package com.google.sitebricks.mail.imap;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 
@@ -27,8 +28,8 @@ public enum Flag {
 
   private static final Logger log = LoggerFactory.getLogger(Flag.class);
 
-  private static final BiMap<String, Flag> flagMap = HashBiMap.create(10);
-  private static final BiMap<Flag, String> lookup;
+  private static final Map<String, Flag> flagMap = new HashMap<String, Flag>();
+  private static final Map<Flag, String> lookup = new HashMap<Flag, String>();
 
   static {
     flagMap.put("\\seen", SEEN);
@@ -39,9 +40,23 @@ public enum Flag {
     flagMap.put("\\answered", ANSWERED);
     flagMap.put("$forwarded", FORWARDED);
     flagMap.put("$notjunk", NOT_JUNK);
+    flagMap.put("notjunk", NOT_JUNK);
+    flagMap.put("junk", JUNK);
     flagMap.put("$junk", JUNK);
 
-    lookup = flagMap.inverse();
+    // Build reverse lookup map.
+    for (Entry<String, Flag> entry : flagMap.entrySet()) {
+      String flag = entry.getKey();
+      char first = flag.charAt(0);
+      if (first == '\\' || first == '$')
+        flag = Character.toString(first) + Character.toUpperCase(flag.charAt(1)) + flag.substring(2);
+
+      lookup.put(entry.getValue(), flag);
+    }
+
+    // Overrides
+    lookup.put(JUNK, "$Junk");
+    lookup.put(NOT_JUNK, "$NotJunk");
   }
 
   public static Flag parse(String flag) {

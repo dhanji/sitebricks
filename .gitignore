@@ -9,6 +9,7 @@ out/
 *.ipr
 *.iws
 *.iml
+atlassian-ide-plugin.xml
 
 # Eclipse
 .classpath
@@ -20,7 +21,8 @@ out/
 
 # Other
 bin/
-sitebricks-web/sitebricks-web.dat
 
 #secret stuff
 *.log
+
+test-output/

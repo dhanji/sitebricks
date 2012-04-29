@@ -1,12 +1,12 @@
 package com.google.sitebricks.compiler;
 
-import org.apache.commons.io.IOUtils;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.google.common.io.CharStreams;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -25,7 +25,7 @@ public final class TemplateCompileException extends RuntimeException {
         this.warnings = warnings;
         try {
             //noinspection unchecked
-            this.templateLines = IOUtils.readLines(new StringReader(template));
+            this.templateLines = CharStreams.readLines(new StringReader(template));          
         } catch (IOException e) {
             throw new IllegalStateException("Fatal error, could not read template after compile", e);
         }

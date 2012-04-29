@@ -23,10 +23,12 @@ import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Evaluator;
+import com.google.sitebricks.MemoryTemplateSource;
 import com.google.sitebricks.MvelEvaluator;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.RespondersForTesting;
+import com.google.sitebricks.Template;
 import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
@@ -84,12 +86,16 @@ public class FreemarkerTemplateCompilerTest {
     assert "asodkoas".equals(Dom.extractKeyAndContent("@Thing(asodkoas)  kko")[1]) : "Extraction wrong: ";
   }
 
+  private Template template(String text) {
+    return new Template("template.fml", text, new MemoryTemplateSource());
+  }
+  
   @Test
   public final void readShowIfWidgetTrue() {
-
+    
     Renderable widget =
-        new FreemarkerTemplateCompiler(Object.class, null)
-          .compile("<html><#if true><p>hello</p></#if></html>");
+        new FreemarkerTemplateCompiler()
+          .compile(Object.class, template("<html><#if true><p>hello</p></#if></html>"));
 
     assert null != widget : " null ";
 
@@ -128,8 +134,8 @@ public class FreemarkerTemplateCompilerTest {
     System.out.println( templateValue );
     
     Renderable widget =
-        new FreemarkerTemplateCompiler(Object.class, null)
-            .compile(templateValue);
+        new FreemarkerTemplateCompiler()
+            .compile(Object.class, template(templateValue));
 
     assert null != widget : " null ";
 
@@ -159,8 +165,8 @@ public class FreemarkerTemplateCompilerTest {
 
 
     Renderable widget =
-        new FreemarkerTemplateCompiler(Object.class, null)
-            .compile("<html><#if false><p>hello</p></#if></html>");
+        new FreemarkerTemplateCompiler()
+            .compile(Object.class, template("<html><#if false><p>hello</p></#if></html>"));
 
     assert null != widget : " null ";
 
@@ -183,8 +189,8 @@ public class FreemarkerTemplateCompilerTest {
     });
 
     Renderable widget =
-        new FreemarkerTemplateCompiler(Object.class, null)
-            .compile("<html><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></html>");
+        new FreemarkerTemplateCompiler()
+            .compile(Object.class, template("<html><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></html>"));
 
     assert null != widget : " null ";
 
@@ -275,8 +281,8 @@ public class FreemarkerTemplateCompilerTest {
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
     Renderable widget =
-        new FreemarkerTemplateCompiler(Object.class, null)
-            .compile("<html><div class='${clazz}'>hello</div></html>");
+        new FreemarkerTemplateCompiler()
+            .compile(Object.class, template("<html><div class='${clazz}'>hello</div></html>"));
 
     assert null != widget : " null ";
 
@@ -298,8 +304,8 @@ public class FreemarkerTemplateCompilerTest {
     final WidgetRegistry registry = injector.getInstance(WidgetRegistry.class);
 
     Renderable widget =
-        new FreemarkerTemplateCompiler(Object.class, null)
-            .compile("<!doctype html><html><body><div class='${clazz}'>hello <#if false><a href='/hi/${id}'>hideme</a></#if></div></body></html>");
+        new FreemarkerTemplateCompiler()
+            .compile(Object.class, template("<!doctype html><html><body><div class='${clazz}'>hello <#if false><a href='/hi/${id}'>hideme</a></#if></div></body></html>"));
 
     assert null != widget : " null ";
 

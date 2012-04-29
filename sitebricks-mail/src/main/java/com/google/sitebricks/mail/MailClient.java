@@ -1,8 +1,11 @@
 package com.google.sitebricks.mail;
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.sitebricks.mail.imap.*;
 
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +36,12 @@ public interface MailClient {
    * executor services.
    */
   void disconnect();
+
+  /**
+   * Same as {@link #disconnect()} but does so on a separate worker thread, the caller
+   * returns immediately.
+   */
+  void disconnectAsync();
 
   /**
    * Returns true if the underlying channels are connected to the remote server, logged in and
@@ -83,6 +92,39 @@ public interface MailClient {
    * <b>NOTE: you must call {@link #open(String)} first.</b>
    */
   ListenableFuture<List<MessageStatus>> list(Folder folder, int start, int end);
+
+  /**
+   * <p>
+   * Exactly the same as {@link #list(com.google.sitebricks.mail.imap.Folder, int, int)}
+   * except the range specified is in IMAP UID, rather than sequence number.
+   * <p>
+   * <b>NOTE: you must call {@link #open(String)} first.</b>
+   */
+  ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, int start, int end);
+
+  ListenableFuture<List<MessageStatus>> listUidThin(Folder folder, List<Sequence> sequences);
+
+  /**
+   * Runs a search for a raw query as provided by gmail, and returns the UIDs of the
+   * corresponding result. Returns an empty list if there were no results.
+   */
+  ListenableFuture<List<Integer>> searchUid(Folder folder, String query, Date since);
+
+  /**
+   * Returns the list of uids that exist in the given folder. Returns an empty list if
+   * none existed.
+   */
+  ListenableFuture<List<Integer>> exists(Folder folder, Collection<Integer> uids);
+
+  /**
+   * Flush the messages marked as \Deleted in this connection/session.
+   */
+  void expunge();
+
+  /**
+   * Copies a given imap message to the specified folder by UID.
+   */
+  ListenableFuture<Boolean> copy(Folder folder, int imapUid, String toFolder);
 
   /**
    * Adds flags to a range of messages.
@@ -152,14 +194,26 @@ public interface MailClient {
    * Note the subtle point that this method (though it doesn't block) will
    * immediately stop firing events to its FolderObserver. This happens
    * even before IDLEing ceases on the server.
+   * @return whether the connection was being watched when called.
    */
-  void unwatch();
+  boolean unwatch();
 
   /**
    * Returns a string containing the last error message from the server or
    * null if no errors occurred recently.
    */
   WireError lastError();
+
+  /**
+   * Returns the last few items received on the wire, useful for debugging.
+   */
+  List<String> getWireTrace();
+
+  /**
+   * Returns the last few commands sent on the wire, used for debugging.
+   * @return
+   */
+  public List<String> getCommandTrace();
 
   /**
    * Returns true if this client has successfully entered and is currently in IMAP IDLE.
@@ -182,6 +236,9 @@ public interface MailClient {
    */
   ListenableFuture<Message> fetchUid(Folder folder, int uid);
 
+  ListenableFuture<Set<String>> setGmailLabels(Folder folder, int imapUid,
+                                               Set<String> labels);
+
   static interface DisconnectListener {
     void disconnected();
 
@@ -201,5 +258,27 @@ public interface MailClient {
     List<String> trace();
     String expected();
     String toString();
+  }
+
+  public static class Sequence {
+    public final int start;
+    public final int end;
+
+    /**
+     * A range of uids or seq number. Specify -1 for wildcard for either bound.
+     * An end of 0 indicates
+     */
+    public Sequence(int start, int end) {
+      Preconditions.checkArgument(start != 0, "Start of range cannot be 0");
+      this.start = start;
+      this.end = end;
+    }
+
+    /**
+     * A single number to fetch.
+     */
+    public Sequence(int start) {
+      this(start, 0);
+    }
   }
 }

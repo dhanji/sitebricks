@@ -1,15 +1,12 @@
 package com.google.sitebricks.options;
 
-import com.google.common.collect.Lists;
+import java.lang.reflect.Type;
+import java.util.Set;
+
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.sitebricks.conversion.MvelTypeConverter;
 import com.google.sitebricks.conversion.TypeConverter;
-
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Hacky wrapper of MvelTypeConverter to support sets.
@@ -29,6 +26,6 @@ public class OptionTypeConverter implements TypeConverter {
         set.add(s.trim());
       return (T) set;
     }
-    return converter.convert(source, type);
+    return (T) converter.convert(source, type);
   }
 }

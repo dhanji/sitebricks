@@ -1,6 +1,6 @@
 package com.google.sitebricks.mail;
 
-import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * Listens for IMAP folder events such as new mail arriving.
@@ -15,5 +15,5 @@ public interface FolderObserver {
    * @param added the set of numbers of newly added messages, or null if none
    * @param removed the set of numbers of just removed messages, or null if none
    */
-  void changed(Set<Integer> added, Set<Integer> removed);
+  void changed(SortedSet<Integer> added, SortedSet<Integer> removed);
 }

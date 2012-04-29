@@ -1,9 +1,7 @@
 package com.google.sitebricks.mail.imap;
 
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Represents a single email message.
@@ -31,6 +29,7 @@ public class MessageStatus {
   private Long threadId;
   private Set<String> labels;
   private Long gmailMsgId;
+
 
   public int getImapUid() {
     return imapUid;
@@ -140,6 +139,10 @@ public class MessageStatus {
     this.inReplyTo = inReplyTo;
   }
 
+  public String getInReplyTo() {
+    return inReplyTo;
+  }
+
   public void setFlags(EnumSet<Flag> flags) {
     this.flags = flags;
   }
@@ -164,11 +167,17 @@ public class MessageStatus {
     return gmailMsgId;
   }
 
+  private static final SimpleDateFormat ISO_C_DATE_SYDNEY =
+      new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy") {{
+    setTimeZone(TimeZone.getTimeZone("Australia/Sydney"));
+  }};
+
+
   @Override public String toString() {
     return "MessageStatus{" +
         "imapUid=" + imapUid +
         ", messageUid='" + messageUid + '\'' +
-        ", receivedDate=" + receivedDate +
+        ", receivedDate=" + (receivedDate == null ? "null" : ISO_C_DATE_SYDNEY.format(receivedDate)) +
         ", subject='" + subject + '\'' +
         ", inReplyTo='" + inReplyTo + '\'' +
         ", from=" + from +
@@ -178,7 +187,7 @@ public class MessageStatus {
         ", bcc=" + bcc +
         ", replyTo=" + replyTo +
         ", flags=" + flags +
-        ", internalDate=" + internalDate +
+        ", internalDate=" + (internalDate == null ? "null" : ISO_C_DATE_SYDNEY.format(internalDate)) +
         ", size=" + size +
 
         ((threadId != null) ?

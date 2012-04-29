@@ -8,10 +8,12 @@ package com.google.sitebricks.mail.imap;
 public class Folder {
   private final String name;
   private final int count;
+  private final int nextUid;
 
-  public Folder(String name, int count) {
+  public Folder(String name, int count, int nextUid) {
     this.name = name;
     this.count = count;
+    this.nextUid = nextUid;
   }
 
   public int getCount() {
@@ -22,7 +24,11 @@ public class Folder {
     return name;
   }
 
-  @Override
+  public int getNextUid() {
+    return nextUid;
+  }
+
+    @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof Folder)) return false;

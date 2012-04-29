@@ -1,5 +1,6 @@
 package com.google.sitebricks.mail.imap;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.joda.time.format.DateTimeFormat;
@@ -8,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -32,6 +33,9 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
 
   static final DateTimeFormatter INTERNAL_DATE = DateTimeFormat.forPattern(
       "dd-MMM-yyyy HH:mm:ss Z");
+  static final Pattern HELPFUL_NOTIFICATION_PATTERN = Pattern.compile("[*] \\d+ (EXISTS|EXPUNGE)\\s*",
+      Pattern.CASE_INSENSITIVE);
+  static final Pattern SIZE_MARKER = Pattern.compile("\\{(\\d+)\\}$", Pattern.MULTILINE);
 
   @Override
   public List<MessageStatus> extract(List<String> messages) {
@@ -41,23 +45,76 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       if (null == message || message.isEmpty())
         continue;
 
-      // Discard the success token.
-
+      // Discard the success token and any EXISTS or EXPUNGE tokens.
       try {
-        if (Command.isEndOfSequence(message))
+        if (Command.isEndOfSequence(message) || HELPFUL_NOTIFICATION_PATTERN.matcher(message).matches())
           continue;
       } catch (ExtractionException ee) {
         log.error("Warning: error parsing email message status! {}", messages, ee);
         continue;
       }
 
-      // Appears that this message got split between lines. So unfold.
-      if (!message.endsWith(")")) {
+      // The only newlines allowed are inside strings, so check whether the message
+      // might have been split between lines and unfold as appropriate.
+      boolean isUnterminatedString = isUnterminatedString(message, false);
+      while (isUnterminatedString && (i + 1 < messagesSize)) {
         String next = messages.get(i + 1);
         message = message + '\n' + next;
-
+        isUnterminatedString = isUnterminatedString(next, isUnterminatedString);
         // Skip next.
         i++;
+      }
+
+      // Newlines are actually also allowed outside strings if a length marker is specified.
+      Matcher matcher = SIZE_MARKER.matcher(message);
+      while (matcher.find()) {
+        int size = Integer.parseInt(matcher.group(1));
+        StringBuilder stringToken = new StringBuilder("\n");
+        String rest = "";
+        int newlines = 1;
+        boolean done = false;
+        while (stringToken.length() <= size + 1 && !done && (i + 1 < messagesSize)) {
+          String next = messages.get(i + 1).trim();
+          ++i;
+          if (next.length() + stringToken.length() <= size) {
+            stringToken.append(next).append('\n');
+            newlines++;
+          } else {
+            int offset = Math.max(0, size - stringToken.length() - newlines * 2);
+            stringToken.append(next.substring(0, offset));
+            rest = next.substring(offset);
+
+            // We could have over-counted as newlines are not always counted as 2 characters.
+            // For sanity
+            int bracketPos = rest.indexOf("((");
+            if (bracketPos > 0 && rest.charAt(bracketPos - 1) == ' ')
+              bracketPos--;
+
+            int nilPos = rest.indexOf(" NIL");
+            int delim = Math.min(bracketPos == -1 ? Integer.MAX_VALUE : bracketPos,
+                nilPos == -1 ? Integer.MAX_VALUE : nilPos);
+            
+            if (delim == Integer.MAX_VALUE) {
+              int spacePos = rest.indexOf(" ");
+              delim = spacePos == -1 ? Integer.MAX_VALUE : spacePos;
+            }
+            
+            if (delim > 0 && delim != Integer.MAX_VALUE) {
+              stringToken.append(rest.substring(0, delim));
+              rest = rest.substring(delim);
+              done = true;
+            }
+          }
+        }
+
+        // Now take the extracted subject and compose it into the message header as though it
+        // were quoted.
+        message = matcher.replaceAll("");
+        // Escape nested quotes:
+        String newToken = stringToken.toString().replaceAll("\"", "\\\\\"");
+        message += '"' + newToken + '"' + rest;
+        // The new message string might have further size markers.
+        matcher = SIZE_MARKER.matcher(message);
       }
 
       statuses.add(parseStatus(message.replaceFirst("^[*] ", "")));
@@ -66,28 +123,59 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     return statuses;
   }
 
+  /**
+   Check for string termination, will check for quote escaping, but only if it's escaped
+   within a string... otherwise it's illegal and we'll treat it as a regular quote.
+   A trailing backslash indicates a \CRLF was received (as envisaged in RFC 822 3.4.5).
+   */
+  @VisibleForTesting
+  static boolean isUnterminatedString(String message, boolean alreadyInString) {
+    boolean escaped = false;
+    boolean inString = alreadyInString;
+    for (int i = 0; i < message.length(); i++) {
+      final char c = message.charAt(i);
+      if (inString) {
+        if (c == '\\') {
+          escaped = !escaped;
+        } else if (c == '"') {
+          if (!escaped)
+            inString = false;
+          escaped = false;
+        } else
+          escaped = false;
+      } else
+        inString = c == '"';
+    }
+    return inString;
+  }
+
   private static MessageStatus parseStatus(String message) {
     Queue<String> tokens = Parsing.tokenize(message);
     MessageStatus status = new MessageStatus();
 
-    // Assert that we have an envelope.
-    Parsing.match(tokens, int.class);
-    Parsing.eat(tokens, "FETCH", "(");
+    try {
+      // Assert that we have an envelope.
+      Parsing.match(tokens, int.class);
+      Parsing.eat(tokens, "FETCH", "(");
 
-    while (!tokens.isEmpty()) {
-      boolean match = parseUid(tokens, status);
-      match |= parseEnvelope(tokens, status);
-      match |= parseFlags(tokens, status);
-      match |= parseInternalDate(tokens, status);
-      match |= parseRfc822Size(tokens, status);
+      while (!tokens.isEmpty()) {
+        boolean match = parseUid(tokens, status);
+        match |= parseEnvelope(tokens, status);
+        match |= parseFlags(tokens, status);
+        match |= parseInternalDate(tokens, status);
+        match |= parseRfc822Size(tokens, status);
 
-      match |= parseGmailUid(tokens, status);
-      match |= parseGmailThreadId(tokens, status);
-      match |= parseGmailLabels(tokens, status);
+        match |= parseGmailUid(tokens, status);
+        match |= parseGmailThreadId(tokens, status);
+        match |= parseGmailLabels(tokens, status);
 
-      if (!match) {
-        break;
+        if (!match) {
+          break;
+        }
       }
+    } catch (IllegalArgumentException e) {
+      log.warn("Error parsing status: {}", message);
+      throw e;
     }
 
     // We don't really need to bother closing the last ')'
@@ -153,8 +241,15 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     status.setLabels(Sets.<String>newHashSet());
 
     // Check if there are labels to add.
-    while (!")".equals(tokens.peek())) {
+    while (!")".equals(tokens.peek())) { // \Inbox
       String token = tokens.poll();
+
+      // HACK: horrible hack!!!
+      // The original Parser incorrectly left escaped backslashes intact. We now
+      // emulate this by putting them back in...
+      // this code replaces all single backslashes (escaped here as "\\\\") to double backslashes.
+      token = token.replaceAll("\\\\", "\\\\\\\\");
+
       status.getLabels().add(token);
     }
     Parsing.eat(tokens, ")");
@@ -174,6 +269,8 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
       } catch (ParseException e) {
         log.error("Malformed received date format {}. Unable to parse.", receivedDate, e);
       }
+    } else if (receivedDate != null) {
+      Parsing.eat(tokens, "NIL");
     }
 
     status.setSubject(Parsing.decode(Parsing.match(tokens, String.class)));

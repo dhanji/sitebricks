@@ -33,8 +33,7 @@ import java.util.regex.Pattern;
 class MailClientHandler extends SimpleChannelHandler {
   private static final Logger log = LoggerFactory.getLogger(MailClientHandler.class);
 
-  private static final Set<String> logAllMessagesForUsers =
-      Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+  private static final Map<String, Boolean> logAllMessagesForUsers = new ConcurrentHashMap<String, Boolean>();
 
   public static final String CAPABILITY_PREFIX = "* CAPABILITY";
   static final Pattern AUTH_SUCCESS_REGEX =
@@ -42,6 +41,9 @@ class MailClientHandler extends SimpleChannelHandler {
 
   static final Pattern COMMAND_FAILED_REGEX =
       Pattern.compile("^[.] (NO|BAD) (.*)", Pattern.CASE_INSENSITIVE);
+  static final Pattern MESSAGE_COULDNT_BE_FETCHED_REGEX =
+      Pattern.compile("^\\d+ no some messages could not be fetched \\(failure\\)\\s*",
+          Pattern.CASE_INSENSITIVE);
   static final Pattern SYSTEM_ERROR_REGEX = Pattern.compile("[*]\\s*bye\\s*system\\s*error\\s*",
       Pattern.CASE_INSENSITIVE);
 
@@ -58,8 +60,9 @@ class MailClientHandler extends SimpleChannelHandler {
   private final CountDownLatch loginSuccess = new CountDownLatch(1);
   private volatile List<String> capabilities;
   private volatile FolderObserver observer;
-  final AtomicBoolean idling = new AtomicBoolean();
+  final AtomicBoolean idleRequested = new AtomicBoolean();
   final AtomicBoolean idleAcknowledged = new AtomicBoolean();
+  private final Object idleMutex = new Object();
 
   // Panic button.
   private volatile boolean halt = false;
@@ -69,7 +72,7 @@ class MailClientHandler extends SimpleChannelHandler {
       new ConcurrentLinkedQueue<CommandCompletion>();
   private volatile PushedData pushedData;
 
-  private final BoundedDiscardingList<String> commandDebugHistory = new BoundedDiscardingList<String>(10);
+  private final BoundedDiscardingList<String> commandTrace = new BoundedDiscardingList<String>(10);
   private final BoundedDiscardingList<String> wireTrace = new BoundedDiscardingList<String>(25);
   private final MBeanRegistration mBeanRegistration;
   private final InputBuffer inputBuffer = new InputBuffer();
@@ -82,23 +85,32 @@ class MailClientHandler extends SimpleChannelHandler {
         config.getUsername());
   }
 
+  // For debugging, use with caution!
+  public static void addUserForVerboseLogging(String username, boolean toStdOut) {
+    logAllMessagesForUsers.put(username, toStdOut);
+  }
+
   @ManagedOperation
-  public void logAllMessages(boolean b) {
-    log.info("logAllMessagesForUsers[" + config.getUsername() + "] = " + b);
+  public void setReceiveLogging(boolean b) {
+    log.info("setReceiveLogging[" + config.getUsername() + "] = " + b);
     if (b)
-      logAllMessagesForUsers.add(config.getUsername());
+      logAllMessagesForUsers.put(config.getUsername(), false);
     else
       logAllMessagesForUsers.remove(config.getUsername());
   }
 
   @ManagedAttribute
   public Set<String> getLogAllMessagesFor() {
-    return logAllMessagesForUsers;
+    return logAllMessagesForUsers.keySet();
   }
 
   @ManagedAttribute
-  public List<String> getCommandDebugHistory() {
-    return commandDebugHistory.list();
+  public List<String> getCommandTrace() {
+    return commandTrace.list();
+  }
+
+  public List<String> getWireTrace() {
+    return wireTrace.list();
   }
 
   @ManagedAttribute
@@ -108,15 +120,16 @@ class MailClientHandler extends SimpleChannelHandler {
 
   private static class PushedData {
     volatile boolean idleExitSent = false;
-    final Set<Integer> pushAdds = Collections.synchronizedSet(Sets.<Integer>newHashSet());
-    final Set<Integer> pushRemoves = Collections.synchronizedSet(Sets.<Integer>newHashSet());
-
+    // guarded by idleMutex.
+    final SortedSet<Integer> pushAdds = Sets.<Integer>newTreeSet();
+    // guarded by idleMutex.
+    final SortedSet<Integer> pushRemoves = Sets.<Integer>newTreeSet();
   }
 
   // DO NOT synchronize!
   public void enqueue(CommandCompletion completion) {
     completions.add(completion);
-    commandDebugHistory.add(new Date().toString() + " " + completion.toString());
+    commandTrace.add(new Date().toString() + " " + completion.toString());
   }
 
   @Override
@@ -128,8 +141,12 @@ class MailClientHandler extends SimpleChannelHandler {
   }
 
   private void processMessage(String message) throws Exception {
-    if (logAllMessagesForUsers.contains(config.getUsername())) {
-      log.info("IMAP [" + config.getUsername() + "]: " + message);
+    Boolean toStdOut = logAllMessagesForUsers.get(config.getUsername());
+    if (toStdOut != null) {
+      if (toStdOut)
+        System.out.println("IMAPrcv[" + config.getUsername() + "]: " + message);
+      else
+        log.info("IMAPrcv[{}]: {}", config.getUsername(), message);
     }
 
     wireTrace.add(message);
@@ -173,46 +190,48 @@ class MailClientHandler extends SimpleChannelHandler {
 
       // Copy to local var as the value can change underneath us.
       FolderObserver observer = this.observer;
-      if (idling.get()) {
-        log.info("Message received for {} during idling: {}", config.getUsername(), message);
+      if (idleRequested.get() || idleAcknowledged.get()) {
+        synchronized (idleMutex) {
+          if (IDLE_ENDED_REGEX.matcher(message).matches()) {
+            idleRequested.compareAndSet(true, false);
+            idleAcknowledged.set(false);
 
-        if (IDLE_ENDED_REGEX.matcher(message).matches()) {
-          idling.compareAndSet(true, false);
-          idleAcknowledged.set(false);
+            // Now fire the events.
+            PushedData data = pushedData;
+            pushedData = null;
 
-          // Now fire the events.
-          PushedData data = pushedData;
-          pushedData = null;
-
-          idler.idleEnd();
-          observer.changed(data.pushAdds.isEmpty() ? null : data.pushAdds,
-              data.pushRemoves.isEmpty() ? null : data.pushRemoves);
-          return;
-        }
-
-        // Queue up any push notifications to publish to the client in a second.
-        Matcher existsMatcher = IDLE_EXISTS_REGEX.matcher(message);
-        boolean matched = false;
-        if (existsMatcher.matches()) {
-          int number = Integer.parseInt(existsMatcher.group(1));
-          pushedData.pushAdds.add(number);
-          pushedData.pushRemoves.remove(number);
-          matched = true;
-        } else {
-          Matcher expungeMatcher = IDLE_EXPUNGE_REGEX.matcher(message);
-          if (expungeMatcher.matches()) {
-            int number = Integer.parseInt(expungeMatcher.group(1));
-            pushedData.pushRemoves.add(number);
-            pushedData.pushAdds.remove(number);
-            matched = true;
+            idler.idleEnd();
+            observer.changed(data.pushAdds.isEmpty() ? null : data.pushAdds,
+                data.pushRemoves.isEmpty() ? null : data.pushRemoves);
+            return;
           }
-        }
 
-        // Stop idling, when we get the stopped idling message we can publish shit.
-        if (matched && !pushedData.idleExitSent) {
-          idler.done();
-          pushedData.idleExitSent = true;
-          return;
+          // Queue up any push notifications to publish to the client in a second.
+          Matcher existsMatcher = IDLE_EXISTS_REGEX.matcher(message);
+          boolean matched = false;
+          if (existsMatcher.matches()) {
+            int number = Integer.parseInt(existsMatcher.group(1));
+            pushedData.pushAdds.add(number);
+            pushedData.pushRemoves.remove(number);
+            matched = true;
+          } else {
+            Matcher expungeMatcher = IDLE_EXPUNGE_REGEX.matcher(message);
+            if (expungeMatcher.matches()) {
+              int number = Integer.parseInt(expungeMatcher.group(1));
+              pushedData.pushRemoves.add(number);
+              pushedData.pushAdds.remove(number);
+              matched = true;
+            }
+          }
+
+          // Stop idling, when we get the idle ended message (next cycle) we can publish what's been gathered.
+          if (matched) {
+            if(!pushedData.idleExitSent) {
+              idler.done();
+              pushedData.idleExitSent = true;
+            }
+            return;
+          }
         }
       }
 
@@ -235,7 +254,8 @@ class MailClientHandler extends SimpleChannelHandler {
       halt();
       // Disconnect abnormally. The user code should reconnect using the mail client.
       errorStack.push(new Error(completions.poll(), message, wireTrace.list()));
-      idler.disconnect();
+
+      idler.disconnectAsync();
     } finally {
       disconnected();
     }
@@ -251,18 +271,33 @@ class MailClientHandler extends SimpleChannelHandler {
   private synchronized void complete(String message) {
     // This is a weird problem with writing stuff while idling. Need to investigate it more, but
     // for now just ignore it.
-    if ("* BAD [CLIENTBUG] Invalid tag".equalsIgnoreCase(message)) {
-      log.warn("Invalid tag warning, ignored.");
+    if (MESSAGE_COULDNT_BE_FETCHED_REGEX.matcher(message).matches()) {
+      log.warn("Some messages in the batch could not be fetched for {}\n" +
+          "---cmd---\n{}\n---wire---\n{}\n---end---\n", new Object[] {
+          config.getUsername(),
+          getCommandTrace(),
+          getWireTrace()
+      });
       errorStack.push(new Error(completions.peek(), message, wireTrace.list()));
-      return;
+      final CommandCompletion completion = completions.peek();
+      String errorMsg = "Some messages in the batch could not be fetched for user " + config.getUsername();
+      RuntimeException ex = new RuntimeException(errorMsg);
+      if (completion != null) {
+        completion.error(errorMsg, new MailHandlingException(getWireTrace(), errorMsg, ex));
+        completions.poll();
+      } else {
+        throw ex;
+      }
     }
 
     CommandCompletion completion = completions.peek();
     if (completion == null) {
       if ("+ idling".equalsIgnoreCase(message)) {
-        idler.idleStart();
-        log.trace("IDLE entered.");
-        idleAcknowledged.set(true);
+        synchronized (idleMutex) {
+          idler.idleStart();
+          log.trace("IDLE entered.");
+          idleAcknowledged.set(true);
+        }
       } else {
         log.error("Could not find the completion for message {} (Was it ever issued?)", message);
         errorStack.push(new Error(null, "No completion found!", wireTrace.list()));
@@ -303,15 +338,21 @@ class MailClientHandler extends SimpleChannelHandler {
     return errorStack.peek() != null ? errorStack.pop() : null;
   }
 
+  List<String> getLastTrace() {
+    return wireTrace.list();
+  }
+
   /**
    * Registers a FolderObserver to receive events happening with a particular
    * folder. Typically an IMAP IDLE feature. If called multiple times, will
    * overwrite the currently set observer.
    */
   void observe(FolderObserver observer) {
-    this.observer = observer;
-    pushedData = new PushedData();
-    idleAcknowledged.set(false);
+    synchronized (idleMutex) {
+      this.observer = observer;
+      pushedData = new PushedData();
+      idleAcknowledged.set(false);
+    }
   }
 
   void halt() {
@@ -370,11 +411,12 @@ class MailClientHandler extends SimpleChannelHandler {
   static class InputBuffer {
     volatile private StringBuilder buffer = new StringBuilder();
 
-
     @VisibleForTesting
     List<String> processMessage(String message) {
+      // Nuke all CR characters, and we'll only count LF.
+      message = message.replaceAll("\r", "");
       // Split leaves a trailing empty line if there's a terminating newline.
-      ArrayList<String> split = Lists.newArrayList(message.split("\r?\n", -1));
+      ArrayList<String> split = Lists.newArrayList(message.split("\n", -1));
       Preconditions.checkArgument(split.size() > 0);
 
       synchronized (this) {
