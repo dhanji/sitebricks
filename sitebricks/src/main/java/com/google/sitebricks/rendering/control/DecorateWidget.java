@@ -22,7 +22,11 @@ public class DecorateWidget implements Renderable {
   private ThreadLocal<Class<?>> templateClassLocal = new ThreadLocal<Class<?>>();
   
   public static String embedNameFor(Class<?> pageClass) {
-    return pageClass.getName().toLowerCase() + "-extend";
+    String name = pageClass.getName();
+    int mark = name.indexOf("$$EnhancerByGuice");
+    if (mark >= 0)
+        name = name.substring(0, mark);
+    return name.toLowerCase() + "-extend";
   }
   
   public DecorateWidget(WidgetChain chain, String expression, Evaluator evaluator){
