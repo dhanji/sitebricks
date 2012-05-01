@@ -1,25 +1,5 @@
 package com.google.sitebricks.compiler;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
-import org.dom4j.Attribute;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentType;
-import org.dom4j.Element;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
-import org.jetbrains.annotations.NotNull;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -32,6 +12,20 @@ import com.google.sitebricks.rendering.control.WidgetChain;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
+import org.dom4j.*;
+import org.dom4j.io.SAXReader;
+import org.jetbrains.annotations.NotNull;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)

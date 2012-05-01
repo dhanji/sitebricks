@@ -1,8 +1,8 @@
 repositories << "http://repository.jboss.org/nexus/content/groups/public-jboss/"
 
 project "Sitebricks :: Options Module" @ "null"
-  id: com.google.sitebricks:sitebricks-options:0.8.6-SNAPSHOT
-  inherit: com.google.sitebricks:sitebricks-parent:0.8.6-SNAPSHOT:../pom.atom
+  id: com.google.sitebricks:sitebricks-options:0.8.7-SNAPSHOT
+  inherit: com.google.sitebricks:sitebricks-parent:0.8.7-SNAPSHOT:../pom.atom
   packaging: jar
 
   deps: [ com.google.sitebricks:sitebricks-converter

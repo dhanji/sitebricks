@@ -1,7 +1,7 @@
 repositories << "http://scala-tools.org/repo-releases/"
 
 project "Sitebricks :: Parent" @ "https://github.com/dhanji/sitebricks"
-  id: com.google.sitebricks:sitebricks-parent:0.8.6-SNAPSHOT
+  id: com.google.sitebricks:sitebricks-parent:0.8.7-SNAPSHOT
   inherit: org.sonatype.oss:oss-parent:6
   packaging: pom
 
