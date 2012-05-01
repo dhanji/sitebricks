@@ -1,82 +1,10 @@
 project "Sitebricks :: Mail Client" @ "null"
   id: com.google.sitebricks:sitebricks-mail:0.8.7-SNAPSHOT
-
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.webapp.WebAppContext;
-
-/**
- * Main method kicks off the Jetty servlet container pointing at our Sitebricks webapp
- * in source code.
- * <p>
- * You should run this from the sitebricks-jetty-archetype directory or appropriately change
- * the directory specified ("src/main/resources" by default) below.
- *
- * @author Dhanji R. Prasanna (dhanji@gmail.com)
- */
-public class Main {
-  private static final int PORT = 8080;
-
-  public static void main(String... args) throws Exception {
-    Server server = new Server(PORT);
-    server.addHandler(new WebAppContext("src/main/resources", "/"));
-
-    server.start();
-    server.join();
-  }
-}
-  inherit: com.google.sitebricks:sitebricks-parent:0.8.7-SNAPSHOT
-
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.webapp.WebAppContext;
-
-/**
- * Main method kicks off the Jetty servlet container pointing at our Sitebricks webapp
- * in source code.
- * <p>
- * You should run this from the sitebricks-jetty-archetype directory or appropriately change
- * the directory specified ("src/main/resources" by default) below.
- *
- * @author Dhanji R. Prasanna (dhanji@gmail.com)
- */
-public class Main {
-  private static final int PORT = 8080;
-
-  public static void main(String... args) throws Exception {
-    Server server = new Server(PORT);
-    server.addHandler(new WebAppContext("src/main/resources", "/"));
-
-    server.start();
-    server.join();
-  }
-}:../pom.atom
+  inherit: com.google.sitebricks:sitebricks-parent:0.8.7-SNAPSHOT:../pom.atom
   packaging: jar
 
   deps: [ org.apache.james:apache-mime4j:0.6
                com.google.sitebricks:sitebricks:0.8.7-SNAPSHOT
-
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.webapp.WebAppContext;
-
-/**
- * Main method kicks off the Jetty servlet container pointing at our Sitebricks webapp
- * in source code.
- * <p>
- * You should run this from the sitebricks-jetty-archetype directory or appropriately change
- * the directory specified ("src/main/resources" by default) below.
- *
- * @author Dhanji R. Prasanna (dhanji@gmail.com)
- */
-public class Main {
-  private static final int PORT = 8080;
-
-  public static void main(String... args) throws Exception {
-    Server server = new Server(PORT);
-    server.addHandler(new WebAppContext("src/main/resources", "/"));
-
-    server.start();
-    server.join();
-  }
-}
                org.jboss.netty:netty:3.2.4.Final
                org.slf4j:slf4j-api:1.5.5
                ch.qos.logback:logback-classic:${ch.qos.logback.version}
