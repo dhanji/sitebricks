@@ -124,10 +124,20 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     //
     MapBinder<String,TemplateCompiler> templateCompilers = MapBinder.newMapBinder(binder(), String.class, TemplateCompiler.class);
     templateCompilers.addBinding("html").to(HtmlTemplateCompiler.class);
+    templateCompilers.addBinding("xhtml").to(HtmlTemplateCompiler.class);
     templateCompilers.addBinding("xml").to(XmlTemplateCompiler.class);
     templateCompilers.addBinding("flat").to(FlatTemplateCompiler.class);
     templateCompilers.addBinding("mvel").to(MvelTemplateCompiler.class);
-    templateCompilers.addBinding("fml").to(FreemarkerTemplateCompiler.class);    
+    templateCompilers.addBinding("fml").to(FreemarkerTemplateCompiler.class);
+
+    configureTemplateCompilers(templateCompilers);
+  }
+
+  protected void configureTemplateCompilers(MapBinder<String, TemplateCompiler> compilers) {
+      // Override to include custom template compilers. You can also simply add to the existing MapBinder
+      // mapping anywhere in your modules (see: http://code.google.com/p/google-guice/wiki/Multibindings):
+      //    MapBinder<String,TemplateCompiler> templateCompilers = MapBinder.newMapBinder(binder(), String.class, TemplateCompiler.class);
+      //    templateCompilers.addBinding("mustache").to(MustacheTemplateCompiler.class);
   }
   
   /**
