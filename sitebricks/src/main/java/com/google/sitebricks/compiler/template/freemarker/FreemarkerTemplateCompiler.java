@@ -1,10 +1,5 @@
 package com.google.sitebricks.compiler.template.freemarker;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-
 import com.google.inject.Singleton;
 import com.google.sitebricks.compiler.TemplateCompiler;
 import com.google.sitebricks.compiler.template.AbstractMagicTemplateCompiler;
@@ -14,6 +9,11 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
 
 @Singleton
 public class FreemarkerTemplateCompiler extends AbstractMagicTemplateCompiler implements TemplateCompiler {
@@ -51,6 +51,7 @@ public class FreemarkerTemplateCompiler extends AbstractMagicTemplateCompiler im
   }
 
   class SitebricksTemplateExceptionHandler implements TemplateExceptionHandler {
+
     public void handleTemplateException(TemplateException te, Environment env, Writer out) throws TemplateException {
       // We intentionally do nothing here
     }
