@@ -1,8 +1,8 @@
 repositories << "http://nexus.openqa.org/content/repositories/releases,http://repository.codehaus.org"
 
 project "Sitebricks :: Acceptance Tests" @ "null"
-  id: com.google.sitebricks:sitebricks-acceptance-tests:0.8.6-SNAPSHOT
-  inherit: com.google.sitebricks:sitebricks-parent:0.8.6-SNAPSHOT:../pom.atom
+  id: com.google.sitebricks:sitebricks-acceptance-tests:0.8.7-SNAPSHOT
+  inherit: com.google.sitebricks:sitebricks-parent:0.8.7-SNAPSHOT:../pom.atom
   packaging: jar
 
   overrides: [ org.slf4j:slf4j-api:1.6.1 ]

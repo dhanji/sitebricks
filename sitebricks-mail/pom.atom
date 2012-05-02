@@ -1,10 +1,10 @@
 project "Sitebricks :: Mail Client" @ "null"
-  id: com.google.sitebricks:sitebricks-mail:0.8.6-SNAPSHOT
-  inherit: com.google.sitebricks:sitebricks-parent:0.8.6-SNAPSHOT:../pom.atom
+  id: com.google.sitebricks:sitebricks-mail:0.8.7-SNAPSHOT
+  inherit: com.google.sitebricks:sitebricks-parent:0.8.7-SNAPSHOT:../pom.atom
   packaging: jar
 
   deps: [ org.apache.james:apache-mime4j:0.6
-               com.google.sitebricks:sitebricks:0.8.6-SNAPSHOT
+               com.google.sitebricks:sitebricks:0.8.7-SNAPSHOT
                org.jboss.netty:netty:3.2.4.Final
                org.slf4j:slf4j-api:1.5.5
                ch.qos.logback:logback-classic:${ch.qos.logback.version}
