@@ -1,30 +1,5 @@
 package com.google.sitebricks.compiler;
 
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_CONTENT;
-import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_KEY;
-import static com.google.sitebricks.compiler.HtmlParser.LINE_NUMBER_ATTRIBUTE;
-import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
-
-import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
-import org.jetbrains.annotations.NotNull;
-import org.jsoup.nodes.Attribute;
-import org.jsoup.nodes.Attributes;
-import org.jsoup.nodes.Comment;
-import org.jsoup.nodes.DataNode;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
-import org.jsoup.nodes.XmlDeclaration;
-import org.softee.util.Preconditions;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -38,6 +13,16 @@ import com.google.sitebricks.rendering.control.WidgetChain;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
+import org.jetbrains.annotations.NotNull;
+import org.jsoup.nodes.*;
+import org.softee.util.Preconditions;
+
+import java.lang.reflect.Type;
+import java.util.*;
+
+import static com.google.sitebricks.compiler.AnnotationNode.*;
+import static com.google.sitebricks.compiler.HtmlParser.LINE_NUMBER_ATTRIBUTE;
+import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
 
 /**
  * @author Shawn based on XMLTemplateCompiler by Dhanji R. Prasanna (dhanji@gmail.com)
