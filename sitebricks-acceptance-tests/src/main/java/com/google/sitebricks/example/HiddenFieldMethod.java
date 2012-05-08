@@ -2,6 +2,7 @@ package com.google.sitebricks.example;
 
 
 import com.google.sitebricks.At;
+import com.google.sitebricks.http.Patch;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
 
@@ -34,6 +35,11 @@ public class HiddenFieldMethod {
   @Put
   public void put() {
     putMessage = "Submitted via PUT";
+  }
+
+  @Patch
+  public void patch() {
+    putMessage = "Submitted via PATCH";
   }
 
   @Post

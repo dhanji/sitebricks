@@ -8,16 +8,16 @@ import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Patch;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
-
-
-import javax.inject.Inject;
 
 import org.sitebricks.client.easy.Bar;
 import org.sitebricks.client.easy.Foo;
 
 import java.util.Collection;
+
+import javax.inject.Inject;
 
 @At("/service/foo")
 @Service
@@ -45,6 +45,15 @@ public class FooService {
     final Bar bar = submission.read(Bar.class).as(Json.class);
 
     foo.add(bar);
+
+    return Reply.saying().ok();
+  }
+
+  @Patch
+  public Reply<?> update(final Request submission) {
+    final Bar bar = submission.read(Bar.class).as(Json.class);
+
+    foo.update(bar);
 
     return Reply.saying().ok();
   }

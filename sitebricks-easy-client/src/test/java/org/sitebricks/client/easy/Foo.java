@@ -1,19 +1,23 @@
 package org.sitebricks.client.easy;
 
-import java.util.Collection;
-
-import javax.inject.Named;
-
 import com.google.sitebricks.At;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Patch;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
+
+import java.util.Collection;
+
+import javax.inject.Named;
 
 @At("/service/foo")
 public interface Foo {
   @Put
   void add(Bar bar);
+
+  @Patch
+  void update(Bar bar);
 
   @Delete
   @At("/:id")
@@ -38,5 +42,4 @@ public interface Foo {
 
   @Post
   String echoWithPost(String message);
-
 }

@@ -1,12 +1,11 @@
 package org.sitebricks.client.easy;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.sitebricks.client.easy.SisuSitebricksClientModule.restClientModule;
+import com.google.sitebricks.SitebricksModule;
+import com.google.sitebricks.acceptance.util.SitebricksServiceTest;
+
+import org.mockito.Mockito;
+import org.sitebricks.client.easy.service.FooService;
+import org.testng.annotations.Test;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -16,12 +15,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.mockito.Mockito;
-import org.sitebricks.client.easy.service.FooService;
-import org.testng.annotations.Test;
-
-import com.google.sitebricks.SitebricksModule;
-import com.google.sitebricks.acceptance.util.SitebricksServiceTest;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.sitebricks.client.easy.SisuSitebricksClientModule.restClientModule;
 
 @Test(suiteName = "easyClientSuite")
 public class SisuSitebricksClientModuleTest extends SitebricksServiceTest {
@@ -82,6 +82,18 @@ public class SisuSitebricksClientModuleTest extends SitebricksServiceTest {
   }
 
   @Test
+  public void update() throws Exception {
+    final Bar mockBar = new Bar();
+    final Bar mockBar2 = new Bar();
+
+    final Foo foo = fooFactory.create(new URL(baseUrl()));
+    foo.add(mockBar);
+    foo.update(mockBar2);
+
+    verify(mockFoo).update(Mockito.any(Bar.class));
+  }
+
+  @Test
   public void remove() throws Exception {
     final Foo foo = fooFactory.create(new URL(baseUrl()));
     foo.remove("1");
@@ -115,5 +127,5 @@ public class SisuSitebricksClientModuleTest extends SitebricksServiceTest {
     final String echo = foo.echoWithPost("hello");
 
     assertThat("Echo message", echo, is(equalTo("Sitebricks says hello!")));
-  }  
+  }
 }

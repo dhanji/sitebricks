@@ -1,11 +1,5 @@
 package com.google.sitebricks.example;
 
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import com.google.inject.name.Named;
 import com.google.sitebricks.At;
 import com.google.sitebricks.client.transport.Json;
@@ -14,8 +8,15 @@ import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Patch;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
+
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @At(RestfulWebServiceWithCRUDConversions.AT_ME)
 @Service
@@ -50,6 +51,13 @@ public class RestfulWebServiceWithCRUDConversions {
 		addWidget(widget);
 		return Reply.with(widget).as(Json.class).type("application/json");
 	}
+
+  @Patch
+  public Reply<?> patch(Request request) {
+    Widget widget = request.read(Widget.class).as(Json.class);
+    updateWidget(widget);
+    return Reply.with(widget).as(Json.class).type("application/json");
+  }
 
 	@Get
 	public Reply<List<Widget>> getAll() {
@@ -91,6 +99,15 @@ public class RestfulWebServiceWithCRUDConversions {
 			widgets.remove(oldWidget);
 		widgets.add(widget);
 	}
+
+  public static void updateWidget(Widget widget) {
+    Widget staleWidget = findWidget(widget.getId());
+    if (staleWidget != null) {
+      staleWidget.setName(widget.getName());
+      staleWidget.setAvailable(widget.getAvailable());
+      staleWidget.setPrice(widget.getPrice());
+    }
+  }
 
 	public static Widget findWidget(int id) {
 		for (Widget widget : widgets) {
