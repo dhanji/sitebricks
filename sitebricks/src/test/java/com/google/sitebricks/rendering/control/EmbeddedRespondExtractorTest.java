@@ -121,7 +121,7 @@ public class EmbeddedRespondExtractorTest {
     public final void extractInsideHeadTags(final String htmlDoc, String expectedHead, String expectedBody) {
         final EmbeddedRespondFactory factory = Guice.createInjector().getInstance(EmbeddedRespondFactory.class);
 
-        final EmbeddedRespond respond = factory.get(Collections.<String, ArgumentWidget>emptyMap());
+        final EmbeddedRespond respond = factory.get(null, Collections.<String, ArgumentWidget>emptyMap());
 
         respond.write(htmlDoc);
 

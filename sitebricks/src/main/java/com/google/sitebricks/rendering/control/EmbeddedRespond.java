@@ -4,6 +4,8 @@ import com.google.sitebricks.Respond;
 
 import java.util.Map;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
@@ -17,8 +19,11 @@ class EmbeddedRespond implements Respond {
 
   private final Map<String, ArgumentWidget> arguments;
   private final Respond delegate;
+  @Nullable
+  private final WidgetChain widgetChain;
 
-  public EmbeddedRespond(Map<String, ArgumentWidget> arguments, Respond respond) {
+  public EmbeddedRespond(WidgetChain widgetChain, Map<String, ArgumentWidget> arguments, Respond respond) {
+    this.widgetChain = widgetChain;
     this.arguments = arguments;
     this.delegate = respond;
   }
@@ -120,6 +125,10 @@ class EmbeddedRespond implements Respond {
   public void clear() {
     delegate.clear();
   }
+  
+  public WidgetChain getWidgetChain() {
+      return widgetChain;
+  }
 
   @Override public Object pageObject() {
     return delegate.pageObject();
@@ -128,7 +137,8 @@ class EmbeddedRespond implements Respond {
   @Override
   public String toString() {
     if (null == body) {
-      extract(super.toString());
+      String sstring = super.toString();
+      extract(sstring);
     }
 
     return body;

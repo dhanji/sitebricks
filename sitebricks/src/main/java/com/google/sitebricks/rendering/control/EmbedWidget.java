@@ -19,6 +19,7 @@ import java.util.Set;
  */
 @Immutable
 class EmbedWidget implements Renderable {
+  private final WidgetChain widgetChain;
   private final Map<String, String> bindExpressions;
   private final Map<String, ArgumentWidget> arguments;
   private final Evaluator evaluator;
@@ -28,8 +29,9 @@ class EmbedWidget implements Renderable {
   private EmbeddedRespondFactory factory;
   private Provider<Request> request;
 
-  public EmbedWidget(Map<String, ArgumentWidget> arguments, String expression,
+  public EmbedWidget(WidgetChain widgetChain, Map<String, ArgumentWidget> arguments, String expression,
                      Evaluator evaluator, PageBook pageBook, String targetPage) {
+    this.widgetChain = widgetChain;
     this.arguments = arguments;
 
     this.evaluator = evaluator;
@@ -53,7 +55,7 @@ class EmbedWidget implements Renderable {
     }
 
     //chain to embedded page (widget), with arguments
-    EmbeddedRespond embed = factory.get(arguments);
+    EmbeddedRespond embed = factory.get(widgetChain, arguments);
 
     Request req = request.get();
     page.doMethod(req.method(), pageObject, "", req);

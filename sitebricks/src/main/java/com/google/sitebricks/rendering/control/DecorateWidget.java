@@ -40,6 +40,21 @@ public class DecorateWidget implements Renderable {
     Class<?> previousTemplateClass = templateClassLocal.get();
     try {
 	    if (previousTemplateClass == null) {
+	      if (respond instanceof EmbeddedRespond) {
+	          WidgetChain widgetChain = ((EmbeddedRespond)respond).getWidgetChain();
+	          if (widgetChain != null) {
+	              // Render the widgetChain content here.
+	              StringBuilderRespond sbrespond = new StringBuilderRespond(new Object());
+	              EmbeddedRespond embedded = new EmbeddedRespond(null, null, sbrespond);
+	              widgetChain.render(bound, embedded);
+	          
+	              // write the head and content to the real respond
+	              respond.writeToHead(embedded.toHeadString());
+	              respond.write(embedded.toString());
+	              
+	              return;
+	          }
+	      }
 	      templateClass = bound.getClass();
 	    }
 	    else {
@@ -56,7 +71,7 @@ public class DecorateWidget implements Renderable {
 	
 	    // create a dummy respond to collect the output of the embedded page
 	    StringBuilderRespond sbrespond = new StringBuilderRespond(new Object());
-	    EmbeddedRespond embedded = new EmbeddedRespond(null, sbrespond);
+	    EmbeddedRespond embedded = new EmbeddedRespond(null, null, sbrespond);
 	    page.widget().render(bound, embedded);
 	
 	    // write the head and content to the real respond
@@ -82,7 +97,7 @@ public class DecorateWidget implements Renderable {
     }
     else if (candidate == Object.class) {
       // this should never happen - we should terminate recursion first
-      throw new IllegalStateException("Did not find previsou extension");
+      throw new IllegalStateException("Did not find previous extension");
     }
     else {
       // check the super class for the result

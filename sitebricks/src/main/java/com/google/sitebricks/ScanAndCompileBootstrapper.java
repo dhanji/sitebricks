@@ -21,6 +21,7 @@ import com.google.sitebricks.routing.PageBook.Page;
 import com.google.sitebricks.routing.SystemMetrics;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -95,7 +96,7 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
     //we need to scan all the pages first (do not collapse into the next loop)
     Set<PageBook.Page> pagesToCompile = scanPagesToCompile(set);
     collectBindings(bindings, pagesToCompile);
-    extendedPages(pagesToCompile);
+    decoratePages(pagesToCompile);
 
     // Compile templates for scanned classes (except in dev mode, where faster startup
     // time is more important and compiles are amortized across visits to each page).
@@ -114,11 +115,12 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
     metrics.activate();
   }
 
-  private void extendedPages(Set<Page> pagesToCompile) {
-    for (Page page : pagesToCompile) {
+  private void decoratePages(Set<Page> pagesToCompile) {
+    // copy the page set, as we may be adding to it
+    for (Page page : new ArrayList<Page>(pagesToCompile)) {
       if (page.pageClass().isAnnotationPresent(Decorated.class)) {
-        // recursively add extension pages
-        analyseExtension(pagesToCompile, page.pageClass());
+        // recursively add decorated pages
+        analyseDecorated(pagesToCompile, page.pageClass());
       }
     }
   }
@@ -206,22 +208,22 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
     return pagesToCompile;
   }
 
-  private void analyseExtension(Set<PageBook.Page> pagesToCompile, Class<?> extendClass) {
-    // store the page with a special page name used by ExtendWidget
-    pagesToCompile.add(pageBook.decorate(extendClass));
+  private void analyseDecorated(Set<PageBook.Page> pagesToCompile, Class<?> decoratorClass) {
+    // store the page with a special page name used by DecorateWidget
+    pagesToCompile.add(pageBook.decorate(decoratorClass));
     
     // recursively analyse super class
-    while (extendClass != Object.class) {
-      extendClass = extendClass.getSuperclass();
-      if (extendClass.isAnnotationPresent(Decorated.class)) {
-        analyseExtension(pagesToCompile, extendClass);
+    while (decoratorClass != Object.class) {
+      decoratorClass = decoratorClass.getSuperclass();
+      if (decoratorClass.isAnnotationPresent(Decorated.class)) {
+        analyseDecorated(pagesToCompile, decoratorClass);
       }
-      else if (extendClass.isAnnotationPresent(Show.class)) {
-        // there is a @Show with no @Extension so this is the outer template
+      else if (decoratorClass.isAnnotationPresent(Show.class)) {
+        // there is a @Show with no @Decorate so this is the outer template
         return;
       }
     }
-    throw new IllegalStateException("Could not find super class annotated with @Show");
+    throw new IllegalStateException("Could not find superclass annotated with @Show");
   }
 
   private void compilePages(Set<PageBook.Page> pagesToCompile) {
