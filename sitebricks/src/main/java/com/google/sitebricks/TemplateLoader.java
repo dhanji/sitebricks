@@ -35,32 +35,36 @@ public class TemplateLoader {
     //
     // try to find the template name
     //
-    String template = null;
+    String name;
     String extension = null;
+    String show = null;
 
-    Show show = pageClass.getAnnotation(Show.class);
-    if (null != show) {
-      template = show.value();
+    Show showAnnotation = pageClass.getAnnotation(Show.class);
+    if (null != showAnnotation) {
+      show = showAnnotation.value();
     }
 
     //
     // an empty string means no template name was given
     //
-    if (template == null || template.length() == 0) {
+    if (show == null || show.length() == 0) {
       // use the default name for the page class
-      template = pageClass.getSimpleName();
+      name = pageClass.getSimpleName();
     } else {
+      name = show;
+
       // Check and see if the supplied template value has a supported file extension
       for (String ext : templateSystem.getTemplateExtensions()) {
         String type = ext.replace("%s.", ".");
-        if (template.endsWith(type)) {
-          extension = type;
+        if (show.endsWith(type)) {
+          name = show.substring(0, show.lastIndexOf(type));
+          extension = type.substring(1);
           break;
         }
       }
     }
 
-    if (null == template) {
+    if (null == name) {
       throw new MissingTemplateException(String.format("Could not determine the base template name for %s", Show.class));
     }
 
@@ -72,26 +76,26 @@ public class TemplateLoader {
       InputStream stream = null;
 
       //
-      // If there was a matching file extension, short-circuit the deep search
+      // If there is a direct @Show(template) match, short-circuit the deep search
       //
 
-      if (template.contains(".") || null != extension) {
+      if ((null != show && show.contains("."))) {
         // Check class neighborhood for direct match
-        stream = pageClass.getResourceAsStream(template);
+        stream = pageClass.getResourceAsStream(show);
 
         // Check url conventions for direct match
         if (null == stream) {
-          stream = open(template, servletContext);
+          stream = open(show, servletContext);
         }
 
         // Same as above, but checks in WEB-INF
         if (null == stream) {
-          stream = openWebInf(template, servletContext);
+          stream = openWebInf(show, servletContext);
         }
 
         // Finally, try to get the resource from the servlet context
         if (null == stream) {
-          stream = servletContext.getResourceAsStream(template);
+          stream = servletContext.getResourceAsStream(show);
         }
       }
 
@@ -102,11 +106,12 @@ public class TemplateLoader {
 
       if (null == stream) {
         for (String ext : templateSystem.getTemplateExtensions()) {
-          String name = String.format(ext, template);
+          String template = String.format(ext, name);
 
-          stream = pageClass.getResourceAsStream(name);
+          stream = pageClass.getResourceAsStream(template);
 
           if (null != stream) {
+            extension = ext.substring(3);
             break;
           }
         }
@@ -119,11 +124,12 @@ public class TemplateLoader {
 
       if (null == stream) {
         for (String ext : templateSystem.getTemplateExtensions()) {
-          String name = String.format(ext, pageClass.getSimpleName());
+          String template = String.format(ext, name);
 
-          stream = open(name, servletContext);
+          stream = open(template, servletContext);
 
           if (null != stream) {
+            extension = ext.substring(3);
             break;
           }
         }
@@ -135,11 +141,12 @@ public class TemplateLoader {
 
       if (null == stream) {
         for (String ext : templateSystem.getTemplateExtensions()) {
-          String name = String.format(ext, pageClass.getSimpleName());
+          String template = String.format(ext, name);
 
-          stream = openWebInf(name, servletContext);
+          stream = openWebInf(template, servletContext);
 
           if (null != stream) {
+            extension = ext.substring(3);
             break;
           }
         }
@@ -151,11 +158,12 @@ public class TemplateLoader {
 
       if (null == stream) {
         for (String ext : templateSystem.getTemplateExtensions()) {
-          String name = String.format(ext, template);
+          String template = String.format(ext, name);
 
-          stream = servletContext.getResourceAsStream(name);
+          stream = servletContext.getResourceAsStream(template);
 
           if (null != stream) {
+            extension = ext.substring(3);
             break;
           }
         }
@@ -176,8 +184,7 @@ public class TemplateLoader {
     } catch (IOException e) {
       throw new TemplateLoadingException("Could not load template for (i/o error): " + pageClass, e);
     }
-
-    return new Template(template, text, templateSource);
+    return new Template(name + (null != extension ? "." + extension : ""), text, templateSource);
   }
 
   private static InputStream open(String templateName, ServletContext context) {
