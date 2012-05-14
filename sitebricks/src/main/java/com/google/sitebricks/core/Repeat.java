@@ -56,6 +56,12 @@ import java.util.Collection;
  *  &lt;/div&gt;
  * &lt;/div&gt;
  * </pre>
+ * 
+ * <p>
+ * Repeat makes two additional variables available: {@code index} and {@code isLast}. {@code index} 
+ * is a zero-based counter that indicates the current item number. {@code isLast} is a boolean that
+ * will be true when the last item is being processed.
+ * </p>
  *
  * 
  * <p>
