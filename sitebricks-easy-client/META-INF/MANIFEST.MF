@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
-Export-Package: org.sitebricks.client.easy;version="0.8.6.SNAPSHOT";
+Export-Package: org.sitebricks.client.easy;version="0.8.7.SNAPSHOT";
   uses:="com.google.inject.binder,
    com.google.inject.util,
    org.sonatype.sisu.sitebricks.client.internal,
    com.google.inject",
- org.sitebricks.client.easy.internal;version="0.8.6.SNAPSHOT";
+ org.sitebricks.client.easy.internal;version="0.8.7.SNAPSHOT";
   uses:="com.google.sitebricks.client,
    com.google.sitebricks.http,
    com.google.sitebricks.client.transport,
@@ -17,7 +17,7 @@ Export-Package: org.sitebricks.client.easy;version="0.8.6.SNAPSHOT";
    org.sonatype.sisu.sitebricks.client,
    com.google.inject.spi,
    com.google.inject"
-Bundle-Version: 0.8.6.SNAPSHOT
+Bundle-Version: 0.8.7.SNAPSHOT
 Tool: Bnd-0.0.357
 Bundle-Name: sitebricks-easy-client
 Bnd-LastModified: 1327256671731
@@ -41,4 +41,3 @@ Import-Package: com.google.inject;version="1.3",
  org.codehaus.jackson.type;version="1.9",
  org.sitebricks.client.easy;version="0.8",
  org.sitebricks.client.easy.internal;version="0.8"
-

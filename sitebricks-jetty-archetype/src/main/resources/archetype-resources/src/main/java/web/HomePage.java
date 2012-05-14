@@ -1,4 +1,4 @@
-package info.sitebricks.example.web;
+package ${package}.web;
 
 import com.google.sitebricks.At;
 import com.google.sitebricks.Visible;

@@ -62,9 +62,9 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     methods.put("delete", Delete.class);
     methods.put("head", Head.class);
     methods.put("trace", Trace.class);
-    
+
   }
-  
+
   @Override
   protected final void configure() {
 
@@ -117,19 +117,29 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
     configureTemplateSystem();
   }
-  
-  protected void configureTemplateSystem() {    
+
+  protected void configureTemplateSystem() {
     //
     // Map of all the implementations keyed by type they can handle 
     //
     MapBinder<String,TemplateCompiler> templateCompilers = MapBinder.newMapBinder(binder(), String.class, TemplateCompiler.class);
     templateCompilers.addBinding("html").to(HtmlTemplateCompiler.class);
+    templateCompilers.addBinding("xhtml").to(HtmlTemplateCompiler.class);
     templateCompilers.addBinding("xml").to(XmlTemplateCompiler.class);
     templateCompilers.addBinding("flat").to(FlatTemplateCompiler.class);
     templateCompilers.addBinding("mvel").to(MvelTemplateCompiler.class);
-    templateCompilers.addBinding("fml").to(FreemarkerTemplateCompiler.class);    
+    templateCompilers.addBinding("fml").to(FreemarkerTemplateCompiler.class);
+
+    configureTemplateCompilers(templateCompilers);
   }
-  
+
+  protected void configureTemplateCompilers(MapBinder<String, TemplateCompiler> compilers) {
+    // Override to include custom template compilers. You can also simply add to the existing MapBinder
+    // mapping anywhere in your modules (see: http://code.google.com/p/google-guice/wiki/Multibindings):
+    //  MapBinder<String,TemplateCompiler> templateCompilers = MapBinder.newMapBinder(binder(), String.class, TemplateCompiler.class);
+    //  templateCompilers.addBinding("mustache").to(MustacheTemplateCompiler.class);
+  }
+
   /**
    * Optionally supply {@link javax.servlet.Servlet} and/or {@link javax.servlet.Filter} implementations to
    * Guice Servlet. See {@link com.google.sitebricks.SitebricksServletModule} for usage examples.
@@ -194,7 +204,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
       public void using(Locale locale, Properties properties) {
         Preconditions.checkArgument(null != properties, "Must provide a non-null resource bundle");
         // A Properties object is always of type string/string
-        @SuppressWarnings({ "unchecked", "rawtypes" }) 
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         Map<String, String> messages = (Map) properties;
         localizations.add(new Localizer.Localization(iface, locale, messages));
       }
@@ -221,7 +231,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     Preconditions.checkArgument(null != pack, "Package parameter to scan() cannot be null");
     packages.add(pack);
   }
-  
+
   static enum BindingKind {
     EMBEDDED, PAGE, SERVICE, STATIC_RESOURCE, ACTION
   }
@@ -331,20 +341,20 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
       this.asEagerSingleton = true;
     }
   }
-  
+
   //
   // Converters
   //
-  
+
   @SuppressWarnings("rawtypes")
   private Multibinder<Converter> converters;
-  
+
   public final void converter(Converter<?, ?> converter)    {
     Preconditions.checkArgument(null != converter, "Type converters cannot be null");
     converters.addBinding().toInstance(converter);
   }
-  
+
   public final void converter(Class<? extends Converter<?, ?>> clazz) {
     converters.addBinding().to(clazz);
-  }  
+  }
 }

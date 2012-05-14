@@ -118,8 +118,10 @@ class XmlWidget implements Renderable {
   private static String contextualizeIfNeeded(String attribute, boolean isFirstToken, String raw) {
     if (isFirstToken && CONTEXTUAL_ATTRIBS.contains(attribute)) {
       //add context to path if needed
-      if (raw.startsWith("/"))
-        raw = request.get().context() + raw;
+      if (raw.startsWith("/")) {
+        if (!raw.startsWith("//"))    // Ignore protocol-relative paths.
+          raw = request.get().context() + raw;
+      }
     }
 
     return raw;
