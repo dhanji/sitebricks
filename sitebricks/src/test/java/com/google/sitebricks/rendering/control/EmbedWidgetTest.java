@@ -142,7 +142,7 @@ public class EmbedWidgetTest {
     targetWidgetChain.addWidget(new XmlWidget(new TerminalWidgetChain(), "p", createMock(EvaluatorCompiler.class), Collections.EMPTY_MAP));
     widgetChain.addWidget(new ShowIfWidget(targetWidgetChain, "true", evaluator));
 
-    final EmbedWidget embedWidget = new EmbedWidget(Collections.<String, ArgumentWidget>emptyMap(), expression, evaluator, pageBook, pageName);
+    final EmbedWidget embedWidget = new EmbedWidget(null, Collections.<String, ArgumentWidget>emptyMap(), expression, evaluator, pageBook, pageName);
     embedWidget.init(new EmbeddedRespondFactory(), HtmlTemplateCompilerTest.mockRequestProviderForContext());
     embedWidget
         .render(new MyParentPage(passOn), respond);
@@ -203,7 +203,7 @@ public class EmbedWidgetTest {
     replay(pageBook, page);
 
 
-    final EmbedWidget embedWidget = new EmbedWidget(Collections.<String, ArgumentWidget>emptyMap(), expression, evaluator, pageBook, pageName);
+    final EmbedWidget embedWidget = new EmbedWidget(null, Collections.<String, ArgumentWidget>emptyMap(), expression, evaluator, pageBook, pageName);
     embedWidget.init(new EmbeddedRespondFactory(), HtmlTemplateCompilerTest.mockRequestProviderForContext());
     embedWidget
         .render(new MyParentPage(passOn), respond);
@@ -273,7 +273,7 @@ public class EmbedWidgetTest {
         includeExpr, evaluator));
 
 
-    final EmbedWidget embedWidget = new EmbedWidget(inners, expression, evaluator, pageBook, targetPageName);
+    final EmbedWidget embedWidget = new EmbedWidget(null, inners, expression, evaluator, pageBook, targetPageName);
     embedWidget.init(new EmbeddedRespondFactory(), HtmlTemplateCompilerTest.mockRequestProviderForContext());
     embedWidget
         .render(new MyParentPage(passOn), respond);
@@ -331,7 +331,7 @@ public class EmbedWidgetTest {
     replay(pageBook, page);
 
 
-    final EmbedWidget embedWidget = new EmbedWidget(Collections.<String, ArgumentWidget>emptyMap(), expression, evaluator, pageBook, pageName);
+    final EmbedWidget embedWidget = new EmbedWidget(null, Collections.<String, ArgumentWidget>emptyMap(), expression, evaluator, pageBook, pageName);
     embedWidget.init(new EmbeddedRespondFactory(), HtmlTemplateCompilerTest.mockRequestProviderForContext());
     embedWidget
         .render(new MyParentPage(passOn), respond);
@@ -379,7 +379,7 @@ public class EmbedWidgetTest {
 
     replay(pageBook, page, mockRespond, widget);
 
-    final EmbedWidget embedWidget = new EmbedWidget(Collections.<String, ArgumentWidget>emptyMap(), expression, new MvelEvaluator(), pageBook, pageName);
+    final EmbedWidget embedWidget = new EmbedWidget(null, Collections.<String, ArgumentWidget>emptyMap(), expression, new MvelEvaluator(), pageBook, pageName);
     embedWidget.init(new EmbeddedRespondFactory(), HtmlTemplateCompilerTest.mockRequestProviderForContext());
     embedWidget
         .render(new MyParentPage(passOn), mockRespond);
@@ -422,7 +422,7 @@ public class EmbedWidgetTest {
 
     replay(pageBook, page, mockRespond, widget);
 
-    new EmbedWidget(Collections.<String, ArgumentWidget>emptyMap(), expression, new MvelEvaluator(), pageBook, pageName)
+    new EmbedWidget(null, Collections.<String, ArgumentWidget>emptyMap(), expression, new MvelEvaluator(), pageBook, pageName)
         .render(new MyParentPage(passOn), mockRespond);
 
     verify(pageBook, page, mockRespond, widget);
@@ -458,7 +458,7 @@ public class EmbedWidgetTest {
 
     replay(pageBook, page, mockRespond, widget);
 
-    final EmbedWidget embedWidget = new EmbedWidget(Collections.<String, ArgumentWidget>emptyMap(), expression, new MvelEvaluator(), pageBook, pageName);
+    final EmbedWidget embedWidget = new EmbedWidget(null, Collections.<String, ArgumentWidget>emptyMap(), expression, new MvelEvaluator(), pageBook, pageName);
     embedWidget.init(new EmbeddedRespondFactory(), HtmlTemplateCompilerTest.mockRequestProviderForContext());
     embedWidget
         .render(new MyParentPage(passOn), mockRespond);

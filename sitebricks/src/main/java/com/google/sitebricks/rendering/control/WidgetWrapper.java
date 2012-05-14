@@ -37,7 +37,7 @@ class WidgetWrapper {
     try {
       return WidgetKind.NORMAL.equals(kind) ?
           constructor.newInstance(widgetChain, expression, evaluator) :
-          constructor.newInstance(toArguments(widgetChain), expression, evaluator, pageBook, key);
+          constructor.newInstance(widgetChain, toArguments(widgetChain), expression, evaluator, pageBook, key);
 
     } catch (IllegalAccessException e) {
       throw new IllegalStateException("Malformed Widget (this should never happen): " + clazz);
@@ -68,7 +68,7 @@ class WidgetWrapper {
     try {
       switch (kind) {
         case EMBED:
-          constructor = widgetClass.getConstructor(Map.class, String.class, Evaluator.class,
+          constructor = widgetClass.getConstructor(WidgetChain.class, Map.class, String.class, Evaluator.class,
               PageBook.class, String.class);
           break;
 

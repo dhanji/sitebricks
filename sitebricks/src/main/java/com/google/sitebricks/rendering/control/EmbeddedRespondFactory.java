@@ -12,7 +12,7 @@ import java.util.Map;
 @Immutable class EmbeddedRespondFactory {
   private final Respond respond = new StringBuilderRespond(new Object());
 
-  public EmbeddedRespond get(Map<String, ArgumentWidget> arguments) {
-    return new EmbeddedRespond(arguments, respond);
+  public EmbeddedRespond get(WidgetChain widgetChain, Map<String, ArgumentWidget> arguments) {
+    return new EmbeddedRespond(widgetChain, arguments, respond);
   }
 }

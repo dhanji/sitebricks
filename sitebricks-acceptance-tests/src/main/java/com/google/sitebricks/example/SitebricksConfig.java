@@ -78,6 +78,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/embed").show(Embed.class);
         at("/error").show(CompileErrors.class);
         at("/forms").show(Forms.class);
+        at("/multipleembed").show(MultipleEmbed.class);
         at("/repeat").show(Repeat.class);
         at("/showif").show(ShowIf.class);
         at("/dynamic.js").show(DynamicJs.class);
@@ -110,6 +111,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/template").show(DecoratedPage.class);
 
         embed(HelloWorld.class).as("Hello");
+        embed(EmbedWithRequire.class).as("EmbedWithRequire");
       }
 
       @SuppressWarnings("unchecked")
