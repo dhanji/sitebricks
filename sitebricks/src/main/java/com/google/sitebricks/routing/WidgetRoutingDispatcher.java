@@ -114,7 +114,6 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
         String redirectUri = targetPage.getUri();
         if (redirect == instance) {
           redirectUri = uri;
-          targetPage = page;
         }
 
         // should never be null coz it will be validated at compile time.
