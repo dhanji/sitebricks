@@ -153,7 +153,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
 
   private static MessageStatus parseStatus(String message) {
     if (message.startsWith("BAD")) {
-      log.warn("en: {}", message);
+      log.warn("error, got BAD response ignoring: {}", message);
       return null;
     }
 
