@@ -33,6 +33,8 @@ import java.util.regex.Pattern;
 class MailClientHandler extends SimpleChannelHandler {
   private static final Logger log = LoggerFactory.getLogger(MailClientHandler.class);
 
+  private static boolean ENABLE_WIRE_TRACE = true;
+
   private static final Map<String, Boolean> logAllMessagesForUsers = new ConcurrentHashMap<String, Boolean>();
 
   public static final String CAPABILITY_PREFIX = "* CAPABILITY";
@@ -149,8 +151,11 @@ class MailClientHandler extends SimpleChannelHandler {
         log.info("IMAPrcv[{}]: {}", config.getUsername(), message);
     }
 
-    wireTrace.add(message);
-    log.trace(message);
+    if (ENABLE_WIRE_TRACE) {
+      wireTrace.add(message);
+      log.trace(message);
+    }
+
     if (SYSTEM_ERROR_REGEX.matcher(message).matches()
         || ". NO [ALERT] Account exceeded command or bandwidth limits. (Failure)".equalsIgnoreCase(
         message.trim())) {

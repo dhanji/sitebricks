@@ -319,6 +319,7 @@ public class NettyImapClient implements MailClient, Idler {
 
     final SettableFuture<Folder> valueFuture = SettableFuture.create();
     final SettableFuture<Folder> externalFuture = SettableFuture.create();
+
     valueFuture.addListener(new Runnable() {
       @Override
       public void run() {

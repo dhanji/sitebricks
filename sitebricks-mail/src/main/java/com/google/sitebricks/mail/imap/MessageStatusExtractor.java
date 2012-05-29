@@ -117,7 +117,9 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
         matcher = SIZE_MARKER.matcher(message);
       }
 
-      statuses.add(parseStatus(message.replaceFirst("^[*] ", "")));
+      final MessageStatus messageStatus = parseStatus(message.replaceFirst("^[*] ", ""));
+      if (messageStatus != null)
+        statuses.add(messageStatus);
     }
 
     return statuses;
@@ -150,9 +152,13 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
   }
 
   private static MessageStatus parseStatus(String message) {
+    if (message.startsWith("BAD")) {
+      log.warn("en: {}", message);
+      return null;
+    }
+
     Queue<String> tokens = Parsing.tokenize(message);
     MessageStatus status = new MessageStatus();
-
     try {
       // Assert that we have an envelope.
       Parsing.match(tokens, int.class);
