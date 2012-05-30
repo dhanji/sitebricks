@@ -18,8 +18,10 @@ import com.google.sitebricks.client.WebResponse;
 import com.google.sitebricks.client.transport.Json;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Patch;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
+
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
 
@@ -34,7 +36,7 @@ import java.util.Map;
 
 public class DefaultRestClient implements InvocationHandler {
 
-  private static final HttpMethod[] METHODS = new HttpMethod[] { new GetHttpMethod(), new PutHttpMethod(), new DeleteHttpMethod(), new PostHttpMethod() };
+  private static final HttpMethod[] METHODS = new HttpMethod[] { new GetHttpMethod(), new PutHttpMethod(), new PatchHttpMethod(), new DeleteHttpMethod(), new PostHttpMethod() };
 
   private final URL baseUrl;
 
@@ -149,7 +151,7 @@ public class DefaultRestClient implements InvocationHandler {
         return httpMethod;
       }
     }
-    throw new IllegalStateException(String.format("Could not determine the http method to call. Is you method [%s] with one of @Get, @Put, @Delete, @Post?", method.getName()));
+    throw new IllegalStateException(String.format("Could not determine the http method to call. Is you method [%s] with one of @Get, @Put, @Patch, @Delete, @Post?", method.getName()));
   }
 
   private static void checkStatus(final WebResponse response, final String url, final HttpMethod httpMethod) {
@@ -220,6 +222,30 @@ public class DefaultRestClient implements InvocationHandler {
     @Override
     public String toString() {
       return "PUT";
+    }
+
+  }
+
+  private static class PatchHttpMethod implements HttpMethod {
+
+    @Override
+    public Class<? extends Annotation> annotation() {
+      return Patch.class;
+    }
+
+    @Override
+    public <T> WebResponse invoke(final WebClient<T> webClient, final T request) {
+      return webClient.patch(request);
+    }
+
+    @Override
+    public Class<? extends Object> getTransportType(final Method method) {
+      return DefaultRestClient.getTransportType(method);
+    }
+
+    @Override
+    public String toString() {
+      return "PATCH";
     }
 
   }

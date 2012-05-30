@@ -7,6 +7,7 @@ import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Patch;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
 
@@ -32,6 +33,7 @@ public class RestfulWebServiceWithCRUD {
   public static final String READ_COLLECTION = "READ_COLLECTION";
   public static final String READ_INDIVIDUAL = "READ_INDIVIDUAL";
   public static final String UPDATE = "UPDATE";
+  public static final String PARTIAL_UPDATE = "PARTIAL_UPDATE";
   public static final String DELETE = "DELETE";
 
   @Post
@@ -52,6 +54,11 @@ public class RestfulWebServiceWithCRUD {
   @At( "/:id" ) @Put
   public Reply<?> put( Request request, @Named( "type" ) String type, @Named( "id" ) String id ) {
     return Reply.with(UPDATE);
+  }
+
+  @At( "/:id" ) @Patch
+  public Reply<?> patch( Request request, @Named( "type" ) String type, @Named( "id" ) String id ) {
+    return Reply.with(PARTIAL_UPDATE);
   }
 
   @At( "/:id" ) @Delete

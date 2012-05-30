@@ -1,7 +1,11 @@
 package com.google.sitebricks.example;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.*;
+import com.google.inject.BindingAnnotation;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.sitebricks.AwareModule;
 import com.google.sitebricks.SitebricksModule;
@@ -13,6 +17,7 @@ import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Patch;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
 import com.google.sitebricks.routing.Action;
@@ -140,6 +145,8 @@ public class SitebricksConfig extends GuiceServletContextListener {
             .on(Get.class)
             .perform(action("UPDATE"))
             .on(Put.class)
+            .perform(action("PARTIAL_UPDATE"))
+            .on(Patch.class)
             .perform(action("DELETE"))
             .on(Delete.class);
       }

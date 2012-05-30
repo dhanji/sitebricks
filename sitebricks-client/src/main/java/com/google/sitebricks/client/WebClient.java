@@ -10,6 +10,8 @@ public interface WebClient<T> {
 
     WebResponse put(T t);
 
+    WebResponse patch(T t);
+
     WebResponse delete();
 
     /**
