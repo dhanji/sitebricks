@@ -1,34 +1,28 @@
 package com.google.sitebricks.mail.imap;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
-import java.util.Collection;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeUtility;
-
-import org.apache.james.mime4j.codec.DecodeMonitor;
-import org.apache.james.mime4j.codec.DecoderUtil;
-import org.jetbrains.annotations.TestOnly;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
+import org.apache.james.mime4j.codec.DecodeMonitor;
+import org.apache.james.mime4j.codec.DecoderUtil;
+import org.jetbrains.annotations.TestOnly;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeUtility;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Extracts a full Message body from an IMAP fetch. Specifically
@@ -42,6 +36,7 @@ import com.google.common.io.CharStreams;
  */
 class MessageBodyExtractor implements Extractor<List<Message>> {
   private static final Logger log = LoggerFactory.getLogger(MessageBodyExtractor.class);
+  private static final Logger parseErrorLog = LoggerFactory.getLogger("parseerrordump");
 
   static final Pattern BOUNDARY_REGEX = Pattern.compile(
       ";[\\s]*boundary[\\s]*=[\\s]*[\"]?([^\"^;]*)[\"]?",
@@ -174,13 +169,11 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   }
 
   private void dumpError(List<Message> emails, List<String> partitionedMessages, int errorCount) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("============\n");
+    parseErrorLog.error("===========");
+    parseErrorLog.error("{} Message parsing error(s) encountered in emails.", errorCount);
     for (String piece : partitionedMessages) {
-      sb.append(piece).append("\n");
+      parseErrorLog.info(piece);
     }
-    sb.append("============\n");
-    log.error("{} Message parsing error(s) encountered in:\n {}", errorCount, sb.toString());
   }
 
   private ListIterator<String> selectLengthBasedSection(ListIterator<String> iterator, long msgSize) throws ParseException {
