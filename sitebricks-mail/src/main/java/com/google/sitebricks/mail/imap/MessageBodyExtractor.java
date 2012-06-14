@@ -169,6 +169,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
   }
 
   private void dumpError(List<Message> emails, List<String> partitionedMessages, int errorCount) {
+    log.error("{} Message parsing error(s) encountered in emails. See parse_error_log dump for details.", errorCount);
     parseErrorLog.error("===========");
     parseErrorLog.error("{} Message parsing error(s) encountered in emails.", errorCount);
     for (String piece : partitionedMessages) {
@@ -532,8 +533,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     try {
       bytes = readBodyAsString(iterator, boundary, gropeForTruncator).getBytes(charset);
     } catch (UnsupportedEncodingException e) {
-      log.error("Could not decode body as string due to encoding, using default encoding.", e);
-      errorCount.incrementAndGet();
+      log.warn("Could not decode body as string due to encoding, using default encoding.", e);
       bytes = readBodyAsString(iterator, boundary, gropeForTruncator).getBytes();
     }
 
