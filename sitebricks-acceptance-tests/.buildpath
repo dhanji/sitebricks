@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<buildpath>
-	<buildpathentry kind="src" path="src/main/java"/>
-	<buildpathentry kind="src" path="src/main/resources"/>
-	<buildpathentry kind="src" path="src/test/java"/>
-	<buildpathentry kind="con" path="org.eclipse.dltk.mod.launching.INTERPRETER_CONTAINER"/>
-	<buildpathentry kind="con" path="org.ebayopensource.vjet.eclipse.core.SDK_CONTAINER/DEFUALT_SDK"/>
-</buildpath>
