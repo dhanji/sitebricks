@@ -24,39 +24,33 @@ import com.google.sitebricks.SitebricksModule;
  * Abstract TestNG/JUnit4 test that automatically binds and injects itself.
  */
 public abstract class SitebricksServiceTest implements Module {
-  
+
   // ----------------------------------------------------------------------
   // Implementation fields
   // ----------------------------------------------------------------------
 
   private String basedir;
-  private Injector injector;  
+  private Injector injector;
   private Jetty server;
-  private int port;
-  
+
   // ----------------------------------------------------------------------
   // Setup
   // ----------------------------------------------------------------------
-  
+
   @BeforeSuite
   public void beforeSuite() throws Exception {
     //
     // Find a free port for the tests
     //
-    port = testPort(); 
-    server = new Jetty("src/test/webapp", port);    
+    server = new Jetty("src/test/webapp", 0);
     server.start();
   }
-  
-  protected int testPort() throws Exception {
-    return new ServerSocket(0).getLocalPort();        
-  }
-  
-  @AfterSuite 
+
+  @AfterSuite
   public void afterSuite() throws Exception {
     server.stop();
   }
-  
+
   @Before
   @BeforeMethod
   public void setUp() {
@@ -66,7 +60,7 @@ public abstract class SitebricksServiceTest implements Module {
   protected SitebricksModule sitebricksModule() {
     return new SitebricksModule();
   }
-  
+
   @After
   @AfterMethod
   public void tearDown() {
@@ -85,7 +79,7 @@ public abstract class SitebricksServiceTest implements Module {
 
   /**
    * Custom injection bindings.
-   * 
+   *
    * @param binder
    *          The Guice binder
    */
@@ -95,7 +89,7 @@ public abstract class SitebricksServiceTest implements Module {
 
   /**
    * Custom property values.
-   * 
+   *
    * @param properties
    *          The test properties
    */
@@ -141,8 +135,8 @@ public abstract class SitebricksServiceTest implements Module {
   private final <T> T lookup(final Key<T> key) {
     return injector.getInstance(key);
   }
-  
+
   protected String baseUrl() {
-    return "http://localhost:" + port + "/sitebricks";
+    return "http://localhost:" + server.getListeningPort() + "/sitebricks";
   }
 }
