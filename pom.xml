@@ -195,6 +195,12 @@
       </dependency>
 
       <dependency>
+        <groupId>org.softee</groupId>
+        <artifactId>pojo-mbean</artifactId>
+        <version>1.1</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.easymock</groupId>
         <artifactId>easymock</artifactId>
         <version>2.4</version>
@@ -216,7 +222,7 @@
         <artifactId>servlet-api-2.5</artifactId>
         <version>${org.mortbay.jetty.version}</version>
       </dependency>
-
+      <!-- Testing -->
       <dependency>
         <groupId>org.seleniumhq.webdriver</groupId>
         <artifactId>webdriver-common</artifactId>
