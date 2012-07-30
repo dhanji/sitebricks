@@ -1,5 +1,6 @@
 package com.google.sitebricks.acceptance.util;
 
+import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 
@@ -13,8 +14,8 @@ public class Jetty {
 
   public Jetty(String path, int port) {
     this(new WebAppContext(path, APP_NAME), port);
-  }  
-  
+  }
+
   public Jetty(WebAppContext webAppContext, int port) {
     server = new Server(port);
     server.addHandler(webAppContext);
@@ -30,5 +31,12 @@ public class Jetty {
 
   public void stop() throws Exception {
     server.stop();
+  }
+
+  public int getListeningPort() {
+    for (Connector connector : server.getConnectors()) {
+      return connector.getLocalPort();
+    }
+    throw new IllegalStateException("No port bound");
   }
 }
