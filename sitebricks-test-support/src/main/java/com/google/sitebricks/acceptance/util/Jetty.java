@@ -1,5 +1,6 @@
 package com.google.sitebricks.acceptance.util;
 
+import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.webapp.WebAppContext;
 
@@ -10,7 +11,7 @@ import com.google.inject.Injector;
  * @author Jason van Zyl
  */
 public class Jetty {
-  
+
   public static final String INJECTOR_KEY = "@_INJECTOR_@";
   private static final String APP_NAME = "/sitebricks";
   private final Server server;
@@ -21,12 +22,12 @@ public class Jetty {
     webAppContext.getServletContext().setAttribute(INJECTOR_KEY, injector);
     server = new Server(port);
     server.addHandler(webAppContext);
-  }  
+  }
 
   public Jetty(String path, int port) {
     this(new WebAppContext(path, APP_NAME), port);
-  }  
-    
+  }
+
   public Jetty(WebAppContext webAppContext, int port) {
     server = new Server(port);
     server.addHandler(webAppContext);
@@ -42,5 +43,12 @@ public class Jetty {
 
   public void stop() throws Exception {
     server.stop();
+  }
+
+  public int getListeningPort() {
+    for (Connector connector : server.getConnectors()) {
+      return connector.getLocalPort();
+    }
+    throw new IllegalStateException("No port bound");
   }
 }
