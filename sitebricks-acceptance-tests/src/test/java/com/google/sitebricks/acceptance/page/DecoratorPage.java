@@ -30,7 +30,7 @@ public class DecoratorPage {
 	 }
 
   public static DecoratorPage open(WebDriver driver) {
-    driver.get(AcceptanceTest.BASE_URL + "/template");
+    driver.get(AcceptanceTest.baseUrl() + "/template");
     return PageFactory.initElements(driver, DecoratorPage.class);
   }
 }

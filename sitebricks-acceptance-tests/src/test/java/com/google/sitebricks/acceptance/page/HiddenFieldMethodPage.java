@@ -35,7 +35,7 @@ public class HiddenFieldMethodPage {
   }
 
   public static HiddenFieldMethodPage open(WebDriver driver) {
-    driver.get(AcceptanceTest.BASE_URL + "/hiddenfieldmethod");
+    driver.get(AcceptanceTest.baseUrl() + "/hiddenfieldmethod");
     return PageFactory.initElements(driver, HiddenFieldMethodPage.class);
   }
 

@@ -25,7 +25,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   public void shouldServiceTopLevelDynamicPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/" + TOPLEVEL)
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath2/" + TOPLEVEL)
         .transports(String.class)
         .over(Json.class)
         .get();
@@ -36,7 +36,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   public void shouldServiceFirstLevelStaticPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/subpath1")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath2/junk/subpath1")
         .transports(String.class)
         .over(Json.class)
         .post("");
@@ -47,7 +47,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   public void shouldServiceSameFirstLevelStaticPathWithPutMethod() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/subpath1")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath2/junk/subpath1")
         .transports(String.class)
         .over(Json.class)
         .put("");
@@ -59,7 +59,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   public void shouldServiceSameFirstLevelStaticPathWithDeleteMethod() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/subpath1")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath2/junk/subpath1")
         .transports(String.class)
         .over(Json.class)
         .delete();
@@ -71,7 +71,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   public void shouldServiceTwoLevelDynamicPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath2/junk/more_junk")
         .transports(String.class)
         .over(Json.class)
         .post("");
@@ -82,7 +82,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   public void shouldServiceTwoLevelDynamicPathWithDeleteMethod() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath2/junk/more_junk")
         .transports(String.class)
         .over(Json.class)
         .delete();
@@ -93,7 +93,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   public void shouldServiceThreeLevelDynamicPathWithDeleteMethod() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath2/junk/more_junk/most_junk")
         .transports(String.class)
         .over(Json.class)
         .delete();
@@ -104,7 +104,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   public void shouldServiceThreeLevelDynamicPathWithPutMethod() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath2/junk/more_junk/most_junk")
         .transports(String.class)
         .over(Json.class)
         .put("");
@@ -115,7 +115,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   public void shouldServiceThreeLevelDynamicPathWithPostMethod() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath2/junk/more_junk/most_junk")
         .transports(String.class)
         .over(Json.class)
         .post("");
@@ -126,7 +126,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
   public void shouldServiceThreeLevelDynamicPathWithGetMethod() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath2/junk/more_junk/most_junk")
         .transports(String.class)
         .over(Json.class)
         .get();
@@ -146,7 +146,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
 //  public void shouldService4LevelMixedPathWithGetMethod() {
 //    WebResponse response = createInjector()
 //        .getInstance(Web.class)
-//        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk/4l")
+//        .clientOf(AcceptanceTest.baseUrl() + "/superpath2/junk/more_junk/most_junk/4l")
 //        .transports(String.class)
 //        .over(Json.class)
 //        .get();
@@ -157,7 +157,7 @@ public class RestfuWebServiceWithSubpaths2AcceptanceTest {
 //  public void shouldService4LevelMixedPathWithPostMethod() {
 //    WebResponse response = createInjector()
 //        .getInstance(Web.class)
-//        .clientOf(AcceptanceTest.BASE_URL + "/superpath2/junk/more_junk/most_junk/4l")
+//        .clientOf(AcceptanceTest.baseUrl() + "/superpath2/junk/more_junk/most_junk/4l")
 //        .transports(String.class)
 //        .over(Json.class)
 //        .post("");

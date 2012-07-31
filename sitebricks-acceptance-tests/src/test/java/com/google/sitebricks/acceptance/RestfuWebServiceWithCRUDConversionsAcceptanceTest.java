@@ -24,7 +24,7 @@ public class RestfuWebServiceWithCRUDConversionsAcceptanceTest {
 	private Widget widgetOne = RestfulWebServiceWithCRUDConversions.findWidget(1).clone();
 
 	public void create() {
-		String url = AcceptanceTest.BASE_URL + RestfulWebServiceWithCRUDConversions.AT_ME;
+		String url = AcceptanceTest.baseUrl() + RestfulWebServiceWithCRUDConversions.AT_ME;
 		System.out.println("POST " + url);
 
 		WebResponse response = createInjector()
@@ -39,7 +39,7 @@ public class RestfuWebServiceWithCRUDConversionsAcceptanceTest {
 	}
 
 	public void readCollection() {
-		String url = AcceptanceTest.BASE_URL + RestfulWebServiceWithCRUDConversions.AT_ME;
+		String url = AcceptanceTest.baseUrl() + RestfulWebServiceWithCRUDConversions.AT_ME;
 		System.out.println("GET " + url);
 		WebResponse response = createInjector()
 			.getInstance(Web.class)
@@ -63,7 +63,7 @@ public class RestfuWebServiceWithCRUDConversionsAcceptanceTest {
 	}
 
 	public void readIndividual() {
-		String url = AcceptanceTest.BASE_URL + RestfulWebServiceWithCRUDConversions.AT_ME + "/" + widgetOne.getId();
+		String url = AcceptanceTest.baseUrl() + RestfulWebServiceWithCRUDConversions.AT_ME + "/" + widgetOne.getId();
 		System.out.println("GET " + url);
 		WebResponse response = createInjector()
 			.getInstance(Web.class)
@@ -77,7 +77,7 @@ public class RestfuWebServiceWithCRUDConversionsAcceptanceTest {
 	}
 
 	public void update() {
-		String url = AcceptanceTest.BASE_URL + RestfulWebServiceWithCRUDConversions.AT_ME;
+		String url = AcceptanceTest.baseUrl() + RestfulWebServiceWithCRUDConversions.AT_ME;
 
 		widgetOne.setPrice(5.50);
 		System.out.println("PUT " + url);
@@ -95,7 +95,7 @@ public class RestfuWebServiceWithCRUDConversionsAcceptanceTest {
 
 
 	public void delete() {
-		String url = AcceptanceTest.BASE_URL + RestfulWebServiceWithCRUDConversions.AT_ME + "/" + testWidget.getId();
+		String url = AcceptanceTest.baseUrl() + RestfulWebServiceWithCRUDConversions.AT_ME + "/" + testWidget.getId();
 		System.out.println("DELETE " + url);
 		WebResponse response = createInjector()
 			.getInstance(Web.class)

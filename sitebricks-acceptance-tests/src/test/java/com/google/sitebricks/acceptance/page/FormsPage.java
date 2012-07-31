@@ -33,7 +33,7 @@ public class FormsPage {
   }
 
   public static FormsPage open(WebDriver driver) {
-    driver.get(AcceptanceTest.BASE_URL + "/forms");
+    driver.get(AcceptanceTest.baseUrl() + "/forms");
     return PageFactory.initElements(driver, FormsPage.class);
   }
 

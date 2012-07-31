@@ -28,7 +28,7 @@ public class HelloWorldPage {
   }
 
   public static HelloWorldPage open(WebDriver driver, String url) {
-    driver.get(AcceptanceTest.BASE_URL + url);
+    driver.get(AcceptanceTest.baseUrl() + url);
     return PageFactory.initElements(driver, HelloWorldPage.class);
   }
 

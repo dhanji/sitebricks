@@ -29,7 +29,7 @@ public class PostableRestfuWebServiceAcceptanceTest {
 
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/postable?p1=v1,v2")
+        .clientOf(AcceptanceTest.baseUrl() + "/postable?p1=v1,v2")
         .transports(RestfulWebService.Book.class)
         .over(Json.class)
         .post(perdido);

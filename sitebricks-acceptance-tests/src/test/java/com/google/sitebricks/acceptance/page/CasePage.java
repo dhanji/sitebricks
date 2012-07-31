@@ -23,7 +23,7 @@ public class CasePage {
   }
 
   public static CasePage open(WebDriver driver) {
-    driver.get(AcceptanceTest.BASE_URL + "/case");
+    driver.get(AcceptanceTest.baseUrl() + "/case");
     return PageFactory.initElements(driver, CasePage.class);
   }
 }

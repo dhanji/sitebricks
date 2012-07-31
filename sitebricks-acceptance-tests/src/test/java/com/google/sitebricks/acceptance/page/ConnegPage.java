@@ -34,7 +34,7 @@ public class ConnegPage {
   public static ConnegPage openWithHeaders(Map<String, String> headers) {
     String content = Guice.createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/conneg", headers)
+        .clientOf(AcceptanceTest.baseUrl() + "/conneg", headers)
         .transports(String.class)
         .over(Text.class)
         .get()

@@ -22,7 +22,7 @@ public class SpiRestfuWebServiceWithCRUDAcceptanceTest {
   public void shouldServiceReadCollection() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/issue")
+        .clientOf(AcceptanceTest.baseUrl() + "/issue")
         .transports(String.class)
         .over(Json.class)
         .get();
@@ -33,7 +33,7 @@ public class SpiRestfuWebServiceWithCRUDAcceptanceTest {
   public void shouldServiceCreate() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/issue")
+        .clientOf(AcceptanceTest.baseUrl() + "/issue")
         .transports(String.class)
         .over(Json.class)
         .post("");
@@ -44,7 +44,7 @@ public class SpiRestfuWebServiceWithCRUDAcceptanceTest {
   public void shouldServiceRead() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/issue/0")
+        .clientOf(AcceptanceTest.baseUrl() + "/issue/0")
         .transports(String.class)
         .over(Json.class)
         .get();
@@ -55,7 +55,7 @@ public class SpiRestfuWebServiceWithCRUDAcceptanceTest {
   public void shouldServiceUpdate() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/issue/0")
+        .clientOf(AcceptanceTest.baseUrl() + "/issue/0")
         .transports(String.class)
         .over(Json.class)
         .put("");
@@ -66,7 +66,7 @@ public class SpiRestfuWebServiceWithCRUDAcceptanceTest {
   public void shouldServiceDelete() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/issue/0")
+        .clientOf(AcceptanceTest.baseUrl() + "/issue/0")
         .transports(String.class)
         .over(Json.class)
         .delete();

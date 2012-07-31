@@ -26,7 +26,7 @@ public class RestfuWebServiceAcceptanceTest {
   public void shouldTransportJsonWithoutTemplate() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/service")
+        .clientOf(AcceptanceTest.baseUrl() + "/service")
         .transports(String.class)
         .over(Json.class)
         .get();
@@ -47,7 +47,7 @@ public class RestfuWebServiceAcceptanceTest {
   public void shouldRedirect() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/service")
+        .clientOf(AcceptanceTest.baseUrl() + "/service")
         .transports(String.class)
         .over(Text.class)
         .post("");
@@ -58,7 +58,7 @@ public class RestfuWebServiceAcceptanceTest {
   public void shouldTransportJsonWithoutTemplateNoAnnotations() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/no_annotations/service")
+        .clientOf(AcceptanceTest.baseUrl() + "/no_annotations/service")
         .transports(String.class)
         .over(Json.class)
         .get();
@@ -69,7 +69,7 @@ public class RestfuWebServiceAcceptanceTest {
   public void shouldRedirectNoAnnotations() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/no_annotations/service")
+        .clientOf(AcceptanceTest.baseUrl() + "/no_annotations/service")
         .transports(String.class)
         .over(Text.class)
         .post("");

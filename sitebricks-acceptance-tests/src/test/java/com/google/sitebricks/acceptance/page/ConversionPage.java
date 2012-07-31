@@ -79,7 +79,7 @@ public class ConversionPage {
 			sb.append ("dbl=").append(encode(dbl.toString()));
 		}
 			
-		sb.insert(0,"/conversion?").insert(0, AcceptanceTest.BASE_URL);
+		sb.insert(0,"/conversion?").insert(0, AcceptanceTest.baseUrl());
 		driver.get(sb.toString());
 		return PageFactory.initElements(driver, ConversionPage.class);
 	}

@@ -34,7 +34,7 @@ public class SelectRoutingPage {
   }
 
   public static SelectRoutingPage open(WebDriver driver) {
-    driver.get(AcceptanceTest.BASE_URL + "/select");
+    driver.get(AcceptanceTest.baseUrl() + "/select");
     return PageFactory.initElements(driver, SelectRoutingPage.class);
   }
 

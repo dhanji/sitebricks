@@ -34,7 +34,7 @@ public class I18nPage {
   public static I18nPage openWithHeaders(Map<String, String> headers) {
     String content = Guice.createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/i18n?name=" + NAME, headers)
+        .clientOf(AcceptanceTest.baseUrl() + "/i18n?name=" + NAME, headers)
         .transports(String.class)
         .over(Text.class)
         .get()

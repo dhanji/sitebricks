@@ -23,7 +23,7 @@ public class RestfuWebServiceWithMatrixParamsAcceptanceTest {
   public void shouldServiceTopLevelPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/matrixpath")
+        .clientOf(AcceptanceTest.baseUrl() + "/matrixpath")
         .transports(String.class)
         .over(Json.class)
         .get();
@@ -35,7 +35,7 @@ public class RestfuWebServiceWithMatrixParamsAcceptanceTest {
   public void shouldServiceVariableThreeLevelSubPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/matrixpath/val;param1=val1;param2=val2/athing")
+        .clientOf(AcceptanceTest.baseUrl() + "/matrixpath/val;param1=val1;param2=val2/athing")
         .transports(String.class)
         .over(Json.class)
         .post("");

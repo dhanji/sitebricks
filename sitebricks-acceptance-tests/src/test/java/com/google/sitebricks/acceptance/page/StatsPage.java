@@ -26,7 +26,7 @@ public class StatsPage {
   }
 
   public static StatsPage open(WebDriver driver) {
-    driver.get(AcceptanceTest.BASE_URL + "/stats");
+    driver.get(AcceptanceTest.baseUrl() + "/stats");
     return PageFactory.initElements(driver, StatsPage.class);
   }
 }

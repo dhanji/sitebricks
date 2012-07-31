@@ -25,7 +25,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
   public void shouldServiceTopLevelPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath")
         .transports(String.class)
         .over(Json.class)
         .get();
@@ -36,7 +36,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
   public void shouldServiceFirstSubPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath/subpath1")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath/subpath1")
         .transports(String.class)
         .over(Json.class)
         .post("");
@@ -47,7 +47,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
   public void shouldServiceSecondSubPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath/subpath2")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath/subpath2")
         .transports(String.class)
         .over(Json.class)
         .post("");
@@ -58,7 +58,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
   public void shouldServiceThirdSubPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath/subpath3")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath/subpath3")
         .transports(String.class)
         .over(Json.class)
         .post("");
@@ -69,7 +69,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
   public void shouldServiceVariableTwoLevelSubPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath/subpath1/a_thing")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath/subpath1/a_thing")
         .transports(String.class)
         .over(Json.class)
         .post("");
@@ -80,7 +80,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
   public void shouldServiceVariableThreeLevelSubPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath/subpath1/a_thing/another_thing")
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath/subpath1/a_thing/another_thing")
         .transports(String.class)
         .over(Json.class)
         .post("");
@@ -92,7 +92,7 @@ public class RestfuWebServiceWithSubpathsAcceptanceTest {
     String aString = "aoskdoaksd" + new Date().hashCode();
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/superpath/subpath3/" + aString)
+        .clientOf(AcceptanceTest.baseUrl() + "/superpath/subpath3/" + aString)
         .transports(String.class)
         .over(Json.class)
         .post("");

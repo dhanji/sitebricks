@@ -15,7 +15,7 @@ public class PageChainPage {
 
 
   public static PageChainPage open(WebDriver driver) {
-    driver.get(AcceptanceTest.BASE_URL + "/pagechain");
+    driver.get(AcceptanceTest.baseUrl() + "/pagechain");
     return PageFactory.initElements(driver, PageChainPage.class);
   }
 

@@ -43,7 +43,7 @@ public class RepeatPage {
   }
 
   public static RepeatPage open(WebDriver driver) {
-    driver.get(AcceptanceTest.BASE_URL + "/repeat");
+    driver.get(AcceptanceTest.baseUrl() + "/repeat");
     return PageFactory.initElements(driver, RepeatPage.class);
   }
 }

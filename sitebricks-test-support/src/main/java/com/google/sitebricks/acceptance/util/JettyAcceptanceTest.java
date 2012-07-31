@@ -1,18 +1,14 @@
-package com.google.sitebricks.acceptance;
-
-import com.google.sitebricks.acceptance.util.AcceptanceTest;
-import com.google.sitebricks.acceptance.util.Jetty;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.Test;
+package com.google.sitebricks.acceptance.util;
 
 import java.io.File;
+
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeSuite;
 
 /**
  * @author Tom Wilson (tom@tomwilson.name)
  */
-@Test(suiteName = AcceptanceTest.SUITE)
-public class JettyAcceptanceTest {
+public class JettyAcceptanceTest { 
   private static final String BUILDR_RESOURCE_DIR = "acceptance-test/src/main/resources";
   private static final String STD_RESOURCE_DIR = "src/main/resources";
 

@@ -22,7 +22,7 @@ public class SpiRestfuWebServiceWithSubpaths2AcceptanceTest {
   public void shouldServiceTopLevelDynamicPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/spi/test")
+        .clientOf(AcceptanceTest.baseUrl() + "/spi/test")
         .transports(String.class)
         .over(Json.class)
         .get();
@@ -33,7 +33,7 @@ public class SpiRestfuWebServiceWithSubpaths2AcceptanceTest {
   public void shouldServiceFirstLevelStaticPath() {
     WebResponse response = createInjector()
         .getInstance(Web.class)
-        .clientOf(AcceptanceTest.BASE_URL + "/spi/test")
+        .clientOf(AcceptanceTest.baseUrl() + "/spi/test")
         .transports(String.class)
         .over(Json.class)
         .post("");

@@ -28,7 +28,7 @@ import static com.google.sitebricks.example.RestfulWebServiceWithCRUD.UPDATE;
 public class RestfuWebServiceWithCRUDAcceptanceTest {
 
   public void create() {
-  	String url = AcceptanceTest.BASE_URL + BASE_SERVICE_PATH;
+  	String url = AcceptanceTest.baseUrl() + BASE_SERVICE_PATH;
   	System.out.println("POST " + url);
     WebResponse response = createInjector()
         .getInstance(Web.class)
@@ -41,7 +41,7 @@ public class RestfuWebServiceWithCRUDAcceptanceTest {
   }
 
   public void readCollection() {
-  	String url = AcceptanceTest.BASE_URL + BASE_SERVICE_PATH;
+  	String url = AcceptanceTest.baseUrl() + BASE_SERVICE_PATH;
   	System.out.println("GET " + url);
     WebResponse response = createInjector()
         .getInstance(Web.class)
@@ -54,7 +54,7 @@ public class RestfuWebServiceWithCRUDAcceptanceTest {
   }  
 
   public void readIndividual() {
-  	String url = AcceptanceTest.BASE_URL + BASE_SERVICE_PATH  + "/1";
+  	String url = AcceptanceTest.baseUrl() + BASE_SERVICE_PATH  + "/1";
   	System.out.println("GET " + url);
     WebResponse response = createInjector()
         .getInstance(Web.class)
@@ -67,7 +67,7 @@ public class RestfuWebServiceWithCRUDAcceptanceTest {
   }  
   
   public void update() {
-  	String url = AcceptanceTest.BASE_URL + BASE_SERVICE_PATH  + "/1";
+  	String url = AcceptanceTest.baseUrl() + BASE_SERVICE_PATH  + "/1";
   	System.out.println("PUT " + url);
     WebResponse response = createInjector()
         .getInstance(Web.class)
@@ -80,7 +80,7 @@ public class RestfuWebServiceWithCRUDAcceptanceTest {
   }
 
   public void delete() {
-  	String url = AcceptanceTest.BASE_URL + BASE_SERVICE_PATH  + "/1";
+  	String url = AcceptanceTest.baseUrl() + BASE_SERVICE_PATH  + "/1";
   	System.out.println("DELETE " + url);
     WebResponse response = createInjector()
         .getInstance(Web.class)

@@ -15,7 +15,7 @@ public class StatsAcceptanceTest {
     WebDriver driver = AcceptanceTest.createWebDriver();
 
     // Request start page.
-    driver.get(AcceptanceTest.BASE_URL);
+    driver.get(AcceptanceTest.baseUrl());
 
     StatsPage statsPage = StatsPage.open(driver);
 

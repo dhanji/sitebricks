@@ -26,7 +26,7 @@ public class EmbedPage {
   }
 
   public static EmbedPage open(WebDriver driver) {
-    driver.get(AcceptanceTest.BASE_URL + "/embed");
+    driver.get(AcceptanceTest.baseUrl() + "/embed");
     return PageFactory.initElements(driver, EmbedPage.class);
   }
 }

@@ -18,7 +18,7 @@ public class DynamicJsPage {
     }
 
     public static DynamicJsPage open(WebDriver driver) {
-        driver.get(AcceptanceTest.BASE_URL + "/dynamic.js");
+        driver.get(AcceptanceTest.baseUrl() + "/dynamic.js");
         return PageFactory.initElements(driver, DynamicJsPage.class);
     }
 }
