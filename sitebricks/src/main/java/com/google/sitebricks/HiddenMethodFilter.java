@@ -9,10 +9,13 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Locale;
 
@@ -63,22 +66,50 @@ class HiddenMethodFilter implements Filter {
       httpRequest.setAttribute(filterDoneAttributeName, Boolean.TRUE);
 
       try {
-        String methodName = httpRequest.getParameter(hiddenFieldName);
+        ServletInputStream inputStream = httpRequest.getInputStream();
+        byte[] reqBytes = new byte[httpRequest.getContentLength()];
+        inputStream.read(reqBytes);
+
+        // Making the input stream available again because we have
+        // already read bytes
+        HttpServletRequestWrapper wrappedRequest = getWrappedRequest(httpRequest, reqBytes);
+        String methodName = wrappedRequest.getParameter(this.hiddenFieldName);
 
         if ("POST".equalsIgnoreCase(httpRequest.getMethod()) && !Strings.empty(methodName)) {
           String methodNameUppercase = methodName.toUpperCase(Locale.ENGLISH);
           HttpServletRequest wrapper = new HttpMethodRequestWrapper(methodNameUppercase, httpRequest);
           filterChain.doFilter(wrapper, response);
         } else {
-
-          // Filtering done, forward to another filter in chain
-          filterChain.doFilter(httpRequest, response);
+          // Making the input stream available again fix for issue 45
+          wrappedRequest = getWrappedRequest(httpRequest, reqBytes);
+          //Filtering done, forward to another filter in chain
+          filterChain.doFilter(wrappedRequest, response);
         }
       } finally {
         // Remove the filterDone attribute for this request.
         request.removeAttribute(filterDoneAttributeName);
       }
     }
+  }
+  
+  private HttpServletRequestWrapper getWrappedRequest(HttpServletRequest httpRequest, final byte[] reqBytes)
+       throws IOException {
+
+    final ByteArrayInputStream byteInput = new ByteArrayInputStream(reqBytes);
+    return new HttpServletRequestWrapper(httpRequest) {
+     
+      @Override
+      public ServletInputStream getInputStream() throws IOException {
+        ServletInputStream sis = new ServletInputStream() {
+
+          @Override
+          public int read() throws IOException {
+            return byteInput.read();
+          }
+        };
+        return sis;
+      }
+    };
   }
 
   public void destroy() {
