@@ -35,6 +35,9 @@ public class XmlTransportTest {
   }
 
   public static class Robot {
+    public Robot() {
+    }
+
     public Robot(String name, Date time, int age, long looong, Robot pet) {
       this.name = name;
       this.time = time;
