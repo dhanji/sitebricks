@@ -75,6 +75,7 @@ public class DefaultPageBook implements PageBook {
     return (Collection) pages.values();
   }
 
+  // Page registration (internal) APIs
   public Page serviceAt(String uri, Class<?> pageClass) {
     // Handle subpaths, registering each as a separate instance of the page
     // tuple.
