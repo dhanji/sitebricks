@@ -184,7 +184,7 @@ public class DefaultPageBook implements PageBook {
       "You cannot extend headless web services!");
     PageTuple pageTuple = new PageTuple("", PathMatcherChain.ignoring(), pageClass, injector, false, true);
 
-    // store page with a special name used by ExtendWidget
+    // store page with a special name used by DecorateWidget
     String name = DecorateWidget.embedNameFor(pageClass);
     synchronized (lock) {
       pagesByName.put(name, pageTuple);

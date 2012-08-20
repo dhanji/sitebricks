@@ -1,7 +1,12 @@
 package com.google.sitebricks.example;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.*;
+import com.google.inject.BindingAnnotation;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+import com.google.inject.Stage;
+import com.google.inject.matcher.Matchers;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.sitebricks.AwareModule;
 import com.google.sitebricks.SitebricksModule;
@@ -15,8 +20,11 @@ import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
+import com.google.sitebricks.rendering.Decorated;
 import com.google.sitebricks.routing.Action;
 import com.google.sitebricks.stat.StatModule;
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -49,7 +57,15 @@ public class SitebricksConfig extends GuiceServletContextListener {
         bindActions();
         bindCrudActions();
 
-        at("/no_annotations/service").serve(RestfulWebServiceNoAnnotations.class);
+        // Bind a dummy interceptor to specifically test AOP interaction with decorated pages.
+        bindInterceptor(Matchers.annotatedWith(Decorated.class), Matchers.any(), new MethodInterceptor() {
+          @Override
+          public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+            return methodInvocation.proceed();
+          }
+        });
+
+            at("/no_annotations/service").serve(RestfulWebServiceNoAnnotations.class);
         at("/debug").show(DebugPage.class);
 
         bind(Start.class).annotatedWith(Test.class).to(Start.class);
