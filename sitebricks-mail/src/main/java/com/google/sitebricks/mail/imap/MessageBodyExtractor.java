@@ -450,6 +450,23 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       } else if(SEVEN_BIT.equals(bodyEncoding) || EIGHT_BIT.equals(bodyEncoding) || "binary".equals(bodyEncoding)) {
         // No decoding needed.
 
+      } else if("base64".equals(bodyEncoding)) {
+        List<String> rfc822msg = Lists.newArrayList();
+        while (iterator.hasNext()) {
+          final String line = iterator.next();
+          if (hasImapTerminator(iterator, line, gropeForTruncator) ||
+                  boundary != null && Parsing.startsWithIgnoreCase(line, boundary)) {
+            alreadyHitEndMarker = Parsing.startsWithIgnoreCase(line, boundary + "--");
+            break;
+          }
+
+          rfc822msg.add(line);
+
+          // Don't need to decode line before checking for boundary as the boundary is not part
+          // of the encoded body.
+        }
+        rfc822iterator = decode(rfc822msg, "base64", charset(mimeType)).listIterator();
+
       } else {
         // Unsupported encoding, print out error context and skip to end of part/message.
         throw new RuntimeException("Unsupported encoding for embedded rfc822 message " +
@@ -502,6 +519,10 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
       // Second time around. Apparently some are slipping through.
       charset = Parsing.stripQuotes(charset);
+
+      // Sometimes the charset prefix slips through as well. Sigh.
+      if (charset.startsWith("charset="))
+        charset = charset.substring("charset=".length() + 1);
 
       return CharStreams.toString(
           new InputStreamReader(MimeUtility.decode(new ByteArrayInputStream(body.getBytes(charset)), encoding), charset));
