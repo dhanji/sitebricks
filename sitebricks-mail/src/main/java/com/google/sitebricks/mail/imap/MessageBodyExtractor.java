@@ -147,7 +147,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
         if (errorCount.get() > 0) {
           // Instead add a sentinel for this message.
-          dumpError(emails, partitionedMessages, errorCount.get());
+          dumpError(partitionedMessages, errorCount.get());
         }
         // Jochen: remove this as soon as satisfied this is safe. (should be, there should never be another FETCH
         // or interesting stuff trailing the mail).
@@ -161,14 +161,14 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         log.error("Unexpected error while parsing message", e);
         emails.add(Message.ERROR);
         e.printStackTrace();
-        dumpError(emails, partitionedMessages, 1);
+        dumpError(partitionedMessages, 1);
       }
     }
 
     return emails;
   }
 
-  private void dumpError(List<Message> emails, List<String> partitionedMessages, int errorCount) {
+  private void dumpError(List<String> partitionedMessages, int errorCount) {
     log.error("{} Message parsing error(s) encountered in emails. See parse_error_log dump for details.", errorCount);
     parseErrorLog.error("===========");
     parseErrorLog.error("{} Message parsing error(s) encountered in emails.", errorCount);
@@ -231,10 +231,13 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     Queue<String> tokens = Parsing.tokenize(firstLine);
     Parsing.eat(tokens, "FETCH", "(", "UID");
     email.setImapUid(Parsing.match(tokens, int.class));
+
+    // We sometimes get a set of flags here, even though we didnt ask for it.
+    MessageStatusExtractor.parseFlags(tokens, new MessageStatus());
+
     Parsing.eat(tokens, "BODY[]");
     String sizeString = Parsing.match(tokens, String.class);
     long size = 0;
-    boolean gropeForTruncator = true;
     boolean moreErrorInfo = false;
 
     // Parse out size in bytes from "{NNN}"
@@ -247,7 +250,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       }
     }
 
-    gropeForTruncator = forceTruncatorGroping || size == 0 || size == ignoreMessageBodyLengthForTesting;
+    boolean gropeForTruncator = forceTruncatorGroping
+                                    || size == 0
+                                    || size == ignoreMessageBodyLengthForTesting;
 
     if (!gropeForTruncator) {
       try {

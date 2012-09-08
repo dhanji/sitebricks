@@ -223,7 +223,7 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     return true;
   }
 
-  private static boolean parseFlags(Queue<String> tokens, MessageStatus status) {
+  public static boolean parseFlags(Queue<String> tokens, MessageStatus status) {
     Set<Flag> flags = Flag.parseFlagList(tokens);
     if (flags == null)
       return false;
