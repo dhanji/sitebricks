@@ -522,7 +522,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
       // Sometimes the charset prefix slips through as well. Sigh.
       if (charset.startsWith("charset="))
-        charset = charset.substring("charset=".length() + 1);
+        charset = charset.substring("charset=".length());
 
       return CharStreams.toString(
           new InputStreamReader(MimeUtility.decode(new ByteArrayInputStream(body.getBytes(charset)), encoding), charset));
