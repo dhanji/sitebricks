@@ -4,7 +4,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.sitebricks.util.BoundedDiscardingList;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
@@ -118,9 +117,9 @@ class MailClientHandler extends SimpleChannelHandler {
   private static class PushedData {
     volatile boolean idleExitSent = false;
     // guarded by idleMutex.
-    final SortedSet<Integer> pushAdds = Sets.<Integer>newTreeSet();
+  	final ArrayList<Integer> pushAdds = new ArrayList<Integer>();
     // guarded by idleMutex.
-    final SortedSet<Integer> pushRemoves = Sets.<Integer>newTreeSet();
+  	final ArrayList<Integer> pushRemoves = new ArrayList<Integer>();
   }
 
   // DO NOT synchronize!
@@ -212,14 +211,12 @@ class MailClientHandler extends SimpleChannelHandler {
           if (existsMatcher.matches()) {
             int number = Integer.parseInt(existsMatcher.group(1));
             pushedData.pushAdds.add(number);
-            pushedData.pushRemoves.remove(number);
             matched = true;
           } else {
             Matcher expungeMatcher = IDLE_EXPUNGE_REGEX.matcher(message);
             if (expungeMatcher.matches()) {
               int number = Integer.parseInt(expungeMatcher.group(1));
               pushedData.pushRemoves.add(number);
-              pushedData.pushAdds.remove(number);
               matched = true;
             }
           }
