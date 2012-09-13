@@ -25,6 +25,7 @@ import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Head;
+import com.google.sitebricks.http.Patch;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
 import com.google.sitebricks.http.Trace;
@@ -59,6 +60,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     methods.put("get", Get.class);
     methods.put("post", Post.class);
     methods.put("put", Put.class);
+    methods.put("patch", Patch.class);
     methods.put("delete", Delete.class);
     methods.put("head", Head.class);
     methods.put("trace", Trace.class);

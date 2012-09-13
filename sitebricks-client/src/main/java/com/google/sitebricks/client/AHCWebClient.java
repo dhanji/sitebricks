@@ -128,6 +128,10 @@ class AHCWebClient<T> implements WebClient<T> {
     return request((new RequestBuilder("PUT")).setUrl(url), t);
   }
 
+  public WebResponse patch(T t) {
+    return request((new RequestBuilder("PATCH")).setUrl(url), t);
+  }
+
   public WebResponse delete() {
     return simpleRequest((new RequestBuilder("DELETE")).setUrl(url));
   }

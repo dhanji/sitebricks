@@ -6,6 +6,7 @@ import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Service;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Patch;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
 
@@ -19,6 +20,7 @@ public class RestfulWebServiceWithSubpaths2 {
   public static final String TOPLEVEL = "test1";
   public static final String PATH_1 = "path1";
   public static final String PATH_1_PUT = "path1put";
+  public static final String PATH_1_PATCH = "path1patch";
   public static final String PATH_1_DELETE = "path1delete";
 
   @Get
@@ -34,6 +36,11 @@ public class RestfulWebServiceWithSubpaths2 {
   @At("/subpath1") @Put
   public Reply<String> path1Put(@Named("dynamic") String dynamic) {
     return Reply.with(PATH_1_PUT);
+  }
+
+  @At("/subpath1") @Patch
+  public Reply<String> path1Patch(@Named("dynamic") String dynamic) {
+    return Reply.with(PATH_1_PATCH);
   }
 
   @At("/subpath1") @Delete
@@ -57,6 +64,13 @@ public class RestfulWebServiceWithSubpaths2 {
                             @Named("l2") String second,
                             @Named("l3") String third) {
     return Reply.with("delete:" + dynamic + "_" + second + "_" + third);
+  }
+
+  @At("/:l2/:l3") @Patch
+  public Reply<String> l2l3Patch(@Named("dynamic") String dynamic,
+                               @Named("l2") String second,
+                               @Named("l3") String third) {
+    return Reply.with("patch:" + dynamic + "_" + second + "_" + third);
   }
 
   @At("/:l2/:l3") @Put
