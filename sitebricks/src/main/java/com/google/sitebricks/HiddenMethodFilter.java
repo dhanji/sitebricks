@@ -5,19 +5,14 @@ import com.google.inject.Singleton;
 import com.google.sitebricks.rendering.Strings;
 import net.jcip.annotations.Immutable;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
 import java.util.Locale;
 
 /**
- * Enables browsers making a simulated PUT and DELETE requests. Currently browsers support making
+ * Enables browsers making a simulated PUT, PATCH and DELETE requests. Currently browsers support making
  * GET and POST requests. This {@link javax.servlet.Filter} checks if a hidden field is set and
  * renames HTTP method, retrieved via {@link javax.servlet.http.HttpServletRequest#getMethod()} to a method
  * set in the hidden field

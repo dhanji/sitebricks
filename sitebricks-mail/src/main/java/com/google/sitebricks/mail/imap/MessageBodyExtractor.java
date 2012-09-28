@@ -147,7 +147,7 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
         if (errorCount.get() > 0) {
           // Instead add a sentinel for this message.
-          dumpError(emails, partitionedMessages, errorCount.get());
+          dumpError(partitionedMessages, errorCount.get());
         }
         // Jochen: remove this as soon as satisfied this is safe. (should be, there should never be another FETCH
         // or interesting stuff trailing the mail).
@@ -161,14 +161,14 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
         log.error("Unexpected error while parsing message", e);
         emails.add(Message.ERROR);
         e.printStackTrace();
-        dumpError(emails, partitionedMessages, 1);
+        dumpError(partitionedMessages, 1);
       }
     }
 
     return emails;
   }
 
-  private void dumpError(List<Message> emails, List<String> partitionedMessages, int errorCount) {
+  private void dumpError(List<String> partitionedMessages, int errorCount) {
     log.error("{} Message parsing error(s) encountered in emails. See parse_error_log dump for details.", errorCount);
     parseErrorLog.error("===========");
     parseErrorLog.error("{} Message parsing error(s) encountered in emails.", errorCount);
@@ -231,10 +231,13 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
     Queue<String> tokens = Parsing.tokenize(firstLine);
     Parsing.eat(tokens, "FETCH", "(", "UID");
     email.setImapUid(Parsing.match(tokens, int.class));
+
+    // We sometimes get a set of flags here, even though we didnt ask for it.
+    MessageStatusExtractor.parseFlags(tokens, new MessageStatus());
+
     Parsing.eat(tokens, "BODY[]");
     String sizeString = Parsing.match(tokens, String.class);
     long size = 0;
-    boolean gropeForTruncator = true;
     boolean moreErrorInfo = false;
 
     // Parse out size in bytes from "{NNN}"
@@ -247,7 +250,9 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       }
     }
 
-    gropeForTruncator = forceTruncatorGroping || size == 0 || size == ignoreMessageBodyLengthForTesting;
+    boolean gropeForTruncator = forceTruncatorGroping
+                                    || size == 0
+                                    || size == ignoreMessageBodyLengthForTesting;
 
     if (!gropeForTruncator) {
       try {
@@ -445,6 +450,23 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
       } else if(SEVEN_BIT.equals(bodyEncoding) || EIGHT_BIT.equals(bodyEncoding) || "binary".equals(bodyEncoding)) {
         // No decoding needed.
 
+      } else if("base64".equals(bodyEncoding)) {
+        List<String> rfc822msg = Lists.newArrayList();
+        while (iterator.hasNext()) {
+          final String line = iterator.next();
+          if (hasImapTerminator(iterator, line, gropeForTruncator) ||
+                  boundary != null && Parsing.startsWithIgnoreCase(line, boundary)) {
+            alreadyHitEndMarker = Parsing.startsWithIgnoreCase(line, boundary + "--");
+            break;
+          }
+
+          rfc822msg.add(line);
+
+          // Don't need to decode line before checking for boundary as the boundary is not part
+          // of the encoded body.
+        }
+        rfc822iterator = decode(rfc822msg, "base64", charset(mimeType)).listIterator();
+
       } else {
         // Unsupported encoding, print out error context and skip to end of part/message.
         throw new RuntimeException("Unsupported encoding for embedded rfc822 message " +
@@ -497,6 +519,10 @@ class MessageBodyExtractor implements Extractor<List<Message>> {
 
       // Second time around. Apparently some are slipping through.
       charset = Parsing.stripQuotes(charset);
+
+      // Sometimes the charset prefix slips through as well. Sigh.
+      if (charset.startsWith("charset="))
+        charset = charset.substring("charset=".length());
 
       return CharStreams.toString(
           new InputStreamReader(MimeUtility.decode(new ByteArrayInputStream(body.getBytes(charset)), encoding), charset));

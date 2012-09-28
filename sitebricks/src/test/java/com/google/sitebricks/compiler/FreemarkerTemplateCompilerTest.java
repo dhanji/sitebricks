@@ -1,20 +1,5 @@
 package com.google.sitebricks.compiler;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createNiceMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.testng.Assert.assertEquals;
-
-import java.lang.annotation.Annotation;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -32,12 +17,28 @@ import com.google.sitebricks.Template;
 import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Patch;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
 import com.google.sitebricks.rendering.EmbedAs;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import java.lang.annotation.Annotation;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -54,6 +55,7 @@ public class FreemarkerTemplateCompilerTest {
     methods.put("get", Get.class);
     methods.put("post", Post.class);
     methods.put("put", Put.class);
+    methods.put("patch", Patch.class);
     methods.put("delete", Delete.class);
 
     injector = Guice.createInjector(new AbstractModule() {

@@ -4,6 +4,7 @@ package com.google.sitebricks.example;
 import com.google.sitebricks.At;
 import com.google.sitebricks.http.Delete;
 import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Patch;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
 import com.google.sitebricks.http.Select;
@@ -92,6 +93,27 @@ public class SelectRouting {
   @Put("304")
   public Object redirectPut() {
     data.add("redirectPut");
+    return new SelectRouting(data);
+  }
+
+  @Patch
+  public void defaultPatch() {
+    data.add("defaultPatch");
+  }
+
+  @Patch("foo")
+  public void fooPatch() {
+    data.add("fooPath");
+  }
+
+  @Patch("bar")
+  public void barPatch() {
+    data.add("barPatch");
+  }
+
+  @Patch("304")
+  public Object redirectPatch() {
+    data.add("redirectPatch");
     return new SelectRouting(data);
   }
 

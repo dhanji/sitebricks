@@ -1,10 +1,10 @@
 package com.google.sitebricks.acceptance.page;
 
 import com.google.sitebricks.acceptance.util.AcceptanceTest;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.PageFactory;
-import org.testng.annotations.Test;
 
 /**
  * @author Peter Knego

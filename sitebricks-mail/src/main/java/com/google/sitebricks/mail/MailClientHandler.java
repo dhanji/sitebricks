@@ -4,9 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.sitebricks.util.BoundedDiscardingList;
-import com.google.sitebricks.util.JmxUtil;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
@@ -16,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.softee.management.annotation.MBean;
 import org.softee.management.annotation.ManagedAttribute;
 import org.softee.management.annotation.ManagedOperation;
-import org.softee.management.helper.MBeanRegistration;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -76,15 +73,12 @@ class MailClientHandler extends SimpleChannelHandler {
 
   private final BoundedDiscardingList<String> commandTrace = new BoundedDiscardingList<String>(10);
   private final BoundedDiscardingList<String> wireTrace = new BoundedDiscardingList<String>(25);
-  private final MBeanRegistration mBeanRegistration;
   private final InputBuffer inputBuffer = new InputBuffer();
 
 
   public MailClientHandler(Idler idler, MailClientConfig config) {
     this.idler = idler;
     this.config = config;
-    mBeanRegistration = JmxUtil.registerMBean(this, "com.google.sitebricks", "MailClientHandler",
-        config.getUsername());
   }
 
   // For debugging, use with caution!
@@ -123,9 +117,9 @@ class MailClientHandler extends SimpleChannelHandler {
   private static class PushedData {
     volatile boolean idleExitSent = false;
     // guarded by idleMutex.
-    final SortedSet<Integer> pushAdds = Sets.<Integer>newTreeSet();
+  	final ArrayList<Integer> pushAdds = new ArrayList<Integer>();
     // guarded by idleMutex.
-    final SortedSet<Integer> pushRemoves = Sets.<Integer>newTreeSet();
+  	final ArrayList<Integer> pushRemoves = new ArrayList<Integer>();
   }
 
   // DO NOT synchronize!
@@ -217,14 +211,12 @@ class MailClientHandler extends SimpleChannelHandler {
           if (existsMatcher.matches()) {
             int number = Integer.parseInt(existsMatcher.group(1));
             pushedData.pushAdds.add(number);
-            pushedData.pushRemoves.remove(number);
             matched = true;
           } else {
             Matcher expungeMatcher = IDLE_EXPUNGE_REGEX.matcher(message);
             if (expungeMatcher.matches()) {
               int number = Integer.parseInt(expungeMatcher.group(1));
               pushedData.pushRemoves.add(number);
-              pushedData.pushAdds.remove(number);
               matched = true;
             }
           }
@@ -369,7 +361,6 @@ class MailClientHandler extends SimpleChannelHandler {
   }
 
   public void disconnected() {
-    JmxUtil.unregister(mBeanRegistration);
   }
 
   static class Error implements MailClient.WireError {
