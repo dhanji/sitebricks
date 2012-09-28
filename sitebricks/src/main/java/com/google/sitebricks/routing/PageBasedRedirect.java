@@ -1,6 +1,7 @@
 package com.google.sitebricks.routing;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.sitebricks.At;
 import net.jcip.annotations.Immutable;
@@ -13,14 +14,26 @@ import java.util.Map;
  */
 @Immutable @Singleton
 class PageBasedRedirect implements Redirect {
+  @Inject private PageBook pageBook;
 
   @Override @SuppressWarnings("deprecation") // For URL encoder.
   public String to(Class<?> pageClass, Map<String, String> parameters) {
     At at = pageClass.getAnnotation(At.class);
-    if (at == null)
-      throw new IllegalArgumentException("No @At annotation found on page class: " + pageClass.getName());
 
-    String[] split = at.value().split("/");
+    String uriTemplate;
+    if (at == null) {
+      // Fall back to see if this class was registered some other way (i.e. at().show())
+      PageBook.Page page = pageBook.forClass(pageClass);
+
+      if (page == null)
+        throw new IllegalArgumentException("No such page class was registered (missing @At annotation?): "
+            + pageClass.getName());
+
+      uriTemplate = page.getUri();
+    } else
+      uriTemplate = at.value();
+
+    String[] split = uriTemplate.split("/");
     StringBuilder uri = new StringBuilder();
     for (int i = 1 /* skip the first '/' */, splitLength = split.length; i < splitLength; i++) {
       String piece = split[i];

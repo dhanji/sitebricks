@@ -5,17 +5,38 @@ import com.google.sitebricks.MvelEvaluator;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.RespondersForTesting;
 import com.google.sitebricks.binding.FlashCache;
-import static org.easymock.EasyMock.*;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 public class ChooseWidgetTest {
+
+  @Test
+  public void mything() {
+    System.out.println(hash("dhanji@gmail.com"));
+    System.out.println(hash("idhanj@gmail.com"));
+  }
+
+  public long hash(String st) {
+    long hash = 0L;
+    char[] chars = st.toCharArray();
+    for (int i = 0; i < chars.length; i++) {
+      char c = chars[i];
+      hash = 127 * hash + c;
+    }
+
+    return hash;
+  }
 
     @Test
     public final void chooseWidgetSelectTagRender() {
