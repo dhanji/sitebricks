@@ -1,5 +1,19 @@
 package com.google.sitebricks.compiler;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.inject.Singleton;
+import com.google.sitebricks.Evaluator;
+import com.google.sitebricks.Visible;
+import com.google.sitebricks.conversion.generics.Generics;
+import com.google.sitebricks.conversion.generics.ParameterizedTypeImpl;
+import org.jetbrains.annotations.Nullable;
+import org.mvel2.CompileException;
+import org.mvel2.MVEL;
+import org.mvel2.ParserContext;
+import org.mvel2.compiler.CompiledExpression;
+import org.mvel2.compiler.ExpressionCompiler;
+
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -12,21 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.jetbrains.annotations.Nullable;
-import org.mvel2.CompileException;
-import org.mvel2.MVEL;
-import org.mvel2.ParserContext;
-import org.mvel2.compiler.CompiledExpression;
-import org.mvel2.compiler.ExpressionCompiler;
-
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.inject.Singleton;
-import com.google.sitebricks.Evaluator;
-import com.google.sitebricks.Visible;
-import com.google.sitebricks.conversion.generics.Generics;
-import com.google.sitebricks.conversion.generics.ParameterizedTypeImpl;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
@@ -65,8 +64,8 @@ public class MvelEvaluatorCompiler implements EvaluatorCompiler {
 	    }
 	    
 	    CompiledExpression compiled = compileExpression(expression);
-		final Class<?> egressClass = compiled.getKnownEgressType();
-	    final Type[] parameters = compiled.getParserContext().getLastTypeParameters();
+		  final Class<?> egressClass = compiled.getKnownEgressType();
+	    final Type[] parameters = getParserContext().getLastTypeParameters();
 	    
 	    if (parameters == null) {
 	        // the class is not parameterised (generic)

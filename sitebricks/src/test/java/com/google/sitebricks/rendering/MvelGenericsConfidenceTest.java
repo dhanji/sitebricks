@@ -21,13 +21,14 @@ public class MvelGenericsConfidenceTest {
         final ParserContext parserContext = new ParserContext();
         parserContext.setStrongTyping(true);
         parserContext.addInput("strings", List.class, new Class[] { String.class });
-        
-        final CompiledExpression expr = new ExpressionCompiler("strings", parserContext)
+
+      ExpressionCompiler compiler = new ExpressionCompiler("strings", parserContext);
+      final CompiledExpression expr = compiler
                 .compile();
 
         assert STRINGS.equals(MVEL.executeExpression(expr, new A())) : "faulty expression eval";
 
-        final Type[] typeParameters = expr.getParserContext().getLastTypeParameters();
+        final Type[] typeParameters = compiler.getParserContextState().getLastTypeParameters();
 
         assert null != typeParameters : "no generic egress type";
         assert String.class.equals(typeParameters[0]) : "wrong generic egress type";
@@ -39,12 +40,14 @@ public class MvelGenericsConfidenceTest {
         parserContext.setStrongTyping(true);
         parserContext.addInput("strings", A.class);
 
-        final CompiledExpression expr = new ExpressionCompiler("strings.strings", parserContext)
+      ExpressionCompiler compiler = new ExpressionCompiler("strings.strings",
+          parserContext);
+      final CompiledExpression expr = compiler
                 .compile();
 
         assert STRINGS.equals(MVEL.executeExpression(expr, new B())) : "faulty expression eval";
 
-        final Type[] typeParameters = expr.getParserContext().getLastTypeParameters();
+        final Type[] typeParameters = compiler.getParserContextState().getLastTypeParameters();
 
         assert null != typeParameters : "no generic egress type";
         assert String.class.equals(typeParameters[0]) : "wrong generic egress type";

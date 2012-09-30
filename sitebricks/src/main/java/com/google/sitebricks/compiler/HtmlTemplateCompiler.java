@@ -1,5 +1,6 @@
 package com.google.sitebricks.compiler;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -14,13 +15,26 @@ import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
 import org.jetbrains.annotations.NotNull;
-import org.jsoup.nodes.*;
-import org.softee.util.Preconditions;
+import org.jsoup.nodes.Attribute;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Comment;
+import org.jsoup.nodes.DataNode;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.nodes.XmlDeclaration;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
-import static com.google.sitebricks.compiler.AnnotationNode.*;
+import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION;
+import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_CONTENT;
+import static com.google.sitebricks.compiler.AnnotationNode.ANNOTATION_KEY;
 import static com.google.sitebricks.compiler.HtmlParser.LINE_NUMBER_ATTRIBUTE;
 import static com.google.sitebricks.compiler.HtmlParser.SKIP_ATTR;
 
@@ -121,7 +135,7 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
 
             } else if (n instanceof TextNode) {
             	TextNode child = (TextNode)n;
-            	Renderable textWidget = null;
+            	Renderable textWidget;
             	
                 //setup a lexical scope if we're going into a repeat widget (by reading the previous node)
                 final boolean shouldPopScope = lexicalClimb(pc, child);
@@ -446,10 +460,9 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
             }
 
             // Compile expression path.
-            final String expression = name;
-            try {
+          try {
                 new MvelEvaluatorCompiler(page.pageClass())
-                        .compile(expression);
+                        .compile(name);
 
             } catch (ExpressionCompileException e) {
                 //TODO Very hacky, needed to strip out xmlns attribution.
@@ -475,13 +488,12 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
 
             // Verify that such a uri exists in the page book,
             // only if it is contextual--ignore abs & relative URIs.
-            final String uri = uriAttrib;
-            if (uri.startsWith("/"))
-                if (null == pageBook.nonCompilingGet(uri))
+          if (uriAttrib.startsWith("/"))
+                if (null == pageBook.nonCompilingGet(uriAttrib))
                     pc.warnings.add(
                         CompileError.in(element.outerHtml())
                         .near(element.siblingIndex()) // TODO - line number
-                        .causedBy(CompileErrors.UNRESOLVABLE_FORM_ACTION, uri)
+                        .causedBy(CompileErrors.UNRESOLVABLE_FORM_ACTION, uriAttrib)
                 );
         }
     }
@@ -498,9 +510,7 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
       Map<String, String> attrs = new LinkedHashMap<String, String>(attributes.size() + 4);
 
       for (Attribute a : attributes.asList())
-          if (SKIP_ATTR.contains(a.getKey()))
-              continue;
-          else
+          if (!SKIP_ATTR.contains(a.getKey()))
               attrs.put(a.getKey(), a.getValue());
 
       return attrs;
@@ -534,13 +544,10 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
 
 
   static boolean skippable(String kind) {
-      if (null == kind)
-          return false;
-
-      return ("submit".equals(kind)
-          || "button".equals(kind)
-          || "reset".equals(kind)
-          || "file".equals(kind));
+    return null != kind && ("submit".equals(kind)
+            || "button".equals(kind)
+            || "reset".equals(kind)
+            || "file".equals(kind));
   }
 
 
@@ -549,27 +556,8 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
 
   // TESTING jsoup.nodes.Node
 
-  /**
-   Get this node's previous sibling.
-   @return the previous sibling, or null if this is the first sibling
-   */
-  public Node previousSibling(Node node) {
-      Preconditions.notNull(node);
-
-      List<Node> siblings = findSiblings(node);
-      if (null == siblings) return null;
-
-      Integer index = indexInList(node, siblings);
-      if (null == index) return null;
-    
-      if (index > 0)
-          return siblings.get(index-1);
-
-      return null;
-  }      
-
   public List<Node> findSiblings(Node node) {
-      Preconditions.notNull(node);
+      Preconditions.checkNotNull(node);
     
       Node parent = node.parent();
       if (null == parent) return null;
@@ -577,22 +565,9 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
       return parent.childNodes();               
   }
 
-  /**
-     * Get the list index of this node in its node sibling list. I.e. if this is the first node
-     * sibling, returns 0.
-     * @return position in node sibling list
-     * @see org.jsoup.nodes.Element#elementSiblingIndex()
-     */
-
-    public Integer siblingIndex(Node node) {
-        if (null != node.parent())
-          Preconditions.notNull(node);
-        return indexInList(node, findSiblings(node));
-    }
-
-    protected static <N extends Node> Integer indexInList(N search, List<N> nodes) {
-        Preconditions.notNull(search);
-        Preconditions.notNull(nodes);
+  protected static <N extends Node> Integer indexInList(N search, List<N> nodes) {
+        Preconditions.checkNotNull(search);
+        Preconditions.checkNotNull(nodes);
 
         for (int i = 0; i < nodes.size(); i++) {
             N node = nodes.get(i);
