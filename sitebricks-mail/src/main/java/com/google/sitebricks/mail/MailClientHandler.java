@@ -11,9 +11,6 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.softee.management.annotation.MBean;
-import org.softee.management.annotation.ManagedAttribute;
-import org.softee.management.annotation.ManagedOperation;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -26,7 +23,6 @@ import java.util.regex.Pattern;
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-@MBean
 class MailClientHandler extends SimpleChannelHandler {
   private static final Logger log = LoggerFactory.getLogger(MailClientHandler.class);
 
@@ -86,7 +82,6 @@ class MailClientHandler extends SimpleChannelHandler {
     logAllMessagesForUsers.put(username, toStdOut);
   }
 
-  @ManagedOperation
   public void setReceiveLogging(boolean b) {
     log.info("setReceiveLogging[" + config.getUsername() + "] = " + b);
     if (b)
@@ -95,12 +90,10 @@ class MailClientHandler extends SimpleChannelHandler {
       logAllMessagesForUsers.remove(config.getUsername());
   }
 
-  @ManagedAttribute
   public Set<String> getLogAllMessagesFor() {
     return logAllMessagesForUsers.keySet();
   }
 
-  @ManagedAttribute
   public List<String> getCommandTrace() {
     return commandTrace.list();
   }
@@ -109,7 +102,6 @@ class MailClientHandler extends SimpleChannelHandler {
     return wireTrace.list();
   }
 
-  @ManagedAttribute
   public boolean isLoggedIn() {
     return loginSuccess.getCount() == 0;
   }

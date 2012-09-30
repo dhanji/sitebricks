@@ -15,8 +15,6 @@ import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.softee.management.annotation.MBean;
-import org.softee.management.annotation.ManagedOperation;
 
 import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
@@ -30,7 +28,6 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-@MBean
 public class NettyImapClient implements MailClient, Idler {
   private static final Logger log = LoggerFactory.getLogger(NettyImapClient.class);
   private static final SimpleDateFormat SINCE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy");
@@ -70,7 +67,6 @@ public class NettyImapClient implements MailClient, Idler {
     logAllMessagesForUsers.put(username, toStdOut);
   }
 
-  @ManagedOperation
   public void enableSendLogging(boolean enable) {
     log.info("Logging of sent IMAP commands for user {} = {}", config.getUsername(), enable);
     if (enable)

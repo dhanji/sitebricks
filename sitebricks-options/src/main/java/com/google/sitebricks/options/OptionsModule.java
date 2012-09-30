@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
-import com.google.sitebricks.conversion.MvelTypeConverter;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -133,9 +132,14 @@ public class OptionsModule extends AbstractModule {
           instance = createCglibHandler(optionClass, concreteOptions);
         }
 
-        bind((Class) optionClass).toInstance(instance);
+        bindToInstance(optionClass, instance);
       }
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  private void bindToInstance(Class optionClass, Object instance) {
+    bind(optionClass).toInstance(instance);
   }
 
   private Object createJdkProxyHandler(Class<?> optionClass,
