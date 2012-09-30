@@ -3,6 +3,7 @@ package com.google.sitebricks.client;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.sitebricks.client.transport.Text;
 import net.jcip.annotations.NotThreadSafe;
 
 import java.util.Map;
@@ -43,6 +44,12 @@ class WebClientBuilder implements Web.FormatBuilder {
 
   public <T> Web.ReadAsBuilder<T> transports(Class<T> clazz) {
     return new InternalReadAsBuilder<T>(clazz);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> WebClient<T> transportsText() {
+    return (WebClient<T>) transports(String.class).over(Text.class);
   }
 
   public Web.FormatBuilder auth(Web.Auth auth, String username, String password) {

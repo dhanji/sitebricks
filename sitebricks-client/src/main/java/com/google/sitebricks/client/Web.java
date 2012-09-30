@@ -20,6 +20,8 @@ public interface Web {
   static interface FormatBuilder {
     <T> ReadAsBuilder<T> transports(Class<T> clazz);
 
+    <T> WebClient<T> transportsText();
+
     FormatBuilder auth(Auth auth, String username, String password);
   }
 
