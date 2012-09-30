@@ -1,14 +1,23 @@
 package com.google.sitebricks.client;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.inject.Injector;
-import com.ning.http.client.*;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClientConfig;
+import com.ning.http.client.Realm;
+import com.ning.http.client.RequestBuilder;
+import com.ning.http.client.Response;
 import net.jcip.annotations.ThreadSafe;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 
 /**
  * @author Jeanfrancois Arcand (jfarcand@apache.org)
@@ -44,7 +53,6 @@ class AHCWebClient<T> implements WebClient<T> {
   }
 
   private WebResponse simpleRequest(RequestBuilder requestBuilder) {
-
     requestBuilder = addHeadersToRequestBuilder(requestBuilder);
 
     try {
@@ -59,8 +67,33 @@ class AHCWebClient<T> implements WebClient<T> {
     }
   }
 
-  private WebResponse request(RequestBuilder requestBuilder, T t) {
+  private ListenableFuture<WebResponse> simpleAsyncRequest(RequestBuilder requestBuilder, Executor executor) {
+    requestBuilder = addHeadersToRequestBuilder(requestBuilder);
 
+    try {
+      final SettableFuture<WebResponse> future = SettableFuture.create();
+      final com.ning.http.client.ListenableFuture<Response> responseFuture = httpClient.executeRequest(
+          requestBuilder.build());
+      responseFuture.addListener(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            future.set(new WebResponseImpl(injector, responseFuture.get()));
+          } catch (InterruptedException e) {
+            throw new TransportException(e);
+          } catch (ExecutionException e) {
+            throw new TransportException(e);
+          }
+        }
+      }, executor);
+
+      return future;
+    } catch (IOException e) {
+      throw new TransportException(e);
+    }
+  }
+
+  private WebResponse request(RequestBuilder requestBuilder, T t) {
     requestBuilder = addHeadersToRequestBuilder(requestBuilder);
 
     try {
@@ -89,6 +122,53 @@ class AHCWebClient<T> implements WebClient<T> {
     }
   }
 
+  @SuppressWarnings("deprecation")
+  private ListenableFuture<WebResponse> requestAsync(RequestBuilder requestBuilder, T t,
+                                                     Executor executor) {
+    requestBuilder = addHeadersToRequestBuilder(requestBuilder);
+
+    try {
+      final SettableFuture<WebResponse> future = SettableFuture.create();
+
+
+      //
+      // Read the entity from the transport plugin.
+      //
+      InputStream in;
+      if (t instanceof InputStream)
+        in = (InputStream) t;
+      else {
+        final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        transport.out(stream, classTypeToTransport, t);
+
+        in = new ByteArrayInputStream(stream.toByteArray());
+      }
+
+      //
+      // Set request body
+      //
+      requestBuilder.setBody(in);
+
+      final com.ning.http.client.ListenableFuture<Response> responseFuture = httpClient.executeRequest(
+          requestBuilder.build());
+      responseFuture.addListener(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            future.set(new WebResponseImpl(injector, responseFuture.get()));
+          } catch (InterruptedException e) {
+            throw new TransportException(e);
+          } catch (ExecutionException e) {
+            throw new TransportException(e);
+          }
+        }
+      }, executor);
+      return future;
+    } catch (IOException e) {
+      throw new TransportException(e);
+    }
+  }
+
   private RequestBuilder addHeadersToRequestBuilder(RequestBuilder requestBuilder) {
     //
     // The user may wish to override the Content-Type header for whatever reason. If they do so we just honour that header and make
@@ -105,7 +185,7 @@ class AHCWebClient<T> implements WebClient<T> {
       }
     }
 
-    if (contentTypeOverriddenInHeaders == false) {
+    if (!contentTypeOverriddenInHeaders) {
       //
       // Set the Content-Type as specified by the Transport. For example if we're using the Json transport the Content-Type header
       // will be set to application/json.
@@ -117,23 +197,48 @@ class AHCWebClient<T> implements WebClient<T> {
   }
 
   public WebResponse get() {
-    return simpleRequest((new RequestBuilder("GET")).setUrl(url));
+    return simpleRequest(new RequestBuilder("GET").setUrl(url));
   }
 
   public WebResponse post(T t) {
-    return request((new RequestBuilder("POST")).setUrl(url), t);
+    return request(new RequestBuilder("POST").setUrl(url), t);
   }
 
   public WebResponse put(T t) {
-    return request((new RequestBuilder("PUT")).setUrl(url), t);
+    return request(new RequestBuilder("PUT").setUrl(url), t);
   }
 
   public WebResponse patch(T t) {
-    return request((new RequestBuilder("PATCH")).setUrl(url), t);
+    return request(new RequestBuilder("PATCH").setUrl(url), t);
   }
 
   public WebResponse delete() {
-    return simpleRequest((new RequestBuilder("DELETE")).setUrl(url));
+    return simpleRequest(new RequestBuilder("DELETE").setUrl(url));
+  }
+
+  @Override
+  public ListenableFuture<WebResponse> get(Executor executor) {
+    return simpleAsyncRequest(new RequestBuilder("GET").setUrl(url), executor);
+  }
+
+  @Override
+  public ListenableFuture<WebResponse> post(T t, Executor executor) {
+    return requestAsync(new RequestBuilder("POST").setUrl(url), t, executor);
+  }
+
+  @Override
+  public ListenableFuture<WebResponse> put(T t, Executor executor) {
+    return requestAsync(new RequestBuilder("PUT").setUrl(url), t, executor);
+  }
+
+  @Override
+  public ListenableFuture<WebResponse> patch(T t, Executor executor) {
+    return requestAsync(new RequestBuilder("PATCH").setUrl(url), t, executor);
+  }
+
+  @Override
+  public ListenableFuture<WebResponse> delete(Executor executor) {
+    return simpleAsyncRequest(new RequestBuilder("DELETE").setUrl(url), executor);
   }
 
   @Override
