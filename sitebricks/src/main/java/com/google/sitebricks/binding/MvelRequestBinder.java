@@ -46,7 +46,9 @@ class MvelRequestBinder implements RequestBinder {
       // If there are multiple entry, then this is a collection bind:
       final Collection<String> values = entry.getValue();
 
-      validate(key);
+      // We guard against expression-injection with a regex validator.
+      if (!validate(key))
+        return;
 
       Object value;
 
@@ -86,9 +88,8 @@ class MvelRequestBinder implements RequestBinder {
           log.fine(String.format("A property [%s] could not be bound,"
               + " but not necessarily an error.", key));
         }
-      }
-      catch (Exception e) {
-          addContextAndThrow(o, key, value, e);
+      } catch (Exception e) {
+        addContextAndThrow(o, key, value, e);
       }
     }
   }
@@ -100,8 +101,7 @@ class MvelRequestBinder implements RequestBinder {
 	    key, bound, value), cause);
 	}
 
-  //TODO optimize this to be aggressive based on collection type
-  //Linear collection search by hashcode
+  // Linear collection search by hashcode
   private Object search(Collection<?> collection, String hashKey) {
     int hash = Integer.valueOf(hashKey);
 
@@ -114,11 +114,15 @@ class MvelRequestBinder implements RequestBinder {
     return null;
   }
 
-  private void validate(String binding) {
-    //guard against expression-injection attacks
-    // TODO use an optimized algorithm, rather than a regex?
-    if (Strings.empty(binding) || !binding.matches(VALID_BINDING_REGEX))
-      throw new InvalidBindingException(
-          "Binding expression (request/form parameter) contained invalid characters: " + binding);
+  private boolean validate(String binding) {
+    //Guards against expression-injection attacks.
+    if (Strings.empty(binding) || !binding.matches(VALID_BINDING_REGEX)) {
+      log.warning(
+          "Binding expression (request/form parameter) contained invalid characters: " + binding
+              + " (ignoring)");
+      return false;
+    }
+
+    return true;
   }
 }

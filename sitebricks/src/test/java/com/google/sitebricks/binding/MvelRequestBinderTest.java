@@ -10,10 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
+import static org.easymock.EasyMock.*;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -125,8 +122,8 @@ public class MvelRequestBinderTest {
     verify(request);
   }
 
-  @Test(expectedExceptions = InvalidBindingException.class)
-  public final void bindRequestDetectInvalid() {
+  @Test
+  public final void bindRequestDetectPartiallyInvalid() {
     final HttpServletRequest request = createMock(HttpServletRequest.class);
 
     expect(request.getParameterMap())
@@ -135,7 +132,39 @@ public class MvelRequestBinderTest {
           put("2 + 12", new String[]{"27"});
           put("#@!*^&", new String[]{"true"});
           put("id", new String[]{"12"});
-          put("height", new String[]{"6.0"});
+          put("heig-ht", new String[]{"6.0"});
+        }});
+
+    replay(request);
+
+    final AnObject o = new AnObject();
+    final AnObject expected = new AnObject();
+    expected.setId(12L);
+
+    final Evaluator evaluator = Guice.createInjector()
+        .getInstance(Evaluator.class);
+
+    new MvelRequestBinder(evaluator, new Provider<FlashCache>() {
+      public FlashCache get() {
+        return new HttpSessionFlashCache();
+      }
+    })
+        .bind(TestRequestCreator.from(request, null), o);
+
+    assert expected.equals(o) : "Invalid binding was allowed!";
+  }
+
+  @Test
+  public final void bindRequestDetectTotallyInvalid() {
+    final HttpServletRequest request = createMock(HttpServletRequest.class);
+
+    expect(request.getParameterMap())
+        .andReturn(new HashMap<String, String[]>() {{
+          put("name.toString()", new String[]{"Dhanji"});
+          put("2 + 12", new String[]{"27"});
+          put("#@!*^&", new String[]{"true"});
+          put("i.d", new String[]{"12"});
+          put("hei-ght", new String[]{"6.0"});
         }});
 
     replay(request);
@@ -152,6 +181,7 @@ public class MvelRequestBinderTest {
     })
         .bind(TestRequestCreator.from(request, null), o);
 
+    assert new AnObject().equals(o) : "Invalid binding was allowed!";
   }
 
   @SuppressWarnings({"UnusedDeclaration"})  
@@ -209,6 +239,37 @@ public class MvelRequestBinderTest {
 
     public void setAge(int age) {
       this.age = age;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      AnObject anObject = (AnObject) o;
+
+      if (age != anObject.age) return false;
+      if (alive != anObject.alive) return false;
+      if (Double.compare(anObject.height, height) != 0) return false;
+      if (id != null ? !id.equals(anObject.id) : anObject.id != null) return false;
+      if (name != null ? !name.equals(anObject.name) : anObject.name != null) return false;
+      if (select != null ? !select.equals(anObject.select) : anObject.select != null) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result;
+      long temp;
+      result = name != null ? name.hashCode() : 0;
+      result = 31 * result + age;
+      result = 31 * result + (alive ? 1 : 0);
+      result = 31 * result + (id != null ? id.hashCode() : 0);
+      temp = height != +0.0d ? Double.doubleToLongBits(height) : 0L;
+      result = 31 * result + (int) (temp ^ (temp >>> 32));
+      result = 31 * result + (select != null ? select.hashCode() : 0);
+      return result;
     }
   }
 }
