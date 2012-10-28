@@ -1,0 +1,85 @@
+<html>
+<!--
+
+
+
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+
+-->
+<head>
+
+  <link href="/default.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="/channel/jquery-1.7.1.js"></script>
+  <script type="text/javascript" src="/channel/__js"></script>
+  <script type="text/javascript">
+    $(function() {
+      console.log('socket id:', sitebricks.SOCKET_ID);
+
+      sock = new sitebricks.Channel('/sitebricks');
+      sock.connect();
+      window.sock = sock;
+
+      sock.send('login', 'hello');
+      var chat = $('#chat');
+
+      sock.on('message', function(data) {
+        chat.append('<div>' + data + '</div>');
+      });
+      sock.on('connect', function() {
+        chat.append('<div><i>websocket connected!</i></div>');
+      });
+      sock.on('disconnect', function() {
+        chat.append('<div><i>websocket disconnected!</i></div>');
+      });
+
+      $('#sendChat').click(function() {
+        var text = $('#textarea').val()
+        sock.send('', text);
+      });
+    });
+  </script>
+</head>
+
+<body>
+    <!-- start header -->
+    <div id="header">
+        <div id="logo">
+            <h1>Sitebricks</h1>
+            <h2>a fast, light web framework from Google</h2>
+        </div>
+        <div id="menu">
+            <ul>
+                <li class="active"><a href="http://code.google.com/p/google-sitebricks">Google Sitebricks</a></li>
+
+                <li><a href="http://google-sitebricks.googlecode.com/svn/trunk">source</a></li>
+                <li><a href="http://code.google.com/p/google-sitebricks/wiki/list">doc</a></li>
+                <li><a href="http://code.google.com/p/google-guice">guice</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="page">
+        <!-- start content -->
+        <div id="content">
+            <div class="post">
+                <h1 class="title">chat over websocket</h1>
+                <div class="entry">
+                  <div id="chat">
+
+                  </div>
+                  <textarea rows="4" cols="10" id="textarea"></textarea>
+                  <div><input id="sendChat" type="button" value="send"> </div>
+                </div>
+
+
+                <div class="meta">
+                    <p class="byline">Google Sitebricks.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

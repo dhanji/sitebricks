@@ -1,10 +1,10 @@
 package com.google.sitebricks.acceptance.util;
 
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.webapp.WebAppContext;
 
 import com.google.inject.Injector;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -39,7 +39,7 @@ public class Jetty {
 
   private void setUp(WebAppContext webAppContext, int port) {
     server = new Server(port);
-    server.addHandler(webAppContext);
+    server.setHandler(webAppContext);
   }
 
   public void start() throws Exception {

@@ -18,6 +18,17 @@
       <groupId>com.google.sitebricks</groupId>
       <artifactId>sitebricks-stat</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.google.sitebricks</groupId>
+      <artifactId>sitebricks-channel</artifactId>
+    </dependency>
+
+    <!-- Jetty webserver -->
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-websocket</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   
 </project>

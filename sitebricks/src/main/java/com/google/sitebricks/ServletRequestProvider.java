@@ -1,18 +1,8 @@
 package com.google.sitebricks;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.annotation.Annotation;
-import java.util.Enumeration;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -20,6 +10,12 @@ import com.google.inject.Singleton;
 import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Parameters;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.Map;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -70,31 +66,6 @@ class ServletRequestProvider implements Provider<Request> {
       @Override
       public void readTo(OutputStream out) throws IOException {
         ByteStreams.copy(servletRequest.getInputStream(), out);
-      }
-
-      @Override
-      public <E> AsyncRequestRead<E> readAsync(final Class<E> type) {
-        return new AsyncRequestRead<E>() {
-          @Override
-          public AsyncCompletion<E> as(final Class<? extends Transport> transport) {
-            return new AsyncCompletion<E>() {
-              @Override
-              public ListenableFuture<E> future() {
-                SettableFuture<E> future = SettableFuture.create();
-                future.set(read(type).as(transport));
-                return future;
-              }
-
-              @Override
-              public void callback(Object target, String methodName) {
-              }
-
-              @Override
-              public void callback(Object target, Class<? extends Annotation> methodAnnotatedWith) {
-              }
-            };
-          }
-        };
       }
 
       @Override

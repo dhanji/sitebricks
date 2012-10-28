@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -92,9 +93,11 @@ public class OptionsModule extends AbstractModule {
         try {
           Class.forName("net.sf.cglib.proxy.Enhancer");
         } catch (ClassNotFoundException e) {
-          addError("Cannot use abstract @Option classes unless Cglib is on the classpath, " +
+          String message = String.format("Cannot use abstract @Option classes unless Cglib is on the classpath, " +
               "[%s] was abstract. Hint: add Cglib 2.0.2 or better to classpath",
               optionClass.getName());
+          Logger.getLogger(Options.class.getName()).severe(message);
+          addError(message);
         }
       }
 
