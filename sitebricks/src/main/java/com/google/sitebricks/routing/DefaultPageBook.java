@@ -1,5 +1,24 @@
 package com.google.sitebricks.routing;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
+
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+
+import org.jetbrains.annotations.Nullable;
+
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
@@ -25,22 +44,6 @@ import com.google.sitebricks.http.negotiate.ContentNegotiator;
 import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.rendering.control.DecorateWidget;
-import net.jcip.annotations.GuardedBy;
-import net.jcip.annotations.ThreadSafe;
-import org.jetbrains.annotations.Nullable;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * contains active uri/widget mappings
@@ -598,13 +601,20 @@ public class DefaultPageBook implements PageBook {
 
       Page that = (Page) o;
 
-      return this.clazz.equals(that.pageClass());
+      return this.clazz.equals(that.pageClass()) && isDecorated() == that.isDecorated();
     }
 
     @Override
     public int hashCode() {
       return clazz.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(PageTuple.class).add("clazz", clazz).add("isDecorated", extension)
+                .add("uri", uri).toString();
+    }
+
   }
 
   private static class MethodTuple implements Action {
