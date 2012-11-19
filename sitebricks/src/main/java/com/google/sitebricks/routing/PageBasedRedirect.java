@@ -44,7 +44,7 @@ class PageBasedRedirect implements Redirect {
         if (value == null)
           throw new IllegalArgumentException("Missing parameter " + piece
               + " in URI template for page class: " + pageClass.getName()
-              + " '" + at.value() + "'");
+              + " '" + uriTemplate + "'");
 
         uri.append(URLEncoder.encode(value));
       } else
