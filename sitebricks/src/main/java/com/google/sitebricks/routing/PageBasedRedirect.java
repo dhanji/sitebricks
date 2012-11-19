@@ -1,9 +1,12 @@
 package com.google.sitebricks.routing;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.sitebricks.At;
+import com.google.sitebricks.headless.Request;
 import net.jcip.annotations.Immutable;
 
 import java.net.URLEncoder;
@@ -15,6 +18,12 @@ import java.util.Map;
 @Immutable @Singleton
 class PageBasedRedirect implements Redirect {
   @Inject private PageBook pageBook;
+  @Inject private Provider<Request> request;
+
+  @VisibleForTesting
+  void setRequestProvider(Provider<Request> request) {
+    this.request = request;
+  }
 
   @Override @SuppressWarnings("deprecation") // For URL encoder.
   public String to(Class<?> pageClass, Map<String, String> parameters) {
@@ -32,6 +41,10 @@ class PageBasedRedirect implements Redirect {
       uriTemplate = page.getUri();
     } else
       uriTemplate = at.value();
+
+    // Contextualize this request if necessary.
+    if (uriTemplate.startsWith("/"))
+      uriTemplate = request.get().context() + uriTemplate;
 
     String[] split = uriTemplate.split("/");
     StringBuilder uri = new StringBuilder();

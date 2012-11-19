@@ -115,7 +115,7 @@ class XmlWidget implements Renderable {
     respond.chew();
   }
 
-  private static String contextualizeIfNeeded(String attribute, boolean isFirstToken, String raw) {
+  static String contextualizeIfNeeded(String attribute, boolean isFirstToken, String raw) {
     if (isFirstToken && CONTEXTUAL_ATTRIBS.contains(attribute)) {
       //add context to path if needed
       if (raw.startsWith("/")) {
