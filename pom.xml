@@ -35,7 +35,7 @@
     <module>sitebricks-options</module>
     <module>sitebricks-channel</module>
     <module>sitebricks-cloud</module>
-    <module>sitebricks-cluster</module>
+    <!-- module>sitebricks-cluster</module -->
     <module>stat</module>
     <module>slf4j</module>
   </modules>
