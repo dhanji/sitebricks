@@ -15,7 +15,7 @@ import java.util.List;
  * Compiles non-XML templates.
  *
  * @author Dhanji R. Prasanna (dhanji@gmail com)
- * @see XmlTemplateCompiler
+ * @see HtmlTemplateCompiler
  */
 @Singleton
 public class FlatTemplateCompiler implements TemplateCompiler {

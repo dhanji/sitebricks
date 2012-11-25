@@ -33,7 +33,6 @@
     <module>sitebricks-test-support</module>
     <module>sitebricks-mail</module>
     <module>sitebricks-options</module>
-    <module>sitebricks-jetty-archetype</module>
     <module>sitebricks-channel</module>
     <module>stat</module>
     <module>slf4j</module>

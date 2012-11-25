@@ -1,6 +1,7 @@
 package com.google.sitebricks;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -9,13 +10,11 @@ import com.google.inject.Key;
 import com.google.inject.Scope;
 import com.google.inject.TypeLiteral;
 import com.google.inject.binder.ScopedBindingBuilder;
-import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.sitebricks.compiler.FlatTemplateCompiler;
 import com.google.sitebricks.compiler.HtmlTemplateCompiler;
 import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.compiler.TemplateCompiler;
-import com.google.sitebricks.compiler.XmlTemplateCompiler;
 import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
 import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
 import com.google.sitebricks.conversion.Converter;
@@ -64,7 +63,6 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     methods.put("delete", Delete.class);
     methods.put("head", Head.class);
     methods.put("trace", Trace.class);
-
   }
 
   @Override
@@ -124,22 +122,24 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     //
     // Map of all the implementations keyed by type they can handle 
     //
-    MapBinder<String,TemplateCompiler> templateCompilers = MapBinder.newMapBinder(binder(), String.class, TemplateCompiler.class);
-    templateCompilers.addBinding("html").to(HtmlTemplateCompiler.class);
-    templateCompilers.addBinding("xhtml").to(HtmlTemplateCompiler.class);
-    templateCompilers.addBinding("xml").to(XmlTemplateCompiler.class);
-    templateCompilers.addBinding("flat").to(FlatTemplateCompiler.class);
-    templateCompilers.addBinding("mvel").to(MvelTemplateCompiler.class);
-    templateCompilers.addBinding("fml").to(FreemarkerTemplateCompiler.class);
+    ImmutableMap.Builder<String, Class<? extends TemplateCompiler>> builder = ImmutableMap.builder();
 
-    configureTemplateCompilers(templateCompilers);
+    builder.put("html", HtmlTemplateCompiler.class);
+    builder.put("xhtml", HtmlTemplateCompiler.class);
+    builder.put("flat", FlatTemplateCompiler.class);
+    builder.put("mvel", MvelTemplateCompiler.class);
+    builder.put("fml", FreemarkerTemplateCompiler.class);
+
+    configureTemplateCompilers(builder);
+
+    Map<String, Class<? extends TemplateCompiler>> map = builder.build();
+    bind(new TypeLiteral<Map<String, Class<? extends TemplateCompiler>>>() {}).toInstance(map);
   }
 
-  protected void configureTemplateCompilers(MapBinder<String, TemplateCompiler> compilers) {
-    // Override to include custom template compilers. You can also simply add to the existing MapBinder
-    // mapping anywhere in your modules (see: http://code.google.com/p/google-guice/wiki/Multibindings):
-    //  MapBinder<String,TemplateCompiler> templateCompilers = MapBinder.newMapBinder(binder(), String.class, TemplateCompiler.class);
-    //  templateCompilers.addBinding("mustache").to(MustacheTemplateCompiler.class);
+  protected void configureTemplateCompilers(ImmutableMap.Builder<String, Class<? extends TemplateCompiler>> compilers) {
+    // Override to include custom template compilers:
+    //  compilers.put("mustache", MustacheTemplateCompiler.class);
+    //  Sitebricks obtains the provided compiler class via Guice.
   }
 
   /**

@@ -3,9 +3,9 @@ package com.google.sitebricks;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.sitebricks.compiler.TemplateCompiler;
-
 import net.jcip.annotations.Immutable;
 
+import javax.servlet.ServletContext;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-
-import javax.servlet.ServletContext;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -67,6 +65,7 @@ public class TemplateLoader {
     TemplateSource templateSource = null;
     String text;
 
+    boolean appendExtension = false;
     try {
       final ServletContext servletContext = context.get();
       InputStream stream = null;
@@ -89,7 +88,7 @@ public class TemplateLoader {
           stream = openWebInf(template, servletContext);
         }
 
-        // Finally, try to get the resource from the servlet context
+        // Finally, try to get the resource from the servlet context internally
         if (null == stream) {
           stream = servletContext.getResourceAsStream(template);
         }
@@ -101,12 +100,14 @@ public class TemplateLoader {
       //
 
       if (null == stream) {
+        appendExtension = true;
         for (String ext : templateSystem.getTemplateExtensions()) {
           String name = String.format(ext, template);
 
           stream = pageClass.getResourceAsStream(name);
 
           if (null != stream) {
+            extension = ext;
             break;
           }
         }
@@ -124,6 +125,7 @@ public class TemplateLoader {
           stream = open(name, servletContext);
 
           if (null != stream) {
+            extension = ext;
             break;
           }
         }
@@ -140,6 +142,7 @@ public class TemplateLoader {
           stream = openWebInf(name, servletContext);
 
           if (null != stream) {
+            extension = ext;
             break;
           }
         }
@@ -156,6 +159,7 @@ public class TemplateLoader {
           stream = servletContext.getResourceAsStream(name);
 
           if (null != stream) {
+            extension = ext;
             break;
           }
         }
@@ -176,6 +180,9 @@ public class TemplateLoader {
     } catch (IOException e) {
       throw new TemplateLoadingException("Could not load template for (i/o error): " + pageClass, e);
     }
+
+    if (appendExtension)
+      template += "." + extension;
 
     return new Template(template, text, templateSource);
   }
