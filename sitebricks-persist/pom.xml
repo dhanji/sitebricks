@@ -6,8 +6,8 @@
     <artifactId>sitebricks-parent</artifactId>
     <version>0.8.8-SNAPSHOT</version>
   </parent>
-  <artifactId>sitebricks-options</artifactId>
-  <name>Sitebricks :: Options</name>
+  <artifactId>sitebricks-persist</artifactId>
+  <name>Sitebricks :: Persistence Module</name>
 
   <repositories>
     <repository>
@@ -21,17 +21,16 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.google.sitebricks</groupId>
-      <artifactId>sitebricks-converter</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
       <groupId>cglib</groupId>
       <artifactId>cglib-full</artifactId>
-      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.sitebricks</groupId>
+      <artifactId>sitebricks-converter</artifactId>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
@@ -40,10 +39,16 @@
       <classifier>jdk15</classifier>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>persistence-api</artifactId>
+    </dependency>
+
   </dependencies>
 
   <build>
-    <finalName>sitebricks-options</finalName>
+    <finalName>sitebricks-persist</finalName>
     <resources>
       <resource>
         <directory>src/test/resources</directory>

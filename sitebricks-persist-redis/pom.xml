@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -6,8 +8,8 @@
     <artifactId>sitebricks-parent</artifactId>
     <version>0.8.8-SNAPSHOT</version>
   </parent>
-  <artifactId>sitebricks-options</artifactId>
-  <name>Sitebricks :: Options</name>
+  <artifactId>sitebricks-persist-redis</artifactId>
+  <name>Sitebricks :: Persistence Module (Redis)</name>
 
   <repositories>
     <repository>
@@ -21,17 +23,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.google.sitebricks</groupId>
-      <artifactId>sitebricks-converter</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib-full</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
@@ -40,10 +33,22 @@
       <classifier>jdk15</classifier>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.google.sitebricks</groupId>
+      <artifactId>sitebricks-persist</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- supported persistence stores -->
+    <dependency>
+      <groupId>redis.clients</groupId>
+      <artifactId>jedis</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
-    <finalName>sitebricks-options</finalName>
+    <finalName>sitebricks-persist-redis</finalName>
     <resources>
       <resource>
         <directory>src/test/resources</directory>
