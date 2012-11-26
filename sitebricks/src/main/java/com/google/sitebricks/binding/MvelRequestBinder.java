@@ -84,9 +84,9 @@ class MvelRequestBinder implements RequestBinder {
     			  addContextAndThrow(o, key, value, e.getCause());
     		  }
         // Log missing property.
-        if (log.isLoggable(Level.FINE)) {
-          log.fine(String.format("A property [%s] could not be bound,"
-              + " but not necessarily an error.", key));
+        if (log.isLoggable(Level.FINER)) {
+          log.finer("A property [" + key +"] could not be bound,"
+              + " but not necessarily an error.");
         }
       } catch (Exception e) {
         addContextAndThrow(o, key, value, e);
@@ -94,8 +94,7 @@ class MvelRequestBinder implements RequestBinder {
     }
   }
 
-	private void addContextAndThrow(Object bound, String key, Object value, Throwable cause)
-	{
+	private void addContextAndThrow(Object bound, String key, Object value, Throwable cause) {
 	  throw new RuntimeException(String.format(
 	    "Problem setting [%s] on instance [%s] with value [%s]",
 	    key, bound, value), cause);
