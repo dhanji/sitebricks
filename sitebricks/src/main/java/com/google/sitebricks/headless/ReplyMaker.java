@@ -192,5 +192,43 @@ class ReplyMaker<E> extends Reply<E> {
       }
     }
   }
+  
+  @Override
+  public boolean equals(Object other) {
+	  if(!(other instanceof ReplyMaker<?>))
+		  return false;
+	  
+	  @SuppressWarnings("unchecked")
+	  ReplyMaker<E> o = (ReplyMaker<E>)other;
+	  if(this.status != o.status)
+		  return false;
+	  
+	  if((this.contentType != o.contentType)
+	  && (this.contentType != null && !this.contentType.equals(o.contentType))
+	  && (this.contentType == null && o.contentType != null))
+		  return false;
+	  
+	  if((this.redirectUri != o.redirectUri)
+	  && (this.redirectUri != null && !this.redirectUri.equals(o.redirectUri))
+	  && (this.redirectUri == null && o.redirectUri != null))
+		  return false;
+	  	  
+	  if(!this.headers.equals(o.headers))
+		  return false;
+	  
+	  if(!this.transport.equals(o.transport))
+		  return false;
+	  
+	  if(this.templateKey != o.templateKey)
+		  return false;
+
+	  if((this.entity != o.entity)
+	  && (this.entity != null && !this.entity.equals(o.entity))
+	  && (this.entity == null && o.entity != null))
+		  return false;
+	  
+	  // All tests passed, the objects must be equal
+	  return true;
+  }
 }
 

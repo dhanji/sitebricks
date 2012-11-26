@@ -8,6 +8,7 @@ import com.google.sitebricks.StringBuilderRespond;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.headless.HeadlessRenderer;
+import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.resource.ResourcesService;
 import com.google.sitebricks.routing.PageBook.Page;
@@ -70,13 +71,9 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     if (page.isHeadless()) {
       return bindAndReply(request, page, instance);
     } else {
-      respond = new StringBuilderRespond(instance);
-
-      //fire events and render reponders
-      bindAndRespond(request, page, respond, instance);
+       //fire events and render reponders
+      return bindAndRespond(request, page, instance);
     }
-
-    return respond;
   }
 
   private Object bindAndReply(Request request, Page page, Object instance) throws IOException {
@@ -87,8 +84,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     return fireEvent(request, page, instance);
   }
 
-  private void bindAndRespond(Request request, PageBook.Page page, Respond respond,
-                              Object instance) {
+  private Object bindAndRespond(Request request, PageBook.Page page, Object instance) {
     //bind request
     binder.bind(request, instance);
 
@@ -96,6 +92,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     final Object redirect = fireEvent(request, page, instance);
 
     //render to respond
+    Respond respond = new StringBuilderRespond(instance);
     if (null != redirect) {
 
       if (redirect instanceof String)
@@ -105,6 +102,9 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
 
         // should never be null coz it is validated on compile.
         respond.redirect(contextualize(request, targetPage.getUri()));
+      } else if (redirect instanceof Reply<?>) {
+    	  // To allow non-headless pages to use Reply<?> for more advanced HTTP responses
+    	  return redirect;
       } else {
         // Handle page-chaining driven redirection.
         PageBook.Page targetPage = book.forInstance(redirect);
@@ -120,8 +120,11 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
         // verified at compile, not be a variablized matcher.
         respond.redirect(contextualize(request, targetPage.getUri()));
       }
-    } else
+    } else {
       page.widget().render(instance, respond);
+    }
+    
+    return respond;
   }
 
   // We're sure the request parameter map is a Map<String, String[]>

@@ -5,16 +5,21 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import com.google.sitebricks.*;
+import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Select;
 import com.google.sitebricks.rendering.EmbedAs;
+
+import org.easymock.EasyMock;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -136,6 +141,54 @@ public class PageBookImplTest {
 
     assert REDIRECTED_POST.equals(redirect);
     assert page.widget().equals(mock);
+  }
+  
+  @Test
+  public final void fireGetMethodOnPageAndReply403() {
+    Renderable mock = new Renderable() {
+      public void render(Object bound, Respond respond) {
+
+      }
+
+      public <T extends Renderable> Set<T> collect(Class<T> clazz) {
+        return null;
+      }
+    };
+
+    final PageBook pageBook = new DefaultPageBook(injector);
+    pageBook.at("/forbidden", MyForbiddenPage.class);
+
+    PageBook.Page page = pageBook.get("/forbidden");
+    page.apply(mock);
+    final MyForbiddenPage bound = new MyForbiddenPage();
+    Object redirect = page.doMethod("get", bound, "/forbidden", fakeRequestWithParams(new HashMap<String, String[]>()));
+
+    assert Reply.saying().forbidden().equals(redirect);
+    assert page.widget().equals(mock);
+  }
+
+  @Test
+  public final void firePostMethodOnPageAndReply403() {
+    Renderable mock = new Renderable() {
+        public void render(Object bound, Respond respond) {
+
+        }
+
+        public <T extends Renderable> Set<T> collect(Class<T> clazz) {
+          return null;
+        }
+      };
+
+      final PageBook pageBook = new DefaultPageBook(injector);
+      pageBook.at("/forbidden", MyForbiddenPage.class);
+
+      PageBook.Page page = pageBook.get("/forbidden");
+      page.apply(mock);
+      final MyForbiddenPage bound = new MyForbiddenPage();
+      Object redirect = page.doMethod("post", bound, "/forbidden", fakeRequestWithParams(new HashMap<String, String[]>()));
+
+      assert Reply.saying().forbidden().equals(redirect);
+      assert page.widget().equals(mock);
   }
 
   @Test
@@ -728,6 +781,20 @@ public class PageBookImplTest {
     @Post
     public String post() {
       return REDIRECTED_POST;
+    }
+  }
+  
+  @At("/forbidden")
+  private class MyForbiddenPage {
+
+    @Get
+    public Object get() {
+    	return Reply.saying().forbidden();
+    }
+
+    @Post
+    public Object post() {
+      return Reply.saying().forbidden();
     }
   }
 }
