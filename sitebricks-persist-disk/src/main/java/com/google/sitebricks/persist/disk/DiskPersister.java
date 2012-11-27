@@ -19,13 +19,13 @@ class DiskPersister extends Persister {
   }
 
   @Override
-  public void start() {
+  public synchronized void start() {
     indexSet.startup();
     entityStore.init(indexSet);
   }
 
   @Override
-  public void shutdown() {
+  public synchronized void shutdown() {
     indexSet.shutdown();
   }
 

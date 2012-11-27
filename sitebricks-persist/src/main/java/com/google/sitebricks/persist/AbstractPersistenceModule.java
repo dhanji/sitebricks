@@ -133,6 +133,7 @@ public abstract class AbstractPersistenceModule extends PrivateModule {
     return key;
   }
 
+  @SuppressWarnings("unchecked")
   protected <T> void exposeEntityStoreDelegate(Class<T> clazz) {
     final Key<EntityStore> key = selectorKey(EntityStore.class);
     bind(clazz).toProvider(new Provider<T>() {

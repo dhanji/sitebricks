@@ -8,8 +8,8 @@
     <artifactId>sitebricks-parent</artifactId>
     <version>0.8.8-SNAPSHOT</version>
   </parent>
-  <artifactId>sitebricks-persist-disk</artifactId>
-  <name>Sitebricks :: Persistence Module (Disk)</name>
+  <artifactId>sitebricks-persist-sql</artifactId>
+  <name>Sitebricks :: Persistence Module (SQL)</name>
 
   <dependencies>
     <dependency>
@@ -30,24 +30,10 @@
       <artifactId>sitebricks-persist</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-queryparser</artifactId>
-      <version>${lucene.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.lucene</groupId>
-      <artifactId>lucene-analyzers-common</artifactId>
-      <version>${lucene.version}</version>
+      <groupId>com.jolbox</groupId>
+      <artifactId>bonecp</artifactId>
+      <version>0.8.0-alpha1</version>
     </dependency>
   </dependencies>
 

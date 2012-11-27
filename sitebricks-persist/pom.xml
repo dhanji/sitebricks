@@ -7,17 +7,7 @@
     <version>0.8.8-SNAPSHOT</version>
   </parent>
   <artifactId>sitebricks-persist</artifactId>
-  <name>Sitebricks :: Persistence Module</name>
-
-  <repositories>
-    <repository>
-      <id>jboss-maven2-public-repository</id>
-      <url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+  <name>Sitebricks :: Persistence</name>
 
   <dependencies>
     <dependency>
@@ -44,7 +34,6 @@
       <groupId>javax.persistence</groupId>
       <artifactId>persistence-api</artifactId>
     </dependency>
-
   </dependencies>
 
   <build>

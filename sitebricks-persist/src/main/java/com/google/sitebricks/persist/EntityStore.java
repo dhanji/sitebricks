@@ -93,7 +93,7 @@ public abstract class EntityStore {
   public <T> T topic(Class<T> entity) {
     EntityMetadata.EntityDescriptor descriptor = metadata.of(entity);
 
-    @SuppressWarnings("unchecked") // Cast is guaranteed by enhancer.
+    @SuppressWarnings({"unchecked", "UnnecessaryLocalVariable"}) // Cast is guaranteed by enhancer.
     T proxy = (T) Enhancer.create(entity, new Class[] { TopicProxy.HasCalledFields.class },
         new TopicProxy(descriptor));
     return proxy;
@@ -114,6 +114,8 @@ public abstract class EntityStore {
    * Returns the underlying implementation API (you should rarely ever need this).
    */
   public abstract Object delegate();
+
+
 
 
   /**

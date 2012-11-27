@@ -39,11 +39,12 @@
     <module>sitebricks-channel</module>
     <module>sitebricks-cloud</module>
     <module>sitebricks-cluster</module>
+    <module>stat</module>
+    <module>slf4j</module>
     <module>sitebricks-persist</module>
     <module>sitebricks-persist-disk</module>
     <module>sitebricks-persist-redis</module>
-    <module>stat</module>
-    <module>slf4j</module>
+    <module>sitebricks-persist-sql</module>
   </modules>
 
   <dependencyManagement>
