@@ -1,6 +1,7 @@
 package com.google.sitebricks.client.transport;
 
 import com.google.inject.Inject;
+import com.google.inject.TypeLiteral;
 import com.thoughtworks.xstream.XStream;
 
 import java.io.IOException;
@@ -20,6 +21,12 @@ class XStreamXmlTransport extends Xml {
 
   public <T> T in(InputStream in, Class<T> type) throws IOException {
     return type.cast(xStream.fromXML(in));
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> T in(InputStream in, TypeLiteral<T> type) throws IOException {
+    return (T)xStream.fromXML(in);
   }
 
   public <T> void out(OutputStream out, Class<T> type, T data) {

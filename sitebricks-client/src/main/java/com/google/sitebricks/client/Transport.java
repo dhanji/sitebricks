@@ -1,5 +1,7 @@
 package com.google.sitebricks.client;
 
+import com.google.inject.TypeLiteral;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,6 +26,20 @@ public interface Transport {
   <T> T in(InputStream in, Class<T> type) throws IOException;
 
   /**
+   * Reads from a given inputstream and returns an object representing the unmarshalled
+   * form of the underlying protocol data.
+   *
+   * @param in   An inputstream to read data from. This stream will NOT be closed
+   *             by the implementation of this interface.
+   * @param type The TypeLiteral which is representing a generic type to read in. The method will return an instance of the
+   *             generic type representing the data in the {@code in} stream.
+   * @return An instance of {@code type} representing the data in the provided
+   *         stream.
+   * @throws IOException Thrown if there is an error reading from this stream.
+   */
+  <T> T in(InputStream in, TypeLiteral<T> type) throws IOException;
+
+  /**
    * Converts a given object into transportable data and writes it to the provided
    * OutputStream.
    *
@@ -34,6 +50,7 @@ public interface Transport {
    * @throws IOException Thrown if there is an error writing to this stream.
    */
   <T> void out(OutputStream out, Class<T> type, T data) throws IOException;
+
 
   /**
    * Returns the HTTP content type marshalled by this transport. For example, the

@@ -115,6 +115,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/superpath2/:dynamic").serve(RestfulWebServiceWithSubpaths2.class);
         at("/json/:type").serve(RestfulWebServiceWithCRUD.class);
         at("/jsonConversion").serve(RestfulWebServiceWithCRUDConversions.class);
+        at("/serviceWithGenerics").serve(RestfulWebServiceWithGenerics.class);
 
         at("/pagechain").show(PageChain.class);
         at("/nextpage").show(NextPage.class);

@@ -1,5 +1,7 @@
 package com.google.sitebricks.client;
 
+import com.google.inject.TypeLiteral;
+
 import java.util.Map;
 
 /**
@@ -11,6 +13,8 @@ public interface WebResponse {
   int status();
 
   <T> ResponseTransportBuilder<T> to(Class<T> data);
+
+  <T> ResponseTransportBuilder<T> to(TypeLiteral<T> data);
 
   String toString();
 

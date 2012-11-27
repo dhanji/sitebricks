@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.TypeLiteral;
 import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Parameters;
@@ -42,6 +43,29 @@ class ServletRequestProvider implements Provider<Request> {
 
       @Override
       public <E> RequestRead<E> read(final Class<E> type) {
+        return new RequestRead<E>() {
+          E memo;
+
+          @Override
+          public E as(Class<? extends Transport> transport) {
+            try {
+              // Only read from the stream once.
+              if (null == memo) {
+                memo = injector.getInstance(transport).in(servletRequest.getInputStream(),
+                    type);
+              }
+            } catch (IOException e) {
+              throw new RuntimeException("Unable to obtain input stream from servlet request" +
+                  " (was it already used or closed elsewhere?). Error:\n" + e.getMessage(), e);
+            }
+
+            return memo;
+          }
+        };
+      }
+
+      @Override
+      public <E> RequestRead<E> read(final TypeLiteral<E> type) {
         return new RequestRead<E>() {
           E memo;
 
