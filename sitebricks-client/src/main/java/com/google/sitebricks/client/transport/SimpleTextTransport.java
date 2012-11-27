@@ -8,6 +8,7 @@ import java.io.OutputStream;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
+import com.google.inject.TypeLiteral;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -17,7 +18,13 @@ class SimpleTextTransport extends Text {
       return type.cast(CharStreams.toString(new InputStreamReader(in)));
     }
 
-    public <T> void out(OutputStream out, Class<T> type, T data) {
+  @Override
+  @SuppressWarnings("unchecked")
+  public <T> T in(InputStream in, TypeLiteral<T> type) throws IOException {
+    return (T) CharStreams.toString(new InputStreamReader(in));
+  }
+
+  public <T> void out(OutputStream out, Class<T> type, T data) {
       try {
         ByteStreams.copy(new ByteArrayInputStream(data.toString().getBytes()), out);
       } catch (IOException e) {

@@ -3,6 +3,8 @@ package com.google.sitebricks.client;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.TypeLiteral;
+import com.google.sitebricks.client.Web.ReadAsBuilder;
 import com.google.sitebricks.client.transport.Text;
 import net.jcip.annotations.NotThreadSafe;
 
@@ -43,6 +45,11 @@ class WebClientBuilder implements Web.FormatBuilder {
   }
 
   public <T> Web.ReadAsBuilder<T> transports(Class<T> clazz) {
+    return new InternalReadAsBuilder<T>(new TypeLiteral<T>() {});
+  }
+
+  @Override
+  public <T> ReadAsBuilder<T> transports(TypeLiteral<T> clazz) {
     return new InternalReadAsBuilder<T>(clazz);
   }
 
@@ -64,9 +71,9 @@ class WebClientBuilder implements Web.FormatBuilder {
   }
 
   private class InternalReadAsBuilder<T> implements Web.ReadAsBuilder<T> {
-    private final Class<T> transporting;
+    private final TypeLiteral<T> transporting;
 
-    private InternalReadAsBuilder(Class<T> transporting) {
+    private InternalReadAsBuilder(TypeLiteral<T> transporting) {
       this.transporting = transporting;
     }
 

@@ -1,6 +1,7 @@
 package com.google.sitebricks.headless;
 
 import com.google.common.collect.Multimap;
+import com.google.inject.TypeLiteral;
 import com.google.sitebricks.client.Transport;
 
 import java.io.IOException;
@@ -25,6 +26,18 @@ public interface Request {
    * @return an instance containing the deserialized raw data.
    */
   <E> RequestRead<E> read(Class<E> type);
+
+  /**
+   * Reads the raw request data into an generic object. Must
+   * be followed by a transport clause for correct unmarshalling. Example:
+   * <pre>
+   *   List&lt;Person&gt; personList = request.read(new TypeLiteral&lt;List&lt;Person&gt;&gt;(){}).as(Json.class);
+   * </pre>
+   *
+   * @param type The target type to unmarshall the raw request data into.
+   * @return an instance containing the deserialized raw data.
+   */
+  <E> RequestRead<E> read(TypeLiteral<E> type);
 
   /**
    * Reads the request data directly into the given output stream. Useful
