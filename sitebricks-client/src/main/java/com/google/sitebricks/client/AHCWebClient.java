@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.inject.Injector;
+import com.google.inject.TypeLiteral;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.Realm;
@@ -27,16 +28,16 @@ import java.util.concurrent.Executor;
 class AHCWebClient<T> implements WebClient<T> {
   private final String url;
   private final Map<String, String> headers;
-  private final Class<T> classTypeToTransport;
+  private final TypeLiteral<T> typeToTransform;
   private final AsyncHttpClient httpClient;
   private final Transport transport;
   private final Injector injector;
 
-  public AHCWebClient(Injector injector, Transport transport, Web.Auth authType, String username, String password, String url, Map<String, String> headers, Class<T> classTypeToTransport) {
+  public AHCWebClient(Injector injector, Transport transport, Web.Auth authType, String username, String password, String url, Map<String, String> headers, TypeLiteral<T> typeToTransform) {
     this.injector = injector;
     this.url = url;
     this.headers = (null == headers) ? null : ImmutableMap.copyOf(headers);
-    this.classTypeToTransport = classTypeToTransport;
+    this.typeToTransform = typeToTransform;
     this.transport = transport;
 
     // configure auth
@@ -101,7 +102,7 @@ class AHCWebClient<T> implements WebClient<T> {
       // Read the entity from the transport plugin.
       //
       final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-      transport.out(stream, classTypeToTransport, t);
+      transport.out(stream, typeToTransform.getRawType(), t);
 
       // TODO worry about endian issues? Or will Content-Encoding be sufficient?
       // OOM if the stream is too bug
@@ -139,7 +140,7 @@ class AHCWebClient<T> implements WebClient<T> {
         in = (InputStream) t;
       else {
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        transport.out(stream, classTypeToTransport, t);
+        transport.out(stream, typeToTransform.getRawType(), t);
 
         in = new ByteArrayInputStream(stream.toByteArray());
       }

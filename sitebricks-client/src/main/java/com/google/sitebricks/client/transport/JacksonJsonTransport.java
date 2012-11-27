@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.google.inject.TypeLiteral;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.codehaus.jackson.map.type.TypeFactory;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -30,6 +32,11 @@ public class JacksonJsonTransport extends Json {
     return objectMapper.readValue(in, type);
   }
 
+  @Override
+  public <T> T in(InputStream in, TypeLiteral<T> type) throws IOException {
+    return objectMapper.readValue(in, TypeFactory.defaultInstance().constructType(type.getType()));
+  }
+
   public <T> void out(OutputStream out, Class<T> type, T data) {
     try {
       objectMapper.writeValue(out, data);
@@ -37,4 +44,6 @@ public class JacksonJsonTransport extends Json {
       throw new RuntimeException(e);
     }
   }
+
+
 }

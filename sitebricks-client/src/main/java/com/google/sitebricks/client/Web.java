@@ -1,6 +1,7 @@
 package com.google.sitebricks.client;
 
 import com.google.inject.ImplementedBy;
+import com.google.inject.TypeLiteral;
 
 import java.util.Map;
 
@@ -19,6 +20,8 @@ public interface Web {
 
   static interface FormatBuilder {
     <T> ReadAsBuilder<T> transports(Class<T> clazz);
+
+    <T> ReadAsBuilder<T> transports(TypeLiteral<T> clazz);
 
     <T> WebClient<T> transportsText();
 

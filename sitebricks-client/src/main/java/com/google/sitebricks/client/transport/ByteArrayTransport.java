@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.google.common.io.ByteStreams;
+import com.google.inject.TypeLiteral;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -14,6 +15,12 @@ class ByteArrayTransport extends Raw {
   @SuppressWarnings("unchecked")
   public <T> T in(InputStream in, Class<T> type) throws IOException {
     assert type == byte[].class;
+    return (T) ByteStreams.toByteArray(in);
+  }
+
+  @Override
+  public <T> T in(InputStream in, TypeLiteral<T> type) throws IOException {
+    assert type.getType() == byte[].class;
     return (T) ByteStreams.toByteArray(in);
   }
 

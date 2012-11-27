@@ -1,6 +1,7 @@
 package com.google.sitebricks.client;
 
 import com.google.inject.Injector;
+import com.google.inject.TypeLiteral;
 import com.ning.http.client.Response;
 import net.jcip.annotations.NotThreadSafe;
 
@@ -45,6 +46,12 @@ class WebResponseImpl implements WebResponse {
   }
 
   public <T> ResponseTransportBuilder<T> to(final Class<T> data) {
+    TypeLiteral<T> typeLiteral = TypeLiteral.get(data);
+    return to(typeLiteral);
+  }
+
+  @Override
+  public <T> ResponseTransportBuilder<T> to(final TypeLiteral<T> data) {
     return new ResponseTransportBuilder<T>() {
       public T using(Class<? extends Transport> transportKey) {
         InputStream in = null;
