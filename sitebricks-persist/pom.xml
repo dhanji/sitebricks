@@ -15,6 +15,10 @@
       <artifactId>guice</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
       <groupId>cglib</groupId>
       <artifactId>cglib-full</artifactId>
     </dependency>

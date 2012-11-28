@@ -22,11 +22,7 @@ This following misspelling results in a template compile error:
 
     Total errors: 1
 
-### Next steps ###
-
-Get started
-5-minute tutorial
-Building RESTful web services
+[Next steps](http://sitebricks.org)
 
 * * *
 

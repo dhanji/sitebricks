@@ -1,5 +1,7 @@
 package com.google.sitebricks.persist.sql;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,13 +30,20 @@ public class Sql {
     this.connection = connection;
   }
 
+  public void execute(String sql) {
+    query(sql);
+  }
+
   public void execute(String sql, Map<String, Object> params) {
     query(sql, params);
   }
 
+  public ResultSet query(String sql) {
+    return query(sql, ImmutableMap.<String, Object>of());
+  }
+
   public ResultSet query(String sql, Map<String, Object> params) {
     try {
-
       Matcher matcher = Sql.NAMED_ARG_PATTERN.matcher(sql);
 
       Map<Integer, Object> positionalParams = toPositionalMap(params, matcher);
@@ -75,6 +84,18 @@ public class Sql {
     return positionalParams;
   }
 
+  public boolean tableExists(String name) {
+    try {
+      return connection.getMetaData().getTables(null, null, name.toUpperCase(), null).next();
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public List<Map<String, Object>> list(String sql) {
+    return list(sql, ImmutableMap.<String, Object>of());
+  }
+
   public List<Map<String, Object>> list(String sql, Map<String, Object> params) {
     ResultSet resultSet = query(sql, params);
 
@@ -85,8 +106,8 @@ public class Sql {
 
       while (resultSet.next()) {
         Map<String, Object> row = new HashMap<String, Object>();
-        for (int i = 0; i < count; i++) {
-          String column = metaData.getColumnName(i);
+        for (int i = 1; i <= count; i++) {
+          String column = metaData.getColumnName(i).toLowerCase();
 
           row.put(column, resultSet.getObject(column));
         }
