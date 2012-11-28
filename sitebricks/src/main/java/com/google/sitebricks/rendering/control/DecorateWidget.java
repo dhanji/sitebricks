@@ -52,7 +52,7 @@ public class DecorateWidget implements Renderable {
       PageBook.Page page = book.forName(DecorateWidget.embedNameFor(templateClass));
 
       // create a dummy respond to collect the output of the embedded page
-      StringBuilderRespond sbrespond = new StringBuilderRespond(new Object());
+      StringBuilderRespond sbrespond = new StringBuilderRespond(bound);
       EmbeddedRespond embedded = new EmbeddedRespond(null, sbrespond);
       page.widget().render(bound, embedded);
 
