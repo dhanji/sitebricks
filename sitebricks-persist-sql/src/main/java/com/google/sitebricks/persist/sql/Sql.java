@@ -1,6 +1,7 @@
 package com.google.sitebricks.persist.sql;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -27,19 +29,41 @@ public class Sql {
   }
 
   public void execute(String sql, Map<String, Object> params) {
+    query(sql, params);
+  }
+
+  public ResultSet query(String sql, Map<String, Object> params) {
     try {
 
-      String[] matcher = NAMED_ARG_PATTERN.split(sql);
-//      PreparedStatement statement = connection.prepareStatement(sql);
+      Matcher matcher = Sql.NAMED_ARG_PATTERN.matcher(sql);
+
+      boolean find = matcher.find();
+      Map<Integer, Object> positionalParams = new HashMap<Integer, Object>();
+      int index = 1;
+      while (find) {
+        Object value = params.get(matcher.group().substring(1));
+
+        positionalParams.put(index, value);
+        find = matcher.find(matcher.end());
+        index++;
+      }
+
+      matcher.reset();
+      sql = matcher.replaceAll("?");
+
+      PreparedStatement statement = connection.prepareStatement(sql);
+      for (int i = 1; i <= positionalParams.size(); i++) {
+        statement.setObject(i, positionalParams.get(i));
+      }
+
+      if (statement.execute())
+        return statement.getResultSet();
+      else
+        return null;
 
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-
-  }
-
-  public ResultSet query(String sql, Map<String, Object> params) {
-    return null;
   }
 
   public List<Map<String, Object>> list(String sql, Map<String, Object> params) {

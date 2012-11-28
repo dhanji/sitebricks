@@ -33,8 +33,9 @@ public class SqlApiTest {
     }
 
     matcher.reset();
-    matcher.replaceFirst()
+    sql = matcher.replaceAll("?");
 
+    System.out.println(sql);
     System.out.println(args);
   }
 }
