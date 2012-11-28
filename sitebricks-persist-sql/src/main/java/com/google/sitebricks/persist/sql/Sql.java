@@ -37,16 +37,7 @@ public class Sql {
 
       Matcher matcher = Sql.NAMED_ARG_PATTERN.matcher(sql);
 
-      boolean find = matcher.find();
-      Map<Integer, Object> positionalParams = new HashMap<Integer, Object>();
-      int index = 1;
-      while (find) {
-        Object value = params.get(matcher.group().substring(1));
-
-        positionalParams.put(index, value);
-        find = matcher.find(matcher.end());
-        index++;
-      }
+      Map<Integer, Object> positionalParams = toPositionalMap(params, matcher);
 
       matcher.reset();
       sql = matcher.replaceAll("?");
@@ -64,6 +55,24 @@ public class Sql {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  static Map<Integer, Object> toPositionalMap(Map<String, Object> params, Matcher matcher) {
+    boolean find = matcher.find();
+    Map<Integer, Object> positionalParams = new HashMap<Integer, Object>();
+    int index = 1;
+    while (find) {
+      Object value = params.get(matcher.group().substring(1));
+      if (value == null) {
+        throw new IllegalArgumentException("Named parameter map for SQL statement did" +
+            " not contain required parameter: " + matcher.group());
+      }
+
+      positionalParams.put(index, value);
+      find = matcher.find(matcher.end());
+      index++;
+    }
+    return positionalParams;
   }
 
   public List<Map<String, Object>> list(String sql, Map<String, Object> params) {
