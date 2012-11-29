@@ -130,6 +130,8 @@ public class SitebricksConfig extends GuiceServletContextListener {
 
         at("/chat").show(Chatter.class);
 
+        at("/decorated-repeat").show(DecoratedRepeat.class);
+
         embed(HelloWorld.class).as("Hello");
       }
 
