@@ -4,7 +4,9 @@ import com.google.sitebricks.persist.EntityStore;
 import com.google.sitebricks.persist.Persister;
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
+import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
@@ -39,13 +41,22 @@ class SqlPersister extends Persister {
 
   @Override
   protected void endWork(EntityStore store, boolean commit) {
+    Connection connection = ((Sql) store.delegate()).connection();
     try {
       if (commit)
-        ((Sql) store.delegate()).connection().commit();
+        connection.commit();
       else
-        ((Sql) store.delegate()).connection().rollback();
+        connection.rollback();
     } catch (SQLException e) {
       throw new RuntimeException(e);
+    } finally {
+      try {
+        connection.close();
+      } catch (SQLException e) {
+        // This is bad! Log it everywhere possible.
+        e.printStackTrace(System.err);
+        LoggerFactory.getLogger(SqlPersister.class).error("Unable to release SQL connection", e);
+      }
     }
   }
 
