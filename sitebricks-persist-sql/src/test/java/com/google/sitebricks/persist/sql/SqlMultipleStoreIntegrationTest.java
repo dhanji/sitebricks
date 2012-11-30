@@ -10,6 +10,7 @@ import com.google.sitebricks.persist.Persister;
 import com.google.sitebricks.persist.Work;
 import com.jolbox.bonecp.BoneCPConfig;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -27,6 +28,7 @@ import static org.testng.AssertJUnit.assertTrue;
  */
 public class SqlMultipleStoreIntegrationTest {
   public static final String A_NAME = "Jason Van Zyl";
+  private static final String ANOTHER_NAME = "Jason";
 
   public static class SqlSaver {
     @Inject @Db1
@@ -44,12 +46,19 @@ public class SqlMultipleStoreIntegrationTest {
     @Work @Db1
     public void make1() {
       sql1.get().execute("insert into my_table (id, name) values (1, @name)",
-          ImmutableMap.<String, Object>of("name", A_NAME));
+          ImmutableMap.<String, Object>of("name", ANOTHER_NAME));
     }
 
     @Work @Db2
     public String find() {
       List<Map<String,Object>> list = sql2.get().list("select * from my_table");
+      assertFalse(list.isEmpty());
+      return list.iterator().next().get("name").toString();
+    }
+
+    @Work @Db1
+    public String find1() {
+      List<Map<String,Object>> list = sql1.get().list("select * from my_table");
       assertFalse(list.isEmpty());
       return list.iterator().next().get("name").toString();
     }
@@ -62,14 +71,14 @@ public class SqlMultipleStoreIntegrationTest {
   public final void pre() {
     config1 = new BoneCPConfig();
     config1.setJdbcUrl("jdbc:hsqldb:mem:muldb1;sql.syntax_mys=true");
-    config1.setUser("sa");
+    config1.setUsername("sa");
     config1.setPassword("");
     config1.setPartitionCount(1);
     config1.setMaxConnectionsPerPartition(2);
 
     config2 = new BoneCPConfig();
     config2.setJdbcUrl("jdbc:hsqldb:mem:muldb2;sql.syntax_mys=true");
-    config2.setUser("sa");
+    config2.setUsername("sa");
     config2.setPassword("");
     config2.setPartitionCount(1);
     config2.setMaxConnectionsPerPartition(2);
@@ -97,7 +106,7 @@ public class SqlMultipleStoreIntegrationTest {
     assertTrue(tableExists.get());
   }
 
-//  @Test
+  @Test
   public final void storeAndRetrieve() {
     SqlModule db1Module = new SqlModule(Db1.class, config1);
     SqlModule db2Module = new SqlModule(Db2.class, config2);
@@ -108,7 +117,7 @@ public class SqlMultipleStoreIntegrationTest {
         new PersistAopModule(db2Module),
         new PersistAopModule(db1Module));
     createTable(injector, Db1.class);
-//    createTable(injector, Db2.class);
+    createTable(injector, Db2.class);
 
     SqlSaver saver = injector.getInstance(SqlSaver.class);
 
@@ -116,5 +125,6 @@ public class SqlMultipleStoreIntegrationTest {
     saver.make1();
 
     assertEquals(A_NAME, saver.find());
+    assertEquals(ANOTHER_NAME, saver.find1());
   }
 }

@@ -74,7 +74,7 @@ public class SqlStoreIntegrationTest {
 
     config = new BoneCPConfig();
     config.setJdbcUrl("jdbc:hsqldb:mem:" + database + ";sql.syntax_mys=true");
-    config.setUser("sa");
+    config.setUsername("sa");
     config.setPassword("");
   }
 
