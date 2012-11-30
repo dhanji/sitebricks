@@ -51,7 +51,8 @@ class SqlPersister extends Persister {
       throw new RuntimeException(e);
     } finally {
       try {
-        connection.close();
+        if (!connection.isClosed())
+          connection.close();
       } catch (SQLException e) {
         // This is bad! Log it everywhere possible.
         e.printStackTrace(System.err);

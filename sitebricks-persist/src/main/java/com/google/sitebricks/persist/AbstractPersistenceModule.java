@@ -1,6 +1,11 @@
 package com.google.sitebricks.persist;
 
-import com.google.inject.*;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.PrivateModule;
+import com.google.inject.Provider;
+import com.google.inject.Stage;
+import com.google.inject.TypeLiteral;
 
 import javax.inject.Inject;
 import javax.persistence.Entity;
@@ -137,7 +142,8 @@ public abstract class AbstractPersistenceModule extends PrivateModule {
   protected <T> void exposeEntityStoreDelegate(Class<T> clazz) {
     final Key<EntityStore> key = selectorKey(EntityStore.class);
     bind(clazz).toProvider(new Provider<T>() {
-      @Inject Injector injector;
+      @Inject
+      Injector injector;
 
       @Override
       public T get() {

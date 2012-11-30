@@ -1,5 +1,7 @@
 package com.google.sitebricks.persist.sql;
 
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.sitebricks.persist.AbstractPersistenceModule;
 import com.google.sitebricks.persist.Persister;
 import com.jolbox.bonecp.BoneCPConfig;
@@ -26,10 +28,13 @@ public class SqlModule extends AbstractPersistenceModule {
 
   @Override
   protected void internalConfigure() {
-    SqlPersister persister = new SqlPersister(config);
-    requestInjection(persister);
-    bind(Persister.class).toInstance(persister);
-
     exposeEntityStoreDelegate(Sql.class);
+  }
+
+  @Provides @Singleton
+  Persister providePersister() {
+    SqlPersister persister = new SqlPersister(config);
+//    requestInjection(persister);
+    return persister;
   }
 }

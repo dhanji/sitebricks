@@ -1,6 +1,7 @@
 package com.google.sitebricks.persist.sql;
 
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -52,14 +53,17 @@ public class Sql {
       sql = matcher.replaceAll("?");
 
       PreparedStatement statement = connection.prepareStatement(sql);
+
       for (int i = 1; i <= positionalParams.size(); i++) {
         statement.setObject(i, positionalParams.get(i));
       }
 
       if (statement.execute())
         return statement.getResultSet();
-      else
+      else {
+        statement.close();
         return null;
+      }
 
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -118,6 +122,14 @@ public class Sql {
       return list;
     } catch (SQLException e) {
       throw new RuntimeException(e);
+    } finally {
+      try {
+        resultSet.close();
+      } catch (SQLException e) {
+        // This is bad! Log it everywhere possible.
+        e.printStackTrace(System.err);
+        LoggerFactory.getLogger(SqlPersister.class).error("Unable to release SQL connection", e);
+      }
     }
   }
 

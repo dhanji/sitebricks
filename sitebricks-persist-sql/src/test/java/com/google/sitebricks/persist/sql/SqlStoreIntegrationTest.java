@@ -101,7 +101,7 @@ public class SqlStoreIntegrationTest {
   }
 
   @Test
-  public final void storeAndRetrieve() {
+  public final void storeAndRetrieve() throws InterruptedException {
     SqlModule redisModule = new SqlModule(config);
     Injector injector = Guice.createInjector(redisModule, new PersistAopModule(redisModule));
     createTable(injector);

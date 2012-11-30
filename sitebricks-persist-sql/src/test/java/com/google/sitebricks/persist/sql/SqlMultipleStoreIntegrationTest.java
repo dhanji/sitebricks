@@ -29,18 +29,27 @@ public class SqlMultipleStoreIntegrationTest {
   public static final String A_NAME = "Jason Van Zyl";
 
   public static class SqlSaver {
-    @Inject
-    Provider<Sql> sql;
+    @Inject @Db1
+    Provider<Sql> sql1;
+
+    @Inject @Db2
+    Provider<Sql> sql2;
 
     @Work @Db2
     public void make() {
-      sql.get().execute("insert into my_table (id, name) values (1, @name)",
+      sql2.get().execute("insert into my_table (id, name) values (1, @name)",
+          ImmutableMap.<String, Object>of("name", A_NAME));
+    }
+
+    @Work @Db1
+    public void make1() {
+      sql1.get().execute("insert into my_table (id, name) values (1, @name)",
           ImmutableMap.<String, Object>of("name", A_NAME));
     }
 
     @Work @Db2
     public String find() {
-      List<Map<String,Object>> list = sql.get().list("select * from my_table");
+      List<Map<String,Object>> list = sql2.get().list("select * from my_table");
       assertFalse(list.isEmpty());
       return list.iterator().next().get("name").toString();
     }
@@ -92,17 +101,19 @@ public class SqlMultipleStoreIntegrationTest {
   public final void storeAndRetrieve() {
     SqlModule db1Module = new SqlModule(Db1.class, config1);
     SqlModule db2Module = new SqlModule(Db2.class, config2);
+
     Injector injector = Guice.createInjector(
-        db1Module,
         db2Module,
-        new PersistAopModule(db1Module),
-        new PersistAopModule(db2Module));
+        db1Module,
+        new PersistAopModule(db2Module),
+        new PersistAopModule(db1Module));
     createTable(injector, Db1.class);
-    createTable(injector, Db2.class);
+//    createTable(injector, Db2.class);
 
     SqlSaver saver = injector.getInstance(SqlSaver.class);
 
     saver.make();
+    saver.make1();
 
     assertEquals(A_NAME, saver.find());
   }
