@@ -25,7 +25,7 @@ public interface WidgetRegistry {
   Renderable newWidget(String key, String expression, WidgetChain widgetChain,
                        EvaluatorCompiler compiler) throws ExpressionCompileException;
 
-  Renderable requireWidget(String template, EvaluatorCompiler compiler)
+  Renderable requireWidget(XmlWidget widget)
       throws ExpressionCompileException;
 
   Renderable textWidget(String template, EvaluatorCompiler compiler)

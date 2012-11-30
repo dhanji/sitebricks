@@ -46,7 +46,6 @@ public class StringBuilderRespond implements Respond {
   private final StringBuilder out = new StringBuilder();
   private final StringBuilder head = new StringBuilder();
 
-  //TODO use SortedSet for clustering certain tag types together.
   private final Set<String> requires = new LinkedHashSet<String>();
   private String redirect;
 

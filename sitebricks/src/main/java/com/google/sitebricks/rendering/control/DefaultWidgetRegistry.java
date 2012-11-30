@@ -133,9 +133,9 @@ class DefaultWidgetRegistry implements WidgetRegistry {
     return widget;
   }
 
-  public Renderable requireWidget(String template, EvaluatorCompiler compiler)
+  public Renderable requireWidget(XmlWidget xmlWidget)
       throws ExpressionCompileException {
-    return new RequireWidget(template, compiler);
+    return new RequireWidget(xmlWidget);
   }
 
   public Renderable textWidget(String template, EvaluatorCompiler compiler)

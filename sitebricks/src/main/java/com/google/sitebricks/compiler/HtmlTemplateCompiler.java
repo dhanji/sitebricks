@@ -109,7 +109,6 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
      */
     @NotNull
     private <N extends Node> WidgetChain walk(PageCompilingContext pc, N node) {
-
         WidgetChain widgetChain = Chains.proceeding();
         for (Node n: node.childNodes()) {
             if (n instanceof Element) {
@@ -309,7 +308,8 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
         //   if so, tags in head need to be promoted to head of enclosing page.
         if (REQUIRE_WIDGET.equalsIgnoreCase(annotation.trim()))
             try {
-                return registry.requireWidget(cleanHtml(node), pc.lexicalScopes.peek());
+                return registry.requireWidget(registry.xmlWidget(childsChildren, node.nodeName(),
+                    parseAttribs(node.attributes()), pc.lexicalScopes.peek()));
             } catch (ExpressionCompileException e) {
                 pc.errors.add(
                     CompileError.in(node.outerHtml())
@@ -505,7 +505,7 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
    * @param attributes A list of attribs
    * @return Returns a mutable map parsed out of the attribute list
    */
-  static Map<String, String> parseAttribs(Attributes attributes) {
+  public static Map<String, String> parseAttribs(Attributes attributes) {
 
       Map<String, String> attrs = new LinkedHashMap<String, String>(attributes.size() + 4);
 
