@@ -32,8 +32,8 @@ public final class PersistAopModule extends AbstractModule {
 
     // Visible persistence APIs.
     if (module.selector != null) {
-      workMatcher.and(annotatedWith(module.selector));
-      txnMatcher.and(annotatedWith(module.selector));
+      workMatcher = workMatcher.and(annotatedWith(module.selector));
+      txnMatcher = txnMatcher.and(annotatedWith(module.selector));
     }
 
     bindInterceptor(any(), workMatcher, workInterceptor);
