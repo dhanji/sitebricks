@@ -3,6 +3,7 @@ package com.google.sitebricks.mail.imap;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -33,6 +34,8 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
 
   static final DateTimeFormatter INTERNAL_DATE = DateTimeFormat.forPattern(
       "dd-MMM-yyyy HH:mm:ss Z");
+  static final DateTimeFormatter ALTERNATE_INTERNAL_DATE = DateTimeFormat.forPattern(
+      "MMM-yyyy HH:mm:ss Z");
   static final Pattern HELPFUL_NOTIFICATION_PATTERN = Pattern.compile("[*] \\d+ (EXISTS|EXPUNGE)\\s*",
       Pattern.CASE_INSENSITIVE);
   static final Pattern SIZE_MARKER = Pattern.compile("\\{(\\d+)\\}$", Pattern.MULTILINE);
@@ -217,7 +220,20 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     String internalDate = tokens.peek();
     if (Parsing.isValid(internalDate)) {
       internalDate = Parsing.normalizeDateToken(Parsing.match(tokens, String.class));
-      status.setInternalDate(INTERNAL_DATE.parseDateTime(internalDate).toDate());
+      DateTime dateTime;
+      try {
+        dateTime = INTERNAL_DATE.parseDateTime(internalDate);
+      } catch (IllegalArgumentException e) {
+        try {
+          dateTime = ALTERNATE_INTERNAL_DATE.parseDateTime(internalDate);
+        } catch (IllegalArgumentException iae) {
+          log.warn("Unable to extract internal date--message may be incomplete", e);
+          dateTime = null;
+        }
+      }
+
+      if (dateTime != null)
+        status.setInternalDate(dateTime.toDate());
     }
 
     return true;
