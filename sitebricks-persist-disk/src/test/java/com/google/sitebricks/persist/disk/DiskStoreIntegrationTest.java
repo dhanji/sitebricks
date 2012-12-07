@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.sitebricks.persist.EntityQuery.FieldMatcher.*;
 import static org.testng.Assert.assertEquals;
@@ -24,12 +25,13 @@ import static org.testng.AssertJUnit.assertNull;
 public class DiskStoreIntegrationTest {
 
   public static final String STORE_DIR = "target/storedir";
+  private static final AtomicInteger testRun = new AtomicInteger();
 
   private Persister persister;
 
   @BeforeMethod
   public void pre() throws IOException {
-    persister = Guice.createInjector(new DiskModule(STORE_DIR) {
+    persister = Guice.createInjector(new DiskModule(STORE_DIR + testRun.incrementAndGet()) {
       @Override
       protected void configurePersistence() {
         disableAutoStart();
