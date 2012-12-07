@@ -1,10 +1,12 @@
 package com.google.sitebricks.mail.imap;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.io.CharStreams;
+import com.google.common.io.Resources;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -15,14 +17,11 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Queue;
 
-import org.testng.annotations.Test;
-
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.io.CharStreams;
-import com.google.common.io.Resources;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -385,7 +384,6 @@ public class MessageStatusExtractorTest {
 
     for (int i = 0, statusesSize = statuses.size(); i < statusesSize; i++) {
       MessageStatus st = statuses.get(i);
-//      System.out.println(st);
       assertEquals(st.toString(), assertions.get(i));
     }
   }

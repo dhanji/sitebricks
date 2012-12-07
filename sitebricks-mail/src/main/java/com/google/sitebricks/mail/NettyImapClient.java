@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class NettyImapClient implements MailClient, Idler {
   private static final Logger log = LoggerFactory.getLogger(NettyImapClient.class);
-  private static final SimpleDateFormat SINCE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy");
+  private static final SimpleDateFormat SINCE_FORMAT = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
 
   // For debugging, use with caution!
   private static final Map<String, Boolean> logAllMessagesForUsers = new ConcurrentHashMap<String, Boolean>();

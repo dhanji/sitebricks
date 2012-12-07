@@ -168,9 +168,9 @@ public class MessageStatus {
   }
 
   private static final SimpleDateFormat ISO_C_DATE_SYDNEY =
-      new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy") {{
-    setTimeZone(TimeZone.getTimeZone("Australia/Sydney"));
-  }};
+    new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy", Locale.ENGLISH) {{
+      setTimeZone(TimeZone.getTimeZone("Australia/Sydney"));
+    }};
 
 
   @Override public String toString() {

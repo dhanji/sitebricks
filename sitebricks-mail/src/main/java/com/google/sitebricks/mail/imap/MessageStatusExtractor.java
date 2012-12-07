@@ -9,10 +9,12 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.mail.internet.MailDateFormat;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -287,7 +289,9 @@ class MessageStatusExtractor implements Extractor<List<MessageStatus>> {
     if (Parsing.isValid(receivedDate)) {
       receivedDate = Parsing.normalizeDateToken(Parsing.match(tokens, String.class));
       try {
-        status.setReceivedDate(new javax.mail.internet.MailDateFormat().parse(receivedDate));
+        MailDateFormat dateFormat = new MailDateFormat();
+        dateFormat.setTimeZone(TimeZone.getTimeZone("Australia/Sydney"));
+        status.setReceivedDate(dateFormat.parse(receivedDate));
       } catch (ParseException e) {
         log.error("Malformed received date format {}. Unable to parse.", receivedDate, e);
       }

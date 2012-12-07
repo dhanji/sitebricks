@@ -1,11 +1,15 @@
 package com.google.sitebricks.mail.imap;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import com.google.common.base.Charsets;
+import com.google.common.base.Objects;
+import com.google.common.collect.Multimap;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
+import com.google.common.io.Resources;
+import org.testng.annotations.Test;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeUtility;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,17 +22,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeUtility;
-
-import org.testng.annotations.Test;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Objects;
-import com.google.common.collect.Multimap;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.CharStreams;
-import com.google.common.io.Resources;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -651,7 +649,7 @@ public class MessageBodyExtractorTest {
     }
 
     // Compare the parsed headers with what we slurped in.
-    assertEquals(out.toString(), Resources.toString(assertions, Charsets.UTF_8));
+    assertEquals(out.toString().trim(), Resources.toString(assertions, Charsets.UTF_8).trim());
   }
 
 
