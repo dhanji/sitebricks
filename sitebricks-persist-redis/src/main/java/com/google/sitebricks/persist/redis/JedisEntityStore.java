@@ -26,13 +26,15 @@ class JedisEntityStore extends EntityStore {
   }
 
   @Override
-  public <T> void save(T t) {
+  public <T> Serializable save(T t) {
     // Jedis store only works with Parameter types for now.
     if (!(t instanceof Parameter))
       throw new RuntimeException("Can only persist objects of type Parameter into Redis store");
 
     Parameter parameter = (Parameter) t;
     jedis.set(parameter.name, parameter.value);
+
+    return parameter.name;
   }
 
   @Override

@@ -52,7 +52,7 @@ class DiskEntityStore extends EntityStore {
   }
 
   @Override
-  public <T> void save(T t) {
+  public <T> Serializable save(T t) {
     EntityMetadata.EntityDescriptor descriptor = metadata.of(t.getClass());
     if (descriptor == null)
       throw new IllegalArgumentException("Object of unknown type provided. Did you remember" +
@@ -63,6 +63,7 @@ class DiskEntityStore extends EntityStore {
     Map<String, EntityMetadata.MemberReader> fields = descriptor.fields();
 
     IndexWriter writer = indexSet.current().writer;
+    Serializable idValue = null;
     Document document = new Document();
     for (Map.Entry<String, EntityMetadata.MemberReader> entry : fields.entrySet()) {
       EntityMetadata.MemberReader reader = entry.getValue();
@@ -86,6 +87,13 @@ class DiskEntityStore extends EntityStore {
       IndexableField field;
 
       Object value = reader.value(t);
+      if (id) {
+        if (value == null)
+          throw new IllegalArgumentException("You must provide an id (disk store does not autopopulate id");
+        else
+          idValue = (Serializable) value;
+      }
+
       if (type == int.class || type == Integer.class)
         field = new IntField(entry.getKey(), (Integer) value, Field.Store.NO);
       else if (type == long.class || type == Long.class)
@@ -117,6 +125,8 @@ class DiskEntityStore extends EntityStore {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+
+    return idValue;
   }
 
   @Override

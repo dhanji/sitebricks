@@ -24,7 +24,9 @@ class SqlEntityStore extends EntityStore {
   }
 
   @Override
-  public <T> void save(T t) {}
+  public <T> Serializable save(T t) {
+    return null;
+  }
 
   @Override
   public <T> T find(Class<T> type, Serializable key) {

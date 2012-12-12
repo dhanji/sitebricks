@@ -65,7 +65,7 @@ public abstract class EntityStore {
    * Save an object to the entity store. This object must be an instance of a class
    * known to Sitebricks.
    */
-  public abstract <T> void save(T t);
+  public abstract <T> Serializable save(T t);
 
   /**
    * Delete a persistent object from the underlying datastore.
