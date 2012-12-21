@@ -90,7 +90,13 @@ public class Sql {
 
   public boolean tableExists(String name) {
     try {
-      return connection.getMetaData().getTables(null, null, name.toUpperCase(), null).next();
+      boolean exists = connection.getMetaData().getTables(null, null, name, null).next();
+
+      // Try upper-case object name in case there is some provider-specific weirdness.
+      if (!exists)
+        return connection.getMetaData().getTables(null, null, name.toUpperCase(), null).next();
+      else
+        return exists;
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
