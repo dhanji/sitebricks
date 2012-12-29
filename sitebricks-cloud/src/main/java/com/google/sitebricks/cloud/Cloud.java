@@ -16,7 +16,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -94,11 +93,7 @@ public class Cloud {
       if (arg.startsWith("-"))
         continue;
 
-      if (arg.contains(":")) {
-        String[] split = arg.split(":");
-        Collections.addAll(commands, split);
-      } else
-        commands.add(arg);
+      commands.add(arg);
     }
 
     if (commands.isEmpty())
