@@ -43,9 +43,7 @@ public class Cloud {
 
       if (arg.contains(":")) {
         String[] split = arg.split(":");
-        for (int i = 0; i < split.length; i++) {
-          commands.add(split[i]);
-        }
+        Collections.addAll(commands, split);
       } else
         commands.add(arg);
     }
