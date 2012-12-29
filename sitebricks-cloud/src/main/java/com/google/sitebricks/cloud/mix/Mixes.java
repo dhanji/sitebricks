@@ -15,7 +15,7 @@ public class Mixes {
       "@web",
       "@jetty",
       "@test",
-      "@launcher"
+      "@procfile"
   );
   static {
     mixes.put("@sql", new SqlMix());
@@ -26,7 +26,7 @@ public class Mixes {
     mixes.put("@persist", new PersistMix());
     mixes.put("@test", new TestMix());
     mixes.put("@websocket", new LauncherMix());
-    mixes.put("@launcher", new LauncherMix());
+    mixes.put("@procfile", new LauncherMix());
     mixes.put("@jetty", new JettyMix());
     mixes.put("@web", new WebMix());
   }

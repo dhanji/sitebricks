@@ -40,6 +40,7 @@ class Init implements Command {
 
     String projectName = commands.get(1);
     String group;
+    System.out.println(commands);
     if (projectName.contains(":")) {
       String[] split = projectName.split(":");
       if (split.length < 3)

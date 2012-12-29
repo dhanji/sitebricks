@@ -7,7 +7,9 @@ import com.google.sitebricks.options.OptionsModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -17,13 +19,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class Cloud {
+  private static final Set<String> MAVEN_REPOS = new LinkedHashSet<String>();
   public static final String SB_VERSION = System.getenv("SB_VERSION");
   static {
     if (SB_VERSION == null) {
@@ -133,7 +138,17 @@ public class Cloud {
     File jarFile = new File(file);
     if (!jarFile.exists()) {
       // Don't use #quit() as it invokes logback which may not be available...
-      System.out.println("Fatal error, missing dependency: " + dep);
+      System.out.println("Fatal error, missing internal dependency: " + dep);
+      System.out.print("Attempt to fetch from central (y/N)? ");
+      BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+      String value = reader.readLine();
+      System.out.println();
+      if ("yes".equalsIgnoreCase(value) || "y".equalsIgnoreCase(value)) {
+        fetchDependency(dep);
+        addDepToClasspath(dep);
+        return;
+      }
+
       System.exit(1);
     }
 
@@ -161,5 +176,32 @@ public class Cloud {
         + '/'
         + split[2]
         + '/' + jar;
+  }
+
+  private static String toRepoString() {
+    return MAVEN_REPOS.toString().replaceAll("[\\[\\] ]", "");
+  }
+
+  // Use maven dependency:get to fetch dep from central.
+  private static void fetchDependency(String dep) throws Exception {
+    String repo = toRepoString();
+
+    System.out.print("Resolving ...");
+    String command = "mvn dependency:get -Dartifact=" + dep +
+        " -DrepoUrl=" + repo +
+        " --batch-mode";
+    Process process = Runtime.getRuntime().exec(command);
+
+    if (process.waitFor() == 0)
+      System.out.println(" success!");
+    else {
+      System.out.println("failed");
+      System.out.println(command);
+      System.out.println();
+      BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+      while (br.ready())
+        System.out.println(br.readLine());
+      System.exit(1);
+    }
   }
 }

@@ -28,6 +28,7 @@ public class Mixin implements Command {
   static {
     try {
       Cloud.addDepToClasspath("dom4j:dom4j:1.6.1");
+      Cloud.addDepToClasspath("jaxen:jaxen:1.1.4");
     } catch (Exception e) {
       Cloud.quit("Corrupt dependencies. try: sitebricks selfupdate");
     }
