@@ -7,4 +7,4 @@ if [ ! -f $SB_JAR ] || [ "$1" == "selfupdate" ]; then
 fi
 
 # run it!
-java -cp $SB_JAR com.google.sitebricks.cloud.Cloud $*
+SB_VERSION=$SB_VERSION java -cp $SB_JAR com.google.sitebricks.cloud.Cloud $*

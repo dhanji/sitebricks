@@ -7,13 +7,55 @@ import com.google.sitebricks.options.OptionsModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class Cloud {
-  private static final Logger log = LoggerFactory.getLogger("sitebricks");
+  public static final String SB_VERSION = System.getenv("SB_VERSION");
+  static {
+    if (SB_VERSION == null) {
+      System.out.println("Missing environment variable 'SB_VERSION'");
+      System.exit(1);
+    }
+
+    // Add deps to classpath. Warning this is fragile as must be maintained
+    // between pom and here in sync.
+    try {
+      addDepToClasspath("org.slf4j:slf4j-api:1.6.4");
+      addDepToClasspath("ch.qos.logback:logback-classic:0.9.26");
+      addDepToClasspath("ch.qos.logback:logback-core:0.9.26");
+      addDepToClasspath("javax.inject:javax.inject:1");
+      addDepToClasspath("aopalliance:aopalliance:1.0");
+      addDepToClasspath("com.google.inject:guice:3.0");
+      addDepToClasspath("com.google.sitebricks:sitebricks-options:" + SB_VERSION);
+      addDepToClasspath("com.google.sitebricks:sitebricks-converter:" + SB_VERSION);
+      addDepToClasspath("cglib:cglib-full:2.0.2");
+      addDepToClasspath("org.yaml:snakeyaml:1.10");
+      addDepToClasspath("com.google.guava:guava:r09");
+      addDepToClasspath("org.mvel:mvel2:2.1.3.Final");
+
+      // Only assign logger after deps have loaded.
+      log = LoggerFactory.getLogger("sitebricks");
+    } catch (Exception e) {
+      System.out.println("Corrupt dependencies. Try: sitebricks selfupdate");
+      System.exit(1);
+    }
+  }
+
+  private static volatile Logger log;
 
   public static final Map<String, Class<? extends Command>> commandMap =
       new LinkedHashMap<String, Class<? extends Command>>();
@@ -29,6 +71,12 @@ public class Cloud {
 
     commandMap.put("run", ProcRunner.class);
     descriptions.put("run", "Runs the cluster locally");
+
+    commandMap.put("init", Init.class);
+    descriptions.put("init", "Creates a new sitebricks project");
+
+    commandMap.put("mix", Mixin.class);
+    descriptions.put("mix", "Mixes in a sitebricks component");
   }
 
   public static void main(String[] args) {
@@ -51,7 +99,7 @@ public class Cloud {
     if (commands.isEmpty())
       commands = Lists.newArrayList("run");
 
-    if (commands.isEmpty()) {
+    if ("help".equals(commands.get(0))) {
       System.out.println("Usage: sitebricks <command> <options>\n\n" +
           "Commands:");
       for (String cmd : commandMap.keySet()) {
@@ -74,5 +122,44 @@ public class Cloud {
   public static void quit(String message) {
     log.info(message);
     System.exit(1);
+  }
+
+  public static void addDepToClasspath(String dep) throws Exception {
+    String jarPath = toJarPath(dep);
+
+    // Rebuild local repository URL.
+    String file = System.getProperty("user.home") + "/.m2/repository/" + jarPath;
+
+    File jarFile = new File(file);
+    if (!jarFile.exists()) {
+      // Don't use #quit() as it invokes logback which may not be available...
+      System.out.println("Fatal error, missing dependency: " + dep);
+      System.exit(1);
+    }
+
+    addJarPathToClasspath(jarFile);
+  }
+  private static void addJarPathToClasspath(File jarFile)
+      throws NoSuchMethodException, IllegalAccessException, InvocationTargetException,
+      MalformedURLException {
+    Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+    method.setAccessible(true);
+    method.invoke(ClassLoader.getSystemClassLoader(), jarFile.toURI().toURL());
+  }
+
+  private static String toJarPath(String dep) {
+    return toPath(dep, "jar");
+  }
+
+  private static String toPath(String dep, String ext) {
+    String[] split = dep.split(":");
+    String jar = split[1] + "-" + split[2] + "." + ext;
+
+    return split[0].replace('.', '/')
+        + '/'
+        + split[1]
+        + '/'
+        + split[2]
+        + '/' + jar;
   }
 }

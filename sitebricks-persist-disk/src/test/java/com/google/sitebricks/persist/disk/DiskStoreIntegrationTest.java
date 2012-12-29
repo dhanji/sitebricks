@@ -47,7 +47,7 @@ public class DiskStoreIntegrationTest {
   public void post() throws IOException {
     persister.shutdown();
     try {
-      FileUtils.deleteDirectory(new File(STORE_DIR));
+      FileUtils.deleteDirectory(new File(STORE_DIR + testRun.get()));
     } catch (IOException e) {
       e.printStackTrace();
       // Can't do much really.
