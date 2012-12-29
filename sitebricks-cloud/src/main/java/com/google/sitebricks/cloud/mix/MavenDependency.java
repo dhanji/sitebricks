@@ -57,8 +57,8 @@ public class MavenDependency {
         +  "      <groupId>" + group + "</groupId>\n"
         +  "      <artifactId>" + artifact + "</artifactId>\n"
         +  "      <version>" + version + "</version>\n"
-        + (classifier != null ? "      <classifier>" + classifier + "</classifier>" : "")
-        + (scope != null ?      "      <scope>" + scope + "</scope>" : "")
+        + (classifier != null ? "      <classifier>" + classifier + "</classifier>\n" : "")
+        + (scope != null ?      "      <scope>" + scope + "</scope>\n" : "")
         +  "    </dependency>\n";
   }
 }
