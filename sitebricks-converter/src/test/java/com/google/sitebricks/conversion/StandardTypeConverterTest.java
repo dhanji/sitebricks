@@ -1,19 +1,18 @@
 package com.google.sitebricks.conversion;
 
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
-
 import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 import com.google.sitebricks.conversion.DateConverters.DateStringConverter;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * @author JRodriguez
@@ -82,9 +81,7 @@ public class StandardTypeConverterTest {
 	  Calendar calendar = Calendar.getInstance();	
     String answer = converter.convert(calendar, String.class);
     String expected = sdf.format(calendar.getTime());
-    System.out.println( ">> " + answer );
-    System.out.println( ">> " + expected );
-    assert answer.equals(expected);
+    assert answer.equals(expected) : answer + " but wanted " + expected;
   }
 
   @Test
