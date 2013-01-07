@@ -1,0 +1,19 @@
+package @{projectPackage}.web@{dir != null ? '.' + dir : ''};
+
+import com.google.sitebricks.At;@if{json}
+import com.google.sitebricks.client.transport.Json;@end{}
+import com.google.sitebricks.headless.Reply;
+import com.google.sitebricks.headless.Service;
+import com.google.sitebricks.http.Get;
+
+/**
+ * @{name} resource endpoint.
+ */
+@{'@'}At(@{at})@if{!isTemplate} @{'@'}Service@else{show != ''}@{'@'}Show(@{show})@end{}
+public class @{name.substring(name.lastIndexOf('.') + 1)} {
+  @{'@'}Get
+  @if{!isTemplate}Reply<?>@else{}void@end{} get() {
+    @if{!isTemplate}Object entity = @if{json}this@else{}"Hello there!"@end{};
+    return Reply.with(entity).ok()@if{json}.as(Json.class)@end{};@end{}
+  }
+}

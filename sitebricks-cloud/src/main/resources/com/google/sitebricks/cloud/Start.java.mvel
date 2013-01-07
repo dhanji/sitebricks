@@ -1,0 +1,21 @@
+package @{projectPackage}.web;
+
+import com.google.sitebricks.At;
+import com.google.sitebricks.http.Get;
+
+/**
+ * Home page. Looks for a sitebricks template in web/ named Start.html
+ */
+@{'@'}At("/")
+public class Start {
+  private String message;
+
+  @{'@'}Get
+  void display() {
+    message = "Hello from sitebricks!";
+  }
+
+  public String getMessage() {
+    return message;
+  }
+}

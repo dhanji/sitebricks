@@ -5,8 +5,15 @@ import com.google.sitebricks.cloud.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -23,7 +30,9 @@ public class Proc {
   private final String name;
   private final String command;
   private final Config config;
+  private final boolean quiet;
   private volatile boolean on;
+  private Collection<String> logBuffer;
 
   private final Runnable logTask = new Runnable() {
     @Override
@@ -48,6 +57,11 @@ public class Proc {
   private volatile String pid;
 
   public Proc(String line, Config config) {
+    this(line, config, false);
+  }
+
+  public Proc(String line, Config config, boolean quiet) {
+    this.quiet = quiet;
     this.config = config;
 
     String[] pieces = line.split("\\s*:\\s*", 2);
@@ -58,6 +72,11 @@ public class Proc {
     command = pieces[1].trim();
 
     log = LoggerFactory.getLogger(name);
+
+    if (quiet) {
+      logBuffer = new ConcurrentLinkedQueue<String>();
+      logBuffer.add("quiet mode enabled.");
+    }
   }
 
   public boolean running() {
@@ -76,9 +95,16 @@ public class Proc {
     return command;
   }
 
+  public void stop() {
+    on = false;
+  }
+
   public void start(String[] environment) throws Exception {
     on = true;
     try {
+      if (!quiet) {
+        log.info("environment: " + Arrays.toString(environment));
+      }
       this.process = Runtime.getRuntime().exec(command, environment);
     } catch (Exception e) {
       log.info(e.getMessage());
@@ -100,7 +126,7 @@ public class Proc {
     log.info("started with pid {}", pid);
   }
 
-  public boolean stop() throws IOException {
+  public boolean kill() throws IOException {
     on = false;
     if (!running())
       return true;
@@ -144,14 +170,20 @@ public class Proc {
     try {
       return process.waitFor();
     } finally {
-      if (isOn())
+      if (!on)
         cleanup();
+      else if (quiet)
+        System.out.println();
     }
   }
 
-  private void cleanup() throws IOException {
-    pipe();
-    log.info("terminated");
+  private synchronized void cleanup() throws IOException {
+    if (quiet)
+      System.out.println();
+    else {
+      pipe();
+      log.info("terminated");
+    }
     process = null;
     out = null;
     err = null;
@@ -166,7 +198,18 @@ public class Proc {
   private void pipe(InputStream in) throws IOException {
     BufferedReader reader = new BufferedReader(new InputStreamReader(in));
     while (reader.ready()) {
-      log.info(reader.readLine());
+      if (quiet) {
+        logBuffer.add(reader.readLine());
+        System.out.print(".");
+      } else
+        log.info(reader.readLine());
     }
+  }
+
+  public void dumpBuffer() {
+    for (String line : logBuffer) {
+      log.info(line);
+    }
+    logBuffer.clear();
   }
 }

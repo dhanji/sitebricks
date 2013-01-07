@@ -1,0 +1,9 @@
+<!doctype html>
+<html>
+<head>
+  <title>@{projectName}</title>
+</head>
+<body>
+  @{'@{message}'}
+</body>
+</html>

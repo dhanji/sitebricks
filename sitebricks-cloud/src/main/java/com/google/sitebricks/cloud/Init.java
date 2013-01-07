@@ -1,14 +1,10 @@
 package com.google.sitebricks.cloud;
 
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
-import org.mvel2.templates.TemplateRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +12,7 @@ import java.util.Map;
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-class Init implements Command {
+public class Init implements Command {
   private static volatile Logger log;
 
   @Override
@@ -28,7 +24,7 @@ class Init implements Command {
     }
 
     File pomXml = new File("pom.xml");
-    if (pomXml.exists()) {
+    if (pomXml.exists() && !config.force()) {
       log.info("pom.xml already exists. cannot proceed");
       System.exit(1);
     }
@@ -55,38 +51,26 @@ class Init implements Command {
       properties.put("projectVersion", "1.0");
     }
 
+    String cleanedProjectName = projectName.replaceAll("[-.:]", "");
+    properties.put("cleanedProjectName", cleanedProjectName);
+
     log.info("creating project structure");
-    mkdir("src");
-    mkdir("test");
-    mkdir("resources");
-    String packagePath = group.replace(".", "/") + '/' + projectName;
-    mkdir("src/" + packagePath);
-    mkdir("test/" + packagePath);
+    Cloud.mkdir("config");
+    Cloud.mkdir("src");
+    Cloud.mkdir("test");
+    Cloud.mkdir("resources");
+    String packagePath = group.replace(".", "/") + '/' + cleanedProjectName;
+    Cloud.mkdir("src/" + packagePath);
+    Cloud.mkdir("test/" + packagePath);
+
+    properties.put("packagePath", packagePath);
+    properties.put("projectPackage", group + '.' + cleanedProjectName);
 
     properties.put("deps", new Mixin().run(commands, properties));
-    String pom = TemplateRuntime.eval(
-        Resources.toString(Init.class.getResource("pom.xml.mvel"), Charsets.UTF_8), properties)
-        .toString();
-
     // Write new pom.xml
-    log.info("writing pom.xml");
-    final FileWriter fileWriter = new FileWriter("pom.xml");
-    fileWriter.write(pom);
-    fileWriter.flush();
-    fileWriter.close();
-
+    Cloud.writeTemplate("pom.xml", properties);
+    Cloud.writeTemplate("environment.yml", "config/environment.yml", properties);
+    Cloud.writeTemplate("logback.xml", "resources/logback.xml", properties);
     log.info("project initialized. Next, run 'sitebricks'");
-  }
-
-  private static void mkdir(String path) {
-    File dir = new File(path);
-    if (dir.exists()) {
-      log.warn(path + " already exists. skipped.");
-      return;
-    }
-
-    log.info(path + "/");
-    if (!dir.mkdirs())
-      Cloud.quit("IO error. Unable to mkdir " + path);
   }
 }

@@ -1,14 +1,20 @@
 package com.google.sitebricks.cloud;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.sitebricks.cloud.mix.Mixes;
 import com.google.sitebricks.options.OptionsModule;
+import org.mvel2.templates.TemplateRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,6 +35,7 @@ import java.util.Set;
 public class Cloud {
   private static final Set<String> MAVEN_REPOS = new LinkedHashSet<String>();
   public static final String SB_VERSION = System.getenv("SB_VERSION");
+
   static {
     if (SB_VERSION == null) {
       System.out.println("Missing environment variable 'SB_VERSION'");
@@ -60,6 +67,7 @@ public class Cloud {
   }
 
   private static volatile Logger log;
+  private static volatile Config config;
 
   public static final Map<String, Class<? extends Command>> commandMap =
       new LinkedHashMap<String, Class<? extends Command>>();
@@ -81,11 +89,14 @@ public class Cloud {
 
     commandMap.put("mix", Mixin.class);
     descriptions.put("mix", "Mixes in a sitebricks component");
+
+    commandMap.put("mixes", Mixes.class);
+    descriptions.put("mixes", "Lists all available components");
   }
 
   public static void main(String[] args) {
     Injector injector = Guice.createInjector(new OptionsModule(args).options(Config.class));
-    Config config = injector.getInstance(Config.class);
+    config = injector.getInstance(Config.class);
 
     // Discover all non-flag switches.
     List<String> commands = new ArrayList<String>();
@@ -149,6 +160,7 @@ public class Cloud {
 
     addJarPathToClasspath(jarFile);
   }
+
   private static void addJarPathToClasspath(File jarFile)
       throws NoSuchMethodException, IllegalAccessException, InvocationTargetException,
       MalformedURLException {
@@ -198,5 +210,36 @@ public class Cloud {
         System.out.println(br.readLine());
       System.exit(1);
     }
+  }
+
+  public static void mkdir(String path) {
+    File dir = new File(path);
+    if (dir.exists()) {
+      log.warn(path + " already exists. skipped.");
+      return;
+    }
+
+    log.info(path + "/");
+    if (!dir.mkdirs())
+      quit("IO error. Unable to mkdir " + path);
+  }
+
+  public static void writeFile(String to, String text) throws IOException {
+    log.info("writing {}", to);
+    final FileWriter fileWriter = new FileWriter(to);
+    fileWriter.write(text);
+    fileWriter.flush();
+    fileWriter.close();
+  }
+
+  public static void writeTemplate(String name, Map<String, Object> properties) throws IOException {
+    writeTemplate(name, name, properties);
+  }
+
+  public static void writeTemplate(String template, String to, Map<String, Object> properties)
+      throws IOException {
+    writeFile(to, TemplateRuntime.eval(
+        Resources.toString(Init.class.getResource(template + ".mvel"), Charsets.UTF_8), properties)
+        .toString());
   }
 }

@@ -7,5 +7,19 @@ import com.google.sitebricks.options.Options;
  */
 @Options
 public abstract class Config {
+  public String name() {
+    return null;
+  }
 
+  public String at() {
+    return null;
+  }
+
+  public String show() {
+    return null;
+  }
+
+  public boolean force() {
+    return false;
+  }
 }
