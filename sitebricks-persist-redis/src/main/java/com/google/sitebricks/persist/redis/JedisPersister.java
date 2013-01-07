@@ -5,7 +5,9 @@ import com.google.sitebricks.persist.Persister;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Protocol;
 
+import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +19,7 @@ class JedisPersister extends Persister {
 
   private final JedisPoolConfig config;
   private final String host;
+  private final String password;
   private final int port;
 
   private volatile JedisPool pool;
@@ -41,11 +44,26 @@ class JedisPersister extends Persister {
 
     this.host = host;
     this.port = port;
+
+    // Discover password if necessary.
+    URI uri = URI.create(host);
+    String password = null;
+    // If using the redis protocol, try to discover password
+    if ("redis".equals(uri.getScheme())) {
+      String[] split = uri.getUserInfo().split(":", 2);
+      if (split.length > 1)
+        password = split[1];
+    }
+
+    this.password = password;
   }
 
   @Override
   public synchronized void start() {
-    pool = new JedisPool(config, host, port);
+    if (password == null)
+      pool = new JedisPool(config, host, port);
+    else
+      pool = new JedisPool(config, host, port, Protocol.DEFAULT_TIMEOUT, password);
   }
 
   @Override

@@ -23,7 +23,7 @@
     <ch.qos.logback.version>1.0.6</ch.qos.logback.version>
     <cglib.full.version>2.0.2</cglib.full.version>
     <lucene.version>4.0.0</lucene.version>
-    <jedis.version>2.0.0</jedis.version>
+    <jedis.version>2.1.0</jedis.version>
   </properties>
 
   <modules>
