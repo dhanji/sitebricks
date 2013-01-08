@@ -16,7 +16,7 @@ class LauncherMix implements Mix {
   public void mix(Map<String, Object> properties, Set<MavenDependency> deps) throws Exception {
     File procfile = new File("Procfile");
     if (procfile.exists()) {
-      LoggerFactory.getLogger("init").warn("Procfile exists. skipped.");
+      LoggerFactory.getLogger("init").warn("Procfile already exists. skipped.");
     } else {
       String main = properties.get("projectPackage").toString() + ".Main";
       FileWriter writer = new FileWriter(procfile);
