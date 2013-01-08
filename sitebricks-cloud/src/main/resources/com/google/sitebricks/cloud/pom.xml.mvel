@@ -11,7 +11,7 @@
   <name>@{projectName}</name>
 
   <repositories>
-@foreach{dep : deps}@if{dep.type == 'repo'}@{dep.toDepString()}@end{}
+@foreach{dep : deps}@if{dep.type == 'repo'}@{dep.toDepString()}@end{}@end{}
   </repositories>
 
   <dependencies>
@@ -25,7 +25,7 @@
       <artifactId>logback-classic</artifactId>
       <version>0.9.30</version>
     </dependency>
-@foreach{dep : deps}@if{dep.type == 'dep'}@{dep.toDepString()}@end{}
+@foreach{dep : deps}@if{dep.type == 'dep'}@{dep.toDepString()}@end{}@end{}
   </dependencies>
 
   <!-- Profiles are used to configure deployment target environments -->
@@ -45,7 +45,7 @@
   </profiles>
 
   <pluginRepositories>
-@foreach{dep : deps}@if{dep.type == 'pluginRepo'}@{dep.toDepString()}@end{}
+@foreach{dep : deps}@if{dep.type == 'pluginRepo'}@{dep.toDepString()}@end{}@end{}
   </pluginRepositories>
 
   <build>
@@ -85,8 +85,7 @@
           </execution>
         </executions>
       </plugin>
-@foreach{dep : deps}@if{dep.type == 'plugin'}@{dep.toDepString()}@end{}
-      @end{}
+@foreach{dep : deps}@if{dep.type == 'plugin'}@{dep.toDepString()}@end{}@end{}
     </plugins>
   </build>
 </project>

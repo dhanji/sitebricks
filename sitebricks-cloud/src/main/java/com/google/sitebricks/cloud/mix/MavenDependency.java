@@ -52,8 +52,8 @@ public class MavenDependency {
 
   @Override
   public int hashCode() {
-    int result = group.hashCode();
-    result = 31 * result + artifact.hashCode();
+    int result = group == null ? 0 : group.hashCode();
+    result = 31 * result + (artifact == null ? 0 : artifact.hashCode());
     return result;
   }
 

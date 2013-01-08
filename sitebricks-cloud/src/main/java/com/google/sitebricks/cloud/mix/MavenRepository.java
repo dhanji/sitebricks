@@ -48,15 +48,15 @@ public class MavenRepository extends MavenDependency {
   @Override
   public String toDepString() {
     return
-        "  <repository>\n" +
-        "     <id>" + id + "</id>\n" +
-        "     <url>" + url + "</url>\n" +
-        "     <releases>\n" +
-        "       <enabled>" + releases + "</enabled>\n" +
-        "     </releases> \n" +
-        "     <snapshots>\n" +
-        "       <enabled>" + snapshots + "</enabled>\n" +
-        "     </snapshots>\n" +
-        "   </repository>";
+        "    <repository>\n" +
+        "      <id>" + id + "</id>\n" +
+        "      <url>" + url + "</url>\n" +
+        "      <releases>\n" +
+        "        <enabled>" + releases + "</enabled>\n" +
+        "      </releases> \n" +
+        "      <snapshots>\n" +
+        "        <enabled>" + snapshots + "</enabled>\n" +
+        "      </snapshots>\n" +
+        "    </repository>";
   }
 }
