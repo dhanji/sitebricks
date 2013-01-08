@@ -2,7 +2,6 @@ package com.google.sitebricks.cloud.mix;
 
 import com.google.sitebricks.cloud.Cloud;
 
-import javax.inject.Inject;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,9 +9,6 @@ import java.util.Set;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 class WebMix implements Mix {
-  @Inject
-  ResourceMix resourceMix;
-
   @Override
   public void mix(Map<String, Object> properties, Set<MavenDependency> deps) throws Exception {
     deps.add(new MavenDependency("javax.servlet", "servlet-api", "2.5", null, "provided"));
@@ -29,6 +25,9 @@ class WebMix implements Mix {
     // Write web.xml if missing.
     Cloud.mkdir("web");
     Cloud.mkdir("web/WEB-INF");
+    Cloud.mkdir("web/js");
+    Cloud.mkdir("web/images");
+    Cloud.mkdir("web/css");
     Cloud.mkdir("src/" + packagePath + "/web");
 
     Cloud.writeTemplate("web.xml", "web/WEB-INF/web.xml", properties);
@@ -38,5 +37,7 @@ class WebMix implements Mix {
 
     // Now create a hello world for the start page.
     Cloud.writeTemplate("Start.java", "src/" + packagePath + "/web/Start.java", properties);
+    Cloud.writeTemplate("main.css", "web/css/main.css", properties);
+    Cloud.writeTemplate("Start.html", "web/Start.html", properties);
   }
 }

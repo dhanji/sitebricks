@@ -1,9 +1,11 @@
 <!doctype html>
 <html>
 <head>
-  <title>@{projectName}</title>
+  <title>Welcome to @{projectName}!</title>
+
+  <link rel="stylesheet" href="css/main.css"/>
 </head>
 <body>
-  @{'@{message}'}
+  @{'${message}'}
 </body>
 </html>

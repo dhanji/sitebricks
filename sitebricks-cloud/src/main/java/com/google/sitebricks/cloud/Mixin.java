@@ -25,14 +25,6 @@ import java.util.Set;
  */
 public class Mixin implements Command {
   private static final Logger log = LoggerFactory.getLogger("mixer");
-  static {
-    try {
-      Cloud.addDepToClasspath("dom4j:dom4j:1.6.1");
-      Cloud.addDepToClasspath("jaxen:jaxen:1.1.4");
-    } catch (Exception e) {
-      Cloud.quit("Corrupt dependencies. try: sitebricks selfupdate");
-    }
-  }
 
   @Override
   @SuppressWarnings("unchecked")

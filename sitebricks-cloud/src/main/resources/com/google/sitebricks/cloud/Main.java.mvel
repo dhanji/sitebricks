@@ -17,7 +17,7 @@ public class Main {
     Server jetty = new Server(port);
     jetty.setHandler(new WebAppContext("web", "/"));
 
-    System.out.println("starting @{projectName} on port: " + port + "...");
+    System.out.println("starting '@{projectName}' on port: " + port);
     jetty.start();
     jetty.join();
   }

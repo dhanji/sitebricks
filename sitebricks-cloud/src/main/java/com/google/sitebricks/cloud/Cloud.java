@@ -58,6 +58,7 @@ public class Cloud {
       addDepToClasspath("com.google.guava:guava:r09");
       addDepToClasspath("org.mvel:mvel2:2.1.3.Final");
       addDepToClasspath("dom4j:dom4j:1.6.1");
+      addDepToClasspath("jaxen:jaxen:1.1.4");
 
       // Only assign logger after deps have loaded.
       log = LoggerFactory.getLogger("sitebricks");
