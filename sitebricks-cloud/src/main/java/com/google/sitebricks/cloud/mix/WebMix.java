@@ -17,6 +17,13 @@ class WebMix implements Mix {
   public void mix(Map<String, Object> properties, Set<MavenDependency> deps) throws Exception {
     deps.add(new MavenDependency("javax.servlet", "servlet-api", "2.5", null, "provided"));
     deps.add(new MavenDependency("com.google.sitebricks", "sitebricks", Cloud.SB_VERSION));
+
+    // Are we on the bleeding edge?
+    if (Cloud.SB_VERSION.contains("SNAPSHOT")) {
+      deps.add(new MavenRepository("sonatype-google-snapshots",
+          "http://oss.sonatype.org/content/repositories/google-snapshots/", false, true));
+    }
+
     String packagePath = properties.get("packagePath").toString();
 
     // Write web.xml if missing.

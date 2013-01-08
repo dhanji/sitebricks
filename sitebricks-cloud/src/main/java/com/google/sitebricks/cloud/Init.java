@@ -13,11 +13,10 @@ import java.util.Map;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class Init implements Command {
-  private static volatile Logger log;
 
   @Override
   public void run(List<String> commands, Config config) throws Exception {
-    log = LoggerFactory.getLogger("init");
+    Logger log = LoggerFactory.getLogger("init");
 
     if (commands.size() < 2) {
       Cloud.quit("Usage: sitebricks init <project_name>");
@@ -51,7 +50,7 @@ public class Init implements Command {
       properties.put("projectVersion", "1.0");
     }
 
-    String cleanedProjectName = projectName.replaceAll("[-.:]", "");
+    String cleanedProjectName = projectName.replaceAll("[\\-.:]", "");
     properties.put("cleanedProjectName", cleanedProjectName);
 
     log.info("creating project structure");
@@ -69,7 +68,6 @@ public class Init implements Command {
     properties.put("deps", new Mixin().run(commands, properties));
     // Write new pom.xml
     Cloud.writeTemplate("pom.xml", properties);
-    Cloud.writeTemplate("environment.yml", "config/environment.yml", properties);
     Cloud.writeTemplate("logback.xml", "resources/logback.xml", properties);
     log.info("project initialized. Next, run 'sitebricks'");
   }

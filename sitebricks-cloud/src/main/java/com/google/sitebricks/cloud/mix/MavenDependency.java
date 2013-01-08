@@ -4,11 +4,14 @@ package com.google.sitebricks.cloud.mix;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class MavenDependency {
-  private String group;
-  private String artifact;
-  private String version;
+  protected String group;
+  protected String artifact;
+  protected String version;
   private String classifier;
   private String scope;
+
+  private String type = "dep";
+
 
   public MavenDependency(String group, String artifact, String version) {
     this.group = group;
@@ -23,6 +26,15 @@ public class MavenDependency {
     this.version = version;
     this.classifier = classifier;
     this.scope = scope;
+  }
+
+
+  void setType(String type) {
+    this.type = type;
+  }
+
+  public String getType() {
+    return type;
   }
 
   @Override

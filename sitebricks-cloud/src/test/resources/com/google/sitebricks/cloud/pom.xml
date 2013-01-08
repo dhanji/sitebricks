@@ -8,6 +8,16 @@
   <artifactId>sitebricks-cloud</artifactId>
   <name>Sitebricks :: Cloud</name>
 
+  <profiles>
+    <profile>
+      <id>local</id>
+      <properties>
+        <hello>there</hello>
+        <second>prop</second>
+      </properties>
+    </profile>
+  </profiles>
+
   <dependencies>
     <dependency>
       <groupId>org.testng</groupId>

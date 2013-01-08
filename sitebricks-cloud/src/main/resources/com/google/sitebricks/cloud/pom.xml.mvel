@@ -10,6 +10,10 @@
   <version>@{projectVersion}</version>
   <name>@{projectName}</name>
 
+  <repositories>
+@foreach{dep : deps}@if{dep.type == 'repo'}@{dep.toDepString()}@end{}
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -21,10 +25,31 @@
       <artifactId>logback-classic</artifactId>
       <version>0.9.30</version>
     </dependency>
-@foreach{dep : deps}@{dep.toDepString()}@end{}
+@foreach{dep : deps}@if{dep.type == 'dep'}@{dep.toDepString()}@end{}
   </dependencies>
 
-  <build>@if{!useMavenPaths}
+  <!-- Profiles are used to configure deployment target environments -->
+  <profiles>
+    <profile>
+      <id>local</id>
+      <properties>
+        <PORT>8080</PORT>
+      </properties>
+    </profile>
+    <profile>
+      <id>production</id>
+      <properties>
+        <sitebricks.target>sitebricks</sitebricks.target>
+      </properties>
+    </profile>
+  </profiles>
+
+  <pluginRepositories>
+@foreach{dep : deps}@if{dep.type == 'pluginRepo'}@{dep.toDepString()}@end{}
+  </pluginRepositories>
+
+  <build>
+    <finalName>@{projectName}</finalName>@if{!useMavenPaths}
     <sourceDirectory>src</sourceDirectory>
     <testSourceDirectory>test</testSourceDirectory>
     <resources>
@@ -60,6 +85,8 @@
           </execution>
         </executions>
       </plugin>
+@foreach{dep : deps}@if{dep.type == 'plugin'}@{dep.toDepString()}@end{}
+      @end{}
     </plugins>
   </build>
 </project>

@@ -1,9 +1,0 @@
-local:
-  PORT: 8080
-
-staging:
-  deployment: heroku
-
-production:
-  PORT: 80
-  deployment: sitebricks
