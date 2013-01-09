@@ -69,7 +69,6 @@ public class Cloud {
   }
 
   private static volatile Logger log;
-  private static volatile Config config;
 
   public static final Map<String, Class<? extends Command>> commandMap =
       new LinkedHashMap<String, Class<? extends Command>>();
@@ -94,11 +93,16 @@ public class Cloud {
 
     commandMap.put("mixes", Mixes.class);
     descriptions.put("mixes", "Lists all available components");
+
+    commandMap.put("config", EnvConfigurer.class);
+    commandMap.put("config:get", EnvConfigurer.class);
+    commandMap.put("config:set", EnvConfigurer.class);
+    descriptions.put("config", "List or edit all configured environment variables");
   }
 
   public static void main(String[] args) {
     Injector injector = Guice.createInjector(new OptionsModule(args).options(Config.class));
-    config = injector.getInstance(Config.class);
+    Config config = injector.getInstance(Config.class);
 
     // Discover all non-flag switches.
     List<String> commands = new ArrayList<String>();

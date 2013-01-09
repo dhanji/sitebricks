@@ -9,7 +9,6 @@ import com.google.sitebricks.cloud.proc.Proc;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Node;
-import org.dom4j.xpath.DefaultXPath;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -17,7 +16,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +24,6 @@ import java.util.Map;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 public class ProcRunner implements Command {
-  private static final Map<String, String> POM_NAMESPACE;
-  static {
-    POM_NAMESPACE = new HashMap<String, String>();
-    POM_NAMESPACE.put("m", "http://maven.apache.org/POM/4.0.0");
-  }
 
   @Override
   public void run(List<String> commands, Config config) throws Exception {
@@ -73,7 +66,7 @@ public class ProcRunner implements Command {
     return array.toArray(new String[env.size()]);
   }
 
-  private static Map<String, String> readEnvironment(String name) throws Exception {
+  static Map<String, String> readEnvironment(String name) throws Exception {
     return readEnvironment(new FileReader("pom.xml"), name);
   }
 
@@ -82,11 +75,11 @@ public class ProcRunner implements Command {
     Document document = DocumentHelper.parseText(CharStreams.toString(pom));
 
     Map<String, String> envConfig = new LinkedHashMap<String, String>();
-    List<Node> nodes = select(document, "/m:project/m:profiles/m:profile");
+    List<Node> nodes = DomUtil.select(document, "/m:project/m:profiles/m:profile");
     for (Node node : nodes) {
-      List<Node> select = select(node, "m:id");
+      List<Node> select = DomUtil.select(node, "m:id");
       if (!select.isEmpty() && name.equals(select.get(0).getStringValue())) {
-        List<Node> properties = select(node, "m:properties/*");
+        List<Node> properties = DomUtil.select(node, "m:properties/*");
         for (Node property : properties) {
           envConfig.put(property.getName(), property.getStringValue());
         }
@@ -94,14 +87,6 @@ public class ProcRunner implements Command {
     }
 
     return envConfig;
-  }
-
-  @SuppressWarnings("unchecked")
-  private static List<Node> select(Node document, String expression) {
-    DefaultXPath expr = new DefaultXPath(expression);
-    expr.setNamespaceURIs(POM_NAMESPACE);
-
-    return expr.selectNodes(document);
   }
 
   public static List<Proc> readProcs(Config config) throws IOException {

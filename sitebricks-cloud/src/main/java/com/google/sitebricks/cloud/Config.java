@@ -7,6 +7,10 @@ import com.google.sitebricks.options.Options;
  */
 @Options
 public abstract class Config {
+  public String env() {
+    return "local";
+  }
+
   public String name() {
     return null;
   }
