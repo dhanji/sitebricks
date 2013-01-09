@@ -137,7 +137,7 @@ public class Cloud {
   }
 
   public static void quit(String message) {
-    log.info(message);
+    System.out.println(message);
     System.exit(1);
   }
 
