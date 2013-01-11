@@ -32,29 +32,34 @@ class JedisPersister extends Persister {
     public void rollback() {}
   };
 
-  JedisPersister(JedisPoolConfig config, String host) {
+  JedisPersister(JedisPoolConfig config, String hostOrUri) {
     this.config = config;
+    String host = hostOrUri;
     int port = 6379;    // default redis port.
+    String password = null;
 
-    Matcher matcher = HOST_PORT_REGEX.matcher(host);
-    if (matcher.matches()) {
-      host = matcher.group(1);
-      port = Integer.parseInt(matcher.group(2));
+    // Discover password if necessary.
+    URI uri = URI.create(hostOrUri);
+    // If using the redis protocol, try to discover password
+    if ("redis".equals(uri.getScheme())) {
+      host = uri.getHost();
+      port = uri.getPort();
+
+      if (uri.getUserInfo() != null) {
+        String[] split = uri.getUserInfo().split(":", 2);
+        if (split.length > 1)
+          password = split[1];
+      }
+    } else {
+      Matcher matcher = HOST_PORT_REGEX.matcher(hostOrUri);
+      if (matcher.matches()) {
+        host = matcher.group(1);
+        port = Integer.parseInt(matcher.group(2));
+      }
     }
 
     this.host = host;
     this.port = port;
-
-    // Discover password if necessary.
-    URI uri = URI.create(host);
-    String password = null;
-    // If using the redis protocol, try to discover password
-    if ("redis".equals(uri.getScheme())) {
-      String[] split = uri.getUserInfo().split(":", 2);
-      if (split.length > 1)
-        password = split[1];
-    }
-
     this.password = password;
   }
 
