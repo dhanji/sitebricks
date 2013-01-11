@@ -3,6 +3,7 @@ package com.google.sitebricks.persist.redis;
 import com.google.inject.Guice;
 import com.google.sitebricks.persist.*;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPoolConfig;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -60,6 +61,16 @@ public class RedisStoreIntegrationTest {
     assertEquals("Jason", saver.find());
   }
 
+//  @Test
+  public final void storeAndRetrieveWithRedisUrl() {
+    RedisModule redisModule = new RedisModule(new JedisPoolConfig(), "redis://localhost:6379");
+    RedisSaver saver = Guice.createInjector(redisModule, new PersistAopModule(redisModule))
+        .getInstance(RedisSaver.class);
+
+    saver.make();
+
+    assertEquals("Jason", saver.find());
+  }
 
 //  @Test
   public final void storeAndRetrieveTransactional() {
