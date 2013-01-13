@@ -2,6 +2,7 @@ package com.google.sitebricks.routing;
 
 import com.google.sitebricks.headless.Request;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -28,5 +29,5 @@ public interface Action {
    * @param map A map of path variables (fragments) to their values.
    * @return an instance of Reply, Redirect or null to trigger a 500 error.
    */
-  Object call(Request request, Object page, Map<String, String> map);
+  Object call(Request request, Object page, Map<String, String> map) throws IOException;
 }

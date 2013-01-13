@@ -13,6 +13,7 @@ import com.google.sitebricks.routing.PageBook;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -105,7 +106,8 @@ public class EmbedWidgetTest {
   }
 
   @Test(dataProvider = PAGES_FOR_EMBEDDING)
-  public final void pageEmbeddingSupressesNormalWidgetChain(String pageName, final String passOn, final String expression) throws ExpressionCompileException {
+  public final void pageEmbeddingSupressesNormalWidgetChain(String pageName, final String passOn, final String expression)
+      throws ExpressionCompileException, IOException {
     //forName expects pageName to be in all-lower case (it's an optimization)
     pageName = pageName.toLowerCase();
 
@@ -160,7 +162,8 @@ public class EmbedWidgetTest {
 
 
   @Test(dataProvider = PAGES_FOR_EMBEDDING)
-  public final void pageEmbeddingChainsToEmbeddedWidget(String pageName, final String passOn, final String expression) throws ExpressionCompileException {
+  public final void pageEmbeddingChainsToEmbeddedWidget(String pageName, final String passOn, final String expression)
+      throws ExpressionCompileException, IOException {
 
     //forName expects pageName to be in all-lower case (it's an optimization)
     pageName = pageName.toLowerCase();
@@ -222,7 +225,8 @@ public class EmbedWidgetTest {
 
 
   @Test(dataProvider = PAGES_FOR_EMBEDDING)
-  public final void pageEmbeddingChainsToEmbeddedWidgetWithArgs(String targetPageName, final String passOn, final String expression) throws ExpressionCompileException {
+  public final void pageEmbeddingChainsToEmbeddedWidgetWithArgs(String targetPageName, final String passOn, final String expression)
+      throws ExpressionCompileException, IOException {
 
     //forName expects pageName to be in all-lower case (it's an optimization)
     targetPageName = targetPageName.toLowerCase();
@@ -292,7 +296,8 @@ public class EmbedWidgetTest {
 
 
   @Test(dataProvider = PAGES_FOR_EMBEDDING)
-  public final void pageEmbeddingChainsToEmbeddedWidgetBehavior(String pageName, final String passOn, final String expression) throws ExpressionCompileException {
+  public final void pageEmbeddingChainsToEmbeddedWidgetBehavior(String pageName, final String passOn, final String expression)
+      throws ExpressionCompileException, IOException {
 
     //forName expects pageName to be in all-lower case (it's an optimization)
     pageName = pageName.toLowerCase();
@@ -349,7 +354,8 @@ public class EmbedWidgetTest {
 
 
   @Test(dataProvider = PAGES_FOR_EMBEDDING)
-  public final void pageEmbeddingAndBinding(String pageName, final String passOn, final String expression) {
+  public final void pageEmbeddingAndBinding(String pageName, final String passOn, final String expression)
+      throws IOException {
     //forName expects pageName to be in all-lower case (it's an optimization)
     pageName = pageName.toLowerCase();
 
@@ -392,7 +398,8 @@ public class EmbedWidgetTest {
   }
 
 //  @Test(dataProvider = PAGES_FOR_EMBEDDING_BROKEN_EXCEPTION, expectedExceptions = IllegalArgumentException.class)
-  public final void failedPageEmbeddingThrowing(String pageName, final String passOn, final String expression) {
+  public final void failedPageEmbeddingThrowing(String pageName, final String passOn, final String expression)
+      throws IOException {
     //forName expects pageName to be in all-lower case (it's an optimization)
     pageName = pageName.toLowerCase();
 
@@ -429,7 +436,8 @@ public class EmbedWidgetTest {
   }
 
   @Test(dataProvider = PAGES_FOR_EMBEDDING_BROKEN)
-  public final void failedPageEmbedding(String pageName, final String passOn, final String expression) {
+  public final void failedPageEmbedding(String pageName, final String passOn, final String expression)
+      throws IOException {
     //forName expects pageName to be in all-lower case (it's an optimization)
     pageName = pageName.toLowerCase();
 

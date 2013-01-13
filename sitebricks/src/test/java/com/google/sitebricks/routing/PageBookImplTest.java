@@ -4,22 +4,23 @@ import com.google.common.collect.Iterators;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
-import com.google.sitebricks.*;
+import com.google.sitebricks.At;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Respond;
+import com.google.sitebricks.SitebricksModule;
+import com.google.sitebricks.TestRequestCreator;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Select;
 import com.google.sitebricks.rendering.EmbedAs;
-
-import org.easymock.EasyMock;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,7 +72,7 @@ public class PageBookImplTest {
   }
 
   @Test
-  public final void fireGetMethodOnPage() {
+  public final void fireGetMethodOnPage() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 
@@ -95,7 +96,7 @@ public class PageBookImplTest {
   }
 
   @Test
-  public final void fireGetMethodOnPageAndRedirectToURL() {
+  public final void fireGetMethodOnPageAndRedirectToURL() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 
@@ -119,7 +120,7 @@ public class PageBookImplTest {
   }
 
   @Test
-  public final void firePostMethodOnPageAndRedirectToURL() {
+  public final void firePostMethodOnPageAndRedirectToURL() throws IOException {
     Renderable mock = new
         Renderable() {
           public void render(Object bound, Respond respond) {
@@ -144,7 +145,7 @@ public class PageBookImplTest {
   }
   
   @Test
-  public final void fireGetMethodOnPageAndReply403() {
+  public final void fireGetMethodOnPageAndReply403() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 
@@ -168,7 +169,7 @@ public class PageBookImplTest {
   }
 
   @Test
-  public final void firePostMethodOnPageAndReply403() {
+  public final void firePostMethodOnPageAndReply403() throws IOException {
     Renderable mock = new Renderable() {
         public void render(Object bound, Respond respond) {
 
@@ -192,7 +193,7 @@ public class PageBookImplTest {
   }
 
   @Test
-  public final void fireGetMethodOnPageToCorrectHandler() {
+  public final void fireGetMethodOnPageToCorrectHandler() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 
@@ -223,7 +224,7 @@ public class PageBookImplTest {
   }
 
   @Test
-  public final void firePostMethodOnPageToCorrectHandler() {
+  public final void firePostMethodOnPageToCorrectHandler() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 
@@ -254,7 +255,7 @@ public class PageBookImplTest {
   }
 
   @Test
-  public final void fireGetMethodOnPageToCorrectHandlerOnlyOnce() {
+  public final void fireGetMethodOnPageToCorrectHandlerOnlyOnce() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 
@@ -285,7 +286,7 @@ public class PageBookImplTest {
   }
 
   @Test
-  public final void firePostMethodOnPageToCorrectHandlerOnlyOnce() {
+  public final void firePostMethodOnPageToCorrectHandlerOnlyOnce() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 
@@ -316,7 +317,7 @@ public class PageBookImplTest {
   }
 
   @Test
-  public final void fireGetMethodOnPageToDefaultHandler() {
+  public final void fireGetMethodOnPageToDefaultHandler() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 
@@ -350,7 +351,7 @@ public class PageBookImplTest {
 
 
   @Test
-  public final void firePostMethodOnPageToDefaultHandler() {
+  public final void firePostMethodOnPageToDefaultHandler() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 
@@ -385,7 +386,7 @@ public class PageBookImplTest {
   }
 
   @Test
-  public final void fireGetMethodWithArgsOnPage() {
+  public final void fireGetMethodWithArgsOnPage() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 
@@ -410,7 +411,7 @@ public class PageBookImplTest {
 
   
   @Test
-  public final void fireGetMethodWithPrimitiveArgsOnPage() {
+  public final void fireGetMethodWithPrimitiveArgsOnPage() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 
@@ -444,7 +445,7 @@ public class PageBookImplTest {
   
 
   @Test
-  public final void firePostMethodWithArgsOnPage() {
+  public final void firePostMethodWithArgsOnPage() throws IOException {
     Renderable mock = new
         Renderable() {
           public void render(Object bound, Respond respond) {
@@ -470,7 +471,7 @@ public class PageBookImplTest {
   }
 
   @Test(expectedExceptions = InvalidEventHandlerException.class)
-  public final void errorOnPostMethodWithUnnamedArgs() {
+  public final void errorOnPostMethodWithUnnamedArgs() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 
@@ -492,7 +493,7 @@ public class PageBookImplTest {
   }
 
   @Test
-  public final void firePostMethodOnPage() {
+  public final void firePostMethodOnPage() throws IOException {
     Renderable mock = new Renderable() {
       public void render(Object bound, Respond respond) {
 

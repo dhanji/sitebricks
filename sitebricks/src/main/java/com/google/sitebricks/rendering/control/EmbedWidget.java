@@ -10,6 +10,7 @@ import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.routing.PageBook;
 import net.jcip.annotations.Immutable;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -56,7 +57,12 @@ class EmbedWidget implements Renderable {
     EmbeddedRespond embed = factory.get(arguments);
 
     Request req = request.get();
-    page.doMethod(req.method(), pageObject, "", req);
+    try {
+      page.doMethod(req.method(), pageObject, "", req);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
     page.widget().render(pageObject, embed);
 
     //extract and write embedded response to enclosing page's respond

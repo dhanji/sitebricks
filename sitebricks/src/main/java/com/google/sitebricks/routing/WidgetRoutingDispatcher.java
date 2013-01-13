@@ -84,7 +84,8 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     return fireEvent(request, page, instance);
   }
 
-  private Object bindAndRespond(Request request, PageBook.Page page, Object instance) {
+  private Object bindAndRespond(Request request, PageBook.Page page, Object instance)
+      throws IOException {
     //bind request
     binder.bind(request, instance);
 
@@ -125,7 +126,8 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
 
   // We're sure the request parameter map is a Map<String, String[]>
   @SuppressWarnings("unchecked")
-  private Object fireEvent(Request request, PageBook.Page page, Object instance) {
+  private Object fireEvent(Request request, PageBook.Page page, Object instance)
+      throws IOException {
     final String method = request.method();
     final String pathInfo = request.path();
 

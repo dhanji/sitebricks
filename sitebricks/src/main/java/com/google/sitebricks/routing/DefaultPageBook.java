@@ -1,23 +1,5 @@
 package com.google.sitebricks.routing;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
-
-import net.jcip.annotations.GuardedBy;
-import net.jcip.annotations.ThreadSafe;
-
-import org.jetbrains.annotations.Nullable;
-
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
@@ -36,14 +18,37 @@ import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.At;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.conversion.TypeConverter;
+import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.headless.Service;
+import com.google.sitebricks.http.As;
+import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Head;
 import com.google.sitebricks.http.Select;
+import com.google.sitebricks.http.Trace;
 import com.google.sitebricks.http.negotiate.ContentNegotiator;
 import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.rendering.control.DecorateWidget;
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * contains active uri/widget mappings
@@ -295,7 +300,8 @@ public class DefaultPageBook implements PageBook {
       return instance;
     }
 
-    public Object doMethod(String httpMethod, Object page, String pathInfo, Request request) {
+    public Object doMethod(String httpMethod, Object page, String pathInfo, Request request)
+        throws IOException {
       return delegate.doMethod(httpMethod, page, pathInfo, request);
     }
 
@@ -512,7 +518,7 @@ public class DefaultPageBook implements PageBook {
     }
 
     public Object doMethod(String httpMethod, Object page, String pathInfo,
-                           Request request) {
+                           Request request) throws IOException {
 
       //nothing to fire
       if (Strings.empty(httpMethod)) {
@@ -566,7 +572,7 @@ public class DefaultPageBook implements PageBook {
     }
 
     private Object callAction(String httpMethod, Object page, Map<String, String> pathMap,
-                              Request request) {
+                              Request request) throws IOException {
 
       // There may be more than one default handler
       Collection<Action> tuple = methods.get(httpMethod);
@@ -624,6 +630,7 @@ public class DefaultPageBook implements PageBook {
     private final Map<String, String> negotiates;
     private final ContentNegotiator negotiator;
 	  private final TypeConverter converter;
+    private final As returnAs;
 
     private MethodTuple(Method method, Injector injector) {
       this.method = method;
@@ -632,6 +639,7 @@ public class DefaultPageBook implements PageBook {
       this.negotiates = discoverNegotiates(method, injector);
       this.negotiator = injector.getInstance(ContentNegotiator.class);
       this.converter = injector.getInstance(TypeConverter.class);
+      this.returnAs = method.getAnnotation(As.class);
     }
 
     private List<Object> reflect(Method method) {
@@ -644,21 +652,33 @@ public class DefaultPageBook implements PageBook {
         Annotation[] annotations = annotationsGrid[i];
 
         Annotation bindingAnnotation = null;
-        boolean namedFound = false;
+        boolean preInjectableFound = false;
         for (Annotation annotation : annotations) {
           if (Named.class.isInstance(annotation)) {
             Named named = (Named) annotation;
 
 			      args.add(new NamedParameter(named.value(), method.getGenericParameterTypes()[i]));
-            namedFound = true;
+            preInjectableFound = true;
 
             break;
           } else if (annotation.annotationType().isAnnotationPresent(BindingAnnotation.class)) {
             bindingAnnotation = annotation;
+          } else if (As.class.isInstance(annotation)) {
+            As as = (As) annotation;
+            if (method.isAnnotationPresent(Get.class)
+                || method.isAnnotationPresent(Head.class)
+                || method.isAnnotationPresent(Trace.class))
+              throw new IllegalArgumentException("Cannot accept a @As(...) request body from" +
+                  " method marked @Get, @Head or @Trace: "
+                  + method.getDeclaringClass().getName() + "#" + method.getName() + "()");
+
+            preInjectableFound = true;
+            args.add(new AsParameter(as.value(), TypeLiteral.get(method.getGenericParameterTypes()[i])));
+            break;
           }
         }
 
-        if (!namedFound) {
+        if (!preInjectableFound) {
           // Could be an arbitrary injection request.
           Class<?> argType = method.getParameterTypes()[i];
           Key<?> key = (null != bindingAnnotation)
@@ -689,19 +709,26 @@ public class DefaultPageBook implements PageBook {
 
 
     @Override
-    public Object call(Request request, Object page, Map<String, String> map) {
+    public Object call(Request request, Object page, Map<String, String> map) throws IOException {
       List<Object> arguments = new ArrayList<Object>();
       for (Object arg : args) {
-    	  if (arg instanceof NamedParameter) {
-			NamedParameter np = (NamedParameter) arg;
-			String text = map.get(np.getName());
-			Object value = converter.convert(text, np.getType());
-			arguments.add(value);
-		} else
+        if (arg instanceof AsParameter) {
+          AsParameter as = (AsParameter) arg;
+          arguments.add(request.read(as.type).as(as.transport));
+        } else if (arg instanceof NamedParameter) {
+          NamedParameter np = (NamedParameter) arg;
+          String text = map.get(np.getName());
+          Object value = converter.convert(text, np.getType());
+          arguments.add(value);
+        } else
           arguments.add(injector.getInstance((Key<?>) arg));
       }
 
-      return call(page, method, arguments.toArray());
+      Object result = call(page, method, arguments.toArray());
+      if (returnAs != null && result instanceof Reply) {
+        ((Reply) result).as(returnAs.value());
+      }
+      return result;
     }
 
     private static Object call(Object page, final Method method,
@@ -741,23 +768,33 @@ public class DefaultPageBook implements PageBook {
       return negotiations;
     }
 
-	public class NamedParameter {
-		private final String name;
-		private final Type type;
+    public class NamedParameter {
+      private final String name;
+      private final Type type;
 
-		public NamedParameter(String name, Type type) {
-			this.name = name;
-			this.type = type;
-		}
+      public NamedParameter(String name, Type type) {
+        this.name = name;
+        this.type = type;
+      }
 
-		public String getName() {
-			return name;
-		}
+      public String getName() {
+        return name;
+      }
 
-		public Type getType() {
-			return type;
-		}
-	}
+      public Type getType() {
+        return type;
+      }
+    }
+
+    public class AsParameter {
+      private final Class<? extends Transport> transport;
+      private final TypeLiteral<?> type;
+
+      public AsParameter(Class<? extends Transport> transport, TypeLiteral<?> type) {
+        this.transport = transport;
+        this.type = type;
+      }
+    }
 
   }
 

@@ -8,6 +8,7 @@ import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.headless.Request;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
@@ -92,7 +93,8 @@ public interface PageBook {
 
     Object instantiate();
 
-    Object doMethod(String httpMethod, Object page, String pathInfo, Request request);
+    Object doMethod(String httpMethod, Object page, String pathInfo, Request request)
+        throws IOException;
 
     Class<?> pageClass();
 

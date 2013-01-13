@@ -3,6 +3,7 @@ package com.google.sitebricks.routing;
 import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.headless.Request;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -50,7 +51,7 @@ public class SpiAction implements Action {
   }
 
   @Override
-  public Object call(Request request, Object page, Map<String, String> map) {
+  public Object call(Request request, Object page, Map<String, String> map) throws IOException {
     return action.call(request, page, map);
   }
 }
