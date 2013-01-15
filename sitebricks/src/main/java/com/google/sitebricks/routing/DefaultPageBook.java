@@ -796,6 +796,22 @@ public class DefaultPageBook implements PageBook {
       }
     }
 
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      MethodTuple that = (MethodTuple) o;
+
+      if (!method.equals(that.method)) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return method.hashCode();
+    }
   }
 
   /**
