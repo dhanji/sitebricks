@@ -50,10 +50,14 @@ class JedisEntityStore extends EntityStore {
     return (T) new Parameter(keyString, value);
   }
 
+  @Override public <T> List<T> all(Class<T> type) {
+    throw new UnsupportedOperationException("Bulk query of all values is not supported by this datastore");
+  }
+
   @Override
   protected <T> List<T> execute(Class<T> type, Map<String, EntityQuery.FieldMatcher<?>> query,
                                 int offset, int limit) {
-    throw new AssertionError("not impl");
+    throw new UnsupportedOperationException("EntityStore query-API is not supported by this datastore");
   }
 
   @Override

@@ -33,6 +33,10 @@ class SqlEntityStore extends EntityStore {
     throw new AssertionError();
   }
 
+  @Override public <T> List<T> all(Class<T> type) {
+    throw new UnsupportedOperationException("Bulk query of all values is not supported by this datastore");
+  }
+
   @Override
   public <T> void remove(Class<T> type, Serializable key) {
   }
@@ -45,7 +49,7 @@ class SqlEntityStore extends EntityStore {
   @Override
   protected <T> List<T> execute(Class<T> type, Map<String, EntityQuery.FieldMatcher<?>> query,
                                 int offset, int limit) {
-    throw new AssertionError();
+    throw new UnsupportedOperationException("Bulk query is not supported by this datastore");
   }
 
   @Override

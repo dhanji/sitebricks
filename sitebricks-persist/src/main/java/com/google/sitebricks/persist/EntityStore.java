@@ -83,6 +83,12 @@ public abstract class EntityStore {
    * Create an entity query (a type-safe abstract object query) that can be used to
    * query items stored in the underlying datastore. The returned query is not threadsafe.
    */
+  public abstract <T> List<T> all(Class<T> type);
+
+  /**
+   * Create an entity query (a type-safe abstract object query) that can be used to
+   * query items stored in the underlying datastore. The returned query is not threadsafe.
+   */
   public <T> EntityQuery<T> from(T entityTopic) {
     return new TypesafeEntityQuery<T>(entityTopic, this);
   }

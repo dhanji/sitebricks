@@ -1,5 +1,6 @@
 package com.google.sitebricks.persist.disk;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexableField;
@@ -170,6 +171,10 @@ class DiskEntityStore extends EntityStore {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override public <T> List<T> all(Class<T> type) {
+    return execute(type, ImmutableMap.<String, EntityQuery.FieldMatcher<?>>of(), 0, Integer.MAX_VALUE);
   }
 
   @Override
