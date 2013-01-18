@@ -5,7 +5,7 @@
     </encoder>
   </appender>
 
-  <logger name="org.eclipse.jetty" level="OFF"/>
+  <logger name="org.eclipse.jetty" level="info"/>
 
   <root level="@{'$'}{loglevel}">
     <appender-ref ref="STDOUT"/>
