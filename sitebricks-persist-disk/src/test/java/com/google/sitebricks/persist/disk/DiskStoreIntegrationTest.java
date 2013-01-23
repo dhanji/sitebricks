@@ -1,9 +1,10 @@
 package com.google.sitebricks.persist.disk;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
-import org.apache.commons.io.FileUtils;
 import com.google.sitebricks.persist.EntityStore;
 import com.google.sitebricks.persist.Persister;
+import org.apache.commons.io.FileUtils;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -11,12 +12,11 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.sitebricks.persist.EntityQuery.FieldMatcher.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertNull;
 
 /**
@@ -94,6 +94,17 @@ public class DiskStoreIntegrationTest {
       }
     });
 
+    Object all = persister.call(new Persister.InWork() {
+      @Override
+      public Object perform(EntityStore es) throws Throwable {
+        return es.all(MyEntity.class);
+      }
+    });
+
+    assertNotNull(all);
+    assertTrue(all instanceof List);
+    assertEquals(ImmutableList.of(myEntity), all);
+
     persister.call(new Persister.InWork() {
       @Override
       public Object perform(EntityStore es) throws Throwable {
@@ -110,6 +121,15 @@ public class DiskStoreIntegrationTest {
     });
 
     assertNull(found);
+
+    all = persister.call(new Persister.InWork() {
+      @Override
+      public Object perform(EntityStore es) throws Throwable {
+        return es.all(MyEntity.class);
+      }
+    });
+
+    assertNull(all);
   }
 
   @Test
