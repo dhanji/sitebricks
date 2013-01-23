@@ -12,7 +12,6 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.sitebricks.persist.EntityQuery.FieldMatcher.*;
@@ -102,7 +101,6 @@ public class DiskStoreIntegrationTest {
     });
 
     assertNotNull(all);
-    assertTrue(all instanceof List);
     assertEquals(ImmutableList.of(myEntity), all);
 
     persister.call(new Persister.InWork() {
