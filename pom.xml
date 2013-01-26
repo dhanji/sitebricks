@@ -274,6 +274,11 @@
         <artifactId>jetty-util</artifactId>
         <version>${org.mortbay.jetty.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>jsp-2.1-glassfish</artifactId>
+        <version>2.1.v20100127</version>
+      </dependency>
       <!-- Testing -->
       <dependency>
         <groupId>org.seleniumhq.webdriver</groupId>

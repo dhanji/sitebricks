@@ -4,7 +4,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" >
 
-
     <filter>
         <filter-name>webFilter</filter-name>
         <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
@@ -19,4 +18,27 @@
         <listener-class>com.google.sitebricks.example.SitebricksConfig</listener-class>
     </listener>
 
+    <servlet id="jsp">
+      <servlet-name>jsp</servlet-name>
+      <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
+        <init-param>
+            <param-name>logVerbosityLevel</param-name>
+            <param-value>DEBUG</param-value>
+        </init-param>
+        <init-param>
+            <param-name>fork</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>keepgenerated</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <load-on-startup>0</load-on-startup>
+        </servlet>
+ 
+    <servlet-mapping>
+      <servlet-name>jsp</servlet-name>
+      <url-pattern>*.jsp</url-pattern>
+    </servlet-mapping>
+  
 </web-app>

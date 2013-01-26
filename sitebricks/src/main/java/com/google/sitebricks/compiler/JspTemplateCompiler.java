@@ -19,14 +19,16 @@ import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.SystemMetrics;
 
 /**
+ * Class that delegates the JSP compilation to the provided WEB container compiler
+ * and let the {@link RequestDispatcher} write the result into the response.
  * 
+ * The {@link Respond} is not used to write the result.
+ * 
+ * An pageFlow attribute is added to the request so the accessors available in the 
+ * page object can be used from the JSP page.
  */
 @Singleton
 public class JspTemplateCompiler implements TemplateCompiler {
-
-	private final WidgetRegistry registry;
-	private final PageBook pageBook;
-	private final SystemMetrics metrics;
 
 	@Inject
 	Provider<HttpServletRequest> httpServletRequestProvider;
@@ -34,16 +36,8 @@ public class JspTemplateCompiler implements TemplateCompiler {
 	@Inject
 	Provider<HttpServletResponse> httpServletResponseProvider;
 
-	// special widget types (built-in symbol table)
-	private static final String REQUIRE_WIDGET = "@require";
-	private static final String REPEAT_WIDGET = "repeat";
-	private static final String CHOOSE_WIDGET = "choose";
-
 	@Inject
 	public JspTemplateCompiler(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics) {
-		this.registry = registry;
-		this.pageBook = pageBook;
-		this.metrics = metrics;
 	}
 
 	public Renderable compile(Class<?> page, final Template template) {
@@ -55,14 +49,13 @@ public class JspTemplateCompiler implements TemplateCompiler {
 				HttpServletRequest request = httpServletRequestProvider.get();
 				HttpServletResponse response = httpServletResponseProvider.get();
 				RequestDispatcher requestDispatcher = request.getRequestDispatcher(template.getName());
+				request.setAttribute("pageFlow", bound);
 				try {
 					requestDispatcher.include(request, response);
 				} catch (ServletException e) {
-					e.printStackTrace();
-					throw new RuntimeException("Could not include the response for path=" + template.getName(), e);
+					throw new RuntimeException("Could not include the JSP response for path=" + template.getName(), e);
 				} catch (IOException e) {
-					e.printStackTrace();
-					throw new RuntimeException("Could not include the response for path=" + template.getName(), e);
+					throw new RuntimeException("Could not include the JSP response for path=" + template.getName(), e);
 				}
 			}
 

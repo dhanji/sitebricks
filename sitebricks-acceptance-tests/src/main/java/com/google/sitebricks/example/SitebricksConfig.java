@@ -1,7 +1,19 @@
 package com.google.sitebricks.example;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
+import java.util.Map;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+
 import com.google.common.collect.ImmutableMap;
-import com.google.inject.*;
+import com.google.inject.BindingAnnotation;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.sitebricks.AwareModule;
@@ -14,17 +26,14 @@ import com.google.sitebricks.conversion.DateConverters;
 import com.google.sitebricks.debug.DebugPage;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
-import com.google.sitebricks.http.*;
+import com.google.sitebricks.http.Delete;
+import com.google.sitebricks.http.Get;
+import com.google.sitebricks.http.Patch;
+import com.google.sitebricks.http.Post;
+import com.google.sitebricks.http.Put;
 import com.google.sitebricks.rendering.Decorated;
 import com.google.sitebricks.routing.Action;
 import com.google.sitebricks.stat.StatModule;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.Locale;
-import java.util.Map;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -132,6 +141,8 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/chat").show(Chatter.class);
 
         at("/decorated-repeat").show(DecoratedRepeat.class);
+
+        at("/jsp").show(Jsp.class);
 
         embed(HelloWorld.class).as("Hello");
       }
