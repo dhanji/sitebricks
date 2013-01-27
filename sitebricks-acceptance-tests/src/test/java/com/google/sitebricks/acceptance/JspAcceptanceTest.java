@@ -13,7 +13,7 @@ import com.google.sitebricks.acceptance.util.AcceptanceTest;
 /**
  * 
  */
-//@Test(suiteName = AcceptanceTest.SUITE)
+@Test(suiteName = AcceptanceTest.SUITE)
 public class JspAcceptanceTest {
 
   public void shouldRepeatItemsFromCollection() {

@@ -279,6 +279,11 @@
         <artifactId>jsp-2.1-glassfish</artifactId>
         <version>2.1.v20100127</version>
       </dependency>
+      <dependency>
+        <groupId>taglibs</groupId>
+        <artifactId>standard</artifactId>
+        <version>1.1.2</version>
+      </dependency>
       <!-- Testing -->
       <dependency>
         <groupId>org.seleniumhq.webdriver</groupId>

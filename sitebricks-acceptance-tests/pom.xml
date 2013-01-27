@@ -66,6 +66,13 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- JSP taglib -->
+    <dependency>
+      <groupId>taglibs</groupId>
+      <artifactId>standard</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
   
 </project>
