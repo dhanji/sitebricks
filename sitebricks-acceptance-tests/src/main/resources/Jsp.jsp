@@ -41,8 +41,8 @@ Released for free under a Creative Commons Attribution 2.5 License
                     The following expression is repeated over every item in the bound collection of names.
 
                     <ul>
-                      <c:forEach var="name" items="${pageFlow.names}">
- 		                <li>${index}: ${name}</li>
+                      <c:forEach var="name" items="${pageFlow.names}" varStatus="loopStatus">
+ 		                <li>${loopStatus.index}: ${name} (last? ${loopStatus.last == true})</li>
  		              </c:forEach>
                     </ul>
 
@@ -56,9 +56,11 @@ Released for free under a Creative Commons Attribution 2.5 License
 
                     <ul>
                       <c:forEach var="movie" items="${pageFlow.movies}">
-                        <c:forEach var="actor" items="${movie.actors}">
-                           <li>${actor}</li>
-                        </c:forEach>
+                        <li>
+                          <c:forEach var="actor" items="${movie.actors}">
+                            <span>${actor}</span>
+                          </c:forEach>
+                        </li>
                       </c:forEach>
                     </ul>
 

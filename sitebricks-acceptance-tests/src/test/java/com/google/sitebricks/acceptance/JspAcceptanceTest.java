@@ -1,13 +1,14 @@
 package com.google.sitebricks.acceptance;
 
-import com.google.sitebricks.acceptance.page.RepeatPage;
-import com.google.sitebricks.acceptance.util.AcceptanceTest;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.List;
+import com.google.sitebricks.acceptance.page.JspPage;
+import com.google.sitebricks.acceptance.util.AcceptanceTest;
 
 /**
  * 
@@ -17,7 +18,7 @@ public class JspAcceptanceTest {
 
   public void shouldRepeatItemsFromCollection() {
     WebDriver driver = AcceptanceTest.createWebDriver();
-    RepeatPage page = RepeatPage.open(driver);
+    JspPage page = JspPage.open(driver);
 
     List<String> expectedNames = Arrays.asList(
         "0: Dhanji (last? false)",
