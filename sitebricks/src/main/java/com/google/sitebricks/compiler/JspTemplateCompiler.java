@@ -14,9 +14,6 @@ import com.google.inject.Singleton;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.Template;
-import com.google.sitebricks.rendering.control.WidgetRegistry;
-import com.google.sitebricks.routing.PageBook;
-import com.google.sitebricks.routing.SystemMetrics;
 
 /**
  * Class that delegates the JSP compilation to the provided WEB container compiler
@@ -35,10 +32,6 @@ public class JspTemplateCompiler implements TemplateCompiler {
 
 	@Inject
 	Provider<HttpServletResponse> httpServletResponseProvider;
-
-	@Inject
-	public JspTemplateCompiler(WidgetRegistry registry, PageBook pageBook, SystemMetrics metrics) {
-	}
 
 	public Renderable compile(Class<?> page, final Template template) {
 
