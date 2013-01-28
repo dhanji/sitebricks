@@ -1,5 +1,14 @@
 package com.google.sitebricks;
 
+import java.lang.annotation.Annotation;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Set;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -13,6 +22,7 @@ import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.sitebricks.compiler.FlatTemplateCompiler;
 import com.google.sitebricks.compiler.HtmlTemplateCompiler;
+import com.google.sitebricks.compiler.JspTemplateCompiler;
 import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.compiler.TemplateCompiler;
 import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
@@ -32,15 +42,6 @@ import com.google.sitebricks.http.negotiate.Accept;
 import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.routing.Action;
-
-import java.lang.annotation.Annotation;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.Set;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -129,6 +130,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     builder.put("flat", FlatTemplateCompiler.class);
     builder.put("mvel", MvelTemplateCompiler.class);
     builder.put("fml", FreemarkerTemplateCompiler.class);
+    builder.put("jsp", JspTemplateCompiler.class);
 
     configureTemplateCompilers(builder);
 

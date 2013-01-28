@@ -1,10 +1,15 @@
 package com.google.sitebricks.acceptance.util;
 
 
-import com.google.inject.Injector;
+import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
+
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
+
+import com.google.inject.Injector;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -43,6 +48,16 @@ public class Jetty {
   }
 
   public void start() throws Exception {
+    // Hack to allow successfull test via maven CLI
+    // Read http://stackoverflow.com/questions/2151075/cannot-load-jstl-taglib-within-embedded-jetty-server
+    ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
+    File taglibsJarFile = new File(System.getProperty("user.home") + "/.m2/repository/taglibs/standard/1.1.2/standard-1.1.2.jar");
+    if (! taglibsJarFile.exists()) {
+        throw new RuntimeException("Taglib Jar file does not exist at path: " + taglibsJarFile.getAbsolutePath());
+    }
+    URL taglibsJarUrl = taglibsJarFile.toURI().toURL();
+    URLClassLoader newClassLoader = new URLClassLoader(new URL[]{taglibsJarUrl}, currentClassLoader);
+    Thread.currentThread().setContextClassLoader(newClassLoader);
     server.start();
     //
     // When the server starts if the port is specified at 0, then it will find a free port. Once that
