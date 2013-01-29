@@ -60,6 +60,19 @@
       <artifactId>jetty-websocket</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jsp-2.1-glassfish</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- JSP taglib -->
+    <dependency>
+      <groupId>taglibs</groupId>
+      <artifactId>standard</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
   
 </project>
