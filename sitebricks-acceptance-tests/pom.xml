@@ -54,6 +54,12 @@
       <version>2.7.0</version>
     </dependency>
 
+    <!-- Validation -->
+    <dependency>
+      <groupId>org.apache.bval</groupId>
+      <artifactId>bval-guice</artifactId>
+    </dependency>
+
     <!-- Jetty webserver -->
     <dependency>
       <groupId>org.eclipse.jetty</groupId>

@@ -1,5 +1,26 @@
 package com.google.sitebricks.routing;
 
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.validation.ValidationException;
+
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
@@ -32,23 +53,6 @@ import com.google.sitebricks.http.negotiate.ContentNegotiator;
 import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.rendering.control.DecorateWidget;
-import net.jcip.annotations.GuardedBy;
-import net.jcip.annotations.ThreadSafe;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * contains active uri/widget mappings
@@ -559,7 +563,7 @@ public class DefaultPageBook implements PageBook {
 
         // no matched events. Fire default handler
         if (!matched) {
-          return callAction(httpMethod, page, map, request);
+            return callAction(httpMethod, page, map, request);
         }
 
       } else {
@@ -740,6 +744,9 @@ public class DefaultPageBook implements PageBook {
             "Could not access event method (appears to be a security problem): " + method, e);
       } catch (InvocationTargetException e) {
         Throwable cause = e.getCause();
+        if (cause instanceof ValidationException) {
+            throw (ValidationException) cause;
+        }
         StackTraceElement[] stackTrace = cause.getStackTrace();
         throw new EventDispatchException(String.format(
             "Exception [%s - \"%s\"] thrown by event method [%s]\n\nat %s\n"

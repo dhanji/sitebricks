@@ -1,5 +1,12 @@
 package com.google.sitebricks.routing;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
+
+import net.jcip.annotations.Immutable;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -12,9 +19,6 @@ import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.resource.ResourcesService;
 import com.google.sitebricks.routing.PageBook.Page;
-import net.jcip.annotations.Immutable;
-
-import java.io.IOException;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -28,6 +32,9 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
   private final Provider<FlashCache> flashCacheProvider;
   private final HeadlessRenderer headlessRenderer;
 
+  @Inject
+  Provider<HttpServletRequest> httpServletRequestProvider;
+  
   @Inject
   public WidgetRoutingDispatcher(PageBook book, RequestBinder binder,
                                  ResourcesService resourcesService,
@@ -89,9 +96,19 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     //bind request
     binder.bind(request, instance);
 
-    //fire get/post events
-    final Object redirect = fireEvent(request, page, instance);
-
+    // fire get/post events
+    Object redirect = null;
+    try {
+        redirect = fireEvent(request, page, instance);
+    }
+    catch (ValidationException e) {
+        HttpServletRequest httpServletRequest = httpServletRequestProvider.get();
+        httpServletRequest.setAttribute("pageFlowValidationErrors", e.getCause());
+        // TODO(eric) do we need refire an event?
+        // redirect = fireEvent(request, page, instance, "get");
+    }
+        
+        
     //render to respond
     Respond respond = new StringBuilderRespond(instance);
     if (null != redirect) {
