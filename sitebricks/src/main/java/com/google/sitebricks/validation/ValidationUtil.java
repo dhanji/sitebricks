@@ -18,8 +18,10 @@ public class ValidationUtil {
     
     public static List<String> toErrors(Set<? extends ConstraintViolation<?>> cvs) {
         List<String> errors = Lists.newArrayList();
-        for (ConstraintViolation<?> cv: cvs) {
-            errors.add(cv.getMessage());
+        if (cvs != null) {
+            for (ConstraintViolation<?> cv: cvs) {
+                errors.add(cv.getMessage());
+            }
         }
         return errors;
     }
