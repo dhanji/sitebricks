@@ -13,10 +13,10 @@ public class ValidationUtil {
     
     public static List<String> toErrors(ValidationException ve) {
         ConstraintViolationException cve = (ConstraintViolationException) ve.getCause();
-        return toErrors((Set<? extends ConstraintViolation<Object>>) cve.getConstraintViolations());
+        return toErrors((Set<? extends ConstraintViolation<?>>) cve.getConstraintViolations());
     }
     
-    public static List<String> toErrors(Set<? extends ConstraintViolation<Object>> cvs) {
+    public static List<String> toErrors(Set<? extends ConstraintViolation<?>> cvs) {
         List<String> errors = Lists.newArrayList();
         for (ConstraintViolation<?> cv: cvs) {
             errors.add(cv.getMessage());
