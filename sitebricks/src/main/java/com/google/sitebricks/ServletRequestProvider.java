@@ -1,7 +1,7 @@
 package com.google.sitebricks;
 
 
-import static com.google.sitebricks.validation.ValidationUtil.toErrors;
+import static com.google.sitebricks.conversion.ValidationConverter.toErrors;
 
 import java.io.IOException;
 import java.io.OutputStream;

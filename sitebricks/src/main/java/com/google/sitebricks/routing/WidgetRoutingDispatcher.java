@@ -8,7 +8,7 @@ import javax.validation.ValidationException;
 
 import net.jcip.annotations.Immutable;
 
-import static com.google.sitebricks.validation.ValidationUtil.toErrors;
+import static com.google.sitebricks.conversion.ValidationConverter.toErrors;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

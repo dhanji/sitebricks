@@ -1,4 +1,4 @@
-package com.google.sitebricks.validation;
+package com.google.sitebricks.conversion;
 
 import java.util.List;
 import java.util.Set;
@@ -9,7 +9,7 @@ import javax.validation.ValidationException;
 
 import com.google.common.collect.Lists;
 
-public class ValidationUtil {
+public class ValidationConverter {
     
     public static List<String> toErrors(ValidationException ve) {
         ConstraintViolationException cve = (ConstraintViolationException) ve.getCause();
