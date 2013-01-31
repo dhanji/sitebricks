@@ -9,6 +9,8 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.apache.bval.guice.ValidationModule;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -22,11 +24,11 @@ import com.google.inject.binder.ScopedBindingBuilder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.sitebricks.compiler.FlatTemplateCompiler;
 import com.google.sitebricks.compiler.HtmlTemplateCompiler;
-import com.google.sitebricks.compiler.JspTemplateCompiler;
 import com.google.sitebricks.compiler.Parsing;
 import com.google.sitebricks.compiler.TemplateCompiler;
 import com.google.sitebricks.compiler.template.MvelTemplateCompiler;
 import com.google.sitebricks.compiler.template.freemarker.FreemarkerTemplateCompiler;
+import com.google.sitebricks.compiler.template.jsp.JspTemplateCompiler;
 import com.google.sitebricks.conversion.Converter;
 import com.google.sitebricks.conversion.ConverterUtils;
 import com.google.sitebricks.core.CaseWidget;
@@ -117,6 +119,10 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
     Localizer.localizeAll(binder(), localizations);
 
     configureTemplateSystem();
+
+    // Validation
+    install(new ValidationModule());
+  
   }
 
   protected void configureTemplateSystem() {

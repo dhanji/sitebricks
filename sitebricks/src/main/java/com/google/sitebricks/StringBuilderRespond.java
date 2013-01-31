@@ -4,10 +4,13 @@ import net.jcip.annotations.NotThreadSafe;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+
+import javax.validation.ConstraintViolationException;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -26,7 +29,9 @@ public class StringBuilderRespond implements Respond {
 
   private static final String TEXT_HTML = "text/html;charset=utf-8";
   private Object page;
-
+  
+  private List<String> errors;
+  
   @SuppressWarnings("unchecked")
   public StringBuilderRespond(Object context) {
     this.page = context;
@@ -107,6 +112,16 @@ public class StringBuilderRespond implements Respond {
   }
 
   @Override
+  public List<String>  getErrors() {
+    return this.errors;
+  }
+
+  @Override
+  public void setErrors(List<String> errors) {
+    this.errors = errors;
+  }
+
+  @Override
   public String toString() {
     //write requires to header first...
     for (String require : requires) {
@@ -141,4 +156,5 @@ public class StringBuilderRespond implements Respond {
       write(String.format(templates.get().get(TEXTAREA_TAG_TEMPLATE), bind, value));
     }
   }
+
 }

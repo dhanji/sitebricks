@@ -20,9 +20,12 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolationException;
+
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -769,6 +772,16 @@ public class PageBookImplTest {
     @Override public Object pageObject() {
       return null;
     }
+
+    @Override
+    public List<String>  getErrors() {
+        return null;
+    }
+  
+    @Override
+    public void setErrors(List<String> errors) {
+    }
+  
   }
 
   @At("/wiki")

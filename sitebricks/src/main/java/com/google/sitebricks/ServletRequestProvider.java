@@ -1,5 +1,19 @@
 package com.google.sitebricks;
 
+
+import static com.google.sitebricks.validation.ValidationUtil.toErrors;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
@@ -12,12 +26,6 @@ import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Parameters;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Enumeration;
-import java.util.Map;
-
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
@@ -25,11 +33,13 @@ import java.util.Map;
 class ServletRequestProvider implements Provider<Request> {
   private final Provider<HttpServletRequest> servletRequest;
   private final Injector injector;
+  private final Validator validator;
 
   @Inject
-  public ServletRequestProvider(Provider<HttpServletRequest> servletRequest, Injector injector) {
+  public ServletRequestProvider(Provider<HttpServletRequest> servletRequest, Injector injector, Validator validator) {
     this.servletRequest = servletRequest;
     this.injector = injector;
+    this.validator = validator;
   }
 
   @Override
@@ -187,7 +197,14 @@ class ServletRequestProvider implements Provider<Request> {
         this.headers = builder.build();
       }
 
+      @Override
+      public List<String> validate(Object object) {
+          Set<ConstraintViolation<Object>> cvs = validator.validate(object);
+          return toErrors(cvs);
+      }
+
     };
 
   }
+  
 }

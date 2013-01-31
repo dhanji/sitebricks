@@ -19,7 +19,7 @@ import com.google.sitebricks.example.model.Person;
  * 
  */
 @Test(suiteName = AcceptanceTest.SUITE)
-public class RestfulWebServiceValidatingAcceptanceTest {
+public class RestfulWebServiceValidatingDaoAcceptanceTest {
 
     public void shouldValidateGet() {
 
@@ -29,7 +29,7 @@ public class RestfulWebServiceValidatingAcceptanceTest {
         person.setAge(20);
 
         WebResponse response = createInjector().getInstance(Web.class)
-                .clientOf(AcceptanceTest.baseUrl() + "/restvalidating")
+                .clientOf(AcceptanceTest.baseUrl() + "/restvalidatingdao")
                 .transports(Person.class).over(Json.class).get();
 
         assert response.toString().contains(person.getLastName());
@@ -44,7 +44,7 @@ public class RestfulWebServiceValidatingAcceptanceTest {
         person.setAge(20);
 
         WebResponse response = createInjector().getInstance(Web.class)
-                .clientOf(AcceptanceTest.baseUrl() + "/restvalidating")
+                .clientOf(AcceptanceTest.baseUrl() + "/restvalidatingdao")
                 .transports(Person.class).over(Json.class).post(person);
 
         assert response.toString().contains(person.getLastName());
@@ -59,7 +59,7 @@ public class RestfulWebServiceValidatingAcceptanceTest {
         person.setAge(20);
 
         WebResponse response = createInjector().getInstance(Web.class)
-                .clientOf(AcceptanceTest.baseUrl() + "/restvalidating")
+                .clientOf(AcceptanceTest.baseUrl() + "/restvalidatingdao")
                 .transports(Person.class).over(Json.class).post(person);
 
         assert response.toString().contains("violation.null.firstName");

@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class TestRequestCreator {
   public static Request from(HttpServletRequest request, Injector injector) {
-    return new ServletRequestProvider(Providers.of(request), injector).get();
+    // We give null as validator...
+    return new ServletRequestProvider(Providers.of(request), injector, null).get();
   }
 }

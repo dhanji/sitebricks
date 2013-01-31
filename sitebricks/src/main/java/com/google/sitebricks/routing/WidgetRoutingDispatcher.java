@@ -1,11 +1,14 @@
 package com.google.sitebricks.routing;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ValidationException;
 
 import net.jcip.annotations.Immutable;
+
+import static com.google.sitebricks.validation.ValidationUtil.toErrors;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -14,6 +17,7 @@ import com.google.sitebricks.Respond;
 import com.google.sitebricks.StringBuilderRespond;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.RequestBinder;
+import com.google.sitebricks.client.transport.Json;
 import com.google.sitebricks.headless.HeadlessRenderer;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
@@ -78,7 +82,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     if (page.isHeadless()) {
       return bindAndReply(request, page, instance);
     } else {
-       //fire events and render reponders
+       //fire events and render responder
       return bindAndRespond(request, page, instance);
     }
   }
@@ -86,9 +90,16 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
   private Object bindAndReply(Request request, Page page, Object instance) throws IOException {
     // bind request (sets request params, etc).
     binder.bind(request, instance);
-
-    // call the appropriate handler.
-    return fireEvent(request, page, instance);
+    
+    Object response = null;
+    try {
+        // call the appropriate handler.
+        response = fireEvent(request, page, instance);
+    }
+    catch (ValidationException ve) {
+        response =  Reply.with(toErrors(ve)).as(Json.class).badRequest();
+    }
+    return response;
   }
 
   private Object bindAndRespond(Request request, PageBook.Page page, Object instance)
@@ -98,19 +109,17 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
 
     // fire get/post events
     Object redirect = null;
+    List<String> errors = null;
     try {
         redirect = fireEvent(request, page, instance);
     }
-    catch (ValidationException e) {
-        HttpServletRequest httpServletRequest = httpServletRequestProvider.get();
-        httpServletRequest.setAttribute("pageFlowValidationErrors", e.getCause());
-        // TODO(eric) do we need refire an event?
-        // redirect = fireEvent(request, page, instance, "get");
+    catch (ValidationException ve) {
+        errors = toErrors(ve);
     }
-        
         
     //render to respond
     Respond respond = new StringBuilderRespond(instance);
+    respond.setErrors(errors);
     if (null != redirect) {
 
       if (redirect instanceof String)
@@ -154,4 +163,5 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
   private static String contextualize(Request request, String targetUri) {
     return request.context() + targetUri;
   }
+  
 }

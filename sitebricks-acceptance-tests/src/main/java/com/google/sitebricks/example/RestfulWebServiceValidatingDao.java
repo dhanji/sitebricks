@@ -1,8 +1,9 @@
 package com.google.sitebricks.example;
 
-import java.util.List;
+import javax.inject.Inject;
 
 import com.google.sitebricks.client.transport.Json;
+import com.google.sitebricks.example.dao.SimpleDao;
 import com.google.sitebricks.example.model.Person;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
@@ -12,21 +13,21 @@ import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 
 @Service
-public class RestfulWebServiceValidating {
+public class RestfulWebServiceValidatingDao {
 
+    @Inject
+    private SimpleDao dao;
+    
     @Get
     @As(Json.class)
     Reply<Person> newPerson() {
-      return Reply.with(new Person());
+        return Reply.with(new Person());
     }
 
     @Post
     @As(Json.class)
     Reply<?> postPerson(@As(Json.class) Person person, Request request) {
-      List<String> errors = request.validate(person);
-      if (!errors.isEmpty()) {
-        return Reply.with(errors).badRequest();
-      }
+      dao.save(person);
       return Reply.with(person);
     }
 

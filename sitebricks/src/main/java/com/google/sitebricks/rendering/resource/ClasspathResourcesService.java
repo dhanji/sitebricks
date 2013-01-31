@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.validation.ConstraintViolationException;
+
 import net.jcip.annotations.ThreadSafe;
 
 import com.google.common.collect.MapMaker;
@@ -181,5 +183,15 @@ class ClasspathResourcesService implements ResourcesService {
     @Override public Object pageObject() {
       return null;
     }
+
+    @Override
+    public List<String>  getErrors() {
+        return null;
+    }
+  
+    @Override
+    public void setErrors(List<String> errors) {
+    }
+  
   }
 }

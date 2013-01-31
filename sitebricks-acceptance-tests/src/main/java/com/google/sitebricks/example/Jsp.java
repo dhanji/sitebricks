@@ -1,15 +1,17 @@
 package com.google.sitebricks.example;
 
-import com.google.sitebricks.At;
-import com.google.sitebricks.Show;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import java.util.*;
+import com.google.sitebricks.Show;
 
 /**
  * 
  */
-@At("/jsp")
-@Show("Jsp.jsp")
+@Show("/Jsp.jsp")
 public class Jsp {
     private static final List<String> NAMES = Arrays.asList("Dhanji", "Josh", "Jody", "Iron Man");
 

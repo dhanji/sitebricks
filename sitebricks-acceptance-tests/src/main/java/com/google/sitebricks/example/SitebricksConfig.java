@@ -25,6 +25,8 @@ import com.google.sitebricks.channel.ChannelListener;
 import com.google.sitebricks.channel.ChannelModule;
 import com.google.sitebricks.conversion.DateConverters;
 import com.google.sitebricks.debug.DebugPage;
+import com.google.sitebricks.example.dao.SimpleDao;
+import com.google.sitebricks.example.dao.ValidatingDao;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Delete;
@@ -148,8 +150,10 @@ public class SitebricksConfig extends GuiceServletContextListener {
         embed(HelloWorld.class).as("Hello");
         
         // Validation
-        install(new ValidationModule());
-        at("/rest/validate").serve(RestfulWebService.class);
+        bind(SimpleDao.class).to(ValidatingDao.class);
+        at("/jspvalidating").show(JspValidating.class);
+        at("/restvalidating").serve(RestfulWebServiceValidating.class);
+        at("/restvalidatingdao").serve(RestfulWebServiceValidatingDao.class);
         
       }
 
