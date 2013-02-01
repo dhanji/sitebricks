@@ -6,11 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotate localization interface methods with this to describe the purpose and value of
- * an internationalized message.
+ * 
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Message {
-  String message();
-  String description() default "";
+@Target({ElementType.TYPE})
+public @interface ResourceBundle {
+  public Class<?> clazz();
 }
