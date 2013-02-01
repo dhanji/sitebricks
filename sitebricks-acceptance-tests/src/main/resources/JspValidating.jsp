@@ -36,6 +36,12 @@ Released for free under a Creative Commons Attribution 2.5 License
     <div id="page">
         <!-- start content -->
         <div id="content">
+
+        <div>Any validation errors here?:</div>
+<%--
+The following JAVA scriptlet can be eaislly replaced with a custom
+taglib to make a nicer integration in this JSP.
+--%>
 <%
 Object obj = request.getAttribute("pageFlowErrors");
 if (obj != null) {

@@ -4,14 +4,14 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class Person {
-    @NotNull(message = "violation.null.firstName")
-    @Size(min = 1, message = "violation.length.firstName")
+    @NotNull(message = "constraintViolationNullFirstName")
+    @Size(min = 1, message = "constraintViolationLengthFirstName")
     private String firstName;
-    @NotNull(message = "violation.null.lastName")
-    @Size(min = 1, message = "violation.length.lastName")
+    @NotNull(message = "constraintViolationNullLastName")
+    @Size(min = 1, message = "constraintViolationLengthLastName")
     private String lastName;
     private String surName;
-    @NotNull(message = "violation.null.age")
+    @NotNull(message = "constraintViolationNullAge")
     private Integer age;
     public String getFirstName() {
         return firstName;

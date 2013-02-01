@@ -31,12 +31,12 @@ Released for free under a Creative Commons Attribution 2.5 License
 	         contentType : 'application/json',
 	         data : JSON.stringify(json),
 	         success:function(data){
-	          if (console && console.log) {
-			      console.log("response", data);
-		      }
+                var res = JSON.parse(data.responseText);
+                $('#ajax-result').text(res);
 	         },
 	         error:function(data){
                 var res = JSON.parse(data.responseText);
+                $('#ajax-result').text(res);
 		     }
 	      });
 		  return false;
@@ -72,8 +72,12 @@ Released for free under a Creative Commons Attribution 2.5 License
   <!-- start content -->
   <div id="content">
     <div class="post">
-      <h1 class="title">examples</h1>
 
+      <div>Any validation errors here?:</div>
+      <div id="ajax-result"></div>
+      
+      <h1 class="title">examples</h1>
+      
       <form id="form-1">
         <label for="firstName">First Name:</label>
         <input name="firstName" id="firstName" type="text"/><br/>
@@ -83,7 +87,7 @@ Released for free under a Creative Commons Attribution 2.5 License
         <input name="age" id="age" type="text"/><br/>
         <input type="submit" value="Add Person"/>
       </form>
-
+      
       <div class="meta">
         <p class="byline">Google Sitebricks.</p>
       </div>

@@ -117,6 +117,8 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
         .toInstance(negotiations);
 
     Localizer.localizeAll(binder(), localizations);
+    bind(new TypeLiteral<Map<Class<?>, Map<Locale, Localizer.Localization>>>() {})
+        .toInstance(localizationsMap);
 
     configureTemplateSystem();
 
@@ -172,6 +174,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
   private final Map<String, Class<? extends Annotation>> methods = Maps.newHashMap();
   private final Map<String, Class<? extends Annotation>> negotiations = Maps.newHashMap();
   private final Set<Localizer.Localization> localizations = Sets.newHashSet();
+  private final Map<Class<?>, Map<Locale, Localizer.Localization>> localizationsMap = Maps.newHashMap();
 
   public final ShowBinder at(String uri) {
     LinkingBinder binding = new LinkingBinder(uri);
@@ -205,10 +208,10 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
   public LocalizationBinder localize(final Class<?> iface) {
     Preconditions.checkArgument(iface.isInterface(), "localize() accepts an interface type only");
-    localizations.add(Localizer.defaultLocalizationFor(iface));
+    add(Localizer.defaultLocalizationFor(iface));
     return new LocalizationBinder() {
       public void using(Locale locale, Map<String, String> messages) {
-        localizations.add( new Localizer.Localization(iface, locale, messages));
+        add( new Localizer.Localization(iface, locale, messages));
       }
 
       public void using(Locale locale, Properties properties) {
@@ -216,7 +219,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
         // A Properties object is always of type string/string
         @SuppressWarnings({ "unchecked", "rawtypes" })
         Map<String, String> messages = (Map) properties;
-        localizations.add(new Localizer.Localization(iface, locale, messages));
+        add(new Localizer.Localization(iface, locale, messages));
       }
 
       public void using(Locale locale, ResourceBundle bundle) {
@@ -228,15 +231,27 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
           String key = keys.nextElement();
           messages.put(key, bundle.getString(key));
         }
-        localizations.add(new Localizer.Localization(iface, locale, messages));
+        add(new Localizer.Localization(iface, locale, messages));
       }
 
       public void usingDefault() {
-        localizations.add(Localizer.defaultLocalizationFor(iface));
+        add(Localizer.defaultLocalizationFor(iface));
       }
+      
     };
+
   }
 
+  private void add(Localizer.Localization localization) {
+      localizations.add(localization);
+      Map<Locale, Localizer.Localization> localeLocalizer = localizationsMap.get(localization.getClazz());
+      if (localeLocalizer == null) {
+          localeLocalizer = Maps.newHashMap();
+          localizationsMap.put(localization.getClazz(), localeLocalizer);
+      }
+      localeLocalizer.put(localization.getLocale(), localization);
+  }
+  
   protected final void scan(Package pack) {
     Preconditions.checkArgument(null != pack, "Package parameter to scan() cannot be null");
     packages.add(pack);

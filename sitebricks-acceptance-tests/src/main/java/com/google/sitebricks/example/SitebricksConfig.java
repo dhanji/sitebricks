@@ -79,7 +79,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
           }
         });
 
-            at("/no_annotations/service").serve(RestfulWebServiceNoAnnotations.class);
+        at("/no_annotations/service").serve(RestfulWebServiceNoAnnotations.class);
         at("/debug").show(DebugPage.class);
 
         bind(Start.class).annotatedWith(Test.class).to(Start.class);
@@ -88,6 +88,8 @@ public class SitebricksConfig extends GuiceServletContextListener {
         localize(I18n.MyMessages.class).usingDefault();
         localize(I18n.MyMessages.class).using(Locale.CANADA_FRENCH,
             ImmutableMap.of(I18n.HELLO, I18n.HELLO_IN_FRENCH));
+
+        localize(HtmlValidating.ErrorMessages.class).usingDefault();
 
         install(new StatModule("/stats"));
 

@@ -21,9 +21,9 @@ public class JspValidatingAcceptanceTest {
     JspValidatingPage page = JspValidatingPage.open(driver);
 
     List<String> expectedValidationViolations = Arrays.asList(
-        "violation.length.firstName",
-        "violation.null.age",
-        "violation.length.lastName");
+        "constraintViolationLengthFirstName",
+        "constraintViolationNullAge",
+        "constraintViolationLengthLastName");
 
     List<String> actualValidationViolations = page.getValidationViolations();
 

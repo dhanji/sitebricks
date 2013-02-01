@@ -21,14 +21,15 @@ public class HtmlValidatingAcceptanceTest {
     HtmlValidatingPage page = HtmlValidatingPage.open(driver);
 
     List<String> expectedValidationViolations = Arrays.asList(
-        "violation.length.firstName",
-        "violation.null.age",
-        "violation.length.lastName");
+        "Constraint Violation Length First Name Message",
+        "Constraint Violation Null Age Message",
+        "Constraint Violation Length Last Name Message");
 
     List<String> actualValidationViolations = page.getValidationViolations();
 
     assert CollectionUtils.isEqualCollection(expectedValidationViolations, actualValidationViolations)
         : "validation violations didn't match what was expected";
+    
   }
 
 }

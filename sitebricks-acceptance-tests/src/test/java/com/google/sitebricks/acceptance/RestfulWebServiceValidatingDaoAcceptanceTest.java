@@ -62,7 +62,7 @@ public class RestfulWebServiceValidatingDaoAcceptanceTest {
                 .clientOf(AcceptanceTest.baseUrl() + "/restvalidatingdao")
                 .transports(Person.class).over(Json.class).post(person);
 
-        assert response.toString().contains("violation.null.firstName");
+        assert response.toString().contains("constraintViolationNullFirstName");
 
     }
 

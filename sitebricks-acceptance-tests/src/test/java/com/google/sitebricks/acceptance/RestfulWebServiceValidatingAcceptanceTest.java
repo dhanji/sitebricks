@@ -62,7 +62,7 @@ public class RestfulWebServiceValidatingAcceptanceTest {
                 .clientOf(AcceptanceTest.baseUrl() + "/restvalidating")
                 .transports(Person.class).over(Json.class).post(person);
 
-        assert response.toString().contains("violation.null.firstName");
+        assert response.toString().contains("constraintViolationNullFirstName");
 
     }
 

@@ -1,30 +1,54 @@
 package com.google.sitebricks.rendering.control;
 
 import java.util.Collections;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import com.google.sitebricks.Evaluator;
+import com.google.sitebricks.Localizer;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
+import com.google.sitebricks.headless.Request;
+import com.google.sitebricks.i18n.ResourceBundle;
 import com.google.sitebricks.rendering.EmbedAs;
 import com.google.sitebricks.rendering.SelfRendering;
 
-/**
- * 
- */
 @SelfRendering
 @EmbedAs("errors")
 public class ErrorsWidget implements Renderable {
+    
+    @Inject
+    private Map<Class<?> ,Map<Locale, Localizer.Localization>> localizationsMap;
+    
+    @Inject
+    private Locale locale;
 
     public ErrorsWidget(WidgetChain widgetChain, String expression, Evaluator evaluator) {
     }
 
     public void render(Object bound, Respond respond) {
         if (! respond.getErrors().isEmpty()) {
+            Localizer.Localization localization = null;
+            ResourceBundle resourceBundle = bound.getClass().getAnnotation(ResourceBundle.class);
+            if (resourceBundle != null) {
+                Map<Locale, Localizer.Localization> localizerMap = localizationsMap.get(resourceBundle.clazz());
+                if (localizerMap != null) {
+                    localization = localizerMap.get(locale);
+                }
+            }
             respond.write("<div class=\"errors\">");
             respond.write("<ul>");
-            for (String error: respond.getErrors()) {
-                respond.write("<li>" + error + "</li>");
+            for (String errorKey: respond.getErrors()) {
+                String errorMessage = localization.getMessageBundle().get(errorKey);
+                if (errorMessage != null) {
+                    respond.write("<li>" + errorMessage + "</li>");
+                }
+                else {
+                    respond.write("<li> !!! " + errorKey + " !!! </li>");
+                }
             }
             respond.write("</ul>");
             respond.write("</div");

@@ -30,9 +30,8 @@ public class HtmlValidatingPage {
   }
 
   public static HtmlValidatingPage open(WebDriver driver) {
-    driver.get(AcceptanceTest.baseUrl() + "/jspvalidating");
+    driver.get(AcceptanceTest.baseUrl() + "/htmlvalidating");
     driver.findElement(By.id("submit")).click();
-    System.out.println(driver.getPageSource());
     return PageFactory.initElements(driver, HtmlValidatingPage.class);
   }
 

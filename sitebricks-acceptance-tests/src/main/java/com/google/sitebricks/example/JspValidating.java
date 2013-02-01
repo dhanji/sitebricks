@@ -21,7 +21,7 @@ public class JspValidating {
     private Person person;
     
     public JspValidating() {
-        this.person = new Person();
+      this.person = new Person();
     }
     
     @Get
@@ -30,17 +30,16 @@ public class JspValidating {
 
     @Post
     public String createPerson() {
-        dao.save(person);
-        return Jetty.APP_NAME;
+      dao.save(person);
+      return Jetty.APP_NAME;
     }
 
     public Person getPerson() {
-        return person;
+      return person;
     }
 
-
     public void setPerson(Person person) {
-        this.person = person;
+      this.person = person;
     }
     
 }

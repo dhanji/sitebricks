@@ -32,7 +32,6 @@ public class JspValidatingPage {
   public static JspValidatingPage open(WebDriver driver) {
     driver.get(AcceptanceTest.baseUrl() + "/jspvalidating");
     driver.findElement(By.id("submit")).click();
-    System.out.println(driver.getPageSource());
     return PageFactory.initElements(driver, JspValidatingPage.class);
   }
 
