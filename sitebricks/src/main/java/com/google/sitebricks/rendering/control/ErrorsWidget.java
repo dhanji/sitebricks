@@ -11,7 +11,6 @@ import com.google.sitebricks.Evaluator;
 import com.google.sitebricks.Localizer;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
-import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.i18n.ResourceBundle;
 import com.google.sitebricks.rendering.EmbedAs;
 import com.google.sitebricks.rendering.SelfRendering;
