@@ -3,23 +3,19 @@ package com.google.sitebricks.conversion;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Singleton;
 import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
 
 import com.google.common.collect.Lists;
 
-public class ValidationConverter {
-    
-    public static List<String> toErrors(ValidationException ve) {
-        ConstraintViolationException cve = (ConstraintViolationException) ve.getCause();
-        return toErrors((Set<? extends ConstraintViolation<?>>) cve.getConstraintViolations());
-    }
-    
-    public static List<String> toErrors(Set<? extends ConstraintViolation<?>> cvs) {
+@Singleton
+public class ValidationConverter extends ConverterAdaptor<Set<? extends ConstraintViolation<?>>, List<String>> {
+
+    @Override
+    public List<String> to(Set<? extends ConstraintViolation<?>> source) {
         List<String> errors = Lists.newArrayList();
-        if (cvs != null) {
-            for (ConstraintViolation<?> cv: cvs) {
+        if (source != null) {
+            for (ConstraintViolation<?> cv: source) {
                 errors.add(cv.getMessage());
             }
         }

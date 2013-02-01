@@ -11,13 +11,13 @@ import org.openqa.selenium.support.PageFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JspValidatingPage {
+public class HtmlValidatingPage {
   @FindBy(how = How.XPATH, using = "//div[@class='errors'][1]/ul")
   private WebElement constraintViolations;
 
   private WebDriver driver;
 
-  public JspValidatingPage(WebDriver driver) {
+  public HtmlValidatingPage(WebDriver driver) {
     this.driver = driver;
   }
 
@@ -29,11 +29,11 @@ public class JspValidatingPage {
     return items;
   }
 
-  public static JspValidatingPage open(WebDriver driver) {
+  public static HtmlValidatingPage open(WebDriver driver) {
     driver.get(AcceptanceTest.baseUrl() + "/jspvalidating");
     driver.findElement(By.id("submit")).click();
     System.out.println(driver.getPageSource());
-    return PageFactory.initElements(driver, JspValidatingPage.class);
+    return PageFactory.initElements(driver, HtmlValidatingPage.class);
   }
 
 }

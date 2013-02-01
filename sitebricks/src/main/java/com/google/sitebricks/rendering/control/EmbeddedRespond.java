@@ -3,8 +3,6 @@ package com.google.sitebricks.rendering.control;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.ConstraintViolationException;
-
 import com.google.sitebricks.Respond;
 
 /**
@@ -131,7 +129,7 @@ class EmbeddedRespond implements Respond {
   }
 
   @Override
-  public List<String>  getErrors() {
+  public List<String> getErrors() {
     return this.errors;
   }
 

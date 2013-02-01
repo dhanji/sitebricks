@@ -2,22 +2,25 @@ package com.google.sitebricks.routing;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 
 import net.jcip.annotations.Immutable;
 
-import static com.google.sitebricks.conversion.ValidationConverter.toErrors;
-
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.internal.Errors;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.StringBuilderRespond;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.client.transport.Json;
+import com.google.sitebricks.conversion.ValidationConverter;
 import com.google.sitebricks.headless.HeadlessRenderer;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
@@ -39,6 +42,9 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
   @Inject
   Provider<HttpServletRequest> httpServletRequestProvider;
   
+  @Inject
+  private ValidationConverter validationConvertor;
+
   @Inject
   public WidgetRoutingDispatcher(PageBook book, RequestBinder binder,
                                  ResourcesService resourcesService,
@@ -97,7 +103,10 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
         response = fireEvent(request, page, instance);
     }
     catch (ValidationException ve) {
-        response =  Reply.with(toErrors(ve)).as(Json.class).badRequest();
+        ConstraintViolationException cve = (ConstraintViolationException) ve.getCause();
+        Set<? extends ConstraintViolation<?>> scv = (Set<? extends ConstraintViolation<?>>) cve.getConstraintViolations();
+        List<String> errors = validationConvertor.to(scv);
+        response =  Reply.with(errors).as(Json.class).badRequest();
     }
     return response;
   }
@@ -114,7 +123,9 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
         redirect = fireEvent(request, page, instance);
     }
     catch (ValidationException ve) {
-        errors = toErrors(ve);
+        ConstraintViolationException cve = (ConstraintViolationException) ve.getCause();
+        Set<? extends ConstraintViolation<?>> scv = (Set<? extends ConstraintViolation<?>>) cve.getConstraintViolations();
+        errors = validationConvertor.to(scv);
     }
         
     //render to respond

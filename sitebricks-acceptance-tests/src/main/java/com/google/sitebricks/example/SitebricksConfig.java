@@ -151,6 +151,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         
         // Validation
         bind(SimpleDao.class).to(ValidatingDao.class);
+        at("/htmlvalidating").show(HtmlValidating.class);
         at("/jspvalidating").show(JspValidating.class);
         at("/restvalidating").serve(RestfulWebServiceValidating.class);
         at("/restvalidatingdao").serve(RestfulWebServiceValidatingDao.class);

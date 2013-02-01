@@ -1,7 +1,5 @@
 package com.google.sitebricks;
 
-import net.jcip.annotations.NotThreadSafe;
-
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -10,7 +8,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.validation.ConstraintViolationException;
+import com.google.common.collect.Lists;
+
+import net.jcip.annotations.NotThreadSafe;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -113,6 +113,9 @@ public class StringBuilderRespond implements Respond {
 
   @Override
   public List<String>  getErrors() {
+    if (this.errors == null) {
+      this.errors = Lists.newArrayList();
+    }
     return this.errors;
   }
 

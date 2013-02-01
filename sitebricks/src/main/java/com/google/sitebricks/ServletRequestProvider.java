@@ -1,8 +1,5 @@
 package com.google.sitebricks;
 
-
-import static com.google.sitebricks.conversion.ValidationConverter.toErrors;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;
@@ -22,7 +19,9 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.Errors;
 import com.google.sitebricks.client.Transport;
+import com.google.sitebricks.conversion.ValidationConverter;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Parameters;
 
@@ -34,12 +33,15 @@ class ServletRequestProvider implements Provider<Request> {
   private final Provider<HttpServletRequest> servletRequest;
   private final Injector injector;
   private final Validator validator;
+  private final ValidationConverter validationConvertor;
 
   @Inject
-  public ServletRequestProvider(Provider<HttpServletRequest> servletRequest, Injector injector, Validator validator) {
+  public ServletRequestProvider(Provider<HttpServletRequest> servletRequest, Injector injector, 
+          Validator validator, ValidationConverter validationConvertor) {
     this.servletRequest = servletRequest;
     this.injector = injector;
     this.validator = validator;
+    this.validationConvertor = validationConvertor;
   }
 
   @Override
@@ -200,7 +202,7 @@ class ServletRequestProvider implements Provider<Request> {
       @Override
       public List<String> validate(Object object) {
           Set<ConstraintViolation<Object>> cvs = validator.validate(object);
-          return toErrors(cvs);
+          return validationConvertor.to(cvs);
       }
 
     };
