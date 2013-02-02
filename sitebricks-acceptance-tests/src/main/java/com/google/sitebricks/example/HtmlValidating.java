@@ -10,7 +10,7 @@ import com.google.sitebricks.http.Post;
 import com.google.sitebricks.i18n.Message;
 import com.google.sitebricks.i18n.ResourceBundle;
 
-@ResourceBundle(clazz = HtmlValidating.ErrorMessages.class)
+@ResourceBundle(value = HtmlValidating.ErrorMessages.class)
 public class HtmlValidating {
     
     @Inject

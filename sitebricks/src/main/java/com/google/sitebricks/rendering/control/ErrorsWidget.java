@@ -33,7 +33,7 @@ public class ErrorsWidget implements Renderable {
             Localizer.Localization localization = null;
             ResourceBundle resourceBundle = bound.getClass().getAnnotation(ResourceBundle.class);
             if (resourceBundle != null) {
-                Map<Locale, Localizer.Localization> localizerMap = localizationsMap.get(resourceBundle.clazz());
+                Map<Locale, Localizer.Localization> localizerMap = localizationsMap.get(resourceBundle.value());
                 if (localizerMap != null) {
                     localization = localizerMap.get(locale);
                 }

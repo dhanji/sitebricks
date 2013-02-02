@@ -14,7 +14,6 @@ import net.jcip.annotations.Immutable;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.internal.Errors;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.StringBuilderRespond;
 import com.google.sitebricks.binding.FlashCache;

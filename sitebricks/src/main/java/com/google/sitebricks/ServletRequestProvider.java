@@ -9,6 +9,8 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
 import javax.validation.Validator;
 
 import com.google.common.collect.ImmutableMultimap;
@@ -200,9 +202,11 @@ class ServletRequestProvider implements Provider<Request> {
       }
 
       @Override
-      public List<String> validate(Object object) {
-          Set<ConstraintViolation<Object>> cvs = validator.validate(object);
-          return validationConvertor.to(cvs);
+      public void validate(Object object) {
+          Set<? extends ConstraintViolation<?>> cvs = validator.validate(object);
+          if ((cvs != null) && (! cvs.isEmpty())) {
+              throw new ValidationException(new ConstraintViolationException((Set<ConstraintViolation<?>>) cvs));
+          }
       }
 
     };

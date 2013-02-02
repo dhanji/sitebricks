@@ -97,7 +97,7 @@ public interface Request {
 
   String method();
   
-  List<String> validate(Object obj);
+  void validate(Object obj);
 
   public static interface RequestRead<E> {
     E as(Class<? extends Transport> transport);

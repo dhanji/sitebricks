@@ -690,13 +690,14 @@ public class DefaultPageBook implements PageBook {
               : Key.get(argType);
 
           args.add(key);
-
+          
           if (null == injector.getBindings().get(key))
             throw new InvalidEventHandlerException(
                 "Encountered an argument not annotated with @Named and not a valid injection key"
                 + " in event handler method: " + method + " " + key);
-        }
 
+        }
+        
       }
 
       return Collections.unmodifiableList(args);

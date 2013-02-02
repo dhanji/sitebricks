@@ -90,6 +90,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
             ImmutableMap.of(I18n.HELLO, I18n.HELLO_IN_FRENCH));
 
         localize(HtmlValidating.ErrorMessages.class).usingDefault();
+        localize(HtmlValidatingAsForm.ErrorMessages.class).usingDefault();
 
         install(new StatModule("/stats"));
 
@@ -154,6 +155,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         // Validation
         bind(SimpleDao.class).to(ValidatingDao.class);
         at("/htmlvalidating").show(HtmlValidating.class);
+        at("/htmlvalidatingasform").show(HtmlValidatingAsForm.class);
         at("/jspvalidating").show(JspValidating.class);
         at("/restvalidating").serve(RestfulWebServiceValidating.class);
         at("/restvalidatingdao").serve(RestfulWebServiceValidatingDao.class);
