@@ -88,7 +88,6 @@ public class Jetty {
   }
 
   public static String baseUrl() {
-	  System.out.println("http://localhost:" + PORT + "/sitebricks");
     return "http://localhost:" + PORT + "/sitebricks";
   }
 
