@@ -9,6 +9,7 @@ public class ConverterUtils {
   // scratch but we can't right now. jvz. (yes, this class won't be around long)
   //
   public static Multibinder<Converter> createConverterMultibinder(Multibinder<Converter> converters) {
+      
     // register the default converters after user converters
     converters.addBinding().to(ObjectToStringConverter.class);
     
@@ -29,6 +30,9 @@ public class ConverterUtils {
     {
       converters.addBinding().to(converterClass);
     }   
+
     return converters;
+  
   }
+
 }

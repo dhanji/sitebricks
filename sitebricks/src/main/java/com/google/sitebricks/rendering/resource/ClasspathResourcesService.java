@@ -181,5 +181,15 @@ class ClasspathResourcesService implements ResourcesService {
     @Override public Object pageObject() {
       return null;
     }
+
+    @Override
+    public List<String> getErrors() {
+        return null;
+    }
+  
+    @Override
+    public void setErrors(List<String> errors) {
+    }
+  
   }
 }

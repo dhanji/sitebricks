@@ -1,5 +1,16 @@
 package com.google.sitebricks.routing;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
+
+import net.jcip.annotations.Immutable;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -7,14 +18,13 @@ import com.google.sitebricks.Respond;
 import com.google.sitebricks.StringBuilderRespond;
 import com.google.sitebricks.binding.FlashCache;
 import com.google.sitebricks.binding.RequestBinder;
+import com.google.sitebricks.client.transport.Json;
+import com.google.sitebricks.conversion.ValidationConverter;
 import com.google.sitebricks.headless.HeadlessRenderer;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.resource.ResourcesService;
 import com.google.sitebricks.routing.PageBook.Page;
-import net.jcip.annotations.Immutable;
-
-import java.io.IOException;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -27,6 +37,12 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
   private final ResourcesService resourcesService;
   private final Provider<FlashCache> flashCacheProvider;
   private final HeadlessRenderer headlessRenderer;
+
+  @Inject
+  Provider<HttpServletRequest> httpServletRequestProvider;
+  
+  @Inject
+  private ValidationConverter validationConvertor;
 
   @Inject
   public WidgetRoutingDispatcher(PageBook book, RequestBinder binder,
@@ -71,7 +87,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     if (page.isHeadless()) {
       return bindAndReply(request, page, instance);
     } else {
-       //fire events and render reponders
+       //fire events and render responder
       return bindAndRespond(request, page, instance);
     }
   }
@@ -79,9 +95,19 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
   private Object bindAndReply(Request request, Page page, Object instance) throws IOException {
     // bind request (sets request params, etc).
     binder.bind(request, instance);
-
-    // call the appropriate handler.
-    return fireEvent(request, page, instance);
+    
+    Object response = null;
+    try {
+        // call the appropriate handler.
+        response = fireEvent(request, page, instance);
+    }
+    catch (ValidationException ve) {
+        ConstraintViolationException cve = (ConstraintViolationException) ve.getCause();
+        Set<? extends ConstraintViolation<?>> scv = (Set<? extends ConstraintViolation<?>>) cve.getConstraintViolations();
+        List<String> errors = validationConvertor.to(scv);
+        response =  Reply.with(errors).as(Json.class).badRequest();
+    }
+    return response;
   }
 
   private Object bindAndRespond(Request request, PageBook.Page page, Object instance)
@@ -89,11 +115,21 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     //bind request
     binder.bind(request, instance);
 
-    //fire get/post events
-    final Object redirect = fireEvent(request, page, instance);
-
+    // fire get/post events
+    Object redirect = null;
+    List<String> errors = null;
+    try {
+        redirect = fireEvent(request, page, instance);
+    }
+    catch (ValidationException ve) {
+        ConstraintViolationException cve = (ConstraintViolationException) ve.getCause();
+        Set<? extends ConstraintViolation<?>> scv = (Set<? extends ConstraintViolation<?>>) cve.getConstraintViolations();
+        errors = validationConvertor.to(scv);
+    }
+        
     //render to respond
     Respond respond = new StringBuilderRespond(instance);
+    respond.setErrors(errors);
     if (null != redirect) {
 
       if (redirect instanceof String)
@@ -137,4 +173,5 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
   private static String contextualize(Request request, String targetUri) {
     return request.context() + targetUri;
   }
+  
 }

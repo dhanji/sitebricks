@@ -1,14 +1,7 @@
 package com.google.sitebricks;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
-import com.google.sitebricks.headless.Reply;
-import com.google.sitebricks.headless.ReplyBasedHeadlessRenderer;
-import com.google.sitebricks.headless.Request;
-import com.google.sitebricks.routing.RoutingDispatcher;
-import com.google.sitebricks.routing.RoutingDispatcher.Events;
-import net.jcip.annotations.Immutable;
+import java.io.IOException;
+import java.net.URLEncoder;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -18,7 +11,17 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import net.jcip.annotations.Immutable;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.google.sitebricks.headless.Reply;
+import com.google.sitebricks.headless.ReplyBasedHeadlessRenderer;
+import com.google.sitebricks.headless.Request;
+import com.google.sitebricks.routing.RoutingDispatcher;
+import com.google.sitebricks.routing.RoutingDispatcher.Events;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -69,8 +72,10 @@ class SitebricksFilter implements Filter {
         //do we need to redirect or was this a successful render?
         final String redirect = respond.getRedirect();
         if (null != redirect) {
-          response.sendRedirect(redirect);
-        } else { //successful render
+            // We need to encode in a way browser is fine with special characters when reloading the page.
+            String redirectEncoded = URLEncoder.encode(redirect, "UTF-8").replaceAll("%2F", "/");
+            response.sendRedirect(redirectEncoded);
+            } else { //successful render
 
           // by checking if a content type was set, we allow users to override content-type
           //  on an arbitrary basis

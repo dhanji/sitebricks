@@ -1,5 +1,18 @@
 package com.google.sitebricks;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
+
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
@@ -8,15 +21,11 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
+import com.google.inject.internal.Errors;
 import com.google.sitebricks.client.Transport;
+import com.google.sitebricks.conversion.ValidationConverter;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Parameters;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Enumeration;
-import java.util.Map;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -25,11 +34,16 @@ import java.util.Map;
 class ServletRequestProvider implements Provider<Request> {
   private final Provider<HttpServletRequest> servletRequest;
   private final Injector injector;
+  private final Validator validator;
+  private final ValidationConverter validationConvertor;
 
   @Inject
-  public ServletRequestProvider(Provider<HttpServletRequest> servletRequest, Injector injector) {
+  public ServletRequestProvider(Provider<HttpServletRequest> servletRequest, Injector injector, 
+          Validator validator, ValidationConverter validationConvertor) {
     this.servletRequest = servletRequest;
     this.injector = injector;
+    this.validator = validator;
+    this.validationConvertor = validationConvertor;
   }
 
   @Override
@@ -187,7 +201,16 @@ class ServletRequestProvider implements Provider<Request> {
         this.headers = builder.build();
       }
 
+      @Override
+      public void validate(Object object) {
+          Set<? extends ConstraintViolation<?>> cvs = validator.validate(object);
+          if ((cvs != null) && (! cvs.isEmpty())) {
+              throw new ValidationException(new ConstraintViolationException((Set<ConstraintViolation<?>>) cvs));
+          }
+      }
+
     };
 
   }
+  
 }

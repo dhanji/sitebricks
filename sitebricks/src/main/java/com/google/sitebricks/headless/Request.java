@@ -1,11 +1,14 @@
 package com.google.sitebricks.headless;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
+
+import javax.validation.ConstraintViolationException;
+
 import com.google.common.collect.Multimap;
 import com.google.inject.TypeLiteral;
 import com.google.sitebricks.client.Transport;
-
-import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * Sitebricks abstraction of a request. May be a standard HTTP request, a tunneled
@@ -93,6 +96,8 @@ public interface Request {
   String context();
 
   String method();
+  
+  void validate(Object obj);
 
   public static interface RequestRead<E> {
     E as(Class<? extends Transport> transport);

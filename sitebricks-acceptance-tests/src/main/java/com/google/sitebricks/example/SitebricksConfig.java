@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.bval.guice.ValidationModule;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.BindingAnnotation;
@@ -24,6 +25,8 @@ import com.google.sitebricks.channel.ChannelListener;
 import com.google.sitebricks.channel.ChannelModule;
 import com.google.sitebricks.conversion.DateConverters;
 import com.google.sitebricks.debug.DebugPage;
+import com.google.sitebricks.example.dao.SimpleDao;
+import com.google.sitebricks.example.dao.ValidatingDao;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Delete;
@@ -76,7 +79,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
           }
         });
 
-            at("/no_annotations/service").serve(RestfulWebServiceNoAnnotations.class);
+        at("/no_annotations/service").serve(RestfulWebServiceNoAnnotations.class);
         at("/debug").show(DebugPage.class);
 
         bind(Start.class).annotatedWith(Test.class).to(Start.class);
@@ -85,6 +88,9 @@ public class SitebricksConfig extends GuiceServletContextListener {
         localize(I18n.MyMessages.class).usingDefault();
         localize(I18n.MyMessages.class).using(Locale.CANADA_FRENCH,
             ImmutableMap.of(I18n.HELLO, I18n.HELLO_IN_FRENCH));
+
+        localize(HtmlValidating.ErrorMessages.class).usingDefault();
+        localize(HtmlValidatingAsForm.ErrorMessages.class).usingDefault();
 
         install(new StatModule("/stats"));
 
@@ -145,6 +151,15 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/jsp").show(Jsp.class);
 
         embed(HelloWorld.class).as("Hello");
+        
+        // Validation
+        bind(SimpleDao.class).to(ValidatingDao.class);
+        at("/htmlvalidating").show(HtmlValidating.class);
+        at("/htmlvalidatingasform").show(HtmlValidatingAsForm.class);
+        at("/jspvalidating").show(JspValidating.class);
+        at("/restvalidating").serve(RestfulWebServiceValidating.class);
+        at("/restvalidatingdao").serve(RestfulWebServiceValidatingDao.class);
+        
       }
 
       @SuppressWarnings("unchecked")

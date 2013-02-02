@@ -1,5 +1,22 @@
 package com.google.sitebricks.routing;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
 import com.google.common.collect.Iterators;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -15,20 +32,6 @@ import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Select;
 import com.google.sitebricks.rendering.EmbedAs;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -769,6 +772,16 @@ public class PageBookImplTest {
     @Override public Object pageObject() {
       return null;
     }
+
+    @Override
+    public List<String> getErrors() {
+        return null;
+    }
+  
+    @Override
+    public void setErrors(List<String> errors) {
+    }
+  
   }
 
   @At("/wiki")
