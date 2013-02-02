@@ -11,7 +11,8 @@ import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.headless.Request;
 
 /**
- * 
+ * A HTML Form (UTF-8) implementation of Transport where input types can 
+ * be any object. This object will be binded to the {@link Request} params.
  */
 class UrlEncodedFormTransport extends Form {
     
