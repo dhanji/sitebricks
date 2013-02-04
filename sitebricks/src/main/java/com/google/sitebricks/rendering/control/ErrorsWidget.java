@@ -18,18 +18,19 @@ import com.google.sitebricks.rendering.SelfRendering;
 @SelfRendering
 @EmbedAs("errors")
 public class ErrorsWidget implements Renderable {
-    
+
     @Inject
-    private Map<Class<?> ,Map<Locale, Localizer.Localization>> localizationsMap;
-    
+    private Map<Class<?>, Map<Locale, Localizer.Localization>> localizationsMap;
+
     @Inject
     private Locale locale;
 
     public ErrorsWidget(WidgetChain widgetChain, String expression, Evaluator evaluator) {
     }
 
+    @Override
     public void render(Object bound, Respond respond) {
-        if (! respond.getErrors().isEmpty()) {
+        if (!respond.getErrors().isEmpty()) {
             Localizer.Localization localization = null;
             ResourceBundle resourceBundle = bound.getClass().getAnnotation(ResourceBundle.class);
             if (resourceBundle != null) {
@@ -37,11 +38,17 @@ public class ErrorsWidget implements Renderable {
                 if (localizerMap != null) {
                     localization = localizerMap.get(locale);
                 }
+                if (localization == null) {
+                    localization = Localizer.defaultLocalizationFor(resourceBundle.value());
+                }
             }
             respond.write("<div class=\"errors\">");
             respond.write("<ul>");
-            for (String errorKey: respond.getErrors()) {
-                String errorMessage = localization.getMessageBundle().get(errorKey);
+            for (String errorKey : respond.getErrors()) {
+                String errorMessage = null;
+                if (localization != null) {
+                    errorMessage = localization.getMessageBundle().get(errorKey);
+                }
                 if (errorMessage != null) {
                     respond.write("<li>" + errorMessage + "</li>");
                 }
@@ -54,6 +61,7 @@ public class ErrorsWidget implements Renderable {
         }
     }
 
+    @Override
     public <T extends Renderable> Set<T> collect(Class<T> clazz) {
         return Collections.emptySet();
     }
