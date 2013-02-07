@@ -1,5 +1,6 @@
 package com.google.sitebricks.routing;
 
+import com.google.common.collect.Multimap;
 import com.google.inject.AbstractModule;
 import com.google.inject.ImplementedBy;
 import com.google.inject.Module;
@@ -107,6 +108,8 @@ public interface PageBook {
     boolean isDecorated();
 
     Set<String> getMethod();
+    
+    Multimap<String, Action> getMethods();
   }
 
   public static final class Routing extends AbstractModule {

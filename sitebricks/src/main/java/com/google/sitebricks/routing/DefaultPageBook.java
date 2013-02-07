@@ -337,6 +337,11 @@ public class DefaultPageBook implements PageBook {
     public static InstanceBoundPage delegating(Page delegate, Object instance) {
       return new InstanceBoundPage(delegate, instance);
     }
+
+    @Override
+    public Multimap<String, Action> getMethods() {
+      return delegate.getMethods();
+    }
   }
 
   @Select("") //the default select (hacky!!)
@@ -621,9 +626,13 @@ public class DefaultPageBook implements PageBook {
                 .add("uri", uri).toString();
     }
 
+    @Override
+    public Multimap<String, Action> getMethods() {
+      return methods;
+    }
   }
 
-  private static class MethodTuple implements Action {
+  public static class MethodTuple implements Action {
     private final Method method;
     private final Injector injector;
     private final List<Object> args;
@@ -642,6 +651,10 @@ public class DefaultPageBook implements PageBook {
       this.returnAs = method.getAnnotation(As.class);
     }
 
+    public Method getMethod() {
+      return method;
+    }
+    
     private List<Object> reflect(Method method) {
       final Annotation[][] annotationsGrid = method.getParameterAnnotations();
       if (null == annotationsGrid)
