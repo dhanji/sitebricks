@@ -16,7 +16,7 @@
   <properties>
     <guice.version>3.0</guice.version>
     <org.codehaus.jackson.version>1.9.0</org.codehaus.jackson.version>
-    <org.mortbay.jetty.version>8.1.7.v20120910</org.mortbay.jetty.version>
+    <org.mortbay.jetty.version>9.0.0.RC0</org.mortbay.jetty.version>
     <org.seleniumhq.webdriver.version>0.9.7376</org.seleniumhq.webdriver.version>
     <org.testng.version>5.8</org.testng.version>
     <org.slf4j.version>1.6.4</org.slf4j.version>
@@ -255,8 +255,18 @@
         <version>${org.mortbay.jetty.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-websocket</artifactId>
+        <groupId>org.eclipse.jetty.websocket</groupId>
+        <artifactId>websocket-api</artifactId>
+        <version>${org.mortbay.jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty.websocket</groupId>
+        <artifactId>websocket-server</artifactId>
+        <version>${org.mortbay.jetty.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty.websocket</groupId>
+        <artifactId>websocket-servlet</artifactId>
         <version>${org.mortbay.jetty.version}</version>
       </dependency>
       <dependency>
