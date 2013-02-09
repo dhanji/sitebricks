@@ -7,6 +7,7 @@ import java.net.URLClassLoader;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import com.google.inject.Injector;
@@ -21,6 +22,7 @@ public class Jetty {
   public static final String APP_NAME = "/sitebricks";
   private static int PORT;
   private Server server;
+  private ServerConnector connector;
 
   public Jetty(String path, int port, ClassLoader classLoader, Injector injector) {
     WebAppContext webAppContext = new WebAppContext(path, APP_NAME);
@@ -43,11 +45,18 @@ public class Jetty {
   }
 
   private void setUp(WebAppContext webAppContext, int port) {
-    server = new Server(port);
+    server = new Server();
+    connector = new ServerConnector(server);
+    connector.setPort(port);
+    server.addConnector(connector);
     server.setHandler(webAppContext);
   }
 
   public void start() throws Exception {
+	
+	// Trying to keep all the signatures compatible so this is not super pretty, but it works
+	connector.open();
+
     // Hack to allow successfull test via maven CLI
     // Read http://stackoverflow.com/questions/2151075/cannot-load-jstl-taglib-within-embedded-jetty-server
     ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
@@ -75,10 +84,7 @@ public class Jetty {
   }
 
   public int getListeningPort() {
-    for (Connector connector : server.getConnectors()) {
-      return connector.getLocalPort();
-    }
-    throw new IllegalStateException("No port bound");
+	return connector.getLocalPort();
   }
 
   public static String baseUrl() {
