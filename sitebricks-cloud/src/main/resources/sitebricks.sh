@@ -1,4 +1,4 @@
-SB_VERSION=0.8.8-SNAPSHOT
+SB_VERSION=0.8.8
 SB_JAR="$(eval echo ~$USERNAME)/.m2/repository/com/google/sitebricks/sitebricks-cloud/${SB_VERSION}/sitebricks-cloud-${SB_VERSION}.jar"
 
 # Download the latest SB cloud module from sonatype snapshots (if necessary)
