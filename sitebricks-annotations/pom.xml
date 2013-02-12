@@ -3,7 +3,7 @@
   <parent>
     <groupId>com.google.sitebricks</groupId>
     <artifactId>sitebricks-parent</artifactId>
-    <version>0.8.8-SNAPSHOT</version>
+    <version>0.8.9-SNAPSHOT</version>
   </parent>
   <artifactId>sitebricks-annotations</artifactId>
   <name>Sitebricks :: Annotations</name>

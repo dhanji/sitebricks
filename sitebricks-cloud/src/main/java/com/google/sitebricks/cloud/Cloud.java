@@ -150,7 +150,7 @@ public class Cloud {
     File jarFile = new File(file);
     if (!jarFile.exists()) {
       // Don't use #quit() as it invokes logback which may not be available...
-      System.out.println("Fatal error, missing internal dependency: " + dep);
+      System.out.println("Internal error, missing a dependency: " + dep);
       System.out.print("Attempt to fetch from central (y/N)? ");
       BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
       String value = reader.readLine();

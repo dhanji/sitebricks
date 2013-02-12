@@ -1,13 +1,13 @@
 package com.google.sitebricks.channel;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import com.google.inject.servlet.ServletModule;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Install to set up sitebricks channel support for websocket (or other available
@@ -54,9 +54,13 @@ public abstract class ChannelModule extends ServletModule {
       // Test if Jetty-websocket is on classpath.
       boolean websocket = true;
       try {
-        Class.forName("org.eclipse.jetty.websocket.WebSocketServlet");
+        // Jetty 9
+        Class.forName("org.eclipse.jetty.websocket.servlet.WebSocketServlet");
+        // Jetty 8
+        //Class.forName("org.eclipse.jetty.websocket.WebSocketServlet");
         serve(channelUrl + "/websocket").with(WebSocketRoutingServlet.class);
       } catch (ClassNotFoundException cnfe) {
+        System.out.println("NO WEBSOCKET!!!!");
         websocket = false;
       }
 
