@@ -347,8 +347,8 @@ public class NettyImapClient implements MailClient, Idler {
     SettableFuture<List<MessageStatus>> valueFuture = SettableFuture.create();
 
     // -ve end range means get everything (*).
-    String extensions = config.useGmailExtensions() ? " X-GM-MSGID X-GM-THRID X-GM-LABELS UID" : "";
-    String args = start + ":" + toUpperBound(end) + " (RFC822.SIZE INTERNALDATE FLAGS ENVELOPE"
+    String extensions = config.useGmailExtensions() ? " X-GM-MSGID X-GM-THRID X-GM-LABELS" : "";
+    String args = start + ":" + toUpperBound(end) + " (RFC822.SIZE INTERNALDATE FLAGS ENVELOPE UID"
         + extensions + ")";
     send(Command.FETCH_HEADERS, args, valueFuture);
 
