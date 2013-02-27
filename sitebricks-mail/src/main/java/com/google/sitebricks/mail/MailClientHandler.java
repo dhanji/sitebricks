@@ -31,8 +31,11 @@ class MailClientHandler extends SimpleChannelHandler {
   private static final Map<String, Boolean> logAllMessagesForUsers = new ConcurrentHashMap<String, Boolean>();
 
   public static final String CAPABILITY_PREFIX = "* CAPABILITY";
-  static final Pattern AUTH_SUCCESS_REGEX =
+  static final Pattern GMAIL_AUTH_SUCCESS_REGEX =
       Pattern.compile("[.] OK .*@.* \\(Success\\)", Pattern.CASE_INSENSITIVE);
+  
+  static final Pattern IMAP_AUTH_SUCCESS_REGEX =
+	      Pattern.compile("[.] OK (.*)", Pattern.CASE_INSENSITIVE);
 
   static final Pattern COMMAND_FAILED_REGEX =
       Pattern.compile("^[.] (NO|BAD) (.*)", Pattern.CASE_INSENSITIVE);
@@ -157,12 +160,12 @@ class MailClientHandler extends SimpleChannelHandler {
             config.getUsername());
         return;
       }
+      
       if (loginSuccess.getCount() > 0) {
         if (message.startsWith(CAPABILITY_PREFIX)) {
-          this.capabilities = Arrays.asList(
-              message.substring(CAPABILITY_PREFIX.length() + 1).split("[ ]+"));
+          this.capabilities = Arrays.asList( message.substring(CAPABILITY_PREFIX.length() + 1).split("[ ]+"));
           return;
-        } else if (AUTH_SUCCESS_REGEX.matcher(message).matches()) {
+        } else if (GMAIL_AUTH_SUCCESS_REGEX.matcher(message).matches() || IMAP_AUTH_SUCCESS_REGEX.matcher(message).matches()) {
           log.info("Authentication success for user {}", config.getUsername());
           loginSuccess.countDown();
         } else {
@@ -258,6 +261,7 @@ class MailClientHandler extends SimpleChannelHandler {
    * This is synchronized to ensure that we process the queue serially.
    */
   private synchronized void complete(String message) {
+    
     // This is a weird problem with writing stuff while idling. Need to investigate it more, but
     // for now just ignore it.
     if (MESSAGE_COULDNT_BE_FETCHED_REGEX.matcher(message).matches()) {
@@ -293,7 +297,7 @@ class MailClientHandler extends SimpleChannelHandler {
       }
       return;
     }
-
+    
     if (completion.complete(message)) {
       completions.poll();
     }
