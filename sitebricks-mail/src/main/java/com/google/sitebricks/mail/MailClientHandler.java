@@ -165,10 +165,7 @@ class MailClientHandler extends SimpleChannelHandler {
         if (message.startsWith(CAPABILITY_PREFIX)) {
           this.capabilities = Arrays.asList( message.substring(CAPABILITY_PREFIX.length() + 1).split("[ ]+"));
           return;
-        } else if (GMAIL_AUTH_SUCCESS_REGEX.matcher(message).matches()) {
-          log.info("Authentication success for user {}", config.getUsername());
-          loginSuccess.countDown();
-        } else if (IMAP_AUTH_SUCCESS_REGEX.matcher(message).matches()) {
+        } else if (GMAIL_AUTH_SUCCESS_REGEX.matcher(message).matches() || IMAP_AUTH_SUCCESS_REGEX.matcher(message).matches()) {
           log.info("Authentication success for user {}", config.getUsername());
           loginSuccess.countDown();
         } else {
