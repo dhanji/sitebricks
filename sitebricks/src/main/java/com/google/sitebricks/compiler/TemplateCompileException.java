@@ -81,25 +81,20 @@ public final class TemplateCompileException extends RuntimeException {
             
             // Context (source code) of the error.
             int lineNumber = error.getLine();
-            builder.append(lineNumber - 1);
-            builder.append(": ");
-          if (lineNumber > templateLines.size() - 1) {
-            continue;
-          }
-            builder.append(templateLines.get(lineNumber - 1));
-            builder.append('\n');
-            builder.append(lineNumber);
-            builder.append(": ");
-            builder.append(templateLines.get(lineNumber));
-            builder.append('\n');
 
-            // Actual error line...
-            int contextLineNumber = lineNumber + 1;
-            builder.append(contextLineNumber);
+            if (lineNumber - 1 >= 0) {
+              builder.append(lineNumber);
+              builder.append(": ");
+              builder.append(templateLines.get(lineNumber - 1));
+              builder.append('\n');
+            }
+
+            builder.append(lineNumber + 1);
             builder.append(": ");
-            String fragment = templateLines.get(contextLineNumber);
+            String fragment = templateLines.get(lineNumber);
             builder.append(fragment);
             builder.append('\n');
+            int contextLineNumber = lineNumber;
 
             // Compute offset (line number width + expression offset).
             int columnPad = Integer.toString(contextLineNumber).length() + 4;

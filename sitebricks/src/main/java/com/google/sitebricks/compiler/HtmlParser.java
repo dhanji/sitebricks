@@ -360,14 +360,14 @@ public class HtmlParser {
   }
   
   private void parseTextNode() {
-    String text = tq.consumeTo("<");
-    String annotationText = AnnotationParser.readAnnotation(text);
-    text = AnnotationParser.stripAnnotation(text);
+    String rawText = tq.consumeTo("<");
+    String annotationText = AnnotationParser.readAnnotation(rawText);
+    String text = AnnotationParser.stripAnnotation(rawText);
 
     if (text.length() > 0) {
       TextNode textNode = TextNode.createFromEncoded(text, baseUri);
       // if (pendingAnnotation != null) { pendingAnnotation.apply(textNode); }
-      lines(textNode, text);
+      lines(textNode, rawText);
       add(textNode);
     }
 
@@ -555,13 +555,15 @@ public class HtmlParser {
   }
 
 
-  // TODO - LineCountingTokenQueue
-  //  these line numbers are an inaccurate estimate
-
   private void lines(Node node, String data) {
-    linecount += (LINE_SEPARATOR.split(data).length);
+    Matcher newLinematcher = LINE_SEPARATOR.matcher(data);
+    while (newLinematcher.find()) {
+        linecount++;
+    }
     node.attr(LINE_NUMBER_ATTRIBUTE, String.valueOf(linecount));
   }
+
+
 
   private void whitespace() {
     if (tq.peek() == Character.LINE_SEPARATOR)

@@ -160,7 +160,7 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
                 } catch (ExpressionCompileException e) {
                     pc.errors.add(
                             CompileError.in(node.outerHtml())
-                            .near(line(node))
+                            .near(line(n))
                             .causedBy(e)
                     );
                 }
