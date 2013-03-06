@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.apache.bval.guice.ValidationModule;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.BindingAnnotation;
@@ -157,6 +156,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         at("/htmlvalidating").show(HtmlValidating.class);
         at("/htmlvalidatingasform").show(HtmlValidatingAsForm.class);
         at("/jspvalidating").show(JspValidating.class);
+        at("/jspvalidatingasform").show(JspValidatingAsForm.class);
         at("/restvalidating").serve(RestfulWebServiceValidating.class);
         at("/restvalidatingdao").serve(RestfulWebServiceValidatingDao.class);
         
