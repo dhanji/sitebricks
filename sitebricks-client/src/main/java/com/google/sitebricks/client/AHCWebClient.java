@@ -33,7 +33,7 @@ class AHCWebClient<T> implements WebClient<T> {
   private final Transport transport;
   private final Injector injector;
 
-  public AHCWebClient(Injector injector, Transport transport, Web.Auth authType, String username, String password, String url, Map<String, String> headers, TypeLiteral<T> typeToTransform) {
+  public AHCWebClient(Injector injector, Transport transport, Web.Auth authType, String username, String password, boolean usePreemptiveAuth, String url, Map<String, String> headers, TypeLiteral<T> typeToTransform) {
     this.injector = injector;
     this.url = url;
     this.headers = (null == headers) ? null : ImmutableMap.copyOf(headers);
@@ -46,7 +46,7 @@ class AHCWebClient<T> implements WebClient<T> {
       Realm.RealmBuilder b = new Realm.RealmBuilder();
       // TODO: Add support for Kerberos and SPNEGO
       Realm.AuthScheme scheme = authType.equals(Web.Auth.BASIC) ? Realm.AuthScheme.BASIC : Realm.AuthScheme.DIGEST;
-      b.setPrincipal(username).setPassword(password).setScheme(scheme);
+      b.setPrincipal(username).setPassword(password).setScheme(scheme).setUsePreemptiveAuth(usePreemptiveAuth);
       c.setRealm(b.build());
     }
 
