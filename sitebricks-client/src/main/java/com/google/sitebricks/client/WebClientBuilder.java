@@ -26,7 +26,7 @@ class WebClientBuilder implements Web.FormatBuilder {
   private String password;
   private boolean usePreemptiveAuth;
 
-    @Inject
+  @Inject
   public WebClientBuilder(Injector injector) {
     this.injector = injector;
   }
@@ -61,14 +61,7 @@ class WebClientBuilder implements Web.FormatBuilder {
   }
 
   public Web.FormatBuilder auth(Web.Auth auth, String username, String password) {
-    Preconditions.checkArgument(null != auth, "Invalid auth type, null.");
-    Preconditions.checkArgument(null != username, "Username cannot be null.");
-    Preconditions.checkArgument(null != password, "Password cannot be null.");
-
-    this.authType = auth;
-    this.username = username;
-    this.password = password;
-    return this;
+    return auth(auth, username, password, false);
   }
 
   public Web.FormatBuilder auth(Web.Auth auth, String username, String password, boolean usePreemptiveAuth) {
