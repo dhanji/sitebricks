@@ -24,8 +24,9 @@ class WebClientBuilder implements Web.FormatBuilder {
   private Web.Auth authType;
   private String username;
   private String password;
+  private boolean usePreemptiveAuth;
 
-  @Inject
+    @Inject
   public WebClientBuilder(Injector injector) {
     this.injector = injector;
   }
@@ -70,6 +71,18 @@ class WebClientBuilder implements Web.FormatBuilder {
     return this;
   }
 
+  public Web.FormatBuilder auth(Web.Auth auth, String username, String password, boolean usePreemptiveAuth) {
+    Preconditions.checkArgument(null != auth, "Invalid auth type, null.");
+    Preconditions.checkArgument(null != username, "Username cannot be null.");
+    Preconditions.checkArgument(null != password, "Password cannot be null.");
+
+    this.authType = auth;
+    this.username = username;
+    this.password = password;
+    this.usePreemptiveAuth = usePreemptiveAuth;
+    return this;
+  }
+
   private class InternalReadAsBuilder<T> implements Web.ReadAsBuilder<T> {
     private final TypeLiteral<T> transporting;
 
@@ -78,8 +91,8 @@ class WebClientBuilder implements Web.FormatBuilder {
     }
 
     public WebClient<T> over(Class<? extends Transport> transport) {
-      return new AHCWebClient<T>(injector, injector.getInstance(transport), authType, username, password, url,
-          headers, transporting);
+      return new AHCWebClient<T>(injector, injector.getInstance(transport), authType, username, password, 
+                                 usePreemptiveAuth, url, headers, transporting);
     }
   }
 }
