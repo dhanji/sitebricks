@@ -1,9 +1,6 @@
 package com.google.sitebricks.example;
 
-import javax.inject.Inject;
-
 import com.google.sitebricks.acceptance.util.Jetty;
-import com.google.sitebricks.example.dao.SimpleDao;
 import com.google.sitebricks.example.model.Person;
 import com.google.sitebricks.http.As;
 import com.google.sitebricks.http.Get;
@@ -15,9 +12,6 @@ import com.google.sitebricks.transport.Form;
 @ResourceBundle(value = HtmlValidatingAsForm.ErrorMessages.class)
 public class HtmlValidatingAsForm {
     
-    @Inject
-    private SimpleDao dao;
-    
     public HtmlValidatingAsForm() {
     }
     
@@ -26,9 +20,14 @@ public class HtmlValidatingAsForm {
     }
 
     @Post
-    public String createPerson(@As(Form.class) Person person) {
+    public String createPersonViaPost(@As(Form.class) Person person) {
       return Jetty.APP_NAME;
     }
+
+//    @Get
+//    public String createPersonViaGet(@As(Form.class) Person person) {
+//      return Jetty.APP_NAME;
+//    }
 
     public static interface ErrorMessages {
      @Message(message = "Constraint Violation Length First Name Message")

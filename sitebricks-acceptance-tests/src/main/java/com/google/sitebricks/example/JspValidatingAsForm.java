@@ -22,9 +22,14 @@ public class JspValidatingAsForm {
     }
 
     @Post
-    public String createPerson(@As(Form.class) Person person) {
+    public String createPersonViaPost(@As(Form.class) Person person) {
       return Jetty.APP_NAME;
     }
+
+//    @Get
+//    public String createPersonViaGet(@As(Form.class) Person person) {
+//      return Jetty.APP_NAME;
+//    }
 
     public static interface ErrorMessages {
       @Message(message = "Constraint Violation Length First Name Message")

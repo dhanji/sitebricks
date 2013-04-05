@@ -53,6 +53,7 @@ import com.google.sitebricks.http.negotiate.ContentNegotiator;
 import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.rendering.control.DecorateWidget;
+import com.google.sitebricks.transport.Form;
 
 /**
  * contains active uri/widget mappings
@@ -671,10 +672,13 @@ public class DefaultPageBook implements PageBook {
             As as = (As) annotation;
             if (method.isAnnotationPresent(Get.class)
                 || method.isAnnotationPresent(Head.class)
-                || method.isAnnotationPresent(Trace.class))
-              throw new IllegalArgumentException("Cannot accept a @As(...) request body from" +
-                  " method marked @Get, @Head or @Trace: "
-                  + method.getDeclaringClass().getName() + "#" + method.getName() + "()");
+                || method.isAnnotationPresent(Trace.class)) {
+                if (! as.value().equals(Form.class)) {
+                    throw new IllegalArgumentException("Cannot accept a @As(...) request body from" +
+                            " method marked @Get, @Head or @Trace: "
+                            + method.getDeclaringClass().getName() + "#" + method.getName() + "()");
+                }
+            }
 
             preInjectableFound = true;
             args.add(new AsParameter(as.value(), TypeLiteral.get(method.getGenericParameterTypes()[i])));

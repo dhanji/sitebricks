@@ -61,19 +61,34 @@ if (obj != null) {
                 
                 <div id="form">
 
-			        <form action="./jspvalidatingasform" method="post">
+                    <form action="./jspvalidatingasform" method="post">
                       <label for="firstName">What's the first name?</label>
                       <input name="person.firstName" id="firstName" type="text"/><br/>
                       <label for="lastName">What's the last name?</label>
                       <input name="person.lastName" id="lastName" type="text"/><br/>
                       <label for="age">What's the age?</label>
                       <input name="person.age" id="age" type="text"/><br/>
-			          <br/>
-			          <input id="submit" type="submit" value="Add a Person"/>
-	  		        </form>
-  		        
-  		        </div>
+                      <br/>
+                      <input id="submit" type="submit" value="Add a Person via Post"/>
+                    </form>
+                
+                </div>
+<!--
+                <div id="form2">
 
+                    <form action="./jspvalidatingasform" method="get">
+                      <label for="firstName">What's the first name?</label>
+                      <input name="person.firstName" id="firstName" type="text"/><br/>
+                      <label for="lastName">What's the last name?</label>
+                      <input name="person.lastName" id="lastName" type="text"/><br/>
+                      <label for="age">What's the age?</label>
+                      <input name="person.age" id="age" type="text"/><br/>
+                      <br/>
+                      <input id="submit" type="submit" value="Add a Person via Get"/>
+                    </form>
+                
+                </div>
+-->
                 <div class="meta">
                     <p class="byline">Google Sitebricks.</p>
                 </div>
