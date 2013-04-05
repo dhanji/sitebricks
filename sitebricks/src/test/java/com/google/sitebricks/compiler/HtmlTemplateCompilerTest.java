@@ -40,6 +40,7 @@ import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -250,6 +251,36 @@ public class HtmlTemplateCompilerTest {
     assertEquals(value, expected);
   }
 
+
+   @Test
+   public final void readHtmlWidgetWithError() {
+       try{
+        Renderable widget = compiler()
+                .compile(TestBackingType.class, new Template("<html>\n<div class='${clazz}'>hello</div>\n</html>${qwe}"));
+        fail();
+       } catch (Exception ex){
+           assertEquals(ex.getClass(), TemplateCompileException.class);
+           TemplateCompileException te = (TemplateCompileException) ex;
+           assertEquals(te.getErrors().size(), 1);
+           CompileError error = te.getErrors().get(0);
+           assertEquals(error.getLine(), 2);
+       }
+   }
+
+    @Test
+    public final void readHtmlWidgetWithErrorAndWidget() {
+        try{
+            Renderable widget = compiler()
+                    .compile(TestBackingType.class, new Template("<html>\n<div class='${clazz}'>hello</div>\n\n</html>@ShowIf(true)\n${qwe}"));
+            fail();
+        } catch (Exception ex){
+            assertEquals(ex.getClass(), TemplateCompileException.class);
+            TemplateCompileException te = (TemplateCompileException) ex;
+            assertEquals(te.getErrors().size(), 1);
+            CompileError error = te.getErrors().get(0);
+            assertEquals(error.getLine(), 4);
+        }
+    }
 
   @Test
   public final void readHtmlWidget() {

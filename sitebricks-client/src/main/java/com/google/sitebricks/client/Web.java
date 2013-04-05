@@ -26,6 +26,8 @@ public interface Web {
     <T> WebClient<T> transportsText();
 
     FormatBuilder auth(Auth auth, String username, String password);
+      
+    FormatBuilder auth(Auth auth, String username, String password, boolean usePreemptiveAuth);
   }
 
   static interface ReadAsBuilder<T> {
