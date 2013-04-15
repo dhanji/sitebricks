@@ -1,25 +1,29 @@
 package com.google.sitebricks.transport;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 
-import org.apache.commons.fileupload.MultipartStream;
-import org.apache.commons.fileupload.ParameterParser;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.headless.Request;
@@ -30,17 +34,15 @@ import com.google.sitebricks.headless.Request;
  */
 class MutiPartFormTransport extends MultiPartForm {
 
-    private static final String CONTENT_DISPOSITION = "content-disposition";
-
-    private final Request request;
+    private final HttpServletRequest httpServletRequest;
     
     private final RequestBinder binder;
     
     private final Validator validator;
 
     @Inject
-    public MutiPartFormTransport(Request request, RequestBinder binder, Validator validator) {
-        this.request = request;
+    public MutiPartFormTransport(Provider<HttpServletRequest> requestProvider, RequestBinder binder, Validator validator) {
+        this.httpServletRequest = requestProvider.get();
         this.binder = binder;
         this.validator = validator;
     }
@@ -49,9 +51,9 @@ class MutiPartFormTransport extends MultiPartForm {
         T t = null;
         try {
             t = (T) type.newInstance();
-            Request multiPartRequest = new MultiPartRequest(params(in));
+            Request multiPartRequest = new MultiPartRequest(params(httpServletRequest));
             binder.bind(multiPartRequest, t);
-            // TODO should use request.validate(t) method...
+            // TODO(eric) should use request.validate(t) method...
             Set<? extends ConstraintViolation<?>> cvs = validator.validate(t);
             if ((cvs != null) && (! cvs.isEmpty())) {
                 throw new ValidationException(new ConstraintViolationException((Set<ConstraintViolation<?>>) cvs));
@@ -61,6 +63,9 @@ class MutiPartFormTransport extends MultiPartForm {
             throw new RuntimeException(e);
         }
         catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        catch (FileUploadException e) {
             throw new RuntimeException(e);
         }
         return t;
@@ -72,9 +77,9 @@ class MutiPartFormTransport extends MultiPartForm {
         T t = null;
         try {
             t = (T) type.getRawType().newInstance();
-            Request multiPartRequest = new MultiPartRequest(params(in));
+            Request multiPartRequest = new MultiPartRequest(params(httpServletRequest));
             binder.bind(multiPartRequest, t);
-            // TODO should use request.validate(t) method...
+            // TODO(eric) should use request.validate(t) method...
             Set<? extends ConstraintViolation<?>> cvs = validator.validate(t);
             if ((cvs != null) && (! cvs.isEmpty())) {
                 throw new ValidationException(new ConstraintViolationException((Set<ConstraintViolation<?>>) cvs));
@@ -86,6 +91,9 @@ class MutiPartFormTransport extends MultiPartForm {
         catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+        catch (FileUploadException e) {
+            throw new RuntimeException(e);
+        }
         return t;
     }
 
@@ -93,70 +101,33 @@ class MutiPartFormTransport extends MultiPartForm {
         throw new IllegalAccessError("You should not write to a form transport.");
     }
 
-    private Multimap<String, String> params(InputStream in) throws IOException {
+    private Multimap<String, String> params(HttpServletRequest request) throws FileUploadException {
         
-        ImmutableMultimap.Builder<String, String> paramsBuilder = ImmutableMultimap.builder();
+        ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
+        FileItemFactory fileItemFactory = new DiskFileItemFactory(1000, null);
 
-        byte[] boundary = getBoundary(request.header("Content-Type"));
-
-        @SuppressWarnings("deprecation")
-        MultipartStream multipartStream = new MultipartStream(in, boundary);
-
-        boolean nextPart = multipartStream.skipPreamble();
-        while (nextPart) {
-            String header = multipartStream.readHeaders();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            multipartStream.readBodyData(baos);
-            byte[] value = baos.toByteArray();
-            paramsBuilder.put(getFieldName(header), new String(value));
-            nextPart = multipartStream.readBoundary();
-        }
-
-        return paramsBuilder.build();
-
-    }
-
-    private byte[] getBoundary(String contentType) {
-        ParameterParser parser = new ParameterParser();
-        parser.setLowerCaseNames(true);
-        // Parameter parser can handle null input
-        char[] separators = new char[] { ';', ',' };
-        Map<String, String> params = parser.parse(contentType, separators);
-        String boundaryStr = (String) params.get("boundary");
-
-        if (boundaryStr == null) {
-            return null;
-        }
-        byte[] boundary;
-        try {
-            boundary = boundaryStr.getBytes("ISO-8859-1");
-        }
-        catch (UnsupportedEncodingException e) {
-            boundary = boundaryStr.getBytes();
-        }
-        return boundary;
-    }
-
-    /**
-     * Returns the field name, which is given by the content-disposition header.
-     * 
-     * @param pContentDisposition
-     *            The content-dispositions header value.
-     * @return The field jake
-     */
-    private String getFieldName(String pContentDisposition) {
-        String fieldName = null;
-        if (pContentDisposition != null && pContentDisposition.toLowerCase().startsWith(CONTENT_DISPOSITION)) {
-            ParameterParser parser = new ParameterParser();
-            parser.setLowerCaseNames(true);
-            // Parameter parser can handle null input
-            Map params = parser.parse(pContentDisposition, ';');
-            fieldName = (String) params.get("name");
-            if (fieldName != null) {
-                fieldName = fieldName.trim();
+        ServletFileUpload upload = new ServletFileUpload(fileItemFactory);
+        upload.setHeaderEncoding(request.getCharacterEncoding());
+        List<FileItem> items = upload.parseRequest(request);
+        
+        Iterator<FileItem> iter = items.iterator();
+        while (iter.hasNext()) {
+            FileItem item = (FileItem) iter.next();
+            if (item.isFormField()) {
+                builder.put(item.getFieldName(), item.getString());
+            } else {
+                try {
+                    // Use ISO-8859-1 encoding, see http://stackoverflow.com/questions/9098022/problems-converting-byte-array-to-string-and-back-to-byte-array
+                    // When reading back the String to get the byte array, use getBytes("ISO-8859-1")
+                    builder.put(item.getFieldName(), new String(item.get(), "ISO-8859-1"));
+                }
+                catch (UnsupportedEncodingException e) {
+                }
             }
         }
-        return fieldName;
+        
+        return builder.build();
+
     }
 
 }
