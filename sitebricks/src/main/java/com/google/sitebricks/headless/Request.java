@@ -2,9 +2,6 @@ package com.google.sitebricks.headless;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
-
-import javax.validation.ConstraintViolationException;
 
 import com.google.common.collect.Multimap;
 import com.google.inject.TypeLiteral;

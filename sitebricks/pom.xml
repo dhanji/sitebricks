@@ -117,21 +117,17 @@
   </dependencies>
 
   <!-- This should be removed when the googlecode repositories are migrated to the standard Nexus OSS repository infrastructure -->
-      <distributionManagement>
-        <repository>
-          <id>aos.public-release</id>
-          <name>AOS Public Release Repository</name>
-          <url>http://repo.aos.io/repository/aos.public-release</url>
-        </repository>
-        <snapshotRepository>
-          <id>aos.public-snapshot</id>
-          <name>AOS Public Snapshot Repository</name>
-          <url>http://repo.aos.io/repository/aos.public-snapshot</url>
-        </snapshotRepository>
-        <site>
-          <id></id>
-          <name></name>
-        </site>
-      </distributionManagement>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>google-snapshots</id>
+      <name>Sonatype OSS Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>google-with-staging</id>
+      <name>Nexus OSS Staging Repository</name>
+      <url> https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement> 
 
 </project>

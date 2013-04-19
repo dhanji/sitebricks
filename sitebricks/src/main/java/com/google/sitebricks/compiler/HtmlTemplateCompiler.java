@@ -295,7 +295,7 @@ public class HtmlTemplateCompiler implements TemplateCompiler {
                 return registry.xmlWidget(childsChildren, node.nodeName(), parseAttribs(node.attributes()),
                         pc.lexicalScopes.peek());
             } catch (ExpressionCompileException e) {
-                pc.errors.add(  
+                pc.errors.add(
                     CompileError.in(node.outerHtml())
                     .near(line(node)) 
                     .causedBy(e)

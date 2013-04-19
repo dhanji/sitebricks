@@ -564,7 +564,7 @@ public class DefaultPageBook implements PageBook {
 
         // no matched events. Fire default handler
         if (!matched) {
-            return callAction(httpMethod, page, map, request);
+          return callAction(httpMethod, page, map, request);
         }
 
       } else {
@@ -671,12 +671,12 @@ public class DefaultPageBook implements PageBook {
           } else if (As.class.isInstance(annotation)) {
             As as = (As) annotation;
             if (method.isAnnotationPresent(Get.class)
-                || method.isAnnotationPresent(Head.class)
-                || method.isAnnotationPresent(Trace.class)) {
-                if (! as.value().equals(Form.class)) {
-                    throw new IllegalArgumentException("Cannot accept a @As(...) request body from" +
-                            " method marked @Get, @Head or @Trace: "
-                            + method.getDeclaringClass().getName() + "#" + method.getName() + "()");
+              || method.isAnnotationPresent(Head.class)
+              || method.isAnnotationPresent(Trace.class)) {
+              if (! as.value().equals(Form.class)) {
+                throw new IllegalArgumentException("Cannot accept a @As(...) request body from" +
+                  " method marked @Get, @Head or @Trace: "
+                  + method.getDeclaringClass().getName() + "#" + method.getName() + "()");
                 }
             }
 

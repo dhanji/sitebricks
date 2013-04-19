@@ -2,8 +2,6 @@ package com.google.sitebricks;
 
 import java.util.Set;
 
-import com.google.sitebricks.headless.Request;
-
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
