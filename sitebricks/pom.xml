@@ -89,7 +89,6 @@
     <dependency>
       <groupId>org.apache.bval</groupId>
       <artifactId>bval-guice</artifactId>
-      <scope>provided</scope>
     </dependency>
 
     <!-- provided deps -->

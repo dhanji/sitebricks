@@ -9,6 +9,8 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.apache.bval.guice.ValidationModule;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -120,6 +122,9 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
     configureTemplateSystem();
 
+    // Validation
+    install(new ValidationModule());
+  
   }
 
   protected void configureTemplateSystem() {

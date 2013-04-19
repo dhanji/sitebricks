@@ -73,13 +73,6 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Validation -->
-    <dependency>
-      <groupId>org.apache.bval</groupId>
-      <artifactId>bval-guice</artifactId>
-      <scope>provided</scope>
-    </dependency>
-
     <!-- JSP taglib -->
     <dependency>
       <groupId>taglibs</groupId>
