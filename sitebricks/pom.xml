@@ -83,12 +83,13 @@
 
     <!-- Validation -->
     <dependency>
-      <groupId>org.apache.bval</groupId>
-      <artifactId>bval-guice</artifactId>
-    </dependency>
-    <dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.bval</groupId>
+      <artifactId>bval-guice</artifactId>
+      <scope>provided</scope>
     </dependency>
 
     <!-- provided deps -->

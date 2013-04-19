@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.bval.guice.ValidationModule;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.BindingAnnotation;
@@ -101,6 +102,10 @@ public class SitebricksConfig extends GuiceServletContextListener {
             observe(StartAware.class).asEagerSingleton();
           }
         });
+        
+        // Validation
+        install(new ValidationModule());
+      
       }
 
       private void bindExplicitly() {
