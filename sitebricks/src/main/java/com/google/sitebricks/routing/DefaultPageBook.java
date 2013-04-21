@@ -687,20 +687,12 @@ public class DefaultPageBook implements PageBook {
         }
 
         if (!preInjectableFound) {
-          // Could be an arbitrary injection request.
-          Class<?> argType = method.getParameterTypes()[i];
-          
-          Key<?> key = null;
-          
-          // TODO(eric) Fix this horrible hack. Needed for now because we can not get the generics at runtime...
-          if (argType == Request.class) {
-              key = Key.get(new TypeLiteral<Request<String>>(){});
-          }
-          else {
-              key = (null != bindingAnnotation)
-                  ? Key.get(argType, bindingAnnotation)
-                  : Key.get(argType);
-          }
+
+          Type genericParameterType = method.getGenericParameterTypes()[i];
+            
+          Key<?> key = (null != bindingAnnotation)
+              ? Key.get(genericParameterType, bindingAnnotation)
+              : Key.get(genericParameterType);
 
           args.add(key);
           
