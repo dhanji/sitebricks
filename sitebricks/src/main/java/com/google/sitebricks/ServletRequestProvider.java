@@ -28,7 +28,7 @@ import com.google.sitebricks.http.Parameters;
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 @Singleton
-class ServletRequestProvider implements Provider<Request> {
+class ServletRequestProvider implements Provider<Request<String>> {
   private final Provider<HttpServletRequest> servletRequest;
   private final Injector injector;
   private final Validator validator;
@@ -42,8 +42,8 @@ class ServletRequestProvider implements Provider<Request> {
   }
 
   @Override
-  public Request get() {
-    return new Request() {
+  public Request<String> get() {
+    return new Request<String>() {
       HttpServletRequest servletRequest = ServletRequestProvider.this.servletRequest.get();
       Multimap<String, String> matrix;
       Multimap<String, String> headers;

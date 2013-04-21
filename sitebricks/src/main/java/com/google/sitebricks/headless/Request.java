@@ -13,7 +13,7 @@ import com.google.sitebricks.client.Transport;
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-public interface Request {
+public interface Request<P> {
 
   /**
    * Reads the raw request data into an object of the given type. Must
@@ -57,7 +57,7 @@ public interface Request {
   /**
    * Returns request parameters as a multimap (to account for repeated values).
    */
-  Multimap<String, String> params();
+  Multimap<String, P> params();
 
   /**
    * Returns matrix parameters as a multimap (to account for repeated values).
@@ -76,7 +76,7 @@ public interface Request {
    * <p>
    * Behaves exactly like {@link javax.servlet.http.HttpServletRequest#getParameter(String)}.
    */
-  String param(String name);
+  P param(String name);
 
   /**
    * Returns the only value of a request header or null if the header

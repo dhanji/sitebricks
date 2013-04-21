@@ -1,5 +1,16 @@
 package com.google.sitebricks.binding;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import net.jcip.annotations.Immutable;
+
+import org.apache.commons.fileupload.FileItem;
+import org.mvel2.PropertyAccessException;
+
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -9,42 +20,34 @@ import com.google.inject.Singleton;
 import com.google.sitebricks.Evaluator;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.Strings;
-import net.jcip.annotations.Immutable;
-import org.mvel2.PropertyAccessException;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
 @Immutable
 @Singleton
-public class MvelRequestBinder implements RequestBinder<String> {
+public class MvelFileItemRequestBinder implements RequestBinder<FileItem> {
   private final Evaluator evaluator;
   private final Provider<FlashCache> cacheProvider;
-  private final Logger log = Logger.getLogger(MvelRequestBinder.class.getName());
+  private final Logger log = Logger.getLogger(MvelFileItemRequestBinder.class.getName());
 
   private static final String VALID_BINDING_REGEX = "[\\w\\.$]*";
 
   @Inject
-  public MvelRequestBinder(Evaluator evaluator, Provider<FlashCache> cacheProvider) {
+  public MvelFileItemRequestBinder(Evaluator evaluator, Provider<FlashCache> cacheProvider) {
     this.evaluator = evaluator;
     this.cacheProvider = cacheProvider;
   }
 
-  public void bind(Request<String> request, Object o) {
-    final Multimap<String, String> map = request.params();
+  public void bind(Request<FileItem> request, Object o) {
+    final Multimap<String, FileItem> map = request.params();
 
     //bind iteratively (last incoming param-value per key, gets bound)
-    for (Map.Entry<String, Collection<String>> entry : map.asMap().entrySet()) {
+    for (Map.Entry<String, Collection<FileItem>> entry : map.asMap().entrySet()) {
       String key = entry.getKey();
 
       // If there are multiple entry, then this is a collection bind:
-      final Collection<String> values = entry.getValue();
+      final Collection<FileItem> values = entry.getValue();
 
       // We guard against expression-injection with a regex validator.
       if (!validate(key))
@@ -55,23 +58,33 @@ public class MvelRequestBinder implements RequestBinder<String> {
       if (values.size() > 1) {
         value = Lists.newArrayList(values);
       } else {
+        
         // If there is only one value, bind as per normal
-        String rawValue = Iterables.getOnlyElement(values);   //choose first (and only value)
+        FileItem fileItem = Iterables.getOnlyElement(values);   //choose first (and only value)
 
-        //bind from collection?
-        if (rawValue.startsWith(COLLECTION_BIND_PREFIX)) {
-          final String[] binding = rawValue.substring(COLLECTION_BIND_PREFIX.length()).split("/");
-          if (binding.length != 2)
-            throw new InvalidBindingException(
-                "Collection sources must be bound in the form '[C/collection/hashcode'. "
-                    + "Was the request corrupt? Or did you try to bind something manually"
-                    + " with a key starting '[C/'? Was: " + rawValue);
-
-          final Collection<?> collection = cacheProvider.get().get(binding[0]);
-
-          value = search(collection, binding[1]);
-        } else
-          value = rawValue;
+        if (! fileItem.isFormField()) {
+            value = fileItem.get();
+        }
+        else {
+            
+            String rawValue = fileItem.getString();
+    
+            //bind from collection?
+            if (rawValue.startsWith(COLLECTION_BIND_PREFIX)) {
+              final String[] binding = rawValue.substring(COLLECTION_BIND_PREFIX.length()).split("/");
+              if (binding.length != 2)
+                throw new InvalidBindingException(
+                    "Collection sources must be bound in the form '[C/collection/hashcode'. "
+                        + "Was the request corrupt? Or did you try to bind something manually"
+                        + " with a key starting '[C/'? Was: " + rawValue);
+    
+              final Collection<?> collection = cacheProvider.get().get(binding[0]);
+    
+              value = search(collection, binding[1]);
+            } else {
+                value = rawValue;
+            }
+         }
       }
 
       //apply the bound value to the page object property

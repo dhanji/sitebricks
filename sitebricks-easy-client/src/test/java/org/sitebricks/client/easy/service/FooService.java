@@ -41,7 +41,7 @@ public class FooService {
   }
 
   @Put
-  public Reply<?> add(final Request submission) {
+  public Reply<?> add(final Request<String> submission) {
     final Bar bar = submission.read(Bar.class).as(Json.class);
 
     foo.add(bar);
@@ -50,7 +50,7 @@ public class FooService {
   }
 
   @Patch
-  public Reply<?> update(final Request submission) {
+  public Reply<?> update(final Request<String> submission) {
     final Bar bar = submission.read(Bar.class).as(Json.class);
 
     foo.update(bar);
@@ -72,7 +72,7 @@ public class FooService {
   }
 
   @Post
-  public Reply<?> echo(final Request submission) {
+  public Reply<?> echo(final Request<String> submission) {
     final String message = submission.read(String.class).as(Json.class);
     return Reply.with("Sitebricks says " + message + "!").as(Json.class);
   }

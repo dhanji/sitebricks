@@ -36,12 +36,12 @@ class MutiPartFormTransport extends MultiPartForm {
 
     private final HttpServletRequest httpServletRequest;
     
-    private final RequestBinder binder;
+    private final RequestBinder<FileItem> binder;
     
     private final Validator validator;
 
     @Inject
-    public MutiPartFormTransport(Provider<HttpServletRequest> requestProvider, RequestBinder binder, Validator validator) {
+    public MutiPartFormTransport(Provider<HttpServletRequest> requestProvider, RequestBinder<FileItem> binder, Validator validator) {
         this.httpServletRequest = requestProvider.get();
         this.binder = binder;
         this.validator = validator;
@@ -51,7 +51,7 @@ class MutiPartFormTransport extends MultiPartForm {
         T t = null;
         try {
             t = (T) type.newInstance();
-            Request multiPartRequest = new MultiPartRequest(params(httpServletRequest));
+            Request<FileItem> multiPartRequest = new MultiPartRequest(params(httpServletRequest));
             binder.bind(multiPartRequest, t);
             // TODO(eric) should use request.validate(t) method...
             Set<? extends ConstraintViolation<?>> cvs = validator.validate(t);
@@ -77,7 +77,7 @@ class MutiPartFormTransport extends MultiPartForm {
         T t = null;
         try {
             t = (T) type.getRawType().newInstance();
-            Request multiPartRequest = new MultiPartRequest(params(httpServletRequest));
+            Request<FileItem> multiPartRequest = new MultiPartRequest(params(httpServletRequest));
             binder.bind(multiPartRequest, t);
             // TODO(eric) should use request.validate(t) method...
             Set<? extends ConstraintViolation<?>> cvs = validator.validate(t);
@@ -101,9 +101,9 @@ class MutiPartFormTransport extends MultiPartForm {
         throw new IllegalAccessError("You should not write to a form transport.");
     }
 
-    private Multimap<String, String> params(HttpServletRequest request) throws FileUploadException {
+    private Multimap<String, FileItem> params(HttpServletRequest request) throws FileUploadException {
         
-        ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
+        ImmutableMultimap.Builder<String, FileItem> builder = ImmutableMultimap.builder();
         FileItemFactory fileItemFactory = new DiskFileItemFactory(1000, null);
 
         ServletFileUpload upload = new ServletFileUpload(fileItemFactory);
@@ -112,18 +112,8 @@ class MutiPartFormTransport extends MultiPartForm {
         
         Iterator<FileItem> iter = items.iterator();
         while (iter.hasNext()) {
-            FileItem item = (FileItem) iter.next();
-            if (item.isFormField()) {
-                builder.put(item.getFieldName(), item.getString());
-            } else {
-                try {
-                    // Use ISO-8859-1 encoding, see http://stackoverflow.com/questions/9098022/problems-converting-byte-array-to-string-and-back-to-byte-array
-                    // When reading back the String to get the byte array, use getBytes("ISO-8859-1")
-                    builder.put(item.getFieldName(), new String(item.get(), "ISO-8859-1"));
-                }
-                catch (UnsupportedEncodingException e) {
-                }
-            }
+            FileItem fileItem = (FileItem) iter.next();
+            builder.put(fileItem.getFieldName(), fileItem);
         }
         
         return builder.build();

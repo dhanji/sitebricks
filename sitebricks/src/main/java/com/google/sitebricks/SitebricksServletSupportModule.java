@@ -1,12 +1,14 @@
 package com.google.sitebricks;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.servlet.RequestScoped;
-import com.google.sitebricks.headless.Request;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Locale;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
+import com.google.inject.servlet.RequestScoped;
+import com.google.sitebricks.headless.Request;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -14,7 +16,7 @@ import java.util.Locale;
 class SitebricksServletSupportModule extends AbstractModule {
   @Override
   protected void configure() {
-    bind(Request.class).toProvider(ServletRequestProvider.class).in(RequestScoped.class);
+      bind(new TypeLiteral<Request<String>>(){}).toProvider(ServletRequestProvider.class).in(RequestScoped.class);
   }
 
   @Provides

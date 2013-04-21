@@ -2,17 +2,18 @@ package com.google.sitebricks.transport;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
+
+import org.apache.commons.fileupload.FileItem;
 
 import com.google.common.collect.Multimap;
 import com.google.inject.TypeLiteral;
 import com.google.sitebricks.headless.Request;
 
-public class MultiPartRequest implements Request {
+public class MultiPartRequest implements Request<FileItem> {
     
-    private Multimap<String, String> params;
+    private Multimap<String, FileItem> params;
     
-    public MultiPartRequest(Multimap<String, String> params) {
+    public MultiPartRequest(Multimap<String, FileItem> params) {
         this.params = params;
     }
 
@@ -37,7 +38,7 @@ public class MultiPartRequest implements Request {
     }   
 
     @Override
-    public Multimap<String, String> params() {
+    public Multimap<String, FileItem> params() {
         return this.params;
     }
 
@@ -52,7 +53,7 @@ public class MultiPartRequest implements Request {
     }
 
     @Override
-    public String param(String name) {
+    public FileItem param(String name) {
         throw new UnsupportedOperationException();
     }
 

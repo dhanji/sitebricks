@@ -1,11 +1,17 @@
 package com.google.sitebricks;
 
+import org.apache.commons.fileupload.FileItem;
+import org.mvel2.MVEL;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Stage;
+import com.google.inject.TypeLiteral;
+import com.google.sitebricks.binding.MvelFileItemRequestBinder;
+import com.google.sitebricks.binding.MvelRequestBinder;
+import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.conversion.MvelConversionHandlers;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.RoutingDispatcher;
-import org.mvel2.MVEL;
 
 /**
  * Module encapsulates internal bindings for sitebricks. Can be installed multiple times.
@@ -14,6 +20,7 @@ class SitebricksInternalModule extends AbstractModule {
 
   @Override
   protected void configure() {
+      
     //set up MVEL namespace (when jarjar-ed, it will use the repackaged namespace)
     System.setProperty("mvel.namespace",
         MVEL.class.getPackage().getName().replace('.', '/') + "/");
@@ -29,6 +36,9 @@ class SitebricksInternalModule extends AbstractModule {
       bind(PageBook.class).to(DebugModePageBook.class);
       bind(RoutingDispatcher.class).to(DebugModeRoutingDispatcher.class);
     }
+    
+    bind(new TypeLiteral<RequestBinder<String>>(){}).to(MvelRequestBinder.class).asEagerSingleton();
+    bind(new TypeLiteral<RequestBinder<FileItem>>(){}).to(MvelFileItemRequestBinder.class).asEagerSingleton();
 
     // use sitebricks converters in mvel
     requestInjection(new MvelConversionHandlers());
