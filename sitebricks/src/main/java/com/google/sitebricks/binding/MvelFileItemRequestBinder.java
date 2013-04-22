@@ -40,6 +40,7 @@ public class MvelFileItemRequestBinder implements RequestBinder<FileItem> {
   }
 
   public void bind(Request<FileItem> request, Object o) {
+
     final Multimap<String, FileItem> map = request.params();
 
     //bind iteratively (last incoming param-value per key, gets bound)
@@ -57,6 +58,7 @@ public class MvelFileItemRequestBinder implements RequestBinder<FileItem> {
 
       if (values.size() > 1) {
         value = Lists.newArrayList(values);
+        bindValueToBound(key, o, value);
       } else {
         
         // If there is only one value, bind as per normal
@@ -64,6 +66,11 @@ public class MvelFileItemRequestBinder implements RequestBinder<FileItem> {
 
         if (! fileItem.isFormField()) {
             value = fileItem.get();
+            bindValueToBound(key, o, value);
+            // TODO(eric) there may be a better way to bind the contentType, size...
+            bindValueToBound(key + "Name", o, fileItem.getName());
+            bindValueToBound(key + "Size", o, fileItem.getSize());
+            bindValueToBound(key + "ContentType", o, fileItem.getContentType());
         }
         else {
             
@@ -84,26 +91,34 @@ public class MvelFileItemRequestBinder implements RequestBinder<FileItem> {
             } else {
                 value = rawValue;
             }
-         }
-      }
+        
+            bindValueToBound(key, o, value);
 
-      //apply the bound value to the page object property
-      try {
-        evaluator.write(key, o, value);
-      } catch (PropertyAccessException e) {
-
-    		// Do some better error reporting if this is a real exception.
-    		  if (e.getCause() instanceof InvocationTargetException) {
-    			  addContextAndThrow(o, key, value, e.getCause());
-    		  }
-        // Log missing property.
-        if (log.isLoggable(Level.FINER)) {
-          log.finer("A property [" + key +"] could not be bound,"
-              + " but not necessarily an error.");
         }
-      } catch (Exception e) {
-        addContextAndThrow(o, key, value, e);
+        
       }
+      
+    }
+
+  }
+  
+  private void bindValueToBound(String key, Object o, Object value) {
+    //apply the bound value to the page object property
+    try {
+      evaluator.write(key, o, value);
+    } catch (PropertyAccessException e) {
+
+      // Do some better error reporting if this is a real exception.
+      if (e.getCause() instanceof InvocationTargetException) {
+        addContextAndThrow(o, key, value, e.getCause());
+      }
+      // Log missing property.
+      if (log.isLoggable(Level.FINER)) {
+        log.finer("A property [" + key +"] could not be bound,"
+              + " but not necessarily an error.");
+      }
+    } catch (Exception e) {
+      addContextAndThrow(o, key, value, e);
     }
   }
 
