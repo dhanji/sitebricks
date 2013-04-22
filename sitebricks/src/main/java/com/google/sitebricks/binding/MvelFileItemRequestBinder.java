@@ -65,12 +65,10 @@ public class MvelFileItemRequestBinder implements RequestBinder<FileItem> {
         FileItem fileItem = Iterables.getOnlyElement(values);   //choose first (and only value)
 
         if (! fileItem.isFormField()) {
-            value = fileItem.get();
-            bindValueToBound(key, o, value);
-            // TODO(eric) there may be a better way to bind the contentType, size...
-            bindValueToBound(key + "Name", o, fileItem.getName());
-            bindValueToBound(key + "Size", o, fileItem.getSize());
-            bindValueToBound(key + "ContentType", o, fileItem.getContentType());
+            bindValueToBound(key + ".data", o, fileItem.get());
+            bindValueToBound(key + ".name", o, fileItem.getName());
+            bindValueToBound(key + ".size", o, fileItem.getSize());
+            bindValueToBound(key + ".contentType", o, fileItem.getContentType());
         }
         else {
             
