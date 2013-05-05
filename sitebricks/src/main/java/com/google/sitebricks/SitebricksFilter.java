@@ -74,7 +74,7 @@ class SitebricksFilter implements Filter {
         if (null != redirect) {
             // We need to encode in a way browser is fine with special characters when reloading the page.
             String redirectEncoded = URLEncoder.encode(redirect, "UTF-8").replaceAll("%2F", "/");
-            response.sendRedirect(redirectEncoded);
+            response.sendRedirect(redirect);
             } else { //successful render
 
           // by checking if a content type was set, we allow users to override content-type
