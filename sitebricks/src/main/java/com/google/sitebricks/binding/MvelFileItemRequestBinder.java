@@ -21,9 +21,6 @@ import com.google.sitebricks.Evaluator;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.rendering.Strings;
 
-/**
- * @author Dhanji R. Prasanna (dhanji@gmail.com)
- */
 @Immutable
 @Singleton
 public class MvelFileItemRequestBinder implements RequestBinder<FileItem> {
@@ -65,9 +62,9 @@ public class MvelFileItemRequestBinder implements RequestBinder<FileItem> {
         FileItem fileItem = Iterables.getOnlyElement(values);   //choose first (and only value)
 
         if (! fileItem.isFormField()) {
-            bindValueToBound(key + ".data", o, fileItem.get());
             bindValueToBound(key + ".name", o, fileItem.getName());
             bindValueToBound(key + ".size", o, fileItem.getSize());
+            bindValueToBound(key + ".content", o, fileItem.get());
             bindValueToBound(key + ".contentType", o, fileItem.getContentType());
         }
         else {
@@ -150,4 +147,5 @@ public class MvelFileItemRequestBinder implements RequestBinder<FileItem> {
 
     return true;
   }
+  
 }
