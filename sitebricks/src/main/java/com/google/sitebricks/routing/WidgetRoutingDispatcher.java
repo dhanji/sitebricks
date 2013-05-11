@@ -122,6 +122,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
         redirect = fireEvent(request, page, instance);
     }
     catch (ValidationException ve) {
+        ve.getCause().printStackTrace();
         ConstraintViolationException cve = (ConstraintViolationException) ve.getCause();
         Set<? extends ConstraintViolation<?>> scv = (Set<? extends ConstraintViolation<?>>) cve.getConstraintViolations();
         errors = validationConvertor.to(scv);

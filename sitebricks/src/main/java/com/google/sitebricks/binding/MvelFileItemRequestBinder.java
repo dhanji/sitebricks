@@ -1,5 +1,6 @@
 package com.google.sitebricks.binding;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
@@ -69,7 +70,13 @@ public class MvelFileItemRequestBinder implements RequestBinder<FileItem> {
         }
         else {
             
-            String rawValue = fileItem.getString();
+            String rawValue = null;
+            try {
+                rawValue = fileItem.getString("UTF-8");
+            }
+            catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
     
             //bind from collection?
             if (rawValue.startsWith(COLLECTION_BIND_PREFIX)) {
