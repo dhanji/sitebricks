@@ -99,7 +99,8 @@ class StandardCompilers implements Compilers {
       }
     }
 
-    Renderable widget = compile(templateClass);
+//    Renderable widget = compile(page.pageClass());
+    Renderable widget = loader.compile(page);
 
     //
     //apply the compiled widget chain to the page (completing compile step)

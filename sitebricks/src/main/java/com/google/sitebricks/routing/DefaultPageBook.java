@@ -39,6 +39,7 @@ import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.At;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Show;
 import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.conversion.TypeConverter;
 import com.google.sitebricks.headless.Reply;
@@ -109,11 +110,11 @@ public class DefaultPageBook implements PageBook {
         subpath = uri + subpath;
 
         // Register as headless web service.
-        at(subpath, pageClass, true);
+        doAt(subpath, pageClass, true);
       }
     }
 
-    return at(uri, pageClass, true);
+    return doAt(uri, pageClass, true);
   }
 
   public PageTuple at(String uri, Class<?> clazz) {
@@ -161,6 +162,36 @@ public class DefaultPageBook implements PageBook {
   }
 
   private PageTuple at(String uri, Class<?> clazz, boolean headless) {
+
+      // Handle subpaths, registering each as a separate instance of the page
+      // tuple.
+      for (Method method : clazz.getDeclaredMethods()) {
+        if (method.isAnnotationPresent(At.class)) {
+
+          // This is a subpath expression.
+          At at = method.getAnnotation(At.class);
+          String subpath = at.value();
+
+          // Validate subpath
+          if (!subpath.startsWith("/") || subpath.isEmpty() || subpath.length() == 1) {
+            throw new IllegalArgumentException(String.format(
+                "Subpath At(\"%s\") on %s.%s() must begin with a \"/\" and must not be empty",
+                subpath, clazz.getName(), method.getName()));
+          }
+
+          subpath = uri + subpath;
+
+          // Register as headless web service.
+          doAt(subpath, clazz, headless);
+        }
+      }
+      
+      return doAt(uri, clazz, headless);
+
+  }
+
+  private PageTuple doAt(String uri, Class<?> clazz, boolean headless) {
+
     final String key = firstPathElement(uri);
     final PageTuple pageTuple =
         new PageTuple(uri, new PathMatcherChain(uri), clazz, injector, headless, false);
@@ -341,6 +372,11 @@ public class DefaultPageBook implements PageBook {
 
     public static InstanceBoundPage delegating(Page delegate, Object instance) {
       return new InstanceBoundPage(delegate, instance);
+    }
+
+    @Override
+    public Show getShow() {
+        return delegate.getShow();
     }
   }
 
@@ -606,6 +642,25 @@ public class DefaultPageBook implements PageBook {
     }
 
     @Override
+    public Show getShow() {
+        for (String httpMethod: methods.keySet()) {
+            Collection<Action> actions = methods.get(httpMethod);
+            if (actions != null) {
+                for (Action action: actions) {
+                    Method method = action.getMethod();
+                    if (method != null) {
+                        Show show = action.getMethod().getAnnotation(Show.class);
+                        if (show != null) {
+                            return show;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (!(o instanceof Page)) return false;
@@ -623,7 +678,7 @@ public class DefaultPageBook implements PageBook {
     @Override
     public String toString() {
         return Objects.toStringHelper(PageTuple.class).add("clazz", clazz).add("isDecorated", extension)
-                .add("uri", uri).toString();
+                .add("uri", uri).add("methods", methods).toString();
     }
 
   }
@@ -744,6 +799,11 @@ public class DefaultPageBook implements PageBook {
       return result;
     }
 
+    @Override
+    public Method getMethod() {
+      return this.method;
+    }
+
     private static Object call(Object page, final Method method,
                                Object[] args) {
       try {
@@ -828,6 +888,12 @@ public class DefaultPageBook implements PageBook {
     public int hashCode() {
       return method.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "MethodTuple [method=" + method + ", args=" + args + "]";
+    }
+
   }
 
   /**

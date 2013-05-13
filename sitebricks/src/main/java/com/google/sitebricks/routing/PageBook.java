@@ -1,19 +1,20 @@
 package com.google.sitebricks.routing;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.ImplementedBy;
-import com.google.inject.Module;
-import com.google.inject.Stage;
-import com.google.sitebricks.ActionDescriptor;
-import com.google.sitebricks.Renderable;
-import com.google.sitebricks.headless.Request;
-
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.ImplementedBy;
+import com.google.inject.Module;
+import com.google.inject.Stage;
+import com.google.sitebricks.ActionDescriptor;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Show;
+import com.google.sitebricks.headless.Request;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -89,6 +90,7 @@ public interface PageBook {
 
 
   public static interface Page extends Comparable<Page> {
+      
     Renderable widget();
 
     Object instantiate();
@@ -107,6 +109,9 @@ public interface PageBook {
     boolean isDecorated();
 
     Set<String> getMethod();
+
+    Show getShow();
+    
   }
 
   public static final class Routing extends AbstractModule {

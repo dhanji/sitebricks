@@ -2,6 +2,7 @@ package com.google.sitebricks.example;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Map;
 
@@ -214,6 +215,12 @@ public class SitebricksConfig extends GuiceServletContextListener {
       public Object call(Request request, Object page, Map<String, String> map) {
         return Reply.with(reply);
       }
+
+      @Override
+      public Method getMethod() {
+        return null;
+      }
+
     };
   }
 

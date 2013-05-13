@@ -44,7 +44,7 @@ public class TemplateLoaderTest {
   @Test(dataProvider = CLASSES_AND_TEMPLATES)
   public final void loadExplicitXmlTemplate(final Class<MyXmlPage> pageClass) {
     String template = new TemplateLoader(new MockServletContextProvider(createMock(ServletContext.class)),
-        templateSystem()).load(pageClass).getText();
+        templateSystem()).load(pageClass, null).getText();
     assert null != template : "no template found!";
     template = template.trim();
     assert template.startsWith("<xml>") && template.endsWith("</xml>"); //a weak sauce test
@@ -63,7 +63,7 @@ public class TemplateLoaderTest {
 
     replay(ctx);
     String template = new TemplateLoader(new MockServletContextProvider(ctx),
-        templateSystem()).load(MyMetaInfPage.class).getText();
+        templateSystem()).load(MyMetaInfPage.class, null).getText();
     verify(ctx);
 
     assert null != template : "no template found!";
@@ -88,7 +88,7 @@ public class TemplateLoaderTest {
 
     replay(ctx);
     String template = new TemplateLoader(new MockServletContextProvider(ctx),
-        templateSystem()).load(MyDefaultMetaInfPage.class).getText();
+        templateSystem()).load(MyDefaultMetaInfPage.class, null).getText();
     verify(ctx);
 
     assert null != template : "no template found!";
