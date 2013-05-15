@@ -703,12 +703,16 @@ public class DefaultPageBook implements PageBook {
     }
 
     private List<Object> reflect(Method method) {
+
       final Annotation[][] annotationsGrid = method.getParameterAnnotations();
+      
       if (null == annotationsGrid)
         return Collections.emptyList();
 
       List<Object> args = new ArrayList<Object>();
+      
       for (int i = 0; i < annotationsGrid.length; i++) {
+
         Annotation[] annotations = annotationsGrid[i];
 
         Annotation bindingAnnotation = null;
@@ -716,14 +720,20 @@ public class DefaultPageBook implements PageBook {
         for (Annotation annotation : annotations) {
           if (Named.class.isInstance(annotation)) {
             Named named = (Named) annotation;
-
 			      args.add(new NamedParameter(named.value(), method.getGenericParameterTypes()[i]));
             preInjectableFound = true;
-
             break;
-          } else if (annotation.annotationType().isAnnotationPresent(BindingAnnotation.class)) {
+          } 
+          if (javax.inject.Named.class.isInstance(annotation)) {
+            javax.inject.Named named = (javax.inject.Named) annotation;
+                  args.add(new NamedParameter(named.value(), method.getGenericParameterTypes()[i]));
+            preInjectableFound = true;
+            break;
+          } 
+          else if (annotation.annotationType().isAnnotationPresent(BindingAnnotation.class)) {
             bindingAnnotation = annotation;
-          } else if (As.class.isInstance(annotation)) {
+          } 
+          else if (As.class.isInstance(annotation)) {
             As as = (As) annotation;
             if (method.isAnnotationPresent(Get.class)
               || method.isAnnotationPresent(Head.class)
