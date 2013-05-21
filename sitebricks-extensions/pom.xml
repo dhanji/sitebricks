@@ -1,0 +1,42 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.google.sitebricks</groupId>
+    <artifactId>sitebricks-parent</artifactId>
+    <version>0.8.9-SNAPSHOT</version>
+  </parent>
+  <artifactId>sitebricks-extensions</artifactId>
+  <name>Sitebricks :: Extensions</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.sitebricks</groupId>
+      <artifactId>sitebricks</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>sitebricks-extensions</finalName>
+    <resources>
+      <resource>
+        <directory>src/test/resources</directory>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+    </plugins>
+
+  </build>
+</project>
