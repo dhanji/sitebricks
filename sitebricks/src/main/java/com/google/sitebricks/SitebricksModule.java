@@ -120,9 +120,6 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
     configureTemplateSystem();
 
-    // Validation
-    install(new SitebricksAlwaysValidatingModule());
-  
   }
 
   protected void configureTemplateSystem() {

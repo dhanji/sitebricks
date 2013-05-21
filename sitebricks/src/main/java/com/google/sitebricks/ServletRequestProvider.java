@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
-import javax.validation.Validator;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -23,6 +22,7 @@ import com.google.inject.TypeLiteral;
 import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Parameters;
+import com.google.sitebricks.validation.SitebricksValidator;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
@@ -31,11 +31,11 @@ import com.google.sitebricks.http.Parameters;
 class ServletRequestProvider implements Provider<Request<String>> {
   private final Provider<HttpServletRequest> servletRequest;
   private final Injector injector;
-  private final Validator validator;
+  private final SitebricksValidator validator;
 
   @Inject
   public ServletRequestProvider(Provider<HttpServletRequest> servletRequest, Injector injector, 
-          Validator validator) {
+          SitebricksValidator validator) {
     this.servletRequest = servletRequest;
     this.injector = injector;
     this.validator = validator;

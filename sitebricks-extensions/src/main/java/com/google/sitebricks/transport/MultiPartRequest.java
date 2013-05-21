@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
-import javax.validation.Validator;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -24,17 +23,18 @@ import com.google.common.collect.Multimap;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.sitebricks.headless.Request;
+import com.google.sitebricks.validation.SitebricksValidator;
 
 public class MultiPartRequest implements Request<FileItem> {
     
     private final HttpServletRequest httpServletRequest;
     
-    private Validator validator;
+    private SitebricksValidator validator;
     
     private Multimap<String, FileItem> params;
     
     @Inject
-    public MultiPartRequest(Provider<HttpServletRequest> requestProvider, Validator validator) throws FileUploadException {
+    public MultiPartRequest(Provider<HttpServletRequest> requestProvider, SitebricksValidator validator) throws FileUploadException {
         this.httpServletRequest = requestProvider.get();
         this.validator = validator;
         this.params = params(this.httpServletRequest);
