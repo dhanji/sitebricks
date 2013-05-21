@@ -99,8 +99,14 @@ class StandardCompilers implements Compilers {
       }
     }
 
-//    Renderable widget = compile(page.pageClass());
-    Renderable widget = loader.compile(page);
+    // TODO(eric) this must be reviewed as we don't support @Show on methods combined with @Decorated pages.
+    Renderable widget = null;
+    if (templateClass.equals(page.pageClass())) {
+        widget = loader.compile(page);
+    }
+    else {
+       widget = compile(templateClass);
+    }
 
     //
     //apply the compiled widget chain to the page (completing compile step)
