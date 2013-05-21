@@ -1,12 +1,10 @@
 package com.google.sitebricks;
 
-import org.apache.commons.fileupload.FileItem;
 import org.mvel2.MVEL;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Stage;
 import com.google.inject.TypeLiteral;
-import com.google.sitebricks.binding.MvelFileItemRequestBinder;
 import com.google.sitebricks.binding.MvelRequestBinder;
 import com.google.sitebricks.binding.RequestBinder;
 import com.google.sitebricks.conversion.MvelConversionHandlers;
@@ -38,7 +36,6 @@ class SitebricksInternalModule extends AbstractModule {
     }
     
     bind(new TypeLiteral<RequestBinder<String>>(){}).to(MvelRequestBinder.class).asEagerSingleton();
-    bind(new TypeLiteral<RequestBinder<FileItem>>(){}).to(MvelFileItemRequestBinder.class).asEagerSingleton();
 
     // use sitebricks converters in mvel
     requestInjection(new MvelConversionHandlers());
