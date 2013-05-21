@@ -28,6 +28,7 @@ import com.google.sitebricks.conversion.DateConverters;
 import com.google.sitebricks.debug.DebugPage;
 import com.google.sitebricks.example.dao.SimpleDao;
 import com.google.sitebricks.example.dao.ValidatingDao;
+import com.google.sitebricks.ext.SitebricksValidationExtModule;
 import com.google.sitebricks.headless.Reply;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Delete;
@@ -158,6 +159,7 @@ public class SitebricksConfig extends GuiceServletContextListener {
         embed(HelloWorld.class).as("Hello");
         
         // Validation
+        install(new SitebricksValidationExtModule());
         bind(SimpleDao.class).to(ValidatingDao.class);
         at("/htmlvalidating").show(HtmlValidating.class);
         at("/htmlvalidatingasform").show(HtmlValidatingAsForm.class);

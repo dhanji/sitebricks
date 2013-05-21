@@ -8,7 +8,7 @@ import com.google.sitebricks.binding.MvelFileItemRequestBinder;
 import com.google.sitebricks.binding.RequestBinder;
 
 /**
- * Module encapsulates external bindings for sitebricks fileupload. Can be installed multiple times.
+ * Module encapsulates external bindings for sitebricks fileupload using commons-fileupload.
  */
 public class SitebricksUploadExtModule extends AbstractModule {
 
