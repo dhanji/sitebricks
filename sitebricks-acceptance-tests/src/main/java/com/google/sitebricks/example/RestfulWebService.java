@@ -21,7 +21,7 @@ public class RestfulWebService {
   public static final int PAGE_COUNT = 789;
 
   @Get
-  public Reply<Book> books(Injector injector, Request request,
+  public Reply<Book> books(Injector injector, Request<String> request,
                        @SitebricksConfig.Test Start start) {
     Preconditions.checkNotNull(injector, "method argument injection failed");
     Preconditions.checkNotNull(request, "method argument injection failed");

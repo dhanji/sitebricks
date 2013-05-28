@@ -1,18 +1,22 @@
 package com.google.sitebricks;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.sitebricks.compiler.TemplateCompiler;
-import net.jcip.annotations.Immutable;
-
-import javax.servlet.ServletContext;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.util.Arrays;
+
+import javax.servlet.ServletContext;
+
+import net.jcip.annotations.Immutable;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.sitebricks.compiler.TemplateCompiler;
+import com.google.sitebricks.routing.PageBook;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -29,7 +33,36 @@ public class TemplateLoader {
     this.templateSystem = templateSystem;
   }
 
-  public Template load(Class<?> pageClass) {
+  public Renderable compile(PageBook.Page page) {
+
+      Show methodShow = page.getShow();
+
+      Template template = load(page.pageClass(), methodShow);
+      TemplateCompiler templateCompiler = templateSystem.compilerFor(template.getName());
+
+      if (templateCompiler == null) {
+        templateCompiler = templateSystem.compilerFor("html");
+      }
+
+      return templateCompiler.compile(page.pageClass(), template);
+    }
+
+  public Renderable compile(Class<?> templateClass) {
+      Template template = load(templateClass, null);
+      TemplateCompiler templateCompiler = templateSystem.compilerFor(template.getName());
+      //
+      // This is how the old mechanism worked, for example if dynamic.js comes through the system we still pass back
+      // the html compiler. JVZ: not sure why this wouldn't be directly routed to the right resource. TODO: investigate
+      //
+      if (templateCompiler == null) {
+        templateCompiler = templateSystem.compilerFor("html");
+      }
+
+      return templateCompiler.compile(templateClass, template);
+    }
+
+  // protected for the tests access...
+  protected Template load(Class<?> pageClass, Show methodShow) {
     //
     // try to find the template name
     //
@@ -39,6 +72,15 @@ public class TemplateLoader {
     Show show = pageClass.getAnnotation(Show.class);
     if (null != show) {
       template = show.value();
+    }
+    
+    if (methodShow != null) {
+        if (template != null) {
+            template = template + methodShow.value();
+        }
+        else {
+            template = methodShow.value();
+        }
     }
 
     //
@@ -185,6 +227,7 @@ public class TemplateLoader {
       template += "." + extension;
 
     return new Template(template, text, templateSource);
+    
   }
 
   private static InputStream open(String templateName, ServletContext context) {
@@ -214,19 +257,5 @@ public class TemplateLoader {
     }
 
     return builder.toString();
-  }
-
-  public Renderable compile(Class<?> templateClass) {
-    Template template = load(templateClass);
-    TemplateCompiler templateCompiler = templateSystem.compilerFor(template.getName());
-    //
-    // This is how the old mechanism worked, for example if dynamic.js comes through the system we still pass back
-    // the html compiler. JVZ: not sure why this wouldn't be directly routed to the right resource. TODO: investigate
-    //
-    if (templateCompiler == null) {
-      templateCompiler = templateSystem.compilerFor("html");
-    }
-
-    return templateCompiler.compile(templateClass, template);
   }
 }

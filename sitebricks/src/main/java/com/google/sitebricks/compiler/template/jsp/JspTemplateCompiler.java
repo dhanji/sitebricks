@@ -1,6 +1,7 @@
-package com.google.sitebricks.compiler;
+package com.google.sitebricks.compiler.template.jsp;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
@@ -14,6 +15,7 @@ import com.google.inject.Singleton;
 import com.google.sitebricks.Renderable;
 import com.google.sitebricks.Respond;
 import com.google.sitebricks.Template;
+import com.google.sitebricks.compiler.TemplateCompiler;
 
 /**
  * Class that delegates the JSP compilation to the provided WEB container compiler
@@ -27,11 +29,14 @@ import com.google.sitebricks.Template;
 @Singleton
 public class JspTemplateCompiler implements TemplateCompiler {
 
-	@Inject
-	Provider<HttpServletRequest> httpServletRequestProvider;
+    public static final String PAGE_FLOW_REQUEST_ATTRIBUTE_NAME = "pageFlow";
+    public static final String PAGE_FLOW_ERRORS_REQUEST_ATTRIBUTE_NAME = "pageFlowErrors";
 
-	@Inject
-	Provider<HttpServletResponse> httpServletResponseProvider;
+    @Inject
+	private Provider<HttpServletRequest> httpServletRequestProvider;
+
+    @Inject
+    private Provider<HttpServletResponse> httpServletResponseProvider;
 
 	public Renderable compile(Class<?> page, final Template template) {
 
@@ -39,17 +44,28 @@ public class JspTemplateCompiler implements TemplateCompiler {
 
 			@Override
 			public void render(Object bound, Respond respond) {
-				HttpServletRequest request = httpServletRequestProvider.get();
-				HttpServletResponse response = httpServletResponseProvider.get();
-				RequestDispatcher requestDispatcher = request.getRequestDispatcher(template.getName());
-				request.setAttribute("pageFlow", bound);
+
+			    HttpServletRequest httpRequest = httpServletRequestProvider.get();
+				HttpServletResponse httpresponse = httpServletResponseProvider.get();
+				
+                httpRequest.setAttribute(PAGE_FLOW_REQUEST_ATTRIBUTE_NAME, bound);
+
+                List<String> errors = respond.getErrors();
+                Object obj = httpRequest.getAttribute(PAGE_FLOW_ERRORS_REQUEST_ATTRIBUTE_NAME);
+                if (obj != null) {
+                    errors.addAll((List<String>) obj);
+                }
+                httpRequest.setAttribute(PAGE_FLOW_ERRORS_REQUEST_ATTRIBUTE_NAME, errors);
+
+                RequestDispatcher requestDispatcher = httpRequest.getRequestDispatcher(template.getName());
 				try {
-					requestDispatcher.include(request, response);
+					requestDispatcher.include(httpRequest, httpresponse);
 				} catch (ServletException e) {
 					throw new RuntimeException("Could not include the JSP response for path=" + template.getName(), e);
 				} catch (IOException e) {
 					throw new RuntimeException("Could not include the JSP response for path=" + template.getName(), e);
 				}
+				
 			}
 
 			@Override

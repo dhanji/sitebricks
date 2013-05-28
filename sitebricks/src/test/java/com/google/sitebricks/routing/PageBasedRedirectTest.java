@@ -36,7 +36,7 @@ public class PageBasedRedirectTest {
   public void pre() {
     redirect = new PageBasedRedirect();
 
-    Request requestMock = createNiceMock(Request.class);
+    Request<String> requestMock = createNiceMock(Request.class);
     redirect.setRequestProvider(Providers.of(requestMock));
 
     replay(requestMock);
@@ -63,7 +63,7 @@ public class PageBasedRedirectTest {
 
   @Test
   public void staticUriContextualized() throws Exception {
-    Request requestMock = createMock(Request.class);
+    Request<String> requestMock = createMock(Request.class);
     expect(requestMock.context()).andReturn("/bricks").anyTimes();
     redirect.setRequestProvider(Providers.of(requestMock));
 
@@ -79,7 +79,7 @@ public class PageBasedRedirectTest {
 
   @Test
   public void fillInUriTemplateContextualized() throws Exception {
-    Request requestMock = createMock(Request.class);
+    Request<String> requestMock = createMock(Request.class);
     expect(requestMock.context()).andReturn("/bricks").anyTimes();
     redirect.setRequestProvider(Providers.of(requestMock));
 

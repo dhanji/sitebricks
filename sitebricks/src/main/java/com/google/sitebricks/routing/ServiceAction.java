@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public abstract class ServiceAction implements Action {
   @Inject
-  private Provider<Request> requestProvider;
+  private Provider<Request<String>> requestProvider;
 
   @Override
   public boolean shouldCall(Request request) {

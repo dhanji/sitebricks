@@ -1,8 +1,9 @@
 package com.google.sitebricks.rendering.control;
 
-import com.google.sitebricks.Respond;
-
+import java.util.List;
 import java.util.Map;
+
+import com.google.sitebricks.Respond;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail com)
@@ -17,7 +18,9 @@ class EmbeddedRespond implements Respond {
 
   private final Map<String, ArgumentWidget> arguments;
   private final Respond delegate;
-
+  
+  private List<String> errors;
+  
   public EmbeddedRespond(Map<String, ArgumentWidget> arguments, Respond respond) {
     this.arguments = arguments;
     this.delegate = respond;
@@ -123,6 +126,16 @@ class EmbeddedRespond implements Respond {
 
   @Override public Object pageObject() {
     return delegate.pageObject();
+  }
+
+  @Override
+  public List<String> getErrors() {
+    return this.errors;
+  }
+
+  @Override
+  public void setErrors(List<String> errors) {
+    this.errors = errors;
   }
 
   @Override

@@ -39,21 +39,21 @@ public class RestfulWebServiceWithCRUDConversions {
 	}
 
 	@Post
-	public Reply<Widget> post(Request request) {
+	public Reply<Widget> post(Request<String> request) {
 		Widget widget = request.read(Widget.class).as(Json.class);
 		addWidget(widget);
 		return Reply.with(widget).as(Json.class).type("application/json");
 	}
 
 	@Put
-	public Reply<?> put(Request request) {
+	public Reply<?> put(Request<String> request) {
 		Widget widget = request.read(Widget.class).as(Json.class);
 		addWidget(widget);
 		return Reply.with(widget).as(Json.class).type("application/json");
 	}
 
   @Patch
-  public Reply<?> patch(Request request) {
+  public Reply<?> patch(Request<String> request) {
     Widget widget = request.read(Widget.class).as(Json.class);
     updateWidget(widget);
     return Reply.with(widget).as(Json.class).type("application/json");

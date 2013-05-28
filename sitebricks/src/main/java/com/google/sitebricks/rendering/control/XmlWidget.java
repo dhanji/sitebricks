@@ -28,7 +28,7 @@ class XmlWidget implements Renderable {
   private final Map<String, List<Token>> attributes;
 
   // HACK Extremely ouch! Replace with Assisted inject.
-  private static volatile Provider<Request> request;
+  private static volatile Provider<Request<String>> request;
 
   private static final Set<String> CONTEXTUAL_ATTRIBS;
 
@@ -133,7 +133,7 @@ class XmlWidget implements Renderable {
   }
 
   @Inject
-  public void setRequestProvider(Provider<Request> requestProvider) {
+  public void setRequestProvider(Provider<Request<String>> requestProvider) {
     XmlWidget.request = requestProvider;
   }
 }

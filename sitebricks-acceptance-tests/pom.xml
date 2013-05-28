@@ -16,6 +16,10 @@
     </dependency>
     <dependency>
       <groupId>com.google.sitebricks</groupId>
+      <artifactId>sitebricks-extensions</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.sitebricks</groupId>
       <artifactId>sitebricks-stat</artifactId>
     </dependency>
     <dependency>

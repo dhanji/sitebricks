@@ -28,7 +28,7 @@ import com.google.sitebricks.rendering.Strings;
 /**
  * A Utility that binds a localizable interface to its instance parameters.
  */
-class Localizer {
+public class Localizer {
   private final Binder binder;
   private final Set<Localization> localizations;
 
@@ -42,7 +42,7 @@ class Localizer {
    * A value object that represents the localization of an i18n  interface to a locale
    * and corresponding set of messages. 
    */
-  static class Localization {
+  public static class Localization {
     // TODO(dhanji): Convert class reference to weak?
     private final Class<?> clazz;
     private final Locale locale;
@@ -52,6 +52,16 @@ class Localizer {
       this.clazz = clazz;
       this.locale = locale;
       this.messageBundle = messageBundle;
+    }
+    
+    public Class<?> getClazz() {
+        return this.clazz;
+    }
+    public Locale getLocale() {
+        return this.locale;
+    }
+    public Map<String, String> getMessageBundle() {
+        return this.messageBundle;
     }
 
   }
@@ -238,10 +248,6 @@ class Localizer {
     }
   }
 
-  private static boolean isDefault(Map<String, String> resourceBundle) {
-    return resourceBundle == DEFAULT;
-  }
-
   /**
    * Returns a localization value object describing the defaults specified in the @Message
    * annotations of the methods on the given i18n interface. The locale used is the system
@@ -259,4 +265,5 @@ class Localizer {
 
     return new Localization(iface, Locale.getDefault(), defaultMessages);
   }
+
 }

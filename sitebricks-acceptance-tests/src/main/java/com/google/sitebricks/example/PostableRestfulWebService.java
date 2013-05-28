@@ -20,7 +20,7 @@ import java.util.Map;
 public class PostableRestfulWebService {
 
   @Post
-  public Reply<String> postBook(HttpServletRequest servletRequest, Request request) {
+  public Reply<String> postBook(HttpServletRequest servletRequest, Request<String> request) {
     RestfulWebService.Book perdido = request.read(RestfulWebService.Book.class).as(Json.class);
 
     boolean assertions = RestfulWebService.PERDIDO_STREET_STATION.equals(perdido.getName())

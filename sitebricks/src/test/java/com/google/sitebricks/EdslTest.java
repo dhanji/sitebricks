@@ -8,8 +8,10 @@ import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.routing.Action;
+
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -66,5 +68,12 @@ public class EdslTest {
     public Object call(Request request, Object page, Map<String, String> map) {
       return Reply.saying().ok();
     }
+    
+    @Override
+    public Method getMethod() {
+      return null;
+    }
+
   }
+
 }

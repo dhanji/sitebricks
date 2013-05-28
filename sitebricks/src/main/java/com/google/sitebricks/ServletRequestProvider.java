@@ -1,5 +1,16 @@
 package com.google.sitebricks;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
+
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.io.ByteStreams;
@@ -11,30 +22,28 @@ import com.google.inject.TypeLiteral;
 import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.http.Parameters;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Enumeration;
-import java.util.Map;
+import com.google.sitebricks.validation.SitebricksValidator;
 
 /**
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
 @Singleton
-class ServletRequestProvider implements Provider<Request> {
+class ServletRequestProvider implements Provider<Request<String>> {
   private final Provider<HttpServletRequest> servletRequest;
   private final Injector injector;
+  private final SitebricksValidator validator;
 
   @Inject
-  public ServletRequestProvider(Provider<HttpServletRequest> servletRequest, Injector injector) {
+  public ServletRequestProvider(Provider<HttpServletRequest> servletRequest, Injector injector, 
+          SitebricksValidator validator) {
     this.servletRequest = servletRequest;
     this.injector = injector;
+    this.validator = validator;
   }
 
   @Override
-  public Request get() {
-    return new Request() {
+  public Request<String> get() {
+    return new Request<String>() {
       HttpServletRequest servletRequest = ServletRequestProvider.this.servletRequest.get();
       Multimap<String, String> matrix;
       Multimap<String, String> headers;
@@ -156,7 +165,15 @@ class ServletRequestProvider implements Provider<Request> {
         return method;
       }
 
-      private void readParams() {
+      @Override
+      public void validate(Object object) {
+          Set<? extends ConstraintViolation<?>> cvs = validator.validate(object);
+          if ((cvs != null) && (! cvs.isEmpty())) {
+              throw new ValidationException(new ConstraintViolationException((Set<ConstraintViolation<?>>) cvs));
+          }
+      }
+
+    private void readParams() {
         ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
 
         @SuppressWarnings("unchecked") // Guaranteed by servlet spec
@@ -190,4 +207,5 @@ class ServletRequestProvider implements Provider<Request> {
     };
 
   }
+  
 }

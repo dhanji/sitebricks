@@ -1,5 +1,7 @@
 package com.google.sitebricks;
 
+import java.util.List;
+
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
  */
@@ -33,6 +35,10 @@ public interface Respond {
   void clear();
 
   Object pageObject();
+
+  List<String> getErrors();
+
+  void setErrors(List<String> errors);
 
   public static interface HtmlTagBuilder {
     void textField(String value, String s);

@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  */
 @Immutable
 @Singleton
-class MvelRequestBinder implements RequestBinder {
+public class MvelRequestBinder implements RequestBinder<String> {
   private final Evaluator evaluator;
   private final Provider<FlashCache> cacheProvider;
   private final Logger log = Logger.getLogger(MvelRequestBinder.class.getName());
@@ -36,7 +36,7 @@ class MvelRequestBinder implements RequestBinder {
     this.cacheProvider = cacheProvider;
   }
 
-  public void bind(Request request, Object o) {
+  public void bind(Request<String> request, Object o) {
     final Multimap<String, String> map = request.params();
 
     //bind iteratively (last incoming param-value per key, gets bound)
@@ -124,4 +124,5 @@ class MvelRequestBinder implements RequestBinder {
 
     return true;
   }
+  
 }

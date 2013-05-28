@@ -1,9 +1,10 @@
 package com.google.sitebricks.routing;
 
-import com.google.sitebricks.headless.Request;
-
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Map;
+
+import com.google.sitebricks.headless.Request;
 
 /**
  * An abstract representation of the service code called
@@ -30,4 +31,7 @@ public interface Action {
    * @return an instance of Reply, Redirect or null to trigger a 500 error.
    */
   Object call(Request request, Object page, Map<String, String> map) throws IOException;
+
+  Method getMethod();
+  
 }
