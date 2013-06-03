@@ -119,6 +119,12 @@ class ReplyMaker<E> extends Reply<E> {
   }
 
   @Override
+  public Reply<E> badRequest() {
+    status = HttpServletResponse.SC_BAD_REQUEST;
+    return this;
+  }
+
+  @Override
   public Reply<E> status(int code) {
     status = code;
     return this;

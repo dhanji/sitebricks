@@ -25,7 +25,7 @@ public class RestfulWebServiceWithMatrixParams {
 
   @At("/:variable/:id") @Post
   public Reply<String> variableSecondLevel(@Named("variable") String arg, @Named("id") String id,
-                                           Request request) {
+                                           Request<String> request) {
     return Reply.with(request.matrix().toString() + "_" + arg + "_" + id);
   }
 }

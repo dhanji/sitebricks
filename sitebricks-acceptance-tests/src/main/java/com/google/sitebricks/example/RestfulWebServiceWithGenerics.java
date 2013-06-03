@@ -18,7 +18,7 @@ import java.util.List;
 public class RestfulWebServiceWithGenerics {
 
   @Post
-  public Reply<?> addPerson(Request request) {
+  public Reply<?> addPerson(Request<String> request) {
 
     List<Person> personList = request.read(new TypeLiteral<List<Person>>() {}).as(Json.class);
 

@@ -27,7 +27,7 @@ class EmbedWidget implements Renderable {
   private final String targetPage;
 
   private EmbeddedRespondFactory factory;
-  private Provider<Request> request;
+  private Provider<Request<String>> request;
 
   public EmbedWidget(Map<String, ArgumentWidget> arguments, String expression,
                      Evaluator evaluator, PageBook pageBook, String targetPage) {
@@ -77,7 +77,7 @@ class EmbedWidget implements Renderable {
   }
 
   @Inject
-  public void init(EmbeddedRespondFactory factory, Provider<Request> request) {
+  public void init(EmbeddedRespondFactory factory, Provider<Request<String>> request) {
     this.factory = factory;
     this.request = request;
   }

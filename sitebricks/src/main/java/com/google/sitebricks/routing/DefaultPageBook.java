@@ -1,5 +1,26 @@
 package com.google.sitebricks.routing;
 
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.validation.ValidationException;
+
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
@@ -18,6 +39,7 @@ import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.At;
 import com.google.sitebricks.Bricks;
 import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Show;
 import com.google.sitebricks.client.Transport;
 import com.google.sitebricks.conversion.TypeConverter;
 import com.google.sitebricks.headless.Reply;
@@ -32,23 +54,7 @@ import com.google.sitebricks.http.negotiate.ContentNegotiator;
 import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.rendering.control.DecorateWidget;
-import net.jcip.annotations.GuardedBy;
-import net.jcip.annotations.ThreadSafe;
-import org.jetbrains.annotations.Nullable;
-
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
+import com.google.sitebricks.transport.Form;
 
 /**
  * contains active uri/widget mappings
@@ -104,11 +110,11 @@ public class DefaultPageBook implements PageBook {
         subpath = uri + subpath;
 
         // Register as headless web service.
-        at(subpath, pageClass, true);
+        doAt(subpath, pageClass, true);
       }
     }
 
-    return at(uri, pageClass, true);
+    return doAt(uri, pageClass, true);
   }
 
   public PageTuple at(String uri, Class<?> clazz) {
@@ -156,6 +162,36 @@ public class DefaultPageBook implements PageBook {
   }
 
   private PageTuple at(String uri, Class<?> clazz, boolean headless) {
+
+      // Handle subpaths, registering each as a separate instance of the page
+      // tuple.
+      for (Method method : clazz.getDeclaredMethods()) {
+        if (method.isAnnotationPresent(At.class)) {
+
+          // This is a subpath expression.
+          At at = method.getAnnotation(At.class);
+          String subpath = at.value();
+
+          // Validate subpath
+          if (!subpath.startsWith("/") || subpath.isEmpty() || subpath.length() == 1) {
+            throw new IllegalArgumentException(String.format(
+                "Subpath At(\"%s\") on %s.%s() must begin with a \"/\" and must not be empty",
+                subpath, clazz.getName(), method.getName()));
+          }
+
+          subpath = uri + subpath;
+
+          // Register as headless web service.
+          doAt(subpath, clazz, headless);
+        }
+      }
+      
+      return doAt(uri, clazz, headless);
+
+  }
+
+  private PageTuple doAt(String uri, Class<?> clazz, boolean headless) {
+
     final String key = firstPathElement(uri);
     final PageTuple pageTuple =
         new PageTuple(uri, new PathMatcherChain(uri), clazz, injector, headless, false);
@@ -336,6 +372,11 @@ public class DefaultPageBook implements PageBook {
 
     public static InstanceBoundPage delegating(Page delegate, Object instance) {
       return new InstanceBoundPage(delegate, instance);
+    }
+
+    @Override
+    public Show getShow() {
+        return delegate.getShow();
     }
   }
 
@@ -601,6 +642,25 @@ public class DefaultPageBook implements PageBook {
     }
 
     @Override
+    public Show getShow() {
+        for (String httpMethod: methods.keySet()) {
+            Collection<Action> actions = methods.get(httpMethod);
+            if (actions != null) {
+                for (Action action: actions) {
+                    Method method = action.getMethod();
+                    if (method != null) {
+                        Show show = action.getMethod().getAnnotation(Show.class);
+                        if (show != null) {
+                            return show;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (!(o instanceof Page)) return false;
@@ -618,7 +678,7 @@ public class DefaultPageBook implements PageBook {
     @Override
     public String toString() {
         return Objects.toStringHelper(PageTuple.class).add("clazz", clazz).add("isDecorated", extension)
-                .add("uri", uri).toString();
+                .add("uri", uri).add("methods", methods).toString();
     }
 
   }
@@ -643,12 +703,16 @@ public class DefaultPageBook implements PageBook {
     }
 
     private List<Object> reflect(Method method) {
+
       final Annotation[][] annotationsGrid = method.getParameterAnnotations();
+      
       if (null == annotationsGrid)
         return Collections.emptyList();
 
       List<Object> args = new ArrayList<Object>();
+      
       for (int i = 0; i < annotationsGrid.length; i++) {
+
         Annotation[] annotations = annotationsGrid[i];
 
         Annotation bindingAnnotation = null;
@@ -656,21 +720,30 @@ public class DefaultPageBook implements PageBook {
         for (Annotation annotation : annotations) {
           if (Named.class.isInstance(annotation)) {
             Named named = (Named) annotation;
-
 			      args.add(new NamedParameter(named.value(), method.getGenericParameterTypes()[i]));
             preInjectableFound = true;
-
             break;
-          } else if (annotation.annotationType().isAnnotationPresent(BindingAnnotation.class)) {
+          } 
+          if (javax.inject.Named.class.isInstance(annotation)) {
+            javax.inject.Named named = (javax.inject.Named) annotation;
+                  args.add(new NamedParameter(named.value(), method.getGenericParameterTypes()[i]));
+            preInjectableFound = true;
+            break;
+          } 
+          else if (annotation.annotationType().isAnnotationPresent(BindingAnnotation.class)) {
             bindingAnnotation = annotation;
-          } else if (As.class.isInstance(annotation)) {
+          } 
+          else if (As.class.isInstance(annotation)) {
             As as = (As) annotation;
             if (method.isAnnotationPresent(Get.class)
-                || method.isAnnotationPresent(Head.class)
-                || method.isAnnotationPresent(Trace.class))
-              throw new IllegalArgumentException("Cannot accept a @As(...) request body from" +
+              || method.isAnnotationPresent(Head.class)
+              || method.isAnnotationPresent(Trace.class)) {
+              if (! as.value().equals(Form.class)) {
+                throw new IllegalArgumentException("Cannot accept a @As(...) request body from" +
                   " method marked @Get, @Head or @Trace: "
                   + method.getDeclaringClass().getName() + "#" + method.getName() + "()");
+                }
+            }
 
             preInjectableFound = true;
             args.add(new AsParameter(as.value(), TypeLiteral.get(method.getGenericParameterTypes()[i])));
@@ -679,20 +752,25 @@ public class DefaultPageBook implements PageBook {
         }
 
         if (!preInjectableFound) {
-          // Could be an arbitrary injection request.
-          Class<?> argType = method.getParameterTypes()[i];
+
+          Type genericParameterType = method.getGenericParameterTypes()[i];
+            
           Key<?> key = (null != bindingAnnotation)
-              ? Key.get(argType, bindingAnnotation)
-              : Key.get(argType);
+              ? Key.get(genericParameterType, bindingAnnotation)
+              : Key.get(genericParameterType);
 
           args.add(key);
+          
+          if (null == injector.getBindings().get(key)) {
+              
+              throw new InvalidEventHandlerException(
+                      "Encountered an argument not annotated with @Named and not a valid injection key"
+                      + " in event handler method: " + method + " " + key);
 
-          if (null == injector.getBindings().get(key))
-            throw new InvalidEventHandlerException(
-                "Encountered an argument not annotated with @Named and not a valid injection key"
-                + " in event handler method: " + method + " " + key);
+          }
+
         }
-
+        
       }
 
       return Collections.unmodifiableList(args);
@@ -731,6 +809,11 @@ public class DefaultPageBook implements PageBook {
       return result;
     }
 
+    @Override
+    public Method getMethod() {
+      return this.method;
+    }
+
     private static Object call(Object page, final Method method,
                                Object[] args) {
       try {
@@ -740,6 +823,9 @@ public class DefaultPageBook implements PageBook {
             "Could not access event method (appears to be a security problem): " + method, e);
       } catch (InvocationTargetException e) {
         Throwable cause = e.getCause();
+        if (cause instanceof ValidationException) {
+            throw (ValidationException) cause;
+        }
         StackTraceElement[] stackTrace = cause.getStackTrace();
         throw new EventDispatchException(String.format(
             "Exception [%s - \"%s\"] thrown by event method [%s]\n\nat %s\n"
@@ -812,6 +898,12 @@ public class DefaultPageBook implements PageBook {
     public int hashCode() {
       return method.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "MethodTuple [method=" + method + ", args=" + args + "]";
+    }
+
   }
 
   /**

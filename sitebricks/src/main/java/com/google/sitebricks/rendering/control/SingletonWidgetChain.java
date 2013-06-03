@@ -1,10 +1,11 @@
 package com.google.sitebricks.rendering.control;
 
-import com.google.sitebricks.Renderable;
-import com.google.sitebricks.Respond;
+import java.util.Set;
+
 import net.jcip.annotations.Immutable;
 
-import java.util.Set;
+import com.google.sitebricks.Renderable;
+import com.google.sitebricks.Respond;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)

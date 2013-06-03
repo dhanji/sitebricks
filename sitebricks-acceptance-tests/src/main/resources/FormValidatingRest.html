@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!--
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+-->
+<head>
+
+  <link href="default.css" rel="stylesheet" type="text/css" />
+
+  <script type="text/javascript" src="jquery-1.9.0.min.js"></script>
+  <script type="text/javascript" src="json_parse.js"></script>
+  <script type="text/javascript" src="json2.js"></script>
+
+  <script type="text/javascript">
+
+    $(document).ready(function(){
+    	
+        $('#form-1').submit(function() {
+          var json = { 
+        	  "firstName": $('#firstName').val(), 
+			  "lastName": $('#lastName').val(), 
+			  "age": $('#age').val()
+			  };
+          
+	      $.ajax({
+	         url: './restvalidating',
+	         type: 'POST',
+	         contentType : 'application/json',
+	         data : JSON.stringify(json),
+	         success:function(data){
+                var res = JSON.parse(data.responseText);
+                $('#ajax-result').text(res);
+	         },
+	         error:function(data){
+                var res = JSON.parse(data.responseText);
+                $('#ajax-result').text(res);
+		     }
+	      });
+		  return false;
+	    });
+    	
+    });
+    
+  </script>
+
+</head>
+
+<body>
+<!-- start header -->
+<div id="header">
+  <div id="logo">
+    <h1>Sitebricks</h1>
+
+    <h2>a fast, light web framework from Google</h2>
+  </div>
+  <div id="menu">
+    <ul>
+      <li class="active"><a href="http://code.google.com/p/google-sitebricks">Google Sitebricks</a>
+      </li>
+
+      <li><a href="http://google-sitebricks.googlecode.com/svn/trunk">source</a></li>
+      <li><a href="http://code.google.com/p/google-sitebricks/wiki/list">doc</a></li>
+      <li><a href="http://code.google.com/p/google-guice">guice</a></li>
+    </ul>
+  </div>
+</div>
+
+<div id="page">
+  <!-- start content -->
+  <div id="content">
+    <div class="post">
+
+      <div>Any validation errors here?:</div>
+      <div id="ajax-result"></div>
+      
+      <h1 class="title">examples</h1>
+      
+      <form id="form-1">
+        <label for="firstName">First Name:</label>
+        <input name="firstName" id="firstName" type="text"/><br/>
+        <label for="lastName">Last Name:</label>
+        <input name="lastName" id="lastName" type="text"/><br/>
+        <label for="age">Age:</label>
+        <input name="age" id="age" type="text"/><br/>
+        <input type="submit" value="Add Person"/>
+      </form>
+      
+      <div class="meta">
+        <p class="byline">Google Sitebricks.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+
+
+</html>

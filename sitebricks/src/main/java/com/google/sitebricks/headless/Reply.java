@@ -88,6 +88,11 @@ public abstract class Reply<E> {
   public abstract Reply<E> error();
 
   /**
+   * Perform a 400 Bad Request response.
+   */
+  public abstract Reply<E> badRequest();
+
+  /**
    * Render template associated with the given class. The class must have
    * an @Show() annotation pointing to a valid Sitebricks template type (can
    * be any of the supported templates: MVEL, freemarker, SB, etc.)
@@ -133,4 +138,5 @@ public abstract class Reply<E> {
   public static <E> Reply<E> with(E entity) {
     return new ReplyMaker<E>(entity);
   }
+
 }

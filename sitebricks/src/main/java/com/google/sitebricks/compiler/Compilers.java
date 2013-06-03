@@ -18,4 +18,5 @@ public interface Compilers {
   void compilePage(PageBook.Page page);
 
   Renderable compile(Class<?> templateClass);
+  
 }

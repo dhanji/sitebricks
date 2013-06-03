@@ -4,6 +4,7 @@ import com.google.sitebricks.ActionDescriptor;
 import com.google.sitebricks.headless.Request;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -54,4 +55,10 @@ public class SpiAction implements Action {
   public Object call(Request request, Object page, Map<String, String> map) throws IOException {
     return action.call(request, page, map);
   }
+
+  @Override
+  public Method getMethod() {
+    return null;
+  }
+
 }

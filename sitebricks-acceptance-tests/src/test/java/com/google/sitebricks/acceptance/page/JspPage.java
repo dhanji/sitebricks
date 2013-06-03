@@ -25,13 +25,10 @@ public class JspPage {
   }
 
   public List<String> getRepeatedNames() {
-      System.out.println("+++");
-      System.out.println(driver.getPageSource());
     List<String> items = new ArrayList<String>();
     for (WebElement li : namesEntry.findElements(By.tagName("li"))) {
       items.add(li.getText().trim());
     }
-
     return items;
   }
 
@@ -40,7 +37,6 @@ public class JspPage {
     for (WebElement li : moviesEntry.findElements(By.tagName("li"))) {
       items.add(li.getText());
     }
-
     return items;
   }
 
@@ -48,4 +44,5 @@ public class JspPage {
     driver.get(AcceptanceTest.baseUrl() + "/jsp");
     return PageFactory.initElements(driver, JspPage.class);
   }
+
 }

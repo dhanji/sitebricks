@@ -19,7 +19,7 @@ import com.google.inject.Injector;
 public class Jetty {
 
   public static final String INJECTOR_KEY = "@_INJECTOR_@";
-  private static final String APP_NAME = "/sitebricks";
+  public static final String APP_NAME = "/sitebricks";
   private static int PORT;
   private Server server;
   private ServerConnector connector;
@@ -72,7 +72,7 @@ public class Jetty {
     // When the server starts if the port is specified at 0, then it will find a free port. Once that
     // happens we'll store it so that client code can rely on a valid and free port number.
     //
-    PORT = getListeningPort();
+   PORT = getListeningPort();
   }
 
   public void join() throws Exception {

@@ -24,6 +24,7 @@
     <cglib.full.version>2.0.2</cglib.full.version>
     <lucene.version>4.0.0</lucene.version>
     <jedis.version>2.1.0</jedis.version>
+    <bval.version>0.5</bval.version>
   </properties>
 
   <modules>
@@ -32,6 +33,7 @@
     <module>sitebricks-converter</module>
     <module>sitebricks-client</module>
     <module>sitebricks-easy-client</module>
+    <module>sitebricks-extensions</module>
     <module>sitebricks-acceptance-tests</module>
     <module>sitebricks-test-support</module>
     <module>sitebricks-mail</module>
@@ -57,6 +59,11 @@
       <dependency>
         <groupId>com.google.sitebricks</groupId>
         <artifactId>sitebricks</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.sitebricks</groupId>
+        <artifactId>sitebricks-extensions</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -147,6 +154,12 @@
       </dependency>
 
       <dependency>
+        <groupId>javax.validation</groupId>
+        <artifactId>validation-api</artifactId>
+        <version>1.0.0.GA</version>
+      </dependency>
+
+      <dependency>
         <groupId>net.jcip</groupId>
         <artifactId>jcip-annotations</artifactId>
         <version>1.0</version>
@@ -224,6 +237,16 @@
         <version>1.5.2</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.apache.bval</groupId>
+        <artifactId>bval-guice</artifactId>
+        <version>${bval.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-fileupload</groupId>
+        <artifactId>commons-fileupload</artifactId>
+        <version>1.2.2</version>
+      </dependency>
 
       <dependency>
         <groupId>org.slf4j</groupId>
