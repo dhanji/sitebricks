@@ -5,9 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.sitebricks.mail.imap.*;
-import com.google.sitebricks.mail.oauth.OAuthConfig;
-import com.google.sitebricks.mail.oauth.Protocol;
-import com.google.sitebricks.mail.oauth.XoauthSasl;
+import com.google.sitebricks.mail.oauth.*;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -146,11 +144,9 @@ public class NettyImapClient implements MailClient, Idler {
       channel.write(". CAPABILITY\r\n");
       if (config.getPassword() != null)
         channel.write(". login " + config.getUsername() + " " + config.getPassword() + "\r\n");
-      else {
-        // Use xoauth login instead.
+      else if (config.getOAuthConfig() != null) {
+        // Use xoauth authentication.
         OAuthConfig oauth = config.getOAuthConfig();
-        Preconditions.checkArgument(oauth != null,
-            "Must specify a valid oauth config if not using password auth");
 
         //noinspection ConstantConditions
         String oauthString = new XoauthSasl(config.getUsername(),
@@ -162,6 +158,18 @@ public class NettyImapClient implements MailClient, Idler {
         channel.write(". AUTHENTICATE XOAUTH " + oauthString + "\r\n");
 
       }
+      else if (config.getOAuth2Config() != null) {
+        // Use xoauth2 authentication.
+        OAuth2Config oauth2 = config.getOAuth2Config();
+
+        //noinspection ConstantConditions
+        String oauth2String = Xoauth2Sasl.build(config.getUsername(), oauth2.accessToken);
+
+        channel.write(". AUTHENTICATE XOAUTH2 " + oauth2String + "\r\n");
+
+      }
+      else
+        Preconditions.checkArgument(false, "Must specify a valid oauth/oauth2 config if not using password auth");
       return mailClientHandler.awaitLogin();
     } catch (Exception e) {
       // Capture the wire trace and log it for some extra context here.
@@ -602,6 +610,11 @@ public class NettyImapClient implements MailClient, Idler {
   public synchronized void updateOAuthAccessToken(String accessToken, String tokenSecret) {
     config.getOAuthConfig().accessToken = accessToken;
     config.getOAuthConfig().tokenSecret = tokenSecret;
+  }
+
+  @Override
+  public synchronized void updateOAuth2AccessToken(String accessToken) {
+    config.getOAuthConfig().accessToken = accessToken;
   }
 
   public synchronized void done() {
