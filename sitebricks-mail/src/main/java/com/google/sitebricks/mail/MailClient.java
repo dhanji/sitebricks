@@ -232,6 +232,16 @@ public interface MailClient {
   void updateOAuthAccessToken(String accessToken, String tokenSecret);
 
   /**
+   * Allows you to dynamically update the value of access token if using XOAuth2 to access
+   * an imap server. This is useful if a user logs in from multiple locations
+   * and you always want the last authorized token to be used when reconnecting existing mail
+   * clients.
+   *
+   * @param accessToken A string containing the access token as retrieved from the oauth server.
+   */
+  void updateOAuth2AccessToken(String accessToken);
+
+  /**
    * Fetches a single message by its uid.
    */
   ListenableFuture<Message> fetchUid(Folder folder, int uid);

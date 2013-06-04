@@ -2,6 +2,7 @@ package com.google.sitebricks.mail;
 
 import com.google.common.base.Preconditions;
 import com.google.sitebricks.mail.Mail.AuthBuilder;
+import com.google.sitebricks.mail.oauth.OAuth2Config;
 import com.google.sitebricks.mail.oauth.OAuthConfig;
 
 import java.util.concurrent.ExecutorService;
@@ -62,6 +63,17 @@ class SitebricksMail implements Mail, AuthBuilder {
 
   @Override
   public MailClient prepareOAuth(String username, OAuthConfig config) {
+    if (null == bossPool) {
+      bossPool = Executors.newCachedThreadPool();
+      workerPool = Executors.newCachedThreadPool();
+    }
+
+    return new NettyImapClient(new MailClientConfig(host, port, username, config, timeout),
+        bossPool, workerPool);
+  }
+
+  @Override
+  public MailClient prepareOAuth2(String username, OAuth2Config config) {
     if (null == bossPool) {
       bossPool = Executors.newCachedThreadPool();
       workerPool = Executors.newCachedThreadPool();
