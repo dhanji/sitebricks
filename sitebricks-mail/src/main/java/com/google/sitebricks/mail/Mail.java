@@ -1,6 +1,7 @@
 package com.google.sitebricks.mail;
 
 import com.google.inject.ImplementedBy;
+import com.google.sitebricks.mail.oauth.OAuth2Config;
 import com.google.sitebricks.mail.oauth.OAuthConfig;
 
 import java.util.concurrent.ExecutorService;
@@ -13,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public interface Mail {
   AuthBuilder clientOf(String host, int port);
 
-  public enum Auth { PLAIN, SSL, OAUTH }
+  public enum Auth { PLAIN, SSL, OAUTH, OAUTH2 }
 
   public static interface AuthBuilder {
     AuthBuilder timeout(long amount, TimeUnit unit);
@@ -24,5 +25,7 @@ public interface Mail {
 
 
     MailClient prepareOAuth(String username, OAuthConfig config);
+
+    MailClient prepareOAuth2(String username, OAuth2Config config);
   }
 }

@@ -1,6 +1,7 @@
 package com.google.sitebricks.mail;
 
 import com.google.sitebricks.mail.Mail.Auth;
+import com.google.sitebricks.mail.oauth.OAuth2Config;
 import com.google.sitebricks.mail.oauth.OAuthConfig;
 
 /**
@@ -14,6 +15,7 @@ class MailClientConfig {
   private final String password;
   private final long timeout;
   private final OAuthConfig oAuthConfig;
+  private final OAuth2Config oAuth2Config;
 
   private final boolean gmail;
 
@@ -26,6 +28,7 @@ class MailClientConfig {
     this.password = password;
     this.timeout = timeout;
     oAuthConfig = null;
+    oAuth2Config = null;
 
     this.gmail = isGmail(host);
   }
@@ -42,6 +45,24 @@ class MailClientConfig {
     this.password = null;
     this.timeout = timeout;
     oAuthConfig = config;
+    oAuth2Config = null;
+
+    this.gmail = isGmail(host);
+  }
+
+  public MailClientConfig(String host,
+                          int port,
+                          String username,
+                          OAuth2Config config,
+                          long timeout) {
+    this.host = host;
+    this.port = port;
+    this.authType = Auth.OAUTH;
+    this.username = username;
+    this.password = null;
+    this.timeout = timeout;
+    oAuthConfig = null;
+    oAuth2Config = config;
 
     this.gmail = isGmail(host);
   }
@@ -80,5 +101,9 @@ class MailClientConfig {
 
   public OAuthConfig getOAuthConfig() {
     return oAuthConfig;
+  }
+
+  public OAuth2Config getOAuth2Config() {
+    return oAuth2Config;
   }
 }
