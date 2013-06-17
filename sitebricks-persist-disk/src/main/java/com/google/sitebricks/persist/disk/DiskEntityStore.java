@@ -1,5 +1,6 @@
 package com.google.sitebricks.persist.disk;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexWriter;
@@ -8,7 +9,6 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.util.BytesRef;
-import org.codehaus.jackson.map.ObjectMapper;
 import com.google.sitebricks.persist.EntityMetadata;
 import com.google.sitebricks.persist.EntityQuery;
 import com.google.sitebricks.persist.EntityStore;
