@@ -4,12 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.inject.TypeLiteral;
-import org.codehaus.jackson.map.ObjectMapper;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.codehaus.jackson.map.type.TypeFactory;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)

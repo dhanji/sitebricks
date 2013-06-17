@@ -57,6 +57,10 @@
       <artifactId>xalan</artifactId>
       <version>2.7.0</version>
     </dependency>
+    <dependency>
+      <groupId>dom4j</groupId>
+      <artifactId>dom4j</artifactId>
+    </dependency>
 
     <!-- Jetty webserver -->
       <dependency>
