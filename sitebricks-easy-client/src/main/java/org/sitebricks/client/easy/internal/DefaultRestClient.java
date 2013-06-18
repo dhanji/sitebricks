@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.sitebricks.client.easy.internal;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.sitebricks.At;
 import com.google.sitebricks.client.Web;
 import com.google.sitebricks.client.WebClient;
@@ -21,9 +23,6 @@ import com.google.sitebricks.http.Get;
 import com.google.sitebricks.http.Patch;
 import com.google.sitebricks.http.Post;
 import com.google.sitebricks.http.Put;
-
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.type.TypeFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;

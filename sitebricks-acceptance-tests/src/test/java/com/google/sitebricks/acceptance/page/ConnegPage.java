@@ -4,10 +4,9 @@ import com.google.inject.Guice;
 import com.google.sitebricks.acceptance.util.AcceptanceTest;
 import com.google.sitebricks.client.Web;
 import com.google.sitebricks.client.transport.Text;
+import java.util.Map;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
-
-import java.util.Map;
 
 /**
  * Page object that wraps the content negotiation page.
