@@ -32,7 +32,6 @@
     <module>sitebricks-annotations</module>
     <module>sitebricks-converter</module>
     <module>sitebricks-client</module>
-    <module>sitebricks-easy-client</module>
     <module>sitebricks-extensions</module>
     <module>sitebricks-acceptance-tests</module>
     <module>sitebricks-test-support</module>
