@@ -59,10 +59,14 @@ public class Jetty {
 
     // Hack to allow successfull test via maven CLI
     // Read http://stackoverflow.com/questions/2151075/cannot-load-jstl-taglib-within-embedded-jetty-server
+    System.out.println(">>>>>> " + System.getProperty("maven.repo.local"));
     ClassLoader currentClassLoader = Thread.currentThread().getContextClassLoader();
     File taglibsJarFile = new File(System.getProperty("user.home") + "/.m2/repository/taglibs/standard/1.1.2/standard-1.1.2.jar");
     if (! taglibsJarFile.exists()) {
+      taglibsJarFile = new File(System.getProperty("maven.repo.local") + "/taglibs/standard/1.1.2/standard-1.1.2.jar");
+      if (! taglibsJarFile.exists()) {            
         throw new RuntimeException("Taglib Jar file does not exist at path: " + taglibsJarFile.getAbsolutePath());
+      }
     }
     URL taglibsJarUrl = taglibsJarFile.toURI().toURL();
     URLClassLoader newClassLoader = new URLClassLoader(new URL[]{taglibsJarUrl}, currentClassLoader);
