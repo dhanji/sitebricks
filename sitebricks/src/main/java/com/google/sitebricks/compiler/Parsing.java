@@ -106,7 +106,7 @@ public class Parsing {
 
       //test for start of an expression
       if (TokenizerState.READING_TEXT.equals(state)) {
-        if ('$' == characters[i]) {
+        if ('$' == characters[i] && characters.length > 1) {
           if ('{' == characters[i + 1]) {
             //YES it is the start of an expr, so close up the existing token & start a new one
             if (token.length() > 0) {

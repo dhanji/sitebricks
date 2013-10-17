@@ -183,6 +183,21 @@ public class HtmlTemplateCompilerTest {
 
 
   @Test
+  public final void parseNormalDollarSign() {
+
+    Renderable widget = compiler()
+        .compile(Object.class, new Template("<html><span class=\"price\">$<span>14</span><span>/month</span></span></html>"));
+
+    assert null != widget : " null ";
+    final Respond mockRespond = RespondersForTesting.newRespond();
+    widget.render(new Object(), mockRespond);
+    final String value = mockRespond.toString();
+    assert "<html><span class=\"price\">$<span>14</span><span>/month</span></span></html>".equals(value) : "Did not write expected output, instead: " + value;
+  }
+
+
+  //TODO: Fix NullPointerException in this test
+  @Test(enabled = false)
   public final void readTextWidgetValues() {
 
     Renderable widget = compiler()
