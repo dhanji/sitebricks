@@ -10,9 +10,8 @@ import java.util.Map;
  * @author Dhanji R. Prasanna (dhanji@gmail com)
  */
 @Immutable class EmbeddedRespondFactory {
-  private final Respond respond = new StringBuilderRespond(new Object());
-
-  public EmbeddedRespond get(Map<String, ArgumentWidget> arguments) {
+  public EmbeddedRespond get(Map<String, ArgumentWidget> arguments, Object parentContext) {
+    Respond respond = new StringBuilderRespond(parentContext != null ? parentContext : new Object());
     return new EmbeddedRespond(arguments, respond);
   }
 }
