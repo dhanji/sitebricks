@@ -1,5 +1,6 @@
 package com.google.sitebricks;
 
+import com.google.sitebricks.locale.LocaleProvider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -40,7 +41,7 @@ public class Localizer {
 
   /**
    * A value object that represents the localization of an i18n  interface to a locale
-   * and corresponding set of messages. 
+   * and corresponding set of messages.
    */
   public static class Localization {
     // TODO(dhanji): Convert class reference to weak?
@@ -53,7 +54,7 @@ public class Localizer {
       this.locale = locale;
       this.messageBundle = messageBundle;
     }
-    
+
     public Class<?> getClazz() {
         return this.clazz;
     }
@@ -168,7 +169,7 @@ public class Localizer {
 
         // Wonderful Guice hack to get around not using assisted inject.
         @Inject
-        private final Provider<HttpServletRequest> requestProvider = null;
+		final LocaleProvider localeProvider = null;
 
         // This is our delegate field that proxies the interface.
         private final Object instance = Proxy.newProxyInstance(
@@ -179,7 +180,7 @@ public class Localizer {
                * Returns the localized message bundle value, keyed by the method name invoked.
                */
               public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                Locale locale = requestProvider.get().getLocale();
+                Locale locale = localeProvider.getLocale();
                 Map<String, MessageDescriptor> messages = getMessagesWithFallback(locale);
 
                 // Use default if we don't support the given locale.
@@ -189,7 +190,7 @@ public class Localizer {
 
                 MessageDescriptor descriptor = messages.get(method.getName());
                 if (descriptor == null) {
-                	throw new IllegalStateException("Could not find message '" 
+                	throw new IllegalStateException("Could not find message '"
                 			+ method.getName() + "' in " + messages);
                 }
 				return descriptor.render(args);
@@ -215,7 +216,7 @@ public class Localizer {
 
   }
 
-  private String createLocaleInterfaceKey(final Class<?> iface, Locale locale) { 
+  private String createLocaleInterfaceKey(final Class<?> iface, Locale locale) {
     return locale.toString() + ":" + iface.getName();
   }
 

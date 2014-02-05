@@ -1,5 +1,6 @@
 package com.google.sitebricks;
 
+import com.google.sitebricks.locale.LocaleProviderModule;
 import java.lang.annotation.Annotation;
 import java.util.Enumeration;
 import java.util.List;
@@ -120,11 +121,20 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
 
     configureTemplateSystem();
 
+	/* Now bind the locale provider.*/
+    bindLocaleProvider();
+  }
+
+  /**
+   * Used to bind the Locale provider. Can be overwritten if custom Locale behavior is desider.
+   */
+  protected void bindLocaleProvider() {
+	  install(new LocaleProviderModule());
   }
 
   protected void configureTemplateSystem() {
     //
-    // Map of all the implementations keyed by type they can handle 
+    // Map of all the implementations keyed by type they can handle
     //
     ImmutableMap.Builder<String, Class<? extends TemplateCompiler>> builder = ImmutableMap.builder();
 
@@ -232,7 +242,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
       public void usingDefault() {
         add(Localizer.defaultLocalizationFor(iface));
       }
-      
+
     };
 
   }
@@ -246,7 +256,7 @@ public class SitebricksModule extends AbstractModule implements PageBinder {
       }
       localeLocalizer.put(localization.getLocale(), localization);
   }
-  
+
   protected final void scan(Package pack) {
     Preconditions.checkArgument(null != pack, "Package parameter to scan() cannot be null");
     packages.add(pack);
