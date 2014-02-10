@@ -13,25 +13,26 @@ import com.google.inject.Provider;
  */
 class LocaleProviderImpl implements LocaleProvider {
 
-	private final Provider<HttpServletRequest> requestProvider;
+    private final Provider<HttpServletRequest> requestProvider;
 
-	@Inject
-	LocaleProviderImpl(final Provider<HttpServletRequest> requestProvider) {
-		this.requestProvider = requestProvider;
-	}
+    @Inject
+    LocaleProviderImpl(final Provider<HttpServletRequest> requestProvider) {
+        this.requestProvider = requestProvider;
+    }
 
-	/**
-	 * @return the Locale as stored in the {@link javax.servlet.http.HttpServletRequest}.
-	 */
-	public Locale getLocale() {
-		if (requestProvider == null) {
-			throw new IllegalStateException("The HttpServletRequest provider must be bound.");
-		}
-		final HttpServletRequest request = requestProvider.get();
-		if (request == null) {
-			throw new IllegalStateException("No HttpServletRequest could be retrieved. Cannot determine user locale.");
-		}
+    /**
+     * @return the Locale as stored in the {@link javax.servlet.http.HttpServletRequest}.
+     */
+    public Locale getLocale() {
+        if (requestProvider == null) {
+            throw new IllegalStateException("The HttpServletRequest provider must be bound.");
+        }
 
-		return request.getLocale();
-	}
+        final HttpServletRequest request = requestProvider.get();
+        if (request == null) {
+            throw new IllegalStateException("No HttpServletRequest could be retrieved. Cannot determine user locale.");
+        }
+
+        return request.getLocale();
+    }
 }
