@@ -20,7 +20,7 @@ public class Jetty {
 
   public static final String INJECTOR_KEY = "@_INJECTOR_@";
   public static final String APP_NAME = "/sitebricks";
-  private static int PORT;
+  private static int PORT = 8080;
   private Server server;
   private ServerConnector connector;
 
@@ -41,7 +41,7 @@ public class Jetty {
 
   public Jetty(String path) {
     WebAppContext webAppContext = new WebAppContext(path, APP_NAME);
-    setUp(webAppContext, 0);
+    setUp(webAppContext, PORT);
   }
 
   private void setUp(WebAppContext webAppContext, int port) {

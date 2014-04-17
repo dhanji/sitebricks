@@ -95,6 +95,7 @@ public class RestfuWebServiceWithCRUDConversionsAcceptanceTest {
 
 
 	public void delete() {
+    create();  // create, then delete.
 		String url = AcceptanceTest.baseUrl() + RestfulWebServiceWithCRUDConversions.AT_ME + "/" + testWidget.getId();
 		System.out.println("DELETE " + url);
 		WebResponse response = createInjector()

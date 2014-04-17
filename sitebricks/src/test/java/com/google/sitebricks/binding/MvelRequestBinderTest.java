@@ -148,8 +148,8 @@ public class MvelRequestBinderTest {
       public FlashCache get() {
         return new HttpSessionFlashCache();
       }
-    })
-        .bind(TestRequestCreator.from(request, null), o);
+    }).bind(TestRequestCreator.from(request, null), o);
+    System.out.println(o.getId());
 
     assert expected.equals(o) : "Invalid binding was allowed!";
   }

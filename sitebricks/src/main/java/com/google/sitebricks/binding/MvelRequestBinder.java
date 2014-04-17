@@ -48,7 +48,7 @@ public class MvelRequestBinder implements RequestBinder<String> {
 
       // We guard against expression-injection with a regex validator.
       if (!validate(key))
-        return;
+        continue;
 
       Object value;
 
