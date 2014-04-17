@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 
@@ -90,13 +91,13 @@ public class StoreResponseExtractorTest {
   public final void testOkLabelsWithResponse() throws ExtractionException {
     List<String> OK_RESPONSE = ImmutableList.of("* 4 FETCH (X-GM-LABELS (\\Foo \\Bar " +
         "Baz) UID 6)", "66 OK all good, captain.");
-    assertEquals(labelsExtractor.extract(OK_RESPONSE), ImmutableSet.of("Baz", "\\Foo", "\\Bar"));
+    assertTrue(ImmutableSet.of("Baz", "\\Foo", "\\Bar").equals(labelsExtractor.extract(OK_RESPONSE)));
   }
 
   @Test
   public final void testOkQuotedLabelsWithResponse() throws ExtractionException {
     List<String> OK_RESPONSE = ImmutableList.of("* 4 FETCH (X-GM-LABELS (\"\\\\Foo\" \"\\\\Bar\" " +
         "\"Baz\") UID 6)", "66 OK all good, captain.");
-    assertEquals(labelsExtractor.extract(OK_RESPONSE), ImmutableSet.of("\"Baz\"", "\"\\Foo\"", "\"\\Bar\""));
+    assertTrue(ImmutableSet.of("\"Baz\"", "\"\\Foo\"", "\"\\Bar\"").equals(labelsExtractor.extract(OK_RESPONSE)));
   }
 }

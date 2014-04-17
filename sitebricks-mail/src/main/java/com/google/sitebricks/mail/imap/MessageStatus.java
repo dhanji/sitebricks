@@ -1,5 +1,8 @@
 package com.google.sitebricks.mail.imap;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -172,7 +175,6 @@ public class MessageStatus {
       setTimeZone(TimeZone.getTimeZone("Australia/Sydney"));
     }};
 
-
   @Override public String toString() {
     return "MessageStatus{" +
         "imapUid=" + imapUid +
@@ -192,7 +194,7 @@ public class MessageStatus {
 
         ((threadId != null) ?
             (", threadId=" + threadId +
-            ", labels=" + labels)
+            ", labels=" + Sets.newTreeSet(labels))
         : "") +
         ((gmailMsgId != null) ?
             (", gmailMsgId=" + gmailMsgId)
