@@ -48,6 +48,11 @@ public class OptionsModule extends AbstractModule {
     this(commandLine, ImmutableList.<Map<String, String>>of());
   }
 
+  public OptionsModule(Class<?> configClass, String[] commandLine, String yaml) {
+    this(commandLine, ImmutableList.<Map<String, String>>of());
+    options(configClass);
+  }
+
   public OptionsModule(Iterable<Map<String, String>> freeOptions) {
     this(new String[0], freeOptions);
   }

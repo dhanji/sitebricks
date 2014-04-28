@@ -16,7 +16,7 @@ import com.google.sitebricks.headless.Request;
 class SitebricksServletSupportModule extends AbstractModule {
   @Override
   protected void configure() {
-      bind(new TypeLiteral<Request<String>>(){}).toProvider(ServletRequestProvider.class).in(RequestScoped.class);
+      bind(new TypeLiteral<Request>(){}).toProvider(ServletRequestProvider.class).in(RequestScoped.class);
   }
 
   @Provides

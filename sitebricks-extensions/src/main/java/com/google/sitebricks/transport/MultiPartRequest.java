@@ -25,13 +25,13 @@ import com.google.inject.TypeLiteral;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.validation.SitebricksValidator;
 
-public class MultiPartRequest implements Request<FileItem> {
+public class MultiPartRequest implements Request {
     
     private final HttpServletRequest httpServletRequest;
     
     private SitebricksValidator validator;
     
-    private Multimap<String, FileItem> params;
+    private Multimap<String, String> params;
     
     @Inject
     public MultiPartRequest(Provider<HttpServletRequest> requestProvider, SitebricksValidator validator) throws FileUploadException {
@@ -61,7 +61,7 @@ public class MultiPartRequest implements Request<FileItem> {
     }   
 
     @Override
-    public Multimap<String, FileItem> params() {
+    public Multimap<String, String> params() {
         return this.params;
     }
 
@@ -76,7 +76,7 @@ public class MultiPartRequest implements Request<FileItem> {
     }
 
     @Override
-    public FileItem param(String name) {
+    public String param(String name) {
         throw new UnsupportedOperationException();
     }
 
@@ -113,23 +113,22 @@ public class MultiPartRequest implements Request<FileItem> {
         }
     }
     
-    private Multimap<String, FileItem> params(HttpServletRequest request) throws FileUploadException {
-        
-        ImmutableMultimap.Builder<String, FileItem> builder = ImmutableMultimap.builder();
-        FileItemFactory fileItemFactory = new DiskFileItemFactory(1000, null);
-
-        ServletFileUpload upload = new ServletFileUpload(fileItemFactory);
-        upload.setHeaderEncoding(request.getCharacterEncoding());
-        List<FileItem> items = upload.parseRequest(request);
-        
-        Iterator<FileItem> iter = items.iterator();
-        while (iter.hasNext()) {
-            FileItem fileItem = (FileItem) iter.next();
-            builder.put(fileItem.getFieldName(), fileItem);
-        }
-        
-        return builder.build();
-
+    private Multimap<String, String> params(HttpServletRequest request) throws FileUploadException {
+//        ImmutableMultimap.Builder<String, FileItem> builder = ImmutableMultimap.builder();
+//        FileItemFactory fileItemFactory = new DiskFileItemFactory(1000, null);
+//
+//        ServletFileUpload upload = new ServletFileUpload(fileItemFactory);
+//        upload.setHeaderEncoding(request.getCharacterEncoding());
+//        List<FileItem> items = upload.parseRequest(request);
+//
+//        Iterator<FileItem> iter = items.iterator();
+//        while (iter.hasNext()) {
+//            FileItem fileItem = (FileItem) iter.next();
+//            builder.put(fileItem.getFieldName(), fileItem);
+//        }
+//
+//        return builder.build();
+      return null;
     }
 
 }

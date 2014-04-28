@@ -45,7 +45,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
   private ValidationConverter validationConvertor;
 
   @Inject
-  public WidgetRoutingDispatcher(PageBook book, RequestBinder<String> binder,
+  public WidgetRoutingDispatcher(PageBook book, RequestBinder binder,
                                  ResourcesService resourcesService,
                                  Provider<FlashCache> flashCacheProvider,
                                  HeadlessRenderer headlessRenderer) {
@@ -96,7 +96,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
     // bind request (sets request params, etc).
     binder.bind(request, instance);
     
-    Object response = null;
+    Object response;
     try {
         // call the appropriate handler.
         response = fireEvent(request, page, instance);

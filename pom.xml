@@ -44,6 +44,9 @@
     <module>sitebricks-persist-disk</module>
     <module>sitebricks-persist-redis</module>
     <module>sitebricks-persist-sql</module>
+
+    <!-- instant stack modules -->
+    <module>sitebricks-app</module>
   </modules>
 
   <dependencyManagement>
@@ -164,9 +167,16 @@
       </dependency>
 
       <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty</artifactId>
+        <version>4.0.0.Alpha8</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.intellij</groupId>
         <artifactId>annotations</artifactId>
         <version>7.0.3</version>
+        <scope>compile</scope>
       </dependency>
 
       <dependency>
@@ -355,8 +365,8 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <version>2.5.1</version>
             <configuration>
-              <source>1.7</source>
-              <target>1.7</target>
+              <source>1.8</source>
+              <target>1.8</target>
               <showDeprecation>true</showDeprecation>
               <showWarnings>true</showWarnings>
               <encoding>UTF-8</encoding>
@@ -384,8 +394,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.5.1</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
    </plugins>

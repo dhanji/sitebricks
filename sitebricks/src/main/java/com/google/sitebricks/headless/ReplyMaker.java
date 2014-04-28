@@ -6,20 +6,36 @@ import com.google.common.io.ByteStreams;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.sitebricks.client.Transport;
+import com.google.sitebricks.client.transport.Json;
 import com.google.sitebricks.client.transport.Text;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.rendering.Templates;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.stream.ChunkedStream;
+import io.netty.util.CharsetUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
+import static io.netty.handler.codec.http.HttpHeaders.Names.LOCATION;
+import static io.netty.handler.codec.http.HttpResponseStatus.OK;
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+
 /**
  * A builder implementation of the Reply interface.
  */
-class ReplyMaker<E> extends Reply<E> {
+public class ReplyMaker<E> extends Reply<E> {
 
   // By default, we cool.
   int status = HttpServletResponse.SC_OK;
@@ -29,7 +45,7 @@ class ReplyMaker<E> extends Reply<E> {
   String redirectUri;
   Map<String, String> headers = Maps.newHashMap();
 
-  Key<? extends Transport> transport = Key.get(Text.class);
+  Key<? extends Transport> transport = Key.get(Json.class);
   E entity;
   Class<?> templateKey;
 
@@ -142,13 +158,29 @@ class ReplyMaker<E> extends Reply<E> {
     return this;
   }
 
-  @Override @SuppressWarnings("unchecked")
-  void populate(Injector injector, HttpServletResponse response) throws IOException {
-    // If we should not bother with the chain
-    if (Reply.NO_REPLY == this) {
-      injector.getInstance(HttpServletRequest.class).setAttribute(Reply.NO_REPLY_ATTR, Boolean.TRUE);
-      return;
+  public ChannelFuture populate(Injector injector, ChannelHandlerContext context) throws IOException {
+    // Write out data.
+    ByteBuf buffer = Unpooled.copiedBuffer(new byte[0]);
+    InputStream inputStream = null;
+    if (null != templateKey) {
+      buffer = Unpooled.copiedBuffer(injector.getInstance(Templates.class)
+          .render(templateKey, entity), CharsetUtil.UTF_8);
+    } else if (null != entity) {
+      if (entity instanceof InputStream) {
+        // Stream the response rather than marshalling it through a transport.
+        inputStream = (InputStream) entity;
+      } else {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        injector.getInstance(transport).out(bos, (Class<E>) entity.getClass(), entity);
+        bos.write("\r\n".getBytes());
+        buffer = Unpooled.copiedBuffer(bos.toByteArray());
+      }
     }
+
+
+    FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
+        new HttpResponseStatus(status, ""),
+        buffer);
 
     // This is where we take all the builder values and encode them in the response.
     Transport transport = injector.getInstance(this.transport);
@@ -156,48 +188,32 @@ class ReplyMaker<E> extends Reply<E> {
     // Set any headers (we do this first, so we can override any cheekily set headers).
     if (!headers.isEmpty()) {
       for (Map.Entry<String, String> header : headers.entrySet()) {
-        response.setHeader(header.getKey(), header.getValue());
+        response.headers().set(header.getKey(), header.getValue());
       }
     }
 
     // If the content type was already set, do nothing.
-    if (response.getContentType() == null) {
-      // By default we use the content type of the transport.
-      if (null == contentType) {
-        response.setContentType(transport.contentType());
-      } else {
-        response.setContentType(contentType);
-      }
+    // By default we use the content type of the transport.
+    if (null == contentType) {
+      response.headers().set(CONTENT_TYPE, transport.contentType());
+    } else {
+      response.headers().set(CONTENT_TYPE, contentType);
     }
 
     // Send redirect
     if (null != redirectUri) {
-      response.sendRedirect(redirectUri);
-      response.setStatus(status); // HACK to override whatever status the redirect sets.
-      return;
+      response.headers().set(LOCATION, redirectUri);
     }
 
-    // Write out data.
-    response.setStatus(status);
-
-    if (null != templateKey) {
-      response.getWriter().write(injector.getInstance(Templates.class).render(templateKey, entity));
-    } else if (null != entity) {
-      if (entity instanceof InputStream) {
-        // Stream the response rather than marshalling it through a transport.
-        InputStream inputStream = (InputStream) entity;
-        try {
-          ByteStreams.copy(inputStream, response.getOutputStream());
-        } finally {
-          inputStream.close();
-        }
-      } else {
-        // TODO(dhanji): This feels wrong to me. We need a better way to obtain the entity type.
-        transport.out(response.getOutputStream(), (Class<E>) entity.getClass(), entity);
-      }
+    ChannelFuture future = context.write(response);
+    if (inputStream != null) {
+      final InputStream copied = inputStream;
+      future.addListener(f -> context.write(new ChunkedStream(copied)));
     }
+
+    return future;
   }
-  
+
   @Override
   public boolean equals(Object other) {
 	  if(!(other instanceof ReplyMaker<?>))

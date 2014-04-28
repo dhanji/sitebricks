@@ -114,11 +114,6 @@ public abstract class Reply<E> {
   public abstract Reply<E> ok();
 
   /**
-   * Used internally by sitebricks. Do NOT call.
-   */
-  abstract void populate(Injector injector, HttpServletResponse response) throws IOException;
-
-  /**
    * Convenience method to make a reply without any entity or body. Example, to send a redirect:
    * <pre>
    *   return Reply.saying().redirect("/other");

@@ -2,7 +2,7 @@
  * @fileoverview Client/Server RPC encapsulation. Relies on the presence
  * of jQuery 1.4.2.
  * Classes:
- *   ryter.Rpc
+ *   sitebricks.Channel
  */
 
 var sitebricks = sitebricks || {};
@@ -39,6 +39,9 @@ sitebricks.BACKOFF_CAP = 7;
  */
 sitebricks.IS_MOZILLA = navigator.userAgent.indexOf("Firefox") != -1;
 
+// Pull in Jquery (probably a bad idea in general)
+document.write('<script type="text/javascript" src="' + sitebricks.BASE_URL + '/jquery-1.7.1.js"></script>');
+
 /**
  * Encapsulates client/server RPCs.
  *
@@ -65,15 +68,6 @@ sitebricks.Channel = function(opt_url_context) {
 
   this.onReconnectCallback = null;
   this.onDisconnectCallback = null;
-
-  // Firefox validates all returned JSON, which spews all kinds of errors.
-  if (sitebricks.IS_MOZILLA) {
-    $.ajaxSetup({ 'beforeSend': function(xhr) {
-      if (xhr.overrideMimeType)
-          xhr.overrideMimeType("text/plain");
-      }
-    });
-  }
 
   /**
    * Class that handles RPC transport via HTML5 Websocket.
@@ -133,91 +127,10 @@ sitebricks.Channel = function(opt_url_context) {
     }
   };
 
-  /**
-   * Class that handles RPC transport via XHR Long-polling.
-   */
-  var CometTransport = {
-    handlers_: {},
-    channels_: 0,
-    url: '',
-    first: true,
-
-    /**
-     * @export
-     */
-    connect: function() {
-      var self = this;
-      var url = sitebricks.BASE_URL;
-      url += sitebricks.URL_PREFIX + '/async?SBSocketId=' + sitebricks.SOCKET_ID;
-
-      self.url = url;
-      self.channels_++;
-      $.ajax({
-        type: 'GET',
-        url: self.url,
-        dataType: 'text',
-        success: function(data) {
-          self.handlers_.message(data);
-
-          self.channels_--;
-          if (self.channels_ <= 1)
-            self.connect();
-        },
-        failure: function() {
-          self.channels_--;
-          if (self.handlers_.error)
-            self.handlers_.error()
-        }
-      });
-
-      // We have to simulate a connected event.
-      if (self.first) {
-        self.first = false;
-        self.handlers_.connect();
-      }
-    },
-
-    /**
-     * @export
-     */
-    send: function(message) {
-      var self = this;
-      $.ajax({
-        type: 'POST',
-        url: self.url,
-        processData: false,
-        contentType: 'application/json',
-        data: message,
-        success: function(data) {
-          /* Ignore response. */
-        }
-      });
-    },
-
-    /**
-     * @export
-     */
-    on: function(event, handler) {
-      this.handlers_[event] = handler;
-    },
-
-    /**
-     * @export
-     */
-    isOpen: function() {
-      return this.channels_ > 0;
-    },
-
-    /**
-     * @export
-     */
-    disconnect: function() {}
-  };
-
   if (window.WebSocket || window.MozWebSocket)
     this.transport_ = WebSocketTransport;
   else
-    this.transport_ = CometTransport;
+    throw 'Websocket is not supported by this browser';
 
   this.transport_.reconnectAttempts_ = 1;
   this.transport_.on('message', function(data) {
@@ -267,17 +180,17 @@ sitebricks.Channel = function(opt_url_context) {
   // This is by no means fool-proof, if you can reach an intranet but not the
   // sitebricks server, then it's useless. But it will serve for wake-from-sleep.
   // See: https://developer.mozilla.org/en/Online_and_offline_events
-  $(window).bind('offline', function() {
-    console.log(String(new Date()), 'Offline event received.');
-    self.transport_.forceReconnect();
-  });
-  $(window).bind('online', function() {
-    if (self.transport_.reconnectAttempts_ > 1 || sitebricks.Channel.isPingLate_()) {
-      console.log(String(new Date()), 'Online event received. Accelerating reconnect...');
-      self.transport_.reconnectAttempts_ = 1;
-      self.transport_.forceReconnect();
-    }
-  });
+//  $(window).bind('offline', function() {
+//    console.log(String(new Date()), 'Offline event received.');
+//    self.transport_.forceReconnect();
+//  });
+//  $(window).bind('online', function() {
+//    if (self.transport_.reconnectAttempts_ > 1 || sitebricks.Channel.isPingLate_()) {
+//      console.log(String(new Date()), 'Online event received. Accelerating reconnect...');
+//      self.transport_.reconnectAttempts_ = 1;
+//      self.transport_.forceReconnect();
+//    }
+//  });
 };
 
 /**

@@ -55,6 +55,7 @@ import com.google.sitebricks.http.negotiate.Negotiation;
 import com.google.sitebricks.rendering.Strings;
 import com.google.sitebricks.rendering.control.DecorateWidget;
 import com.google.sitebricks.transport.Form;
+import org.slf4j.LoggerFactory;
 
 /**
  * contains active uri/widget mappings
@@ -247,7 +248,7 @@ public class DefaultPageBook implements PageBook {
     List<PageTuple> list = pages.get(key);
 
     if (null == list) {
-      list = new ArrayList<PageTuple>();
+      list = new ArrayList<>();
       pages.put(key, list);
     }
 

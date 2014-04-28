@@ -29,6 +29,6 @@ public class ReplyBasedHeadlessRenderer implements HeadlessRenderer {
     assert o instanceof Reply : o.getClass();
     Reply<?> reply = (Reply<?>)o;
 
-    reply.populate(injector, response);
+//    reply.populate(injector, response);
   }
 }

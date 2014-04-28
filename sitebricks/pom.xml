@@ -24,6 +24,12 @@
     <!-- /test deps -->
 
     <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>4.0.18.Final</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.google.sitebricks</groupId>
       <artifactId>sitebricks-converter</artifactId>
     </dependency>

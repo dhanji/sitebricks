@@ -37,7 +37,7 @@ public class RestfulWebServiceWithCRUD {
   public static final String DELETE = "DELETE";
 
   @Post
-  public Reply<?> post( Request<String> request, @Named( "type" ) String type ) { 
+  public Reply<?> post( Request request, @Named( "type" ) String type ) {
     return Reply.with(CREATE);
   }
 
@@ -52,12 +52,12 @@ public class RestfulWebServiceWithCRUD {
   }
 
   @At( "/:id" ) @Put
-  public Reply<?> put( Request<String> request, @Named( "type" ) String type, @Named( "id" ) String id ) {
+  public Reply<?> put( Request request, @Named( "type" ) String type, @Named( "id" ) String id ) {
     return Reply.with(UPDATE);
   }
 
   @At( "/:id" ) @Patch
-  public Reply<?> patch( Request<String> request, @Named( "type" ) String type, @Named( "id" ) String id ) {
+  public Reply<?> patch( Request request, @Named( "type" ) String type, @Named( "id" ) String id ) {
     return Reply.with(PARTIAL_UPDATE);
   }
 

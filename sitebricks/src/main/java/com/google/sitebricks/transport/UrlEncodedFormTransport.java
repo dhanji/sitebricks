@@ -16,30 +16,26 @@ import com.google.sitebricks.headless.Request;
  */
 class UrlEncodedFormTransport extends Form {
     
-    private final Request<String> request;
+    private final Request request;
     
-    private final RequestBinder<String> binder;
+    private final RequestBinder binder;
     
     @Inject
-    public UrlEncodedFormTransport(Request<String> request, RequestBinder<String> binder) {
+    public UrlEncodedFormTransport(Request request, RequestBinder binder) {
         this.request = request;
         this.binder = binder;
     }
 
     public <T> T in(InputStream in, Class<T> type) throws IOException {
-        T t = null;
+        T t;
         try {
            t = (T) type.newInstance();
            binder.bind(request, t);
            request.validate(t);
-        }
-        catch (InstantiationException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
           throw new RuntimeException(e);
         }
-        catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-        return t;
+      return t;
     }
 
     @Override

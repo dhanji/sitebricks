@@ -27,7 +27,6 @@ import com.google.sitebricks.client.transport.Json;
  */
 @Singleton
 class WebSocketRoutingServlet extends WebSocketServlet {
-  private static final long serialVersionUID = -7234499580734312102L;
   private final ChannelSwitchboard switchboard;
   private final Provider<ChannelListener> channelListener;
   private final Json json;

@@ -10,15 +10,13 @@ import com.google.inject.Stage;
 import com.google.sitebricks.compiler.Compilers;
 import com.google.sitebricks.compiler.TemplateCompileException;
 import com.google.sitebricks.headless.Service;
-import com.google.sitebricks.rendering.Decorated;
-import com.google.sitebricks.rendering.EmbedAs;
-import com.google.sitebricks.rendering.Templates;
-import com.google.sitebricks.rendering.With;
+import com.google.sitebricks.rendering.*;
 import com.google.sitebricks.rendering.control.WidgetRegistry;
 import com.google.sitebricks.rendering.resource.ResourcesService;
 import com.google.sitebricks.routing.PageBook;
 import com.google.sitebricks.routing.PageBook.Page;
 import com.google.sitebricks.routing.SystemMetrics;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -103,6 +101,17 @@ class ScanAndCompileBootstrapper implements Bootstrapper {
     if (Stage.DEVELOPMENT != currentStage) {
       compilePages(pagesToCompile);
     }
+
+    // Some useful logging info.
+    StringBuilder registered = new StringBuilder("Registered URIs:\n\n");
+    for (Page page : pagesToCompile) {
+      if (Strings.empty(page.getUri()))
+        continue;
+
+      registered.append("  at '").append(page.getUri()).append("' => ")
+          .append(page.pageClass().getName()).append("\n");
+    }
+    LoggerFactory.getLogger(ScanAndCompileBootstrapper.class).info(registered.toString());
 
     // Start all services.
     List<Binding<Aware>> bindings = injector.findBindingsByType(AWARE_TYPE);

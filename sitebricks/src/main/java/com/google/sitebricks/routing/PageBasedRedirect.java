@@ -18,10 +18,10 @@ import java.util.Map;
 @Immutable @Singleton
 class PageBasedRedirect implements Redirect {
   @Inject private PageBook pageBook;
-  @Inject private Provider<Request<String>> request;
+  @Inject private Provider<Request> request;
 
   @VisibleForTesting
-  void setRequestProvider(Provider<Request<String>> request) {
+  void setRequestProvider(Provider<Request> request) {
     this.request = request;
   }
 

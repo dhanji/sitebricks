@@ -20,8 +20,7 @@ public abstract class ChannelModule extends ServletModule {
   private final String channelUrl;
   private static final Set<String> SUPPORTED_SYSTEMS =
       ImmutableSet.of(
-          "jetty-websocket",
-          "jetty-continuation"
+          "jetty-websocket"
       );
 
   private final Map<String, ObserverWrapper> handlers = new HashMap<String, ObserverWrapper>();
@@ -47,37 +46,9 @@ public abstract class ChannelModule extends ServletModule {
 
     bindConstant().annotatedWith(Names.named(CHANNEL_URL_NAME)).to(channelUrl);
 
-    // Appengine?
-    if (System.getProperty("com.google.appengine.runtime.version") != null) {
-      serve(channelUrl).with(AppengineRoutingServlet.class);
-    } else {
-      // Test if Jetty-websocket is on classpath.
-      boolean websocket = true;
-      try {
-        // Jetty 9
-        Class.forName("org.eclipse.jetty.websocket.servlet.WebSocketServlet");
-        // Jetty 8
-        //Class.forName("org.eclipse.jetty.websocket.WebSocketServlet");
-        serve(channelUrl + "/websocket").with(WebSocketRoutingServlet.class);
-      } catch (ClassNotFoundException cnfe) {
-        System.out.println("NO WEBSOCKET!!!!");
-        websocket = false;
-      }
-
-      // Also try Jetty-continuations.
-      try {
-        Class.forName("org.eclipse.jetty.continuation.ContinuationSupport");
-        serve(channelUrl + "/async").with(ContinuationRoutingServlet.class);
-      } catch (ClassNotFoundException cnfe2) {
-        // Give up?
-        if (!websocket)
-          addError("No available browser-socket subsystems were found on the classpath. " +
-              "Currently supported are: " + SUPPORTED_SYSTEMS);
-      }
-
-      serve(channelUrl + CometJSServlet.SOCKET_URL_PATTERN).with(CometJSServlet.class);
-      serve(channelUrl + CometJSServlet.JQUERY_URL_PATTERN).with(CometJSServlet.class);
-    }
+    serve(channelUrl + "/websocket").with(WebSocketRoutingServlet.class);
+    serve(channelUrl + CometJSServlet.SOCKET_URL_PATTERN).with(CometJSServlet.class);
+    serve(channelUrl + CometJSServlet.JQUERY_URL_PATTERN).with(CometJSServlet.class);
   }
 
   protected final ChannelObserverBinder process(final String event) {

@@ -20,10 +20,10 @@ class MutiPartFormTransport extends MultiPartForm {
     
     private final MultiPartRequest multiPartRequest;
 
-    private final RequestBinder<FileItem> binder;
+    private final RequestBinder binder;
     
     @Inject
-    public MutiPartFormTransport(MultiPartRequest multiPartRequest, RequestBinder<FileItem> binder) {
+    public MutiPartFormTransport(MultiPartRequest multiPartRequest, RequestBinder binder) {
         this.multiPartRequest = multiPartRequest;
         this.binder = binder;
     }

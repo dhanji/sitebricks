@@ -71,7 +71,7 @@ public class HtmlTemplateCompilerTest {
 
     injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
-        bind(new TypeLiteral<Request<String>>(){}).toProvider(mockRequestProviderForContext());
+        bind(new TypeLiteral<Request>(){}).toProvider(mockRequestProviderForContext());
         bind(new TypeLiteral<Map<String, Class<? extends Annotation>>>() {
         })
             .annotatedWith(Bricks.class)
@@ -405,8 +405,8 @@ public class HtmlTemplateCompilerTest {
 //                .equals(s) : "Did not write expected output, instead: " + s;
 //    }
 
-  public static Provider<Request<String>> mockRequestProviderForContext() {
-    return new Provider<Request<String>>() {
+  public static Provider<Request> mockRequestProviderForContext() {
+    return new Provider<Request>() {
       public Request get() {
         final HttpServletRequest request = createNiceMock(HttpServletRequest.class);
         expect(request.getContextPath())

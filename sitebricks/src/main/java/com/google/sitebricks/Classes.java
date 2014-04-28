@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  * @see org.testng.internal.PackageUtils
  */
 @Immutable
-class Classes {
+public class Classes {
 
   private final Matcher<? super Class<?>> matcher;
   private final Logger log = Logger.getLogger(Classes.class.getName());

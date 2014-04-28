@@ -14,7 +14,7 @@ public class SitebricksUploadExtModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(new TypeLiteral<RequestBinder<FileItem>>(){}).to(MvelFileItemRequestBinder.class).asEagerSingleton();
+    bind(new TypeLiteral<RequestBinder>(){}).to(MvelFileItemRequestBinder.class).asEagerSingleton();
   }
 
   @Override
