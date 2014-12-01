@@ -110,7 +110,7 @@ public class HtmlParser {
         parseXmlDecl();
       } else if (tq.matches("</")) {
         parseEndTag();
-      } else if (tq.matches("<")) {
+      } else if (tq.matches("<") && !isRawDataTag(stack.peek())) {
         parseStartTag();
       } else {
         parseTextNode();
@@ -202,7 +202,7 @@ public class HtmlParser {
       tq.chompTo(">");
       
       // enable annotations on data areas
-      parseAnnotatableText (data, child);
+      parseAnnotatableText(data, child);
     }
 
     // <base href>: update the base uri
@@ -216,6 +216,12 @@ public class HtmlParser {
     }
 
     addChildToParent(child, isEmptyElement);
+  }
+
+  private static boolean isRawDataTag(Node node) {
+    if (node == null)
+      return false;
+    return "script".equals(node.nodeName()) || "textarea".equals(node.nodeName());
   }
 
   private Attribute parseAttribute() {

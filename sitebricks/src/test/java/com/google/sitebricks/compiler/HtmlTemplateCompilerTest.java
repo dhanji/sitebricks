@@ -185,6 +185,10 @@ public class HtmlTemplateCompilerTest {
   @Test
   public final void readTextWidgetValues() {
 
+    // make a basic type converter without creating
+    TypeConverter converter = new MvelTypeConverter();
+    Parsing.setTypeConverter(converter);
+
     Renderable widget = compiler()
         .compile(TestBackingType.class, new Template("<html><div class='${clazz}'>hello <a href='/people/${id}'>${name}</a></div></html>"));
 
@@ -244,7 +248,7 @@ public class HtmlTemplateCompilerTest {
 
     final String value = respond.toString();
     String expected = "<html> <head>" +
-        "      <script type='text/javascript' src='my.js'></script>" +
+        "      <script type='text/javascript' src='my.js'> </script>" +
         "</head><body>" +
         "<div class='content'>hello <a href='/people/12'>Dhanji</a></div></body></html>";
     expected = expected.replaceAll("'", "\"");
