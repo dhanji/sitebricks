@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.google.sitebricks</groupId>
     <artifactId>sitebricks-parent</artifactId>
-    <version>0.8.10-SNAPSHOT</version>
+    <version>0.8.10</version>
   </parent>
   <artifactId>sitebricks-persist-sql</artifactId>
   <name>Sitebricks :: Persistence Module (SQL)</name>
