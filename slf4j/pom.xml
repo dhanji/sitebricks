@@ -7,6 +7,7 @@
   </parent>  
   <artifactId>sitebricks-slf4j</artifactId>
   <name>Sitebricks :: SLF4J Module</name>
+  <packaging>${packaging}</packaging>
   <description>Slf4j logging support for Guice applications (does not require sitebricks)</description>
 
   <dependencies>

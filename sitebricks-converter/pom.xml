@@ -6,6 +6,7 @@
     <version>0.8.11-SNAPSHOT</version>
   </parent>
   <artifactId>sitebricks-converter</artifactId>
+  <packaging>${packaging}</packaging>
   <name>Sitebricks :: Type Conversion</name>
 
   <dependencies>

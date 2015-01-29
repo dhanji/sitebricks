@@ -6,6 +6,7 @@
     <version>0.8.11-SNAPSHOT</version>
   </parent>
   <artifactId>sitebricks</artifactId>
+  <packaging>takari-jar</packaging>
   <name>Sitebricks :: Core</name>
 
   <dependencies>

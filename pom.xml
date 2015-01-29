@@ -25,6 +25,7 @@
     <lucene.version>4.0.0</lucene.version>
     <jedis.version>2.1.0</jedis.version>
     <bval.version>0.5</bval.version>
+    <packaging>takari-jar</packaging>    
   </properties>
 
   <modules>
@@ -386,6 +387,15 @@
         <configuration>
           <source>1.7</source>
           <target>1.7</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>io.takari.maven.plugins</groupId>
+        <artifactId>takari-lifecycle-plugin</artifactId>
+        <version>1.10.2</version>
+        <extensions>true</extensions>
+        <configuration>
+          <proc>proc</proc>
         </configuration>
       </plugin>
    </plugins>
