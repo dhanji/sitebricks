@@ -7,6 +7,7 @@
   </parent>  
   <artifactId>sitebricks-stat</artifactId>
   <name>Sitebricks :: Statistics</name>
+  <packaging>${packaging}</packaging>
   <description>Statistics/Monitoring for Guice applications (does not require sitebricks)</description>
 
   <repositories>

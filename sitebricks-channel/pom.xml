@@ -6,6 +6,7 @@
     <version>0.8.11-SNAPSHOT</version>
   </parent>
   <artifactId>sitebricks-channel</artifactId>
+  <packaging>${packaging}</packaging>
   <name>Sitebricks :: Channel</name>
 
   <dependencies>

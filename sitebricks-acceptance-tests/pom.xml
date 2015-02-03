@@ -7,6 +7,7 @@
     <version>0.8.11-SNAPSHOT</version>
   </parent>
   <artifactId>sitebricks-acceptance-tests</artifactId>
+  <packaging>takari-jar</packaging>
   <name>Sitebricks :: Acceptance Tests</name>
 
   <dependencies>
