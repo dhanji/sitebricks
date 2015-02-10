@@ -200,7 +200,7 @@ public class Localizer {
 				String localeInterfaceKey = createLocaleInterfaceKey(iface, locale);
 				Map<String, MessageDescriptor> result = localizedValues.get(localeInterfaceKey);
 				if (result == null) {
-					result = localizedValues.get(new Locale(locale.getLanguage()));
+					result = localizedValues.get(createLocaleInterfaceKey(iface, new Locale(locale.getLanguage())));
 				}
 				return result;
 			}
