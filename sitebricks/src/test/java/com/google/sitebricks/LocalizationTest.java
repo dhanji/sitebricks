@@ -11,6 +11,7 @@ import com.google.inject.name.Named;
 import com.google.sitebricks.i18n.Message;
 import com.google.sitebricks.locale.LocaleProvider;
 import org.easymock.EasyMock;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -248,6 +249,45 @@ public class LocalizationTest {
     assert "hello Dudette!".equals(msg);
   }
 
+  /**
+   *  Given: there are multiple localization properties for the same language, once with a country and once without. <br/>
+   *  When: the localization is requested for an unknown locale with a known language. <br/>
+   *  Then: the fallback localization for the language should be retrieved. <br/>
+   */
+  @Test
+  public final void localizationLanguageFallback() {
+      //Create 2 resource bundles, one with a country and one without. Both are for the same language.
+      final Map<String, String> resourceBundleEnglish = Maps.newHashMap();
+      resourceBundleEnglish.put(LocalizationTest.HELLO, "Hello from the English bundle!");
+
+      final Map<String, String> resourceBundleUs = Maps.newHashMap();
+      resourceBundleUs.put(LocalizationTest.HELLO, "Hello from the Us bundle!");
+
+      //Make sure that the locale provider returns an unexpected locale (English in Germany).
+      final LocaleProvider customLocaleProviderMock = createNiceMock(LocaleProvider.class);
+      expect(customLocaleProviderMock.getLocale()).andReturn(new Locale("en", "DE"));
+      replay(customLocaleProviderMock);
+
+      //Create the injector and bind add the two localization bindings.
+      final Injector injector = Guice.createInjector(new AbstractModule() {
+          @Override
+          protected void configure() {
+              final  Set<Localizer.Localization> localizations = Sets.newHashSet();
+              localizations.add(new Localizer.Localization(Localized.class, Locale.US, resourceBundleUs));
+              localizations.add(new Localizer.Localization(Localized.class, Locale.ENGLISH, resourceBundleEnglish));
+
+              Localizer.localizeAll(binder(), localizations);
+              bind(LocaleProvider.class).toInstance(customLocaleProviderMock);
+          }
+      });
+
+      //Request the localized message and assert it equals the expected one.
+      final Localized localized = injector.getInstance(Localized.class);
+      Assert.assertNotNull(localized);
+
+      final String greeting = localized.hello();
+      Assert.assertEquals("Hello from the English bundle!", greeting);
+    }
 
   public static interface Localized {
     @Message(message = "hello world!")
