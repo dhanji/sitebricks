@@ -33,12 +33,12 @@ class SitebricksFilter implements Filter {
   private final Provider<Bootstrapper> bootstrapper;
   private final Provider<Shutdowner> teardowner;
 
-  private final Provider<Request<String>> requestProvider;
+  private final Provider<Request> requestProvider;
   private final ReplyBasedHeadlessRenderer headlessRenderer;
 
   @Inject
   public SitebricksFilter(RoutingDispatcher dispatcher, Provider<Bootstrapper> bootstrapper,
-                          Provider<Shutdowner> teardowner, Provider<Request<String>> requestProvider,
+                          Provider<Shutdowner> teardowner, Provider<Request> requestProvider,
                           ReplyBasedHeadlessRenderer headlessRenderer) {
     this.dispatcher = dispatcher;
     this.bootstrapper = bootstrapper;

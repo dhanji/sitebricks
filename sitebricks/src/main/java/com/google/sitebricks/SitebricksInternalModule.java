@@ -35,7 +35,7 @@ class SitebricksInternalModule extends AbstractModule {
       bind(RoutingDispatcher.class).to(DebugModeRoutingDispatcher.class);
     }
     
-    bind(new TypeLiteral<RequestBinder<String>>(){}).to(MvelRequestBinder.class).asEagerSingleton();
+    bind(new TypeLiteral<RequestBinder>(){}).to(MvelRequestBinder.class).asEagerSingleton();
 
     // use sitebricks converters in mvel
     requestInjection(new MvelConversionHandlers());

@@ -1,31 +1,29 @@
 package com.google.sitebricks.transport;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import com.google.sitebricks.headless.Request;
 import com.google.sitebricks.validation.SitebricksValidator;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-public class MultiPartRequest implements Request<FileItem> {
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+public class MultiPartRequest implements Request {
     
     private final HttpServletRequest httpServletRequest;
     
@@ -61,8 +59,8 @@ public class MultiPartRequest implements Request<FileItem> {
     }   
 
     @Override
-    public Multimap<String, FileItem> params() {
-        return this.params;
+    public Multimap<String, String> params() {
+        return ImmutableMultimap.of();
     }
 
     @Override
@@ -76,7 +74,7 @@ public class MultiPartRequest implements Request<FileItem> {
     }
 
     @Override
-    public FileItem param(String name) {
+    public String param(String name) {
         throw new UnsupportedOperationException();
     }
 

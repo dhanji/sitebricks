@@ -1,11 +1,11 @@
 package com.google.sitebricks.headless;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import com.google.common.collect.Multimap;
 import com.google.inject.TypeLiteral;
 import com.google.sitebricks.client.Transport;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Sitebricks abstraction of a request. May be a standard HTTP request, a tunneled
@@ -13,7 +13,7 @@ import com.google.sitebricks.client.Transport;
  *
  * @author dhanji@gmail.com (Dhanji R. Prasanna)
  */
-public interface Request<P> {
+public interface Request {
 
   /**
    * Reads the raw request data into an object of the given type. Must
@@ -57,7 +57,7 @@ public interface Request<P> {
   /**
    * Returns request parameters as a multimap (to account for repeated values).
    */
-  Multimap<String, P> params();
+  Multimap<String, String> params();
 
   /**
    * Returns matrix parameters as a multimap (to account for repeated values).
@@ -76,7 +76,7 @@ public interface Request<P> {
    * <p>
    * Behaves exactly like {@link javax.servlet.http.HttpServletRequest#getParameter(String)}.
    */
-  P param(String name);
+  String param(String name);
 
   /**
    * Returns the only value of a request header or null if the header

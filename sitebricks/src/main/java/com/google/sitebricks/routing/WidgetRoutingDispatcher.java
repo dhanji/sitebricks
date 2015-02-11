@@ -45,7 +45,7 @@ class WidgetRoutingDispatcher implements RoutingDispatcher {
   private ValidationConverter validationConvertor;
 
   @Inject
-  public WidgetRoutingDispatcher(PageBook book, RequestBinder<String> binder,
+  public WidgetRoutingDispatcher(PageBook book, RequestBinder binder,
                                  ResourcesService resourcesService,
                                  Provider<FlashCache> flashCacheProvider,
                                  HeadlessRenderer headlessRenderer) {

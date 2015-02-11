@@ -31,7 +31,7 @@ public class RestfulWebServiceValidating {
 
     @Post
     @As(Json.class)
-    Reply<?> postPerson(@As(Json.class) Person person, Request<String> request) {
+    Reply<?> postPerson(@As(Json.class) Person person, Request request) {
       try {
           request.validate(person);
       }

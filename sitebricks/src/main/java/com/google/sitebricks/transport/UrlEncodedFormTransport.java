@@ -16,12 +16,12 @@ import com.google.sitebricks.headless.Request;
  */
 class UrlEncodedFormTransport extends Form {
     
-    private final Request<String> request;
+    private final Request request;
     
-    private final RequestBinder<String> binder;
+    private final RequestBinder binder;
     
     @Inject
-    public UrlEncodedFormTransport(Request<String> request, RequestBinder<String> binder) {
+    public UrlEncodedFormTransport(Request request, RequestBinder binder) {
         this.request = request;
         this.binder = binder;
     }

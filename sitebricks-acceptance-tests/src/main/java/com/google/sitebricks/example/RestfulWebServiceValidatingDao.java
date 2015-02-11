@@ -26,7 +26,7 @@ public class RestfulWebServiceValidatingDao {
 
     @Post
     @As(Json.class)
-    Reply<?> postPerson(@As(Json.class) Person person, Request<String> request) {
+    Reply<?> postPerson(@As(Json.class) Person person, Request request) {
       dao.save(person);
       return Reply.with(person);
     }
