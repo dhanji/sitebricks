@@ -23,8 +23,9 @@
   </properties>
 
   <modules>
-    <module>sitebricks</module>
+    <module>web</module>
     <module>stat</module>
+    <module>app</module>
  </modules>
 
   <dependencyManagement>
