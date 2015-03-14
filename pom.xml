@@ -16,112 +16,25 @@
   <properties>
     <guice.version>3.0</guice.version>
     <com.fasterxml.jackson.version>2.2.2</com.fasterxml.jackson.version>
-    <org.mortbay.jetty.version>9.0.0.RC0</org.mortbay.jetty.version>
-    <org.seleniumhq.webdriver.version>0.9.7376</org.seleniumhq.webdriver.version>
-    <org.testng.version>5.8</org.testng.version>
     <org.slf4j.version>1.6.4</org.slf4j.version>
     <ch.qos.logback.version>1.0.6</ch.qos.logback.version>
     <cglib.full.version>2.0.2</cglib.full.version>
-    <lucene.version>4.0.0</lucene.version>
-    <jedis.version>2.1.0</jedis.version>
-    <bval.version>0.5</bval.version>
     <packaging>takari-jar</packaging>    
   </properties>
 
   <modules>
     <module>sitebricks</module>
-    <module>sitebricks-annotations</module>
-    <module>sitebricks-converter</module>
-    <module>sitebricks-client</module>
-    <module>sitebricks-extensions</module>
-    <module>sitebricks-acceptance-tests</module>
-    <module>sitebricks-test-support</module>
-    <module>sitebricks-mail</module>
-    <module>sitebricks-options</module>
-    <module>sitebricks-channel</module>
     <module>stat</module>
-    <module>slf4j</module>
-    <module>sitebricks-persist</module>
-    <module>sitebricks-persist-disk</module>
-    <module>sitebricks-persist-redis</module>
-    <module>sitebricks-persist-sql</module>
-  </modules>
+ </modules>
 
   <dependencyManagement>
     <dependencies>
-      <!-- Sitebricks -->
-      <dependency>
-        <groupId>com.google.sitebricks</groupId>
-        <artifactId>sitebricks-converter</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.sitebricks</groupId>
-        <artifactId>sitebricks</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.sitebricks</groupId>
-        <artifactId>sitebricks-extensions</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.sitebricks</groupId>
-        <artifactId>sitebricks-stat</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.sitebricks</groupId>
-        <artifactId>sitebricks-client</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.sitebricks</groupId>
-        <artifactId>sitebricks-annotations</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.sitebricks</groupId>
-        <artifactId>sitebricks-test-support</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.sitebricks</groupId>
-        <artifactId>sitebricks-options</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.sitebricks</groupId>
-        <artifactId>sitebricks-channel</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.google.sitebricks</groupId>
-        <artifactId>sitebricks-cloud</artifactId>
-        <version>${project.version}</version>
-      </dependency>
 
-      <dependency>
-        <groupId>redis.clients</groupId>
-        <artifactId>jedis</artifactId>
-        <version>${jedis.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.lucene</groupId>
-        <artifactId>lucene-core</artifactId>
-        <version>${lucene.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.mvel</groupId>
-        <artifactId>mvel2</artifactId>
-        <version>2.1.3.Final</version>
-      </dependency>
 
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>13.0</version>
+        <version>18.0</version>
       </dependency>
 
       <dependency>
@@ -260,80 +173,6 @@
       </dependency>
 
       <dependency>
-        <groupId>org.easymock</groupId>
-        <artifactId>easymock</artifactId>
-        <version>2.4</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-server</artifactId>
-        <version>${org.mortbay.jetty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.jetty.websocket</groupId>
-        <artifactId>websocket-api</artifactId>
-        <version>${org.mortbay.jetty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.jetty.websocket</groupId>
-        <artifactId>websocket-server</artifactId>
-        <version>${org.mortbay.jetty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.jetty.websocket</groupId>
-        <artifactId>websocket-servlet</artifactId>
-        <version>${org.mortbay.jetty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-webapp</artifactId>
-        <version>${org.mortbay.jetty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-continuation</artifactId>
-        <version>${org.mortbay.jetty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.eclipse.jetty</groupId>
-        <artifactId>jetty-util</artifactId>
-        <version>${org.mortbay.jetty.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jsp-2.1-glassfish</artifactId>
-        <version>2.1.v20100127</version>
-      </dependency>
-      <dependency>
-        <groupId>taglibs</groupId>
-        <artifactId>standard</artifactId>
-        <version>1.1.2</version>
-      </dependency>
-      <!-- Testing -->
-      <dependency>
-        <groupId>org.seleniumhq.webdriver</groupId>
-        <artifactId>webdriver-common</artifactId>
-        <version>${org.seleniumhq.webdriver.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.seleniumhq.webdriver</groupId>
-        <artifactId>webdriver-support</artifactId>
-        <version>${org.seleniumhq.webdriver.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.seleniumhq.webdriver</groupId>
-        <artifactId>webdriver-htmlunit</artifactId>
-        <version>${org.seleniumhq.webdriver.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.testng</groupId>
-        <artifactId>testng</artifactId>
-        <version>${org.testng.version}</version>
-        <classifier>jdk15</classifier>
-      </dependency>
-      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.8.2</version>
@@ -346,37 +185,6 @@
     <developerConnection>scm:git:git@github.com:dhanji/sitebricks.git</developerConnection>
     <url>https://github.com/dhanji/sitebricks</url>
   </scm>
-  <profiles>
-    <profile>
-      <id>buildhive</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>2.5.1</version>
-            <configuration>
-              <source>1.7</source>
-              <target>1.7</target>
-              <showDeprecation>true</showDeprecation>
-              <showWarnings>true</showWarnings>
-              <encoding>UTF-8</encoding>
-              <executable>/opt/jdk/jdk1.7.0/bin/javac</executable>
-              <fork>true</fork>
-            </configuration>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <jvm>/opt/jdk/jdk1.7.0/bin/java</jvm>
-              <forkMode>once</forkMode>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
   <build>
     <plugins>
@@ -385,8 +193,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.5.1</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
@@ -401,20 +209,4 @@
    </plugins>
   </build>
 
-  <!-- This should be removed when the googlecode repositories are migrated to the standard Nexus OSS repository infrastructure -->
-  <distributionManagement>
-    <snapshotRepository>
-      <id>google-snapshots</id>
-      <name>Sonatype OSS Nexus Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>google-with-staging</id>
-      <name>Nexus OSS Staging Repository</name>
-      <url> https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
-
-  <repositories>
-  </repositories>
 </project>
