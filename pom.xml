@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.sonatype.oss</groupId>
@@ -19,14 +21,14 @@
     <org.slf4j.version>1.6.4</org.slf4j.version>
     <ch.qos.logback.version>1.0.6</ch.qos.logback.version>
     <cglib.full.version>2.0.2</cglib.full.version>
-    <packaging>takari-jar</packaging>    
+    <packaging>takari-jar</packaging>
   </properties>
 
   <modules>
     <module>web</module>
     <module>stat</module>
     <module>app</module>
- </modules>
+  </modules>
 
   <dependencyManagement>
     <dependencies>
@@ -89,7 +91,7 @@
         <artifactId>freemarker</artifactId>
         <version>2.3.10</version>
       </dependency>
-      
+
       <dependency>
         <groupId>com.ning</groupId>
         <artifactId>async-http-client</artifactId>
@@ -139,7 +141,7 @@
       </dependency>
 
       <dependency>
-      <!-- jsoup HTML library @ http://jsoup.org/ -->
+        <!-- jsoup HTML library @ http://jsoup.org/ -->
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
         <version>1.8.1</version>
@@ -177,7 +179,7 @@
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.8.2</version>
-      </dependency>      
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -188,6 +190,19 @@
   </scm>
 
   <build>
+    <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>test</testSourceDirectory>
+    <resources>
+      <resource>
+        <directory>resource</directory>
+      </resource>
+    </resources>
+
+    <testResources>
+      <testResource>
+        <directory>test-resource</directory>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -207,7 +222,7 @@
           <proc>proc</proc>
         </configuration>
       </plugin>
-   </plugins>
+    </plugins>
   </build>
 
 </project>
