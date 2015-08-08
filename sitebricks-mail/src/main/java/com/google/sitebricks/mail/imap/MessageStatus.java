@@ -172,7 +172,7 @@ public class MessageStatus {
 
   private static final SimpleDateFormat ISO_C_DATE_SYDNEY =
     new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy", Locale.ENGLISH) {{
-      setTimeZone(TimeZone.getTimeZone("Australia/Sydney"));
+      setTimeZone(TimeZone.getTimeZone("GMT+10:00"));
     }};
 
   @Override public String toString() {
