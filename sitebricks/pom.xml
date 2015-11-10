@@ -3,7 +3,7 @@
   <parent>
     <groupId>com.google.sitebricks</groupId>
     <artifactId>sitebricks-parent</artifactId>
-    <version>0.8.11-SNAPSHOT</version>
+    <version>0.8.11</version>
   </parent>
   <artifactId>sitebricks</artifactId>
   <packaging>takari-jar</packaging>

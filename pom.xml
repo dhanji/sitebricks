@@ -9,7 +9,7 @@
   <groupId>com.google.sitebricks</groupId>
   <artifactId>sitebricks-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.8.11-SNAPSHOT</version>
+  <version>0.8.11</version>
   <name>Sitebricks :: Parent</name>
   <url>https://github.com/dhanji/sitebricks</url>
 
