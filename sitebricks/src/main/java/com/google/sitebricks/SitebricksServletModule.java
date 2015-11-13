@@ -21,7 +21,7 @@ import com.google.inject.servlet.ServletModule;
           }
 
           @Override
-          protected void configurePreFilters() {
+          protected void configurePostFilters() {
             filter("/*").through(MyPostFilter.class);
           }
 
