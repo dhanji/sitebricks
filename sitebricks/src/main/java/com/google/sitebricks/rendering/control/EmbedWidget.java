@@ -53,8 +53,8 @@ class EmbedWidget implements Renderable {
       evaluator.write(entry.getKey(), pageObject, evaluator.evaluate(entry.getValue(), bound));
     }
 
-    //chain to embedded page (widget), with arguments
-    EmbeddedRespond embed = factory.get(arguments);
+    //chain to embedded page (widget), with arguments and the parent context
+    EmbeddedRespond embed = factory.get(arguments, pageObject);
 
     Request req = request.get();
     try {

@@ -1,0 +1,10 @@
+<ul>
+    @Repeat(items=continents, var="it")
+    <li class="continent">
+        <span class="title">${__page.continentPrefix} ${it.name}</span>
+        <ul>
+            @Repeat(items=it.countries, var="c")
+            <li class="country">${__page.countryPrefix} ${c}</li>
+        </ul>
+    </li>
+</ul>

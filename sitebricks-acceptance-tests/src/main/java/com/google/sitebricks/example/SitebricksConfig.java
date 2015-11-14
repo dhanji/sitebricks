@@ -154,6 +154,9 @@ public class SitebricksConfig extends GuiceServletContextListener {
 
         at("/decorated-repeat").show(DecoratedRepeat.class);
 
+        at("/embedded-repeat").show(EmbeddedRepeat.class);
+        embed(WorldAtlas.class).as("WorldAtlas");
+
         at("/jsp").show(Jsp.class);
 
         embed(HelloWorld.class).as("Hello");
