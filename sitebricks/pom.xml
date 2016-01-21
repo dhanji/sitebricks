@@ -14,7 +14,7 @@
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <classifier>jdk15</classifier>
+      <version>6.1.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>

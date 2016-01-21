@@ -76,6 +76,12 @@ public class PathMatcherTest {
                 put("title", "sokdoasd");
                 put("id", "aoskpaokda");
             }}, },
+            {"/wiki/:id{\\d+}", "/wiki/123", new HashMap() {{
+                put("id", "123");
+            }},},
+            {"/wiki/:id{[a-z]+}", "/wiki/hello", new HashMap() {{
+                put("id", "hello");
+            }},},
         };
     }
 
