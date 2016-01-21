@@ -3,7 +3,12 @@ package com.google.sitebricks.routing;
 import net.jcip.annotations.Immutable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * @author Dhanji R. Prasanna (dhanji@gmail.com)
@@ -23,7 +28,15 @@ class PathMatcherChain implements PathMatcher {
 
         List<PathMatcher> matchers = new ArrayList<PathMatcher>();
         for (String piece : pieces) {
-            matchers.add((piece.startsWith(":")) ? new GreedyPathMatcher(piece) : new SimplePathMatcher(piece));
+            if (piece.startsWith(":") && piece.contains("{") && piece.contains("}")) {
+                String name = piece.substring(0, piece.indexOf("{"));
+                String pattern = piece.substring(piece.indexOf("{") + 1, piece.lastIndexOf("}"));
+                matchers.add(new RegExPathMatcher(pattern, name));
+            } else if (piece.startsWith(":") && !piece.contains("{")) {
+                matchers.add(new GreedyPathMatcher(piece));
+            } else {
+                matchers.add(new SimplePathMatcher(piece));
+            }
         }
 
         return Collections.unmodifiableList(matchers);
@@ -114,6 +127,32 @@ class PathMatcherChain implements PathMatcher {
 
         public String name() {
             return variable;
+        }
+    }
+
+    @Immutable
+    static class RegExPathMatcher implements PathMatcher {
+        private final Pattern pattern;
+        private final String variable;
+
+        public RegExPathMatcher(String pattern, String piece) {
+            this.pattern = Pattern.compile(pattern);
+            this.variable = piece.substring(1);
+        }
+
+        @Override
+        public boolean matches(String incoming) {
+            return pattern.matcher(incoming).matches();
+        }
+
+        @Override
+        public String name() {
+            return variable;
+        }
+
+        @Override
+        public Map<String, String> findMatches(String incoming) {
+            return Collections.emptyMap();
         }
     }
 
