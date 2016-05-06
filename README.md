@@ -1,3 +1,8 @@
+### Deprecated 
+
+This project is deprecated.  
+
+
 Sitebricks
 ----------
 
