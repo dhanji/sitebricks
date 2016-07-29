@@ -1,2 +1,3 @@
-mvn install -am -pl :sitebricks
+#!/usr/bin/env bash
 
+mvn clean install -am -pl :sitebricks
