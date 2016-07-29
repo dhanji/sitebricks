@@ -9,6 +9,9 @@ import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.google.sitebricks.i18n.Message;
+import com.google.sitebricks.locale.LocaleProvider;
+import org.easymock.EasyMock;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -29,15 +32,15 @@ import static org.easymock.EasyMock.verify;
  */
 public class LocalizationTest {
   private static final String HELLO = "hello";
-  private HttpServletRequest requestMock;
+  private LocaleProvider localeProviderMock;
 
   @BeforeMethod
   public final void setup() {
-    requestMock = createNiceMock(HttpServletRequest.class);
+    localeProviderMock = createNiceMock(LocaleProvider.class);
 
-    expect(requestMock.getLocale()).andReturn(Locale.ENGLISH);
+    expect(localeProviderMock.getLocale()).andReturn(Locale.ENGLISH);
 
-    replay(requestMock);
+    replay(localeProviderMock);
   }
 
   @Test
@@ -54,7 +57,7 @@ public class LocalizationTest {
 
         Localizer.localizeAll(binder(), locs);
 
-        bind(HttpServletRequest.class).toInstance(requestMock);
+        bind(LocaleProvider.class).toInstance(localeProviderMock);
       }
     }).getInstance(Localized.class)
         .hello();
@@ -74,7 +77,7 @@ public class LocalizationTest {
         locs.add(new Localizer.Localization(Localized.class, Locale.ENGLISH, resourceBundle));
 
         Localizer.localizeAll(binder(), locs);
-        bind(HttpServletRequest.class).toInstance(requestMock);
+        bind(LocaleProvider.class).toInstance(localeProviderMock);
       }
     });
   }
@@ -92,7 +95,7 @@ public class LocalizationTest {
         locs.add(new Localizer.Localization(LocalizedMissingAnnotation.class, Locale.ENGLISH, resourceBundle));
 
         Localizer.localizeAll(binder(), locs);
-        bind(HttpServletRequest.class).toInstance(requestMock);
+        bind(LocaleProvider.class).toInstance(localeProviderMock);
       }
     }).getInstance(LocalizedMissingAnnotation.class);
   }
@@ -111,7 +114,7 @@ public class LocalizationTest {
         locs.add(new Localizer.Localization(LocalizedWrongReturnType.class, Locale.ENGLISH, resourceBundle));
 
         Localizer.localizeAll(binder(), locs);
-        bind(HttpServletRequest.class).toInstance(requestMock);
+        bind(LocaleProvider.class).toInstance(localeProviderMock);
       }
     }).getInstance(LocalizedWrongReturnType.class);
   }
@@ -130,7 +133,7 @@ public class LocalizationTest {
         locs.add(new Localizer.Localization(LocalizedWrongArgAnnotation.class, Locale.ENGLISH, resourceBundle));
 
         Localizer.localizeAll(binder(), locs);
-        bind(HttpServletRequest.class).toInstance(requestMock);
+        bind(LocaleProvider.class).toInstance(localeProviderMock);
       }
     }).getInstance(LocalizedWrongArgAnnotation.class);
   }
@@ -150,7 +153,7 @@ public class LocalizationTest {
         locs.add(new Localizer.Localization(LocalizedBrokenTemplate.class, Locale.ENGLISH, resourceBundle));
 
         Localizer.localizeAll(binder(), locs);
-        bind(HttpServletRequest.class).toInstance(requestMock);
+        bind(LocaleProvider.class).toInstance(localeProviderMock);
       }
     }).getInstance(LocalizedBrokenTemplate.class);
   }
@@ -169,7 +172,7 @@ public class LocalizationTest {
         locs.add(new Localizer.Localization(LocalizedTemplate.class, Locale.ENGLISH, resourceBundle));
 
         Localizer.localizeAll(binder(), locs);
-        bind(HttpServletRequest.class).toInstance(requestMock);
+        bind(LocaleProvider.class).toInstance(localeProviderMock);
       }
     }).getInstance(LocalizedTemplate.class)
         .hello("Dude");
@@ -186,15 +189,11 @@ public class LocalizationTest {
     resourceBundle.put(LocalizationTest.HELLO, "hello ${name}");
 
     final HashMap<String, String> japaneseBundle = Maps.newHashMap();
-    japaneseBundle.put(LocalizationTest.HELLO, "konichiwa ${name}");
+    japaneseBundle.put(LocalizationTest.HELLO, "konichiwa ${name} sama");
 
-    // Simulate an Accept-Language of Japanese
-    HttpServletRequest japaneseRequest = createNiceMock(HttpServletRequest.class);
-    expect(japaneseRequest.getLocale()).andReturn(Locale.JAPANESE);
-    replay(japaneseRequest);
-
-    final AtomicReference<HttpServletRequest> mockToUse
-        = new AtomicReference<HttpServletRequest>(japaneseRequest);
+    final LocaleProvider customLocaleProviderMock = createNiceMock(LocaleProvider.class);
+    expect(customLocaleProviderMock.getLocale()).andReturn(Locale.JAPANESE);
+    replay(customLocaleProviderMock);
 
     Injector injector = Guice.createInjector(new AbstractModule() {
       @Override
@@ -204,38 +203,31 @@ public class LocalizationTest {
         locs.add(new Localizer.Localization(LocalizedTemplate.class, Locale.JAPANESE, japaneseBundle));
 
         Localizer.localizeAll(binder(), locs);
-        bind(HttpServletRequest.class).toProvider(new Provider<HttpServletRequest>() {
-          public HttpServletRequest get() {
-            return mockToUse.get();
-          }
-        });
+        bind(LocaleProvider.class).toInstance(customLocaleProviderMock);
       }
     });
 
     String msg = injector.getInstance(LocalizedTemplate.class).hello("Dude");
-    assert "konichiwa Dude".equals(msg) : msg;
-
-    verify(japaneseRequest);
+    assert "konichiwa Dude sama".equals(msg) : msg;
 
     // Now let's simulate english.
-    mockToUse.set(requestMock);
+    EasyMock.reset(customLocaleProviderMock);
+    expect(customLocaleProviderMock.getLocale()).andReturn(Locale.ENGLISH);
+    replay(customLocaleProviderMock);
+
     msg = injector.getInstance(LocalizedTemplate.class).hello("Dude");
     assert "hello Dude".equals(msg);
 
 
     // Now let's simulate a totally different locale (should default to english).
     // Simulate an Accept-Language of French
-    HttpServletRequest frenchRequest = createNiceMock(HttpServletRequest.class);
-    expect(frenchRequest.getLocale()).andReturn(Locale.FRENCH);
-    replay(frenchRequest);
-
-    mockToUse.set(frenchRequest);
+    EasyMock.reset(customLocaleProviderMock);
+    expect(customLocaleProviderMock.getLocale()).andReturn(Locale.FRENCH);
+    replay(customLocaleProviderMock);
 
     // Assert that it uses the english locale (set as default above)
     msg = injector.getInstance(LocalizedTemplate.class).hello("Dude");
     assert "hello Dude".equals(msg);
-
-    verify(frenchRequest, requestMock);
   }
 
 
@@ -249,7 +241,7 @@ public class LocalizationTest {
 
         Localizer.localizeAll(binder(), locs);
 
-        bind(HttpServletRequest.class).toInstance(requestMock);
+        bind(LocaleProvider.class).toInstance(localeProviderMock);
       }
     }).getInstance(LocalizedTemplate.class)
         .hello("Dudette");
@@ -257,6 +249,45 @@ public class LocalizationTest {
     assert "hello Dudette!".equals(msg);
   }
 
+  /**
+   *  Given: there are multiple localization properties for the same language, once with a country and once without. <br/>
+   *  When: the localization is requested for an unknown locale with a known language. <br/>
+   *  Then: the fallback localization for the language should be retrieved. <br/>
+   */
+  @Test
+  public final void localizationLanguageFallback() {
+      //Create 2 resource bundles, one with a country and one without. Both are for the same language.
+      final Map<String, String> resourceBundleEnglish = Maps.newHashMap();
+      resourceBundleEnglish.put(LocalizationTest.HELLO, "Hello from the English bundle!");
+
+      final Map<String, String> resourceBundleUs = Maps.newHashMap();
+      resourceBundleUs.put(LocalizationTest.HELLO, "Hello from the Us bundle!");
+
+      //Make sure that the locale provider returns an unexpected language.
+      final LocaleProvider customLocaleProviderMock = createNiceMock(LocaleProvider.class);
+      expect(customLocaleProviderMock.getLocale()).andReturn(new Locale("en", "DE"));
+      replay(customLocaleProviderMock);
+
+      //Create the injector and bind add the two localization bindings.
+      final Injector injector = Guice.createInjector(new AbstractModule() {
+          @Override
+          protected void configure() {
+              final  Set<Localizer.Localization> localizations = Sets.newHashSet();
+              localizations.add(new Localizer.Localization(Localized.class, Locale.US, resourceBundleUs));
+              localizations.add(new Localizer.Localization(Localized.class, Locale.ENGLISH, resourceBundleEnglish));
+
+              Localizer.localizeAll(binder(), localizations);
+              bind(LocaleProvider.class).toInstance(customLocaleProviderMock);
+          }
+      });
+
+      //Request the localized message and assert it equals the expected one.
+      final Localized localized = injector.getInstance(Localized.class);
+      Assert.assertNotNull(localized);
+
+      final String greeting = localized.hello();
+      Assert.assertEquals("Hello from the English bundle!", greeting);
+    }
 
   public static interface Localized {
     @Message(message = "hello world!")
