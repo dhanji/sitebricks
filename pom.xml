@@ -20,7 +20,7 @@
     <org.seleniumhq.webdriver.version>0.9.7376</org.seleniumhq.webdriver.version>
     <org.testng.version>5.8</org.testng.version>
     <org.slf4j.version>1.6.4</org.slf4j.version>
-    <ch.qos.logback.version>1.0.6</ch.qos.logback.version>
+    <ch.qos.logback.version>1.2.0</ch.qos.logback.version>
     <cglib.full.version>2.0.2</cglib.full.version>
     <lucene.version>4.0.0</lucene.version>
     <jedis.version>2.1.0</jedis.version>
