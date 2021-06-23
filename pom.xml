@@ -16,7 +16,7 @@
   <properties>
     <guice.version>3.0</guice.version>
     <com.fasterxml.jackson.version>2.2.2</com.fasterxml.jackson.version>
-    <org.mortbay.jetty.version>9.0.0.RC0</org.mortbay.jetty.version>
+    <org.mortbay.jetty.version>9.4.41.v20210516</org.mortbay.jetty.version>
     <org.seleniumhq.webdriver.version>0.9.7376</org.seleniumhq.webdriver.version>
     <org.testng.version>5.8</org.testng.version>
     <org.slf4j.version>1.6.4</org.slf4j.version>
